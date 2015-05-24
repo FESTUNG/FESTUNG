@@ -14,6 +14,33 @@
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%> @file generateGridData.m
+%>
+%> @brief Assembles lists describing the geometric and topological
+%>        properties of a triangulation.
+%>
+%> <code>g = generateGridData(coordV, V0T)</code> assembles lists describing 
+%> the geometric and topological 
+%> properties of a triangulation @f$\mathcal{T}_h@f$ according to Sec.~ref{sec:grid}
+%> and stores them in the output variable <code>g</code> of type 
+%> <code>struct</code>.  
+%> A usage example is found in Sec.~ref{sec:visualization}. 
+%> Note that the lists <code>g.idE</code> and <code>g.idE0T</code> (cf.~Tab.~ref{tab:lists})
+%> storing the global and local edge indices are <i>not</i> generated and
+%> have to be defined manually after calling <code>generateGridData</code>.
+%>
+%> @param  coordV  Contains the @f$x^1@f$ and @f$x^2@f$ coordinates of the 
+%>                 grid vertices (using a <i>global</i> index) @f$[\#\mathcal{V}\times 2]@f$.
+%> @param  V0T     The global vertex indices for each triangle with a counter-clockwise 
+%>                 ordering @f$[\#\mathcal{T}_h \times 3]@f$.
+%> @retval g       A struct containing the lists that describe the triangulation. 
+
+
+
+
+
+
 function g = generateGridData(coordV, V0T)
 g.coordV = coordV;
 g.V0T = V0T;

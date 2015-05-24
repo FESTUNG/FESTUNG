@@ -1,0 +1,11 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//! @page references References
+//! 
+//! @section FRAK2015 [FRAK2015]
+//! F. Frank, B. Reuter, V. Aizinger, P. Knabner [2015]: 
+//! &ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
+//! Galerkin method, Part I: Diffusion operator&rdquo;.
+//! In: Computers & Mathematics with Applications, Available online 15 May 2015, 
+//! ISSN 0898-1221, http://dx.doi.org/10.1016/j.camwa.2015.04.013.
+//!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
