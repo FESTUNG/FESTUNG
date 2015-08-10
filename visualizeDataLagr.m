@@ -14,7 +14,22 @@
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %
-function visualizeDataLagr(g, dataLagr, varName, fileName, tLvl)
+function visualizeDataLagr(g, dataLagr, varName, fileName, tLvl, fileType)
+%% Deduce default arguments
+if nargin < 6 || isempty(fileType)
+  fileType = 'vtk';
+end
+%% Call correct function for writing file.
+if strcmp(fileType, 'vtk')
+  visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl);
+elseif strcmp(fileType, 'tp')
+  visualizeDataLagrTp(g, dataLagr, varName, fileName, tLvl);
+else
+  error('Unknown file type: %s', fileType);
+end % if
+end % function
+%
+function visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl)
 [K, N] = size(dataLagr);
 %% Open file.
 fileName = [fileName, '.', num2str(tLvl), '.vtu'];
@@ -57,7 +72,7 @@ fprintf(file, '      </Cells>\n');
 switch N
   case 1 % locally constant
     dataLagr = kron(dataLagr, [1;1;1])';
-  case 3 % locally quadratic
+  case 3 % locally linear
     dataLagr = reshape(dataLagr', 1, K*N);
   case 6 % locally quadratic (permutation of local edge indices due to vtk format)
     dataLagr = reshape(dataLagr(:, [1,2,3,6,4,5])', 1, K*N);
@@ -71,6 +86,58 @@ fprintf(file, '      </PointData>\n');
 fprintf(file, '    </Piece>\n');
 fprintf(file, '  </UnstructuredGrid>\n');
 fprintf(file, '</VTKFile>\n');
+%% Close file.
+fclose(file);
+disp(['Data written to ' fileName])
+end % function
+%
+function visualizeDataLagrTp(g, dataLagr, varName, fileName, tLvl)
+[K, N] = size(dataLagr);
+%% Open file.
+fileName = [fileName, '.', num2str(tLvl), '.plt'];
+file     = fopen(fileName, 'wt'); % if this file exists, then overwrite
+%% Header.
+fprintf(file, 'TITLE="FESTUNG output file"\n');
+fprintf(file, 'VARIABLES=X, Y, "%s"\n', varName);
+%% Points and cells.
+switch N
+  case {1, 3}
+    P1          = reshape(g.coordV0T(:, :, 1)', 3*K, 1);
+    P2          = reshape(g.coordV0T(:, :, 2)', 3*K, 1);
+    numT        = K;
+    V0T         = 1:length(P1);
+  case 6
+    P1          = reshape([g.coordV0T(:,:,1), g.baryE0T(:,[3,1,2],1)]',6*K,1);
+    P2          = reshape([g.coordV0T(:,:,2), g.baryE0T(:,[3,1,2],2)]',6*K,1);
+    numT        = 4*K;
+    V0T         = reshape([ 1:6:6*K; 4:6:6*K; 6:6:6*K;
+                            2:6:6*K; 5:6:6*K; 4:6:6*K;
+                            3:6:6*K; 6:6:6*K; 5:6:6*K;
+                            4:6:6*K; 5:6:6*K; 6:6:6*K ], 3, numT);
+end % switch
+%% Data.
+switch N
+  case 1 % locally constant
+    dataLagr = kron(dataLagr, [1;1;1])';
+  case 3 % locally linear
+    dataLagr = reshape(dataLagr', 1, K*N)';
+  case 6 % locally quadratic (permutation of local edge indices due to TP format)
+    dataLagr = reshape(dataLagr(:, [1,2,3,6,4,5])', 1, K*N)';
+end % switch
+%% Zone header.
+fprintf(file, 'ZONE T="Time=%.3e", ', tLvl);
+fprintf(file, 'N=%d, E=%d, ', length(P1), numT);
+fprintf(file, 'ET=TRIANGLE, F=FEBLOCK, ');
+fprintf(file, 'SOLUTIONTIME=%.3e\n\n', tLvl);
+%% Point coordinates and data.
+fprintf(file, '%.3e %.3e %.3e %.3e %.3e\n', P1);
+fprintf(file, '\n\n');
+fprintf(file, '%.3e %.3e %.3e %.3e %.3e\n', P2);
+fprintf(file, '\n\n');
+fprintf(file, '%.3e %.3e %.3e %.3e %.3e\n', dataLagr);
+fprintf(file, '\n');
+%% Connectivity.
+fprintf(file, '%d %d %d\n', V0T);
 %% Close file.
 fclose(file);
 disp(['Data written to ' fileName])

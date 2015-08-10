@@ -95,7 +95,7 @@ for nStep = 1 : numSteps
   if isVisSol
     cDisc = reshape(sysY(2*K*N+1 : 3*K*N), N, K)';
     cLagr = projectDataDisc2DataLagr(cDisc);
-    visualizeDataLagr(g, cLagr, 'c_h', 'solution', nStep)
+    visualizeDataLagr(g, cLagr, 'c_h', 'solution', nStep, 'vtk');
   end % if
 end % for
 fprintf('Done.\n')
