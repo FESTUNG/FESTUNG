@@ -86,6 +86,7 @@
 %>
 %> produces the following output:
 %> @image html  generateGridData.png
+%> @endparblock
 %>
 %> @param  coordV  Contains the @f$x^1@f$ and @f$x^2@f$ coordinates of the 
 %>                 grid vertices (using a <i>global</i> index) 
