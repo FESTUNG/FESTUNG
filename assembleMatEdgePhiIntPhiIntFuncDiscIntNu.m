@@ -1,19 +1,19 @@
 % Assembles two matrices containing integrals over edges of products of two 
 % basis functions from the interior of each element and a function in discrete
-% representation, multiplied by the corresponding component of the unit normal.
+% representation with a component of the edge normal.
 %
+%===============================================================================
 %> @file assembleMatEdgePhiIntPhiIntFuncDiscIntNu.m
 %>
 %> @brief Assembles two matrices containing integrals over edges of products of
 %>        two basis functions from the interior of each element and a function
-%>        in discrete representation, multiplied by the corresponding component
-%>        of the unit normal.
+%>        in discrete representation with a component of the edge normal.
+%===============================================================================
 %>
-%> <code>ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0Tbdr, 
-%> refEdgePhiIntPhiIntPhiInt) </code> assembles matrices
-%> @f$\mathsf{{R}}^m_\mathrm{D}, m\in\{1,2\}@f$ containing integrals over  
-%> edges of products of two basis functions and a function in discrete 
-%> representation from the interior of each element.
+%> @brief Assembles matrices
+%>        @f$\mathsf{{R}}^m_\mathrm{D}, m\in\{1,2\}@f$ containing integrals over  
+%>        edges of products of two basis functions and a function in discrete 
+%>        representation from the interior of each element.
 %>
 %> The matrix @f$\mathsf{{R}}^m_\mathrm{D}\in\mathbb{R}^{KN\times KN}@f$
 %> is block diagonal and defined as
@@ -73,6 +73,10 @@
 %>                    @f$\hat{\mathsf{{R}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiIntPhiInt()</code>.
 %>                    @f$[N \times N \times N \times 3]@f$
+%> @param dataDisc    A representation of the discrete function 
+%>                    @f$d_h(\mathbf(x))@f$, e.g., as computed by 
+%>                    <code>projectFuncCont2DataDisc()</code>
+%>                    @f$[K \times N]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG

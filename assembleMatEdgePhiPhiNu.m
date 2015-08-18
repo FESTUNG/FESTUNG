@@ -9,8 +9,8 @@
 %===============================================================================
 %>
 %> @brief Assembles matrices @f$\mathsf{{Q}}^m, m \in \{1,2\}@f$
-%> containing integrals over edges of products of two basis functions with a 
-%> component of the edge normal.
+%>        containing integrals over edges of products of two basis functions 
+%>        with a component of the edge normal.
 %>
 %> The matrices @f$\mathsf{{Q}}^m \in \mathbb{R}^{KN\times KN}@f$
 %> consist of two kinds of contributions: diagonal blocks and off-diagonal 

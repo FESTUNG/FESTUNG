@@ -2,17 +2,17 @@
 % two basis functions with a discontinuous coefficient function and with a
 % component of the edge normal.
 %
+%===============================================================================
 %> @file assembleMatEdgePhiPhiFuncDiscNu.m
 %>
 %> @brief Assembles two matrices containing integrals over interior edges of 
 %>        products of two basis functions with a discontinuous coefficient 
 %>        function and with a component of the edge normal.
+%===============================================================================
 %>
-%> <code>ret = assembleMatEdgePhiPhiFuncDiscNu(g, markE0Tint, 
-%> refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt)</code> assembles the 
-%> matrices @f$\mathsf{{R}}^m, m\in\{1,2\}@f$ containing integrals over interior
-%> edges of products of two basis functions with a discontinuous coefficient 
-%> function and with a component of the edge normal.
+%> @brief Assembles the matrices @f$\mathsf{{R}}^m, m\in\{1,2\}@f$ containing 
+%>        integrals over interior edges of products of two basis functions with 
+%>        a discontinuous coefficient function and a component of the edge normal.
 %>
 %> The matrices @f$\mathsf{{R}}^m\in\mathbb{R}^{KN\times KN}@f$
 %> consist of two kinds of contributions: diagonal blocks and off-diagonal
@@ -116,6 +116,10 @@
 %>                    @f$\hat{\mathsf{{R}}}^\text{offdiag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiExtPhiExt()</code>.
 %>                    @f$[N \times N \times N \times 3 \times 3]@f$
+%> @param dataDisc    A representation of the discrete function 
+%>                    @f$d_h(\mathbf(x))@f$, e.g., as computed by 
+%>                    <code>projectFuncCont2DataDisc()</code>
+%>                    @f$[K \times N]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG

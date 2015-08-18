@@ -1,13 +1,16 @@
 % Mapping from edge nn to edge np in the reference triangle.
 %
+%===============================================================================
 %> @file theta.m
 %>
 %> @brief Mapping from edge @f$\hat{E}_{n^-}@f$ to edge @f$\hat{E}_{n^+}@f$ in
-%>        the reference triangles
+%>        the reference triangles.
+%===============================================================================
 %>
-%> <code>[XP1,XP2] = theta(nn, np, X1, X2)</code> returns the reference coordinates
-%> @f$\hat{\mathbf{x}}_p = (\hat{x}^1,\hat{x}^2)^T@f$ as given by the mapping
-%> @f$\hat{\mathbf{x}}_p=\hat{\mathbf{\vartheta}}_{n^-n^+}(\hat{\mathbf{x}})@f$.
+%> @brief Computes the reference coordinates
+%>        @f$\hat{\mathbf{x}}_p = (\hat{x}^1,\hat{x}^2)^T@f$ as given by the 
+%>        mapping @f$\hat{\mathbf{x}}_p = 
+%>        \hat{\mathbf{\vartheta}}_{n^-n^+}(\hat{\mathbf{x}})@f$.
 %>
 %> The mapping 
 %> @f$\hat{\mathbf{\vartheta}}_{n^-n^+} : \hat{E}_{n^-} \mapsto \hat{E}_{n^+}@f$ 
@@ -76,11 +79,12 @@
 %>              reference triangle @f$\hat{T}@f$ @f$[\text{scalar}]@f$
 %> @param  np   The index @f$n^+@f$ of edge @f$\hat{E}_{n^+}@f$ in the 
 %>              reference triangle @f$\hat{T}@f$ @f$[\text{scalar}]@f$
-%> @param  S  The parameter @f$s@f$ of the mapping. Can be a vector, e.g.,
-%>            to compute the mapping for multiple values in one function call.
-%> @retval X1,X2  reference coordinates
-%>                @f$\hat{\mathbf{x}} = (\hat{x}^1,\hat{x}^2)^T@f$.
-%>                It holds <code>size(X1) == size(X2) == size(S)</code>.
+%> @param  X1,X2 The coordinates @f$\hat{\mathbf{x}}=(\hat{x}^1,\hat{x}^2)^T@f$
+%>               on edge @f$\hat{E}_{n^-}@f$.
+%> @retval XP1,XP2 The coordinates 
+%>               @f$\hat{\mathbf{x}}_p=(\hat{x}_p^1,\hat{x}_p^2)^T@f$
+%>               on edge @f$\hat{E}_{n^+}@f$.
+%>               It holds <code>size(XP1) == size(XP2) == size(X1) == size(X2)</code>.
 %>
 %> This file is part of FESTUNG
 %>

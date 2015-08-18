@@ -1,15 +1,16 @@
 % Assembles a matrix containing integrals over edges of products of two 
 % basis functions from the interior of each element.
 %
+%===============================================================================
 %> @file assembleMatEdgePhiIntPhiInt.m
 %>
 %> @brief Assembles a matrix containing integrals over edges of products of
 %>        two basis functions from the interior of each element.
+%===============================================================================
 %>
-%> <code>ret = assembleMatEdgePhiIntPhiInt(g, markE0Tbdr, refEdgePhiIntPhiInt)
-%> </code> assembles the matrix @f$\mathsf{{S}}_\mathrm{D}@f$
-%> containing integrals over edges of products of two basis functions from the 
-%> interior of each element.
+%> @brief Assembles the matrix @f$\mathsf{{S}}_\mathrm{D}@f$ containing 
+%>        integrals over edges of products of two basis functions from the 
+%>        interior of each element.
 %>
 %> The matrix @f$\mathsf{{S}}_\mathrm{D} \in \mathbb{R}^{KN\times KN}@f$
 %> is block diagonal and defined as 

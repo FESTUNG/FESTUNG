@@ -1,18 +1,19 @@
 % Assembles two matrices containing integrals over edges of products of two 
-% basis functions from the interior of each element, multiplied by the
-% corresponding component of the unit normal.
+% basis functions from the interior of each element with a component of the 
+% edge normal.
 %
+%===============================================================================
 %> @file assembleMatEdgePhiIntPhiIntNu.m
 %>
 %> @brief Assembles two matrices containing integrals over edges of products of
 %>        two basis functions from the interior of each element, multiplied by
 %>        the corresponding component of the unit normal.
+%===============================================================================
 %>
-%> <code>ret = assembleMatEdgePhiIntPhiIntNu(g, markE0Tbdr, refEdgePhiIntPhiInt)
-%> </code> assembles two matrices @f$\mathsf{{Q}}^m_\mathrm{N}@f$
-%> containing integrals over edges of products of two basis functions from the 
-%> interior of each element, multiplied by the corresponding component of the
-%> unit normal.
+%> @brief Assembles two matrices @f$\mathsf{{Q}}^m_\mathrm{N}, m\in\{1,2\}@f$
+%>        containing integrals over edges of products of two basis functions 
+%>        from the  interior of each element with a component of the
+%>        edge normal.
 %>
 %> The matrix @f$\mathsf{{Q}}^m_\mathrm{N} \in \mathbb{R}^{KN\times KN}@f$
 %> is block diagonal and defined as 

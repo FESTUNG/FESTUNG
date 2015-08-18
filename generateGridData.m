@@ -1,15 +1,16 @@
 % Assembles lists describing the geometric and topological
 % properties of a triangulation.
 %
+%===============================================================================
 %> @file generateGridData.m
 %>
 %> @brief Assembles lists describing the geometric and topological
 %>        properties of a triangulation.
+%===============================================================================
 %>
-%> <code>g = generateGridData(coordV, V0T)</code> assembles lists 
-%> describing the geometric and topological properties of a 
-%> triangulation @f$\mathcal{T}_h@f$ and stores them in the output 
-%> variable <code>g</code> of type <code>struct</code>.
+%> @brief Assembles lists describing the geometric and topological properties  
+%>        of a triangulation @f$\mathcal{T}_h@f$ and stores them in the output 
+%>        variable <code>g</code> of type <code>struct</code>.
 %>
 %> All lists fall in one of two categories: "geometric data" or 
 %> "topological data". The provided lists are (dimension in

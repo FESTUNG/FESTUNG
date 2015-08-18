@@ -1,12 +1,14 @@
 % Mapping from interval [0,1] to the n-th edge in the reference triangle.
 %
+%===============================================================================
 %> @file gammaMap.m
 %>
 %> @brief Mapping from interval [0,1] to the n-th edge in the reference triangle.
+%===============================================================================
 %>
-%> <code>[X1,X2] = gammaMap(n, S)</code> returns the reference coordinates
-%> @f$\hat{\mathbf{x}} = (\hat{x}^1,\hat{x}^2)^T@f$ as given by the mapping
-%> @f$\hat{\mathbf{\gamma}}_n(s)@f$.
+%> @brief Computes the reference coordinates
+%>        @f$\hat{\mathbf{x}} = (\hat{x}^1,\hat{x}^2)^T@f$ as given by the 
+%>        mapping @f$\hat{\mathbf{\gamma}}_n(s)@f$.
 %>
 %> The mapping @f$\hat{\mathbf{\gamma}}_n : [0,1] \mapsto \hat{E}_n@f$ 
 %> maps the unit interval to the @f$n@f$-th edge of the reference triangle

@@ -1,14 +1,15 @@
 % Assembles a matrix containing integrals over interior edges of products of two 
 % basis functions.
 %
+%===============================================================================
 %> @file assembleMatEdgePhiPhi.m
 %>
 %> @brief Assembles a matrix containing integrals over interior edges of 
 %>        products of two basis functions.
+%===============================================================================
 %>
-%> <code>ret = assembleMatEdgePhiPhi(g, markE0Tint, refEdgePhiIntPhiInt, 
-%> refEdgePhiIntPhiExt)</code> assembles the matrix @f$\mathsf{{S}}@f$
-%> containing integrals over edges of products of two basis functions.
+%> @brief Assembles the matrix @f$\mathsf{{S}}@f$ containing integrals
+%>        over edges of products of two basis functions.
 %>
 %> The matrices @f$\mathsf{{S}} \in \mathbb{R}^{KN\times KN}@f$
 %> consist of two kinds of contributions: diagonal blocks and off-diagonal 
