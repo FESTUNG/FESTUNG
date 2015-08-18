@@ -88,9 +88,9 @@
 %>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
 %>                    @f$[N \times N \times 3]@f$
 %> @param refEdgePhiIntPhiExt Local matrix 
-%>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
+%>                    @f$\hat{\mathsf{{S}}}^\text{offdiag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiExt()</code>.
-%>                    @f$[N \times N \times 3 \times 3@f$
+%>                    @f$[N \times N \times 3 \times 3]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
