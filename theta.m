@@ -30,6 +30,47 @@
 %>   \left[ \hat{\mathbf{a}}_{k2} - \hat{\mathbf{a}}_{k1} | 
 %>          \hat{\mathbf{a}}_{k3} - \hat{\mathbf{a}}_{k1} \right] \,.
 %> @f]
+%> This can be boiled down to nine possible maps between the sides of the
+%> reference triangle, the closed form expressions of which read as
+%>
+%> @f[
+%>  \hat{\mathbf{\vartheta}}_{11}:
+%>    \begin{bmatrix} \hat{x}^1 \\ \hat{x}^2 \end{bmatrix} \mapsto
+%>    \begin{bmatrix} 1 - \hat{x}^1 \\ 1 - \hat{x}^2 \end{bmatrix} \,,
+%>  \hat{\mathbf{\vartheta}}_{21}:
+%>    \begin{bmatrix} \hat{x}^1 \\ \hat{x}^2 \end{bmatrix} \mapsto
+%>    \begin{bmatrix} 1 - \hat{x}^2 \\ \hat{x}^2 \end{bmatrix} \,, 
+%>  \hat{\mathbf{\vartheta}}_{31}:
+%>    \begin{bmatrix} \hat{x}^1 \\ \hat{x}^2 \end{bmatrix} \mapsto
+%>    \begin{bmatrix} \hat{x}^1 \\ 1 - \hat{x}^1 \end{bmatrix} \,, 
+%> @f]
+%> @f[
+%>  \hat{\mathbf{\vartheta}}_{12}:
+%>    \begin{bmatrix} \hat{x}^1 \\ \hat{x}^2 \end{bmatrix} \mapsto
+%>    \begin{bmatrix} 0 \\ \hat{x}^2 \end{bmatrix} \,,
+%>  \hat{\mathbf{\vartheta}}_{22}:
+%>    \begin{bmatrix} \hat{x}^1 \\ \hat{x}^2 \end{bmatrix} \mapsto
+%>    \begin{bmatrix} 0 \\ 1 - \hat{x}^2 \end{bmatrix} \,, 
+%>  \hat{\mathbf{\vartheta}}_{32}:
+%>    \begin{bmatrix} \hat{x}^1 \\ \hat{x}^2 \end{bmatrix} \mapsto
+%>    \begin{bmatrix} 0 \\ \hat{x}^1 \end{bmatrix} \,, 
+%> @f]
+%> @f[
+%>  \hat{\mathbf{\vartheta}}_{13}:
+%>    \begin{bmatrix} \hat{x}^1 \\ \hat{x}^2 \end{bmatrix} \mapsto
+%>    \begin{bmatrix} \hat{x}^1 \\ 0 \end{bmatrix} \,,
+%>  \hat{\mathbf{\vartheta}}_{23}:
+%>    \begin{bmatrix} \hat{x}^1 \\ \hat{x}^2 \end{bmatrix} \mapsto
+%>    \begin{bmatrix} \hat{x}^2 \\ 0 \end{bmatrix} \,, 
+%>  \hat{\mathbf{\vartheta}}_{33}:
+%>    \begin{bmatrix} \hat{x}^1 \\ \hat{x}^2 \end{bmatrix} \mapsto
+%>    \begin{bmatrix} 1 - \hat{x}^1 \\ 0 \end{bmatrix} \,.
+%> @f]
+%> All maps @f$\hat{\mathbf{\vartheta}}_{n^-n^+}@f$ reverse the edge orientation
+%> because an edge shared by triangles @f$T^-@f$ and @f$T^+@f$ will always have
+%> different orientations when mapped by @f$\mathbf{F}_{k^-}@f$ and 
+%> @f$\mathbf{F}_{k^+}@f$; this occurs due to the counter-clockwise vertex
+%> orientation consistently maintained throughout the mesh.
 %>
 %> @param  nn   The index @f$n^-@f$ of edge @f$\hat{E}_{n^-}@f$ in the 
 %>              reference triangle @f$\hat{T}@f$ @f$[\text{scalar}]@f$
