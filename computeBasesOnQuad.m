@@ -1,18 +1,63 @@
-% This file is part of FESTUNG 
-% Copyright (C) 2014 Florian Frank, Balthasar Reuter, Vadym Aizinger
-% 
-% This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-% 
-% This program is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-% 
-% You should have received a copy of the GNU General Public License
-% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+% Evaluate basis functions and their gradients in quadrature points on the
+% reference triangle and store them in global variables.
+%
+%===============================================================================
+%> @file computeBasesOnQuad.m
+%>
+%> @brief Evaluate basis functions and their gradients in quadrature points on
+%>        the reference triangle and store them in global variables.
+%===============================================================================
+%>
+%> @brief Evaluate basis functions and their gradients in quadrature points on
+%>        reference triangle and store them in global variables.
+%>
+%> It evaluates the basis functions provided by <code>phi()</code> and
+%> <code>gradPhi()</code> in all quadrature points for all required orders 
+%> on the reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1) \}@f$
+%> 
+%> The quadrature points on the reference triangle @f$\mathbf{q}_r@f$ and the
+%> unit interval @f$[0,1]@f$, @f$q_r@f$, are provided by 
+%> <code>quadRule2D()</code> and <code>quadRule1D()</code>, respectively.
+%>
+%> All global variables are @f$\#\mathcal{P} \times 1@f$ <code>cell</code>-arrays, 
+%> with @f$\mathcal{P} = \{2p, 2p+1\}@f$ the set of required polynomial orders. 
+%> Note, for @f$p=0@f$ only order @f$1@f$ is provided.
+%>
+%> This function computes the following global variables (dimensions given for
+%> each order):
+%> - <code>gPhi1D</code>: @f$\hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(q_r)
+%>                           \; [R \times N \times 3]@f$
+%> - <code>gThetaPhi1D</code>: @f$\hat{\varphi}_i \circ 
+%>                                \hat{\mathbf{\gamma}}_{n^-} \circ
+%>                                \hat{\vartheta}_{n^-n^+}(q_r)
+%>                                \; [R \times N \times 3 \times 3]@f$
+%> - <code>gPhi2D</code>: @f$\hat{\varphi}_i(\mathbf{q}_r) \; [R \times N]@f$
+%> - <code>gGradPhi2D</code>: @f$\hat{\nabla} \hat{\varphi}_i(\mathbf{q}_r)
+%>                               \; [R \times N \times 2]@f$
+%> 
+%> @param  N          The number of local degrees of freedom. For polynomial
+%>                    order @f$p@f$, it is given as @f$N = (p+1)(p+2)/2@f$
+%>                    @f$[\text{scalar}]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
 %
 function computeBasesOnQuad(N)
 global gPhi2D gGradPhi2D gPhi1D gThetaPhi1D
