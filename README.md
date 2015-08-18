@@ -25,13 +25,14 @@ FESTUNGs main developers are Florian Frank (Rice University), [Balthasar Reuter]
 
 ### Third party libraries
 * FESTUNG makes extensive use of the built-in routines in MATLAB / GNU Octave.
-* [triquad](https://github.com/FESTUNG/project/blob/master/triquad.m) was written by Greg von Winckel. See [triquad.txt](https://github.com/FESTUNG/project/blob/master/triquad.txt) for License details.
+* [triquad](https://github.com/FESTUNG/project/blob/master/triquad.m) was written by Greg von Winckel. See [triquad.txt](https://github.com/FESTUNG/project/blob/master/triquad.txt) for license details.
+* [m2cpp](http://www.mathworks.com/matlabcentral/fileexchange/25925-using-doxygen-with-matlab) by Fabrice to generate a [Doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation. See [license.txt](https://github.com/FESTUNG/project/blob/master/thirdParty/doxygenMatlab/license.txt) for license details.
 
 ## License 
 * see [LICENSE](https://github.com/FESTUNG/project/blob/master/LICENSE) file
 
 ## Version 
-* Version 0.1 as published in the Paper "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part I: Diffusion operator" (to appear).
+* Version 0.1 as published in the paper *Frank, Reuter, Aizinger, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part I: Diffusion operator". *In: Computers & Mathematics with Applications 70 (2015) 11-46, Available online 15 May 2015, ISSN 0898-1221, http://dx.doi.org/10.1016/j.camwa.2015.04.013.*
 
 ## Contact
 * Homepage: [https://math.fau.de/FESTUNG](https://math.fau.de/FESTUNG)
