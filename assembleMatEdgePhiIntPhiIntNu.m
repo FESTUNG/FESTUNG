@@ -49,13 +49,8 @@
 %>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(s) 
 %>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_n(s) \mathrm{d}s \,,
 %> @f]
-%> where the mapping @f$\hat{\mathbf{\gamma}}_n : [0,1] \mapsto \hat{E}_n@f$ 
-%> maps the unit interval to the @f$n@f$-th reference edge:
-%> @f[
-%> \hat{\mathbf{\gamma}}_1(s) = (1-s, s)^T \,,\quad
-%> \hat{\mathbf{\gamma}}_2(s) = (0, 1-s)^T \,,\quad
-%> \hat{\mathbf{\gamma}}_2(s) = (s,   0)^T \,.
-%> @f]
+%> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
+%> <code>gammaMap()</code>.
 %>
 %> It is essentially the same as the diagonal part of
 %> <code>assembleMatEdgePhiPhiNu()</code>.
