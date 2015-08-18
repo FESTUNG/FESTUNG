@@ -22,7 +22,7 @@
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_N}
 %>  \int_{E_{kn}} \nu_{kn}^m \varphi_{ki} \varphi_{kj} \mathrm{d}s \,.
 %> @f]
-%> with @f$\nu_{kn}@f$ the @f$m@f$-th component (@f$m\in\{1,2\}@f$) of the unit
+%> with @f$\nu_{kn}@f$ the @f$m@f$-th component (@f$m\in\{1,2\}@f$) of the edge
 %> normal.
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
