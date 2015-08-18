@@ -11,7 +11,15 @@
 %> containing integrals over edges of products of two basis functions from the 
 %> interior of each element.
 %>
-%> The matrix @f$\mathbf{\mathsf{S}}_\mathrm{D}@f$ is defined as follows
+%> The matrix @f$\mathbf{\mathsf{S}}_\mathrm{D} \in \mathbb{R}^{KN\times KN}@f$
+%> is block diagonal and defined as 
+%> @f[
+%> [\mathbf{\mathsf{S}}_\mathrm{D}]_{(k-1)N+i,(k-1)N+j} =
+%>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
+%>  \frac{1}{|E_{kn}|} \int_{E_{kn}} \varphi_{ki} \varphi_{kj} \mathrm{d}s \,.
+%> @f]
+%> All other entries are zero.
+%> To allow for vectorization, the assembly is reformulated as
 %> @f[
 %> \mathbf{\mathsf{S}}_\mathrm{D} = \sum_{n=1}^3
 %>   \begin{bmatrix}
@@ -22,6 +30,22 @@
 %> @f]
 %> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{D}}@f$ denotes the Kronecker 
 %> delta and @f$\otimes@f$ denotes the Kronecker product.
+%>
+%> The entries of matrix 
+%> @f$\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
+%> are given by
+%> @f[
+%> [\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}]_{i,j,n} =
+%>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(s) 
+%>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_n(s) \mathrm{d}s \,,
+%> @f]
+%> where the mapping @f$\hat{\mathbf{\gamma}}_n : [0,1] \mapsto \hat{E}_n@f$ 
+%> maps the unit interval to the @f$n@f$-th reference edge:
+%> @f[
+%> \hat{\mathbf{\gamma}}_1(s) = (1-s, s)^T \,,\quad
+%> \hat{\mathbf{\gamma}}_2(s) = (0, 1-s)^T \,,\quad
+%> \hat{\mathbf{\gamma}}_2(s) = (s,   0)^T \,.
+%> @f]
 %>
 %> It is essentially the same as the diagonal part of
 %> <code>assembleMatEdgePhiPhi()</code>.
@@ -36,7 +60,7 @@
 %> @param refEdgePhiIntPhiInt  Local matrix 
 %>                    @f$\hat{\mathbf{\mathsf{S}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiInt()</code>
-%>                    @f$[N \times N]@f$
+%>                    @f$[N \times N \times 3@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
