@@ -9,10 +9,11 @@
 %>        in discrete representation, multiplied by the corresponding component
 %>        of the unit normal.
 %>
-%> <code>ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0Tbdr, refEdgePhiIntPhiInt)
-%> </code> assembles the matrix @f$\mathsf{{R}}^m_\mathrm{D}@f$
-%> containing integrals over edges of products of two basis functions and a
-%> function in discrete representation from the interior of each element.
+%> <code>ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0Tbdr, 
+%> refEdgePhiIntPhiIntPhiInt) </code> assembles matrices
+%> @f$\mathsf{{R}}^m_\mathrm{D}, m\in\{1,2\}@f$ containing integrals over  
+%> edges of products of two basis functions and a function in discrete 
+%> representation from the interior of each element.
 %>
 %> The matrix @f$\mathsf{{R}}^m_\mathrm{D}\in\mathbb{R}^{KN\times KN}@f$
 %> is block diagonal and defined as

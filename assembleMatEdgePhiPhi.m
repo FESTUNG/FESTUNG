@@ -10,8 +10,8 @@
 %> refEdgePhiIntPhiExt)</code> assembles the matrix @f$\mathsf{{S}}@f$
 %> containing integrals over edges of products of two basis functions.
 %>
-%> The matrix @f$\mathsf{{S}} \in \mathbb{R}^{KN\times KN}@f$
-%> consists of two kinds of contributions: diagonal blocks and off-diagonal 
+%> The matrices @f$\mathsf{{S}} \in \mathbb{R}^{KN\times KN}@f$
+%> consist of two kinds of contributions: diagonal blocks and off-diagonal 
 %> blocks. Diagonal blocks are defined as 
 %> @f[
 %> [\mathsf{{S}}]_{(k-1)N+i,(k-1)N+j} =
@@ -31,7 +31,7 @@
 %> edge @f$E_{k^-n^-} = E_{k^+n^+}@f$.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f$\mathsf{{S}} = \mathsf{{S}}^\mathrm{diag} + 
-%>    \mathsf{{S}}^\mathrm{offidag}@f$ with the blocks defined as
+%>    \mathsf{{S}}^\mathrm{offdiag}@f$ with the blocks defined as
 %> @f[
 %> \mathsf{{S}}^\mathrm{diag} = \sum_{n=1}^3
 %>   \begin{bmatrix}
