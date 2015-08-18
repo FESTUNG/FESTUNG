@@ -7,35 +7,35 @@
 %>        two basis functions from the interior of each element.
 %>
 %> <code>ret = assembleMatEdgePhiIntPhiInt(g, markE0Tbdr, refEdgePhiIntPhiInt)
-%> </code> assembles the matrix @f$\mathbf{\mathsf{S}}_\mathrm{D}@f$
+%> </code> assembles the matrix @f$\mathsf{{S}}_\mathrm{D}@f$
 %> containing integrals over edges of products of two basis functions from the 
 %> interior of each element.
 %>
-%> The matrix @f$\mathbf{\mathsf{S}}_\mathrm{D} \in \mathbb{R}^{KN\times KN}@f$
+%> The matrix @f$\mathsf{{S}}_\mathrm{D} \in \mathbb{R}^{KN\times KN}@f$
 %> is block diagonal and defined as 
 %> @f[
-%> [\mathbf{\mathsf{S}}_\mathrm{D}]_{(k-1)N+i,(k-1)N+j} =
+%> [\mathsf{{S}}_\mathrm{D}]_{(k-1)N+i,(k-1)N+j} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
 %>  \frac{1}{|E_{kn}|} \int_{E_{kn}} \varphi_{ki} \varphi_{kj} \mathrm{d}s \,.
 %> @f]
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathbf{\mathsf{S}}_\mathrm{D} = \sum_{n=1}^3
+%> \mathsf{{S}}_\mathrm{D} = \sum_{n=1}^3
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{D}} &   & \\
 %>     & ~\ddots~ & \\
 %>     &          & \delta_{E_{Kn}\in\mathcal{E}_\mathrm{D}}
-%>   \end{bmatrix} \otimes [\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}]_{:,:,n}\;,
+%>   \end{bmatrix} \otimes [\hat{\mathsf{{S}}}^\mathrm{diag}]_{:,:,n}\;,
 %> @f]
 %> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{D}}@f$ denotes the Kronecker 
 %> delta and @f$\otimes@f$ denotes the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
+%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
 %> are given by
 %> @f[
-%> [\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}]_{i,j,n} =
+%> [\hat{\mathsf{{S}}}^\mathrm{diag}]_{i,j,n} =
 %>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(s) 
 %>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_n(s) \mathrm{d}s \,,
 %> @f]
@@ -53,7 +53,7 @@
 %>                    (boundary) edges on which the matrix blocks should be
 %>                    assembled @f$[K \times 3]@f$
 %> @param refEdgePhiIntPhiInt  Local matrix 
-%>                    @f$\hat{\mathbf{\mathsf{S}}}^\text{diag}@f$ as provided
+%>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
 %>                    @f$[N \times N \times 3]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$

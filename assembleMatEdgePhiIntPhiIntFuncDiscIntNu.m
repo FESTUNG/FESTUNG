@@ -10,14 +10,14 @@
 %>        of the unit normal.
 %>
 %> <code>ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0Tbdr, refEdgePhiIntPhiInt)
-%> </code> assembles the matrix @f$\mathbf{\mathsf{R}}^m_\mathrm{D}@f$
+%> </code> assembles the matrix @f$\mathsf{{R}}^m_\mathrm{D}@f$
 %> containing integrals over edges of products of two basis functions and a
 %> function in discrete representation from the interior of each element.
 %>
-%> The matrix @f$\mathbf{\mathsf{R}}^m_\mathrm{D}\in\mathbb{R}^{KN\times KN}@f$
+%> The matrix @f$\mathsf{{R}}^m_\mathrm{D}\in\mathbb{R}^{KN\times KN}@f$
 %> is block diagonal and defined as
 %> @f[
-%> [\mathbf{\mathsf{R}}^m_\mathrm{D}]_{(k-1)N+i,(k-1)N+j} =
+%> [\mathsf{{R}}^m_\mathrm{D}]_{(k-1)N+i,(k-1)N+j} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
 %>  \nu_{kn}^m \sum_{l=1}^N D_{kl}(t) 
 %>  \int_{E_kn} \varphi_{ki}\varphi_{kl}\varphi_{kj} \,,
@@ -30,7 +30,7 @@
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathbf{\mathsf{R}}^m_\mathrm{D} = \sum_{n=1}^3 \sum_{l=1}^N
+%> \mathsf{{R}}^m_\mathrm{D} = \sum_{n=1}^3 \sum_{l=1}^N
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{D}} &   & \\
 %>     & ~\ddots~ & \\
@@ -40,17 +40,17 @@
 %>     \nu^m_{1n} |E_{1n}| D_{1l}(t) & & \\
 %>     & ~\ddots~ & \\
 %>     &          & \nu^m_{Kn} |E_{Kn}| D_{Kl}(t)
-%>   \end{bmatrix} \otimes [\hat{\mathbf{\mathsf{R}}}^\mathrm{diag}]_{:,:,l,n}\;,
+%>   \end{bmatrix} \otimes [\hat{\mathsf{{R}}}^\mathrm{diag}]_{:,:,l,n}\;,
 %> @f]
 %> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{D}}@f$ denotes the Kronecker 
 %> delta, @f$\circ@f$ denotes the Hadamard product, and @f$\otimes@f$ denotes
 %> the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathbf{\mathsf{R}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times N\times3}@f$
+%> @f$\hat{\mathsf{{R}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times N\times3}@f$
 %> are given by
 %> @f[
-%> [\hat{\mathbf{\mathsf{R}}}^\mathrm{diag}]_{i,j,l,n} =
+%> [\hat{\mathsf{{R}}}^\mathrm{diag}]_{i,j,l,n} =
 %>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(s) 
 %>   \hat{\varphi}_l \circ \hat{\mathbf{\gamma}}_n(s) 
 %>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_n(s) \mathrm{d}s \,,
@@ -69,7 +69,7 @@
 %>                    (boundary) edges on which the matrix blocks should be
 %>                    assembled @f$[K \times 3]@f$
 %> @param refEdgePhiIntPhiIntPhiInt  Local matrix 
-%>                    @f$\hat{\mathbf{\mathsf{R}}}^\text{diag}@f$ as provided
+%>                    @f$\hat{\mathsf{{R}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiIntPhiInt()</code>.
 %>                    @f$[N \times N \times N \times 3]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$

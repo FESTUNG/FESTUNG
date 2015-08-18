@@ -7,20 +7,20 @@
 %>        products of two basis functions.
 %>
 %> <code>ret = assembleMatEdgePhiPhi(g, markE0Tint, refEdgePhiIntPhiInt, 
-%> refEdgePhiIntPhiExt)</code> assembles the matrix @f$\mathbf{\mathsf{S}}@f$
+%> refEdgePhiIntPhiExt)</code> assembles the matrix @f$\mathsf{{S}}@f$
 %> containing integrals over edges of products of two basis functions.
 %>
-%> The matrix @f$\mathbf{\mathsf{S}} \in \mathbb{R}^{KN\times KN}@f$
+%> The matrix @f$\mathsf{{S}} \in \mathbb{R}^{KN\times KN}@f$
 %> consists of two kinds of contributions: diagonal blocks and off-diagonal 
 %> blocks. Diagonal blocks are defined as 
 %> @f[
-%> [\mathbf{\mathsf{S}}]_{(k-1)N+i,(k-1)N+j} =
+%> [\mathsf{{S}}]_{(k-1)N+i,(k-1)N+j} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
 %>  \frac{1}{|E_{kn}|} \int_{E_{kn}} \varphi_{ki} \varphi_{kj} \mathrm{d}s \,,
 %> @f]
 %> and off-diagonal blocks are defined as
 %> @f[
-%> [\mathbf{\mathsf{S}}]_{(k^--1)N+i,(k^+-1)N+j} =
+%> [\mathsf{{S}}]_{(k^--1)N+i,(k^+-1)N+j} =
 %>  -\frac{1}{|E_{k^-n^-}|} \int_{E_{k^-n^-}} 
 %>   \varphi_{k^-i} \varphi_{k^+j} \mathrm{d}s \,.
 %> @f]
@@ -30,19 +30,19 @@
 %> @f$\partial T_{k^-} \cap T_{k^+} \ne\emptyset@f$ consist of exactly one
 %> edge @f$E_{k^-n^-} = E_{k^+n^+}@f$.
 %> To allow for vectorization, the assembly is reformulated as
-%> @f$\mathbf{\mathsf{S}} = \mathbf{\mathsf{S}}^\mathrm{diag} + 
-%>    \mathbf{\mathsf{S}}^\mathrm{offidag}@f$ with the blocks defined as
+%> @f$\mathsf{{S}} = \mathsf{{S}}^\mathrm{diag} + 
+%>    \mathsf{{S}}^\mathrm{offidag}@f$ with the blocks defined as
 %> @f[
-%> \mathbf{\mathsf{S}}^\mathrm{diag} = \sum_{n=1}^3
+%> \mathsf{{S}}^\mathrm{diag} = \sum_{n=1}^3
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\Omega} &   & \\
 %>     & ~\ddots~ & \\
 %>     &          & \delta_{E_{Kn}\in\mathcal{E}_\Omega}
-%>   \end{bmatrix} \otimes [\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}]_{:,:,n}\;,
+%>   \end{bmatrix} \otimes [\hat{\mathsf{{S}}}^\mathrm{diag}]_{:,:,n}\;,
 %> @f]
 %> and
 %> @f[
-%> \mathbf{\mathsf{S}}^\mathrm{offdiag} = -\sum_{n^-=1}^3\sum_{n^+=1}^3
+%> \mathsf{{S}}^\mathrm{offdiag} = -\sum_{n^-=1}^3\sum_{n^+=1}^3
 %>   \begin{bmatrix}
 %>     0&\delta_{E_{1n^-} = E_{1n^+}}&\dots&\dots&\delta_{E_{1n^-}=E_{Kn^+}} \\
 %>     \delta_{E_{2n^-} = E_{1n^+}}&0&\ddots& &\vdots \\
@@ -50,25 +50,25 @@
 %>     \vdots & & \ddots & 0 & \delta_{E_{(K-1)n^-}=E_{Kn^+}} \\
 %>     \delta_{E_{Kn^-} = E_{1n^+}}&\dots&\dots&\delta_{E_{Kn^-} = E_{(K-1)n^+}} &0
 %>   \end{bmatrix} \otimes 
-%> [\hat{\mathbf{\mathsf{S}}}^\mathrm{offdiag}]_{:,:,n^-,n^+}\;,
+%> [\hat{\mathsf{{S}}}^\mathrm{offdiag}]_{:,:,n^-,n^+}\;,
 %> @f]
 %> where @f$\delta_{E_{kn}\in\mathcal{E}_\Omega}, \delta_{E_{in^-}=E_{jn^+}}@f$ 
 %> denote the Kronecker delta and @f$\otimes@f$ denotes the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
+%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
 %> are given by
 %> @f[
-%> [\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}]_{i,j,n} =
+%> [\hat{\mathsf{{S}}}^\mathrm{diag}]_{i,j,n} =
 %>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(s) 
 %>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_n(s) \mathrm{d}s \,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
 %> <code>gammaMap()</code>. The entries of matrix
-%> @f$\hat{\mathbf{\mathsf{S}}}^\mathrm{offdiag} \in 
+%> @f$\hat{\mathsf{{S}}}^\mathrm{offdiag} \in 
 %>    \mathbb{R}^{N\times N\times 3\times 3}@f$ are defined as
 %> @f[
-%> [\hat{\mathbf{\mathsf{S}}}^\mathrm{offdiag}]_{i,j,n^-,n^+} =
+%> [\hat{\mathsf{{S}}}^\mathrm{offdiag}]_{i,j,n^-,n^+} =
 %>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_{n^-}(s) 
 %>   \hat{\varphi}_j\circ \hat{\mathbf{\vartheta}}_{n^-n^+} \circ
 %>   \hat{\mathbf{\gamma}}_{n^-}(s) \mathrm{d}s \,,
@@ -84,11 +84,11 @@
 %>                    (interior) edges on which the matrix blocks should be
 %>                    assembled @f$[K \times 3]@f$
 %> @param refEdgePhiIntPhiInt  Local matrix 
-%>                    @f$\hat{\mathbf{\mathsf{S}}}^\text{diag}@f$ as provided
+%>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
 %>                    @f$[N \times N \times 3]@f$
 %> @param refEdgePhiIntPhiExt Local matrix 
-%>                    @f$\hat{\mathbf{\mathsf{S}}}^\text{diag}@f$ as provided
+%>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiExt()</code>.
 %>                    @f$[N \times N \times 3 \times 3@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$

@@ -9,15 +9,15 @@
 %>        the corresponding component of the unit normal.
 %>
 %> <code>ret = assembleMatEdgePhiIntPhiIntNu(g, markE0Tbdr, refEdgePhiIntPhiInt)
-%> </code> assembles two matrices @f$\mathbf{\mathsf{Q}}^m_\mathrm{N}@f$
+%> </code> assembles two matrices @f$\mathsf{{Q}}^m_\mathrm{N}@f$
 %> containing integrals over edges of products of two basis functions from the 
 %> interior of each element, multiplied by the corresponding component of the
 %> unit normal.
 %>
-%> The matrix @f$\mathbf{\mathsf{Q}}^m_\mathrm{N} \in \mathbb{R}^{KN\times KN}@f$
+%> The matrix @f$\mathsf{{Q}}^m_\mathrm{N} \in \mathbb{R}^{KN\times KN}@f$
 %> is block diagonal and defined as 
 %> @f[
-%> [\mathbf{\mathsf{Q}}^m_\mathrm{N}]_{(k-1)N+i,(k-1)N+j} =
+%> [\mathsf{{Q}}^m_\mathrm{N}]_{(k-1)N+i,(k-1)N+j} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_N}
 %>  \int_{E_{kn}} \nu_{kn}^m \varphi_{ki} \varphi_{kj} \mathrm{d}s \,.
 %> @f]
@@ -26,7 +26,7 @@
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathbf{\mathsf{Q}}^m_\mathrm{N} = \sum_{n=1}^3
+%> \mathsf{{Q}}^m_\mathrm{N} = \sum_{n=1}^3
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{N}} &   & \\
 %>     & ~\ddots~ & \\
@@ -35,17 +35,17 @@
 %>     \nu^m_{1n} | E_{1n} | &   & \\
 %>     & ~\ddots~ & \\
 %>     &          & \nu^m_{Kn} | E_{Kn} |
-%>   \end{bmatrix} \otimes [\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}]_{:,:,n}\;,
+%>   \end{bmatrix} \otimes [\hat{\mathsf{{S}}}^\mathrm{diag}]_{:,:,n}\;,
 %> @f]
 %> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{N}}@f$ denotes the Kronecker 
 %> delta, @f$\circ@f$ denotes the Hadamard product, and @f$\otimes@f$ denotes 
 %> the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
+%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
 %> are given by
 %> @f[
-%> [\hat{\mathbf{\mathsf{S}}}^\mathrm{diag}]_{i,j,n} =
+%> [\hat{\mathsf{{S}}}^\mathrm{diag}]_{i,j,n} =
 %>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(s) 
 %>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_n(s) \mathrm{d}s \,,
 %> @f]
@@ -63,7 +63,7 @@
 %>                    (boundary) edges on which the matrix blocks should be
 %>                    assembled @f$[K \times 3]@f$
 %> @param refEdgePhiIntPhiInt  Local matrix 
-%>                    @f$\hat{\mathbf{\mathsf{S}}}^\text{diag}@f$ as provided
+%>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
 %>                    @f$[N \times N \times 3]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$

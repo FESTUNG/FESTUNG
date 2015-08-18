@@ -17,7 +17,7 @@
 %>
 %> - Geometric data:
 %>   - <code>B</code> @f$[\#\mathcal{T} \times 2 \times 2]@f$:
-%>     transformation matrices @f$\mathbf{\mathsf{B}}_k@f$
+%>     transformation matrices @f$\mathsf{{B}}_k@f$
 %>   - <code>areaE</code> @f$[\#\mathcal{E} \times 1]@f$:
 %>     edge lengths @f$E_{n}@f$
 %>   - <code>areaEOT</code> @f$[\#\mathcal{T} \times 3]@f$:
