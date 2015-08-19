@@ -8,7 +8,7 @@ Two main rules should always be kept in mind: WORM and Camel Case.
 ### WORM
 There is a very simple acronym that governs code development:
 
->WORM: Write Once Read Many
+**WORM: Write Once Read Many**
 
 This means, most code parts are written once and stay like this for a long time - but are read many times to understand what is happening there. Hence, code should always be written in a way that makes it most easy for the reader to understand it, even if it means additional work for the programmer.
 
@@ -26,22 +26,18 @@ For **variable names and function names** we use the *lower camel case* notation
 
 Some examples:
 
-```Matlab
-phi(...)
-integrateRefElemPhiPhi(...)
-dataDisc
-tEnd
-eta
-```
+    phi(...)
+    integrateRefElemPhiPhi(...)
+    dataDisc
+    tEnd
+    eta
 
 For **class names** we use the *upper camel case* notation, i. e., the first letter of the name is always upper case. Since no classes are implemented, yet, this is for future code versions. 
 
 Some examples:
 
-```
-TimeStepper
-Quadrature
-```
+    TimeStepper
+    Quadrature
 
 ## Variable Names
 Use the *lower camel case* notation and use meaningful names. One letter variables can be sufficient (e. g., when abbreviating the number of basis functions as ```N``` all the way through the code) but should be the exception.
@@ -58,49 +54,49 @@ In Finite Elements continuous functions are approximated using coefficients for 
 For example, after an L2-projection of a function *d(x,y)* into our discontinuous space, we could name the array holding the coefficients ```dDisc```. In functions that expect only one coefficient argument, we call it ```dataDisc```.
 
 ## Function Names
-Functions always *do* something, which means we can probably describe them by a verb. This verb should always form the first part of the function name, for example as in ```visualizeGrid(...)```.
+Functions always *do* something, which means we can probably describe them by a verb. This verb should always form the first part of the function name, for example as in `visualizeGrid(...)`.
 
 ### Integration Routines
-Integration routines compute blocks from integrals on the reference elements and are always named with the leading keyword ```integrate...```, which is followed by the geometric entity over which we integrate - for example ```integrateRefEdge...``` or ```integrateRefElem...```. The remainder of the function name should describe the argument of the integral. For example, the integration of the product of the two basis functions *phi* on the reference element is named ```integrateRefElemPhiPhi(...)```. Derivatives of the basis function are called ```Dphi```.
+Integration routines compute blocks from integrals on the reference elements and are always named with the leading keyword `integrate...`, which is followed by the geometric entity over which we integrate - for example `integrateRefEdge...` or `integrateRefElem...`. The remainder of the function name should describe the argument of the integral. For example, the integration of the product of the two basis functions *phi* on the reference element is named `integrateRefElemPhiPhi(...)`. Derivatives of the basis function are called `Dphi`.
 
-On edges, integrals can contain basis functions from either of the adjacent element. To distinguish those cases, we use ```PhiInt``` or ```PhiExt``` to identify the basis functions origin as the interior or exterior of the element. For example, ```integrateRefEdgePhiIntPhiExt(...)``` integrates over all reference edges the product of the basis function from the inside of the corresponding element and the basis function from the neighboring element.
+On edges, integrals can contain basis functions from either of the adjacent element. To distinguish those cases, we use `PhiInt` or `PhiExt` to identify the basis functions origin as the interior or exterior of the element. For example, `integrateRefEdgePhiIntPhiExt(...)` integrates over all reference edges the product of the basis function from the inside of the corresponding element and the basis function from the neighboring element.
 
 ### Assembly Functions
-All assembly functions start with the verb ```assemble...``` and are followed by the type of the assembled array, for example ```assembleMat...()``` or ```assembleVec...()``` and the geometric entity (```...Elem...``` or ```...Edge...```).  The remainder should again describe the integral argument and can be built up from the following:
-* ```Phi```/```Dphi```: A basis function or its derivative from the reference element and a neighbouring element. Both contributions are summed up and divided by 2.
-* ```PhiInt```/```DphiInt```: A basis function or its derivative from the reference element.
-* ```PhiExt```/```DphiExt```: A basis function or its derivative from the neighbouring element.
-* ```FuncDisc```: A coefficient function in the discontinuous space. All integral terms are summed up (i.e., the discontinuous function value is evaluated).
-* ```FuncCont```: A continuous coefficient function.
-* ```Nu```: The integral contains the (edge) normal
+All assembly functions start with the verb `assemble...` and are followed by the type of the assembled array, for example `assembleMat...()` or `assembleVec...()` and the geometric entity (`...Elem...` or `...Edge...`).  The remainder should again describe the integral argument and can be built up from the following:
+* `Phi`/`Dphi`: A basis function or its derivative from the reference element and a neighbouring element. Both contributions are summed up and divided by 2.
+* `PhiInt`/`DphiInt`: A basis function or its derivative from the reference element.
+* `PhiExt`/`DphiExt`: A basis function or its derivative from the neighbouring element.
+* `FuncDisc`: A coefficient function in the discontinuous space. All integral terms are summed up (i.e., the discontinuous function value is evaluated).
+* `FuncCont`: A continuous coefficient function.
+* `Nu`: The integral contains the (edge) normal
 
 ### New Function Names since the Preprint
 The naming convention was introduced after publication of the [preprint on arXiv](http://arxiv.org/abs/1408.3877). This is a mapping of the old to the new function names plus some remarks on additional changes introduced in the process:
 
-| Old Name                 | New Name                                       | Remarks            |
-| :----------------------- | :--------------------------------------------- | :----------------- |
-| ```assembleGlobG```      | ```assembleMatElemDphiPhiFuncDisc```           | sign changed       |
-| ```assembleGlobH```      | ```assembleMatElemDphiPhi```                   | sign changed       |
-| ```assembleGlobJD```     | ```assembleVecEdgePhiIntFuncContNu```          | sign changed       |
-| ```assembleGlobKD```     | ```assembleVecEdgePhiIntFuncCont```            | ```eta``` removed  |
-| ```assembleGlobKN```     | ```assembleVecEdgePhiIntFuncDiscIntFuncCont``` | sign changed       |
-| ```assembleGlobM```      | ```assembleMatElemPhiPhi```                    | -                  |
-| ```assembleGlobQ```      | ```assembleMatEdgePhiPhiNu```                  | -                  |
-| ```assembleGlobQN```     | ```assembleMatEdgePhiIntPhiIntNu```            | -                  |
-| ```assembleGlobR```      | ```assembleMatEdgePhiPhiFuncDiscNu```          | -                  |
-| ```assembleGlobRD```     | ```assembleMatEdgePhiIntPhiIntFuncDiscIntNu``` | -                  |
-| ```assembleGlobS```      | ```assembleMatEdgePhiPhi```                    | ```eta``` removed  |
-| ```assembleGlobSD```     | ```assembleMatEdgePhiIntPhiInt```              | ```eta``` removed  |
-| ```computeHatG```        | ```integrateRefElemDphiPhiPhi```               | -                  |
-| ```computeHatH```        | ```integrateRefElemDphiPhi```                  | -                  |
-| ```computeHatM```        | ```integrateRefElemPhiPhi```                   | -                  |
-| ```computeHatRdiag```    | ```integrateRefEdgePhiIntPhiIntPhiInt```       | -                  |
-| ```computeHatRoffdiag``` | ```integrateRefEdgePhiIntPhiExtPhiExt```       | -                  |
-| ```computeHatSdiag```    | ```integrateRefEdgePhiIntPhiInt```             | -                  |
-| ```computeHatSoffdiag``` | ```integrateRefEdgePhiIntPhiExt```             | -                  |
-| ```generateGridData```   | ```generateGridData```                         | ```sigEOT``` integrated in ```nuEOT``` |
-| ```projectAlg2DG```      | ```projectFuncCont2DataDisc```                 | -                  |
-| ```projectDG2Lagrange``` | ```projectDataDisc2DataLagr```                 | -                  |
-| ```visualizeData```      | ```visualizeDataLagr```                        | -                  |
+| Old Name             | New Name                                   | Remarks            |
+| :------------------- | :----------------------------------------- | :----------------- |
+| `assembleGlobG`      | `assembleMatElemDphiPhiFuncDisc`           | sign changed       |
+| `assembleGlobH`      | `assembleMatElemDphiPhi`                   | sign changed       |
+| `assembleGlobJD`     | `assembleVecEdgePhiIntFuncContNu`          | sign changed       |
+| `assembleGlobKD`     | `assembleVecEdgePhiIntFuncCont`            | `eta` removed      |
+| `assembleGlobKN`     | `assembleVecEdgePhiIntFuncDiscIntFuncCont` | sign changed       |
+| `assembleGlobM`      | `assembleMatElemPhiPhi`                    | -                  |
+| `assembleGlobQ`      | `assembleMatEdgePhiPhiNu`                  | -                  |
+| `assembleGlobQN`     | `assembleMatEdgePhiIntPhiIntNu`            | -                  |
+| `assembleGlobR`      | `assembleMatEdgePhiPhiFuncDiscNu`          | -                  |
+| `assembleGlobRD`     | `assembleMatEdgePhiIntPhiIntFuncDiscIntNu` | -                  |
+| `assembleGlobS`      | `assembleMatEdgePhiPhi`                    | `eta` removed      |
+| `assembleGlobSD`     | `assembleMatEdgePhiIntPhiInt`              | `eta` removed      |
+| `computeHatG`        | `integrateRefElemDphiPhiPhi`               | -                  |
+| `computeHatH`        | `integrateRefElemDphiPhi`                  | -                  |
+| `computeHatM`        | `integrateRefElemPhiPhi`                   | -                  |
+| `computeHatRdiag`    | `integrateRefEdgePhiIntPhiIntPhiInt`       | -                  |
+| `computeHatRoffdiag` | `integrateRefEdgePhiIntPhiExtPhiExt`       | -                  |
+| `computeHatSdiag`    | `integrateRefEdgePhiIntPhiInt`             | -                  |
+| `computeHatSoffdiag` | `integrateRefEdgePhiIntPhiExt`             | -                  |
+| `generateGridData`   | `generateGridData`                         | `sigEOT` integrated in `nuEOT` |
+| `projectAlg2DG`      | `projectFuncCont2DataDisc`                 | -                  |
+| `projectDG2Lagrange` | `projectDataDisc2DataLagr`                 | -                  |
+| `visualizeData`      | `visualizeDataLagr`                        | -                  |
 
 

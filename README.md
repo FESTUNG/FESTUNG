@@ -9,15 +9,18 @@ FESTUNG relies on fully vectorized matrix/vector operations to deliver optimized
 * The latest development versions can always be downloaded from the [Github repository](https://github.com/FESTUNG/project).
 
 ## Usage
-To check out the latest development version, run ```git clone https://github.com/FESTUNG/project.git```
+To check out the latest development version, run `git clone https://github.com/FESTUNG/project.git`
 
-Have a look at the script file ```main.m```, where parameters for the computation are set and the algorithm is implemented. In MATLAB / GNU Octave, run 
+Have a look at the script file `main.m`, where parameters for the computation are set and the algorithm is implemented. In MATLAB / GNU Octave, run 
 
-```$ main```
+    $ main
 
 to start the computation.
 
 Output files are written in [VTK format](http://www.vtk.org/VTK/img/file-formats.pdf) and can be visualized, e.g., using [Paraview](http://www.paraview.org/)
+
+## Development
+When developing code for or with FESTUNG we suggest to stick to the [Naming Convention](NAMING_CONVENTION.md) to allow for better readability and a similar appearance of all code parts.
 
 ## Contributors
 
@@ -26,7 +29,7 @@ FESTUNGs main developers are Florian Frank (Rice University), [Balthasar Reuter]
 ### Third party libraries
 * FESTUNG makes extensive use of the built-in routines in MATLAB / GNU Octave.
 * [triquad](https://github.com/FESTUNG/project/blob/master/triquad.m) was written by Greg von Winckel. See [triquad.txt](https://github.com/FESTUNG/project/blob/master/triquad.txt) for license details.
-* [m2cpp](http://www.mathworks.com/matlabcentral/fileexchange/25925-using-doxygen-with-matlab) by Fabrice to generate a [Doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation. See [license.txt](https://github.com/FESTUNG/project/blob/master/thirdParty/doxygenMatlab/license.txt) for license details.
+* [m2cpp.pl](https://github.com/FESTUNG/project/blob/master/thirdParty/doxygenMatlab/m2cpp.pl) by Fabrice to generate a [Doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation. See [license.txt](https://github.com/FESTUNG/project/blob/master/thirdParty/doxygenMatlab/license.txt) for license details.
 
 ## License 
 * see [LICENSE](https://github.com/FESTUNG/project/blob/master/LICENSE) file
