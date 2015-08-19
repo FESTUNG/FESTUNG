@@ -8,7 +8,7 @@ Two main rules should always be kept in mind: WORM and Camel Case.
 ### WORM
 There is a very simple acronym that governs code development:
 
-**WORM: Write Once Read Many**
+> WORM: Write Once Read Many
 
 This means, most code parts are written once and stay like this for a long time - but are read many times to understand what is happening there. Hence, code should always be written in a way that makes it most easy for the reader to understand it, even if it means additional work for the programmer.
 
