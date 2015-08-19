@@ -1,18 +1,48 @@
-% This file is part of FESTUNG 
-% Copyright (C) 2014 Florian Frank, Balthasar Reuter, Vadym Aizinger
-% 
-% This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-% 
-% This program is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-% 
-% You should have received a copy of the GNU General Public License
-% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+% Visualize the triangulation with global and local indices.
+%
+%===============================================================================
+%> @file visualizeGrid.m
+%>
+%> @brief Visualize the triangulation with global and local indices.
+%===============================================================================
+%>
+%> @brief Visualize the triangulation with global and local indices.
+%>
+%> @par Example
+%> @parblock
+%> @code
+%> g = generateGridData([0, -1; sqrt(3), 0; 0, 1; -sqrt(3), 0], [4,1,3; 1,2,3]);
+%> g.idE = (abs(g.nuE(:,2)) > 0) .* ((g.nuE(:,1)>0) + (g.nuE(:,2)>0)*2+1);
+%> visualizeGrid(g)
+%> @endcode
+%> produces the following output:
+%> @image html  generateGridData.png
+%> @endparblock
+%>
+%> @param  g          The lists describing the geometric and topological 
+%>                    properties of a triangulation (see 
+%>                    <code>generateGridData()</code>) 
+%>                    @f$[1 \times 1 \text{ struct}]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
 %
 function visualizeGrid(g)
 figure('Color', [1, 1, 1]); % white background

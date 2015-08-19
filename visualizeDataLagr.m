@@ -1,18 +1,83 @@
-% This file is part of FESTUNG 
-% Copyright (C) 2014 Florian Frank, Balthasar Reuter, Vadym Aizinger
-% 
-% This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-% 
-% This program is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-% 
-% You should have received a copy of the GNU General Public License
-% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+% Write output files in VTK- or Tecplot-format.
+%
+%===============================================================================
+%> @file visualizeDataLagr.m
+%>
+%> @brief Write output files in VTK- or Tecplot-format.
+%===============================================================================
+%>
+%> @brief Write output files in VTK- or Tecplot-format.
+%>
+%> Depending on the given <code>fileType</code> (<code>'vtk'</code> (default) or
+%> <code>'tp'</code>), it writes a <code>.vtu</code> or <code>.plt</code> file
+%> for the visualization of a discrete quantity in 
+%> @f$\mathbb{P}_p(\mathcal{T}_h), p \in \{0, 1, 2\}@f$.
+%>
+%> The name of the generated file ist <code>fileName.tLvl.vtu</code> or
+%> <code>fileName.tLvl.plt</code>, respectively, where <code>tLvl</code> stands
+%> for time level.
+%>
+%> @note Although the VTK-format supports @f$p=2@f$, Paraview (4.2.0 at the time
+%>       of writing) splits each triangle into four triangles and visualizes
+%>       the function as piecewise linear.
+%>
+%> @note The Tecplot file format doesn't support higher order functions, 
+%>       therefore each triangle is split into four triangles with linear
+%>       representation.
+%>
+%> @par Example
+%> @parblock
+%> @code
+%> g = generateGridData([0, -1; sqrt(3), 0; 0, 1; -sqrt(3), 0], [4,1,3; 1,2,3]);
+%> g.idE = (abs(g.nuE(:,2)) > 0) .* ((g.nuE(:,1)>0) + (g.nuE(:,2)>0)*2+1);
+%> fAlg = @(X1, X2) (X1<0).*(X1.^2 - X2.^2 - 1) + (X1>=0).*(-X1.^2 - X2.^2 + 1);
+%> for N = [1, 3, 6]
+%>   p = (sqrt(8*N+1)-3)/2;
+%>   quadOrd = max(2*p, 1);
+%>   computeBasesOnQuad(N);
+%>   fDisc = projectFuncCont2DataDisc(g, fAlg, quadOrd, integrateRefElemPhiPhi(N));
+%>   fLagr = projectDataDisc2DataLagr(fDisc);
+%>   visualizeDataLagr(g, fLagr, 'funname', ['fDOF', int2str(N)], 1, 'vtk');
+%> end
+%> @endcode
+%> produces the following output using Paraview:
+%> @image html  visP0.png  "fDOF1.1.vtu with range [-2/3,1/3]" width=1cm
+%> @image html  visP1.png  "fDOF3.1.vtu with range [-8/5,6/5]" width=1cm
+%> @image html  visP2.png  "fDOF6.1.vtu with range [-2, 2]" width=1cm
+%> @endparblock
+%>
+%> @param  g          The lists describing the geometric and topological 
+%>                    properties of a triangulation (see 
+%>                    <code>generateGridData()</code>) 
+%>                    @f$[1 \times 1 \text{ struct}]@f$
+%> @param  dataLagr   The Lagrangian representation of the quantity, as produced
+%>                    by <code>projectDataDisc2DataLagr</code> @f$[K \times N]@f$
+%> @param  varName    The name of the quantity within the output file
+%> @param  fileName   The basename of the output file
+%> @param  tLvl       The time level
+%> @param  fileType   (optional) The output format to be written 
+%>                    (<code>'vtk'</code> (default) or <code>'tp'</code>).
+%>
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
 %
 function visualizeDataLagr(g, dataLagr, varName, fileName, tLvl, fileType)
 %% Deduce default arguments
@@ -29,6 +94,7 @@ else
 end % if
 end % function
 %
+%> @brief Helper routine to write VTK-files.
 function visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl)
 [K, N] = size(dataLagr);
 %% Open file.
@@ -91,6 +157,7 @@ fclose(file);
 disp(['Data written to ' fileName])
 end % function
 %
+%> @brief Helper routine to write Tecplot-files.
 function visualizeDataLagrTp(g, dataLagr, varName, fileName, tLvl)
 [K, N] = size(dataLagr);
 %% Open file.
