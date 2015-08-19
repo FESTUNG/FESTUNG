@@ -53,7 +53,7 @@
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param refElemPhiPhi Local matrix @f$\hat{\mathsf{M}}@f$ as provided
 %>                    by <code>integrateRefElemPhiPhi()</code>.
-%>                    @f$[N \times N \times 2]@f$
+%>                    @f$[N \times N]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
