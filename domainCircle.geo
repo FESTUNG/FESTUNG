@@ -1,3 +1,6 @@
+/// @file domainCircle.geo
+/// @brief Geometric description of the unit circle for Gmsh
+//
 cx = 0.0;  cy = 0.0;  r = 0.5;
 Point(0) = {cx, cy,   0.0, 1.0};  Point(1) = {cx-r, cy, 0.0, 1.0};  Point(2) = {cx, cy+r, 0.0, 1.0};
 Point(3) = {cx+r, cy, 0.0, 1.0};  Point(4) = {cx, cy-r, 0.0, 1.0};
