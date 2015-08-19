@@ -1,3 +1,32 @@
+% Gaussian quadrature for a triangular domain
+%
+%===============================================================================
+%> @file triquad.m
+%>
+%> @brief Gaussian quadrature for a triangular domain
+%===============================================================================
+%>
+%> @brief Gaussian quadrature for a triangular domain
+%>
+%> This scripts computes the @f$N^2@f$ nodes and weights for a triangle with
+%> vertices given by the @f$3 \times 2@f$ vector <code>v</code>. 
+%> The nodes are produced by collapsing the square to a triangle. 
+%>
+%> @par Reference
+%> J.N. Lyness, Ronald Cools, A Survey of Numerical Cubature over Triangles (1994)
+%> http://citeseer.ist.psu.edu/lyness94survey.html
+%>
+%> @copyright Written by: Greg von Winckel
+%> Contact: gregvw(at)math(dot)unm(dot)edu
+%> http://math.unm.edu/~gregvw
+%>
+%> @retval X  The @f$\hat{x}^1@f$ coordinates
+%> @retval Y  The @f$\hat{x}^2@f$ coordinates
+%> @retval Wx The weights in @f$\hat{x}^1@f$ direction
+%> @retval Wy The weights in @f$\hat{x}^2@f$ direction
+%>
+%> @par License
+%> See triquad.txt (https://github.com/FESTUNG/project/blob/master/triquad.txt)
 function [X,Y,Wx,Wy]=triquad(N,v)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

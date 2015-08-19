@@ -1,18 +1,59 @@
-% This file is part of FESTUNG 
-% Copyright (C) 2014 Florian Frank, Balthasar Reuter, Vadym Aizinger
-% 
-% This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-% 
-% This program is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-% 
-% You should have received a copy of the GNU General Public License
-% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+% Provides quadrature points and associated weights within the reference triangle.
+%
+%===============================================================================
+%> @file quadRule2D.m
+%>
+%> @brief Provides quadrature points and associated weights within the reference 
+%>        triangle.
+%===============================================================================
+%>
+%> @brief Provides quadrature points and associated weights within the reference 
+%>        triangle.
+%>
+%> The quadrature rule is exact for polynomials up to the given order. The
+%> length of the interval @f$(0,1)@f$ is incorporated in the weights. 
+%>
+%> Quadrature rules up to order 6 are implemented directly. For all higher orders
+%> we call <code>triquad()</code> that uses Gaussian quadrature points on a
+%> square which is collapsed to a triangle.
+%> The area @f$1/2@f$ of the reference triangle @f$\hat{T}@f$ is incorporated in
+%> the weights such that the integral over one is @f$1/2@f$.
+%.
+%> @par Example
+%> @code
+%> [Q1, Q2, W] = quadRule2D(2);
+%> N = 3; M = eye(N);
+%> for i = 1:N
+%>   for j = 1:N
+%>     M(i,j) = sum(W .* phi(i,Q1,Q2) .* phi(j,Q1,Q2));
+%>   end
+%> end
+%> @endcode
+%> 
+%> @param  qOrd The order of the quadrature rule.
+%> @retval Q1   The @f$\hat{x}^1@f$ coordinates of the quadrature points.
+%> @retval Q2   The @f$\hat{x}^2@f$ coordinates of the quadrature points.
+%> @retval W    The associated weights.
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
 %
 function [Q1, Q2, W] = quadRule2D(qOrd)
 switch qOrd
