@@ -10,15 +10,19 @@
 %> @brief Provides quadrature points and associated weights within the reference 
 %>        triangle.
 %>
-%> The quadrature rule is exact for polynomials up to the given order. The
-%> length of the interval @f$(0,1)@f$ is incorporated in the weights. 
-%>
 %> Quadrature rules up to order 6 are implemented directly. For all higher orders
 %> we call <code>triquad()</code> that uses Gaussian quadrature points on a
-%> square which is collapsed to a triangle.
-%> The area @f$1/2@f$ of the reference triangle @f$\hat{T}@f$ is incorporated in
-%> the weights such that the integral over one is @f$1/2@f$.
-%.
+%> square which is collapsed to a triangle.  The area @f$1/2@f$ of the reference
+%> triangle @f$\hat{T}@f$ is incorporated in the weights.
+%>
+%> <code>[Q1, Q2, W] = quadRule2D(qOrd)</code> returns quadrature points 
+%> @f$\hat{\vec{q}}_r = [\hat{q}_r^1, \hat{q}_r^2]^\mathrm{T}@f$ within the reference triangle @f$\hat{T}$@f$ in lists of
+%> @f$\hat{x}^1@f$ and @f$\hat{x}^2@f$ coordinates <code>Q1</code> and <code>Q2</code>, respectively, and the associated 
+%> weights <code>Q</code>.  The quadrature rule is exact for polynomials of order <code>qOrd</code> (see @ref FRAK2015 for details).
+%> The area of @f$1/2@f$ of the reference triangle @f$\hat{T}@f$ is incorporated in the weights.
+%>
+%> An overview of quadrature rules on triangles is found in the &ldquo;Encyclopaedia of Cubature Formulas&rdquo; @ref Cools2003.
+%>
 %> @par Example
 %> @code
 %> [Q1, Q2, W] = quadRule2D(2);
@@ -29,6 +33,8 @@
 %>   end
 %> end
 %> @endcode
+%>
+%> 
 %> 
 %> @param  qOrd The order of the quadrature rule.
 %> @retval Q1   The @f$\hat{x}^1@f$ coordinates of the quadrature points.

@@ -5,8 +5,13 @@
 //! F. Frank, B. Reuter, V. Aizinger, P. Knabner [2015]: 
 //! &ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part I: Diffusion operator&rdquo;.
-//! In: Computers & Mathematics with Applications 70 (2015) 11-46, 
-//! Available online 15 May 2015, 
-//! ISSN 0898-1221, http://dx.doi.org/10.1016/j.camwa.2015.04.013.
+//! In: Computers & Mathematics with Applications 70 (2015) 11-46.
+//! <code>doi:10.1016/j.camwa.2015.04.013</code>.
+//!
+//! @section Cools2003 [Cools2003]
+//! R. Cools [2003]:
+//! &ldquo;An encyclopaedia of cubature formulas&rdquo;.
+//! In: Journal of Complexity 19 (3) (2003) 445-453.
+//! <code>doi:10.1016/S0885-064X(03)00011-6</code>.
 //!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

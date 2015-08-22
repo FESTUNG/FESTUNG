@@ -1,18 +1,44 @@
-% This file is part of FESTUNG 
-% Copyright (C) 2014 Florian Frank, Balthasar Reuter, Vadym Aizinger
-% 
-% This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-% 
-% This program is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-% 
-% You should have received a copy of the GNU General Public License
-% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+% The main script as presented in @ref FRAK2015.
+%
+%===============================================================================
+%> @file main.m
+%>
+%> @brief The main script as presented in @ref FRAK2015 .
+%===============================================================================
+%>
+%> This script builds a numerical solver to approximate solutions @f$c:\overline{J}\times\overline{\Omega}\rightarrow\mathbb{R}@f$ of the diffusion equation
+%> @f{align*}{
+%> \vec{z}                                            &\;=\; - \nabla c                                  &&\text{in}~J\times\Omega\,,\\
+%> \partial_t c  + \nabla\cdot (d\,\vec{z})           &\;=\; f                                           &&\text{in}~J\times\Omega\,,\\
+%> c                                                  &\;=\; c_\mathrm{D}                                &&\text{on}~J\times{\partial\Omega}_{\mathrm{D}}\,,\\
+%> \vec{z}\cdot\vec{\nu}                              &\;=\; g_\mathrm{N}                                &&\text{on}~J\times{\partial\Omega}_\mathrm{N}\,,\\
+%> c                                                  &\;=\; c^0                                         &&\text{on}~\{0\}\times\Omega\,.
+%> @f}
+%> The vector-valued quantity @f$\vec{z}@f$ was introduced as auxiliary unknown.  The coefficients @f$d:J\times\Omega\rightarrow\mathbb{R}^+@f$ and @f$f:J\times\Omega\rightarrow \mathbb{R}@f$
+%> may vary in time and space.  A detailed description is found in @ref FRAK2015.
+%> 
+%> This script can be used as a template for further modifications.
+%>
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
 %
 function main()
 more off % disable paging of output
@@ -21,7 +47,7 @@ hmax        = 1/8;    % maximum edge length of triangle
 p           = 2;      % local polynomial degree
 tEnd        = pi;     % end time
 numSteps    = 20;     % number of time steps
-isVisGrid   = true;  % visualization of grid
+isVisGrid   = true;   % visualization of grid
 isVisSol    = true;   % visualization of solution
 eta         = 1;      % penalty parameter (eta>0)
 %% Parameter check.
