@@ -6,6 +6,8 @@
 %> @brief The main script as presented in @ref FRAK2015 .
 %===============================================================================
 %>
+%> @brief The main script as presented in @ref FRAK2015.
+%> 
 %> This script builds a numerical solver to approximate solutions @f$c:\overline{J}\times\overline{\Omega}\rightarrow\mathbb{R}@f$ of the diffusion equation
 %> @f{align*}{
 %> \vec{z}                                            &\;=\; - \nabla c                                  &&\text{in}~J\times\Omega\,,\\
