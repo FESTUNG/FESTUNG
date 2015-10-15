@@ -158,7 +158,7 @@ for nn = 1 : 3
   Rkn = Rkn .* markE0Tint(:, nn);
   for l = 1 : N
     ret{1} = ret{1} + kron(spdiags(Rkn.*g.nuE0T(:,nn,1).*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
-    ret{2} = ret{2} + kron(spdiags(Rkn.*g.nuE0T(:,nn,1).*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+    ret{2} = ret{2} + kron(spdiags(Rkn.*g.nuE0T(:,nn,2).*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
   end % for
 end % for
 end % function
