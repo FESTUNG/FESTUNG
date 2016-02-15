@@ -1,22 +1,23 @@
-% The main script as presented in @ref FRAK2015.
+% The main script for the diffusion equation as presented in @ref FRAK2015.
 %
 %===============================================================================
-%> @file main.m
+%> @file mainDiffusion.m
 %>
-%> @brief The main script as presented in @ref FRAK2015 .
+%> @brief The main script for the diffusion equation as presented in @ref FRAK2015 .
 %===============================================================================
 %>
-%> @brief The main script as presented in @ref FRAK2015.
+%> @brief The main script for the diffusion equation as presented in @ref FRAK2015.
 %> 
 %> This script builds a numerical solver to approximate solutions @f$c:\overline{J}\times\overline{\Omega}\rightarrow\mathbb{R}@f$ of the diffusion equation
 %> @f{align*}{
-%> \vec{z}                                            &\;=\; - \nabla c                                  &&\text{in}~J\times\Omega\,,\\
-%> \partial_t c  + \nabla\cdot (d\,\vec{z})           &\;=\; f                                           &&\text{in}~J\times\Omega\,,\\
+%> \mathbf{z}                                         &\;=\; - \nabla c                                  &&\text{in}~J\times\Omega\,,\\
+%> \partial_t c  + \nabla\cdot (d\,\mathbf{z})        &\;=\; f                                           &&\text{in}~J\times\Omega\,,\\
 %> c                                                  &\;=\; c_\mathrm{D}                                &&\text{on}~J\times{\partial\Omega}_{\mathrm{D}}\,,\\
 %> \vec{z}\cdot\vec{\nu}                              &\;=\; g_\mathrm{N}                                &&\text{on}~J\times{\partial\Omega}_\mathrm{N}\,,\\
 %> c                                                  &\;=\; c^0                                         &&\text{on}~\{0\}\times\Omega\,.
 %> @f}
-%> The vector-valued quantity @f$\vec{z}@f$ was introduced as auxiliary unknown.  The coefficients @f$d:J\times\Omega\rightarrow\mathbb{R}^+@f$ and @f$f:J\times\Omega\rightarrow \mathbb{R}@f$
+%> The vector-valued quantity @f$\mathbf{z}@f$ was introduced as auxiliary unknown.  
+%> The coefficients @f$d:J\times\Omega\rightarrow\mathbb{R}^+@f$ and @f$f:J\times\Omega\rightarrow \mathbb{R}@f$
 %> may vary in time and space.  A detailed description is found in @ref FRAK2015.
 %> 
 %> This script can be used as a template for further modifications.
@@ -42,7 +43,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function main()
+function mainDiffusion()
 more off % disable paging of output
 %% Parameters.
 hmax        = 1/8;    % maximum edge length of triangle

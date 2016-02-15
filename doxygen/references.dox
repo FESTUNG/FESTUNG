@@ -1,6 +1,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //! @page references References
 //! 
+//! @section RAWFK2016 [RAWFK2016]
+//! B. Reuter, V. Aizinger, M. Wieland, F. Frank, P. Knabner [2016]: 
+//! &ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
+//! Galerkin method, Part II: Advection operator and slope limiting&rdquo;.
+//! Submitted to Computers & Mathematics with Applications.
+//!
 //! @section FRAK2015 [FRAK2015]
 //! F. Frank, B. Reuter, V. Aizinger, P. Knabner [2015]: 
 //! &ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 

@@ -8,10 +8,12 @@
 %>
 %> @brief Write output files in VTK- or Tecplot-format.
 %>
-%> Depending on the given <code>fileType</code> (<code>'vtk'</code> (default) or
-%> <code>'tp'</code>), it writes a <code>.vtu</code> or <code>.plt</code> file
+%> Depending on the given <code>fileTypes</code> (<code>'vtk'</code> (default) or
+%> <code>'tec'</code>), it writes a <code>.vtu</code> or <code>.plt</code> file
 %> for the visualization of a discrete quantity in 
 %> @f$\mathbb{P}_p(\mathcal{T}_h), p \in \{0, 1, 2\}@f$.
+%> Multiple file types can be given at the same time, see the example
+%> below.
 %>
 %> The name of the generated file ist <code>fileName.tLvl.vtu</code> or
 %> <code>fileName.tLvl.plt</code>, respectively, where <code>tLvl</code> stands
@@ -37,7 +39,7 @@
 %>   computeBasesOnQuad(N);
 %>   fDisc = projectFuncCont2DataDisc(g, fAlg, quadOrd, integrateRefElemPhiPhi(N));
 %>   fLagr = projectDataDisc2DataLagr(fDisc);
-%>   visualizeDataLagr(g, fLagr, 'funname', ['fDOF', int2str(N)], 1, 'vtk');
+%>   visualizeDataLagr(g, fLagr, 'funname', ['fDOF', int2str(N)], 1, cellstr(['vtk';'tec']));
 %> end
 %> @endcode
 %> produces the following output using Paraview:
@@ -55,8 +57,8 @@
 %> @param  varName    The name of the quantity within the output file
 %> @param  fileName   The basename of the output file
 %> @param  tLvl       The time level
-%> @param  fileType   (optional) The output format to be written 
-%>                    (<code>'vtk'</code> (default) or <code>'tp'</code>).
+%> @param  fileTypes  (optional) The output format to be written 
+%>                    (<code>'vtk'</code> (default) or <code>'tec'</code>).
 %>
 %>
 %> This file is part of FESTUNG
@@ -79,19 +81,27 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function visualizeDataLagr(g, dataLagr, varName, fileName, tLvl, fileType)
+function visualizeDataLagr(g, dataLagr, varName, fileName, tLvl, fileTypes)
 %% Deduce default arguments
-if nargin < 6 || isempty(fileType)
-  fileType = 'vtk';
+if nargin < 6 || isempty(fileTypes)
+  fileTypes = 'vtk';
+end
+if ~iscell(fileTypes)
+  fileTypes = cellstr(fileTypes);
+end
+if size(fileTypes,1) > size(fileTypes,2)
+  fileTypes = transpose(fileTypes);
 end
 %% Call correct function for writing file.
-if strcmp(fileType, 'vtk')
-  visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl);
-elseif strcmp(fileType, 'tp')
-  visualizeDataLagrTp(g, dataLagr, varName, fileName, tLvl);
-else
-  error('Unknown file type: %s', fileType);
-end % if
+for fileType = fileTypes
+  if strcmp(fileType, 'vtk')
+    visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl);
+  elseif strcmp(fileType, 'tec')
+    visualizeDataLagrTec(g, dataLagr, varName, fileName, tLvl);
+  else
+    error('Unknown file type: %s', fileType);
+  end % if
+end
 end % function
 %
 %> @brief Helper routine to write VTK-files.
@@ -145,7 +155,7 @@ switch N
 end % switch
 fprintf(file, '      <PointData Scalars="%s">\n', varName);
 fprintf(file, '        <DataArray type="Float32" Name="%s" NumberOfComponents="1" format="ascii">\n', varName);
-fprintf(file, '          %.3e\n', dataLagr);
+fprintf(file, '          %.9e\n', dataLagr);
 fprintf(file, '        </DataArray>\n');
 fprintf(file, '      </PointData>\n');
 %% Footer.
@@ -158,7 +168,7 @@ disp(['Data written to ' fileName])
 end % function
 %
 %> @brief Helper routine to write Tecplot-files.
-function visualizeDataLagrTp(g, dataLagr, varName, fileName, tLvl)
+function visualizeDataLagrTec(g, dataLagr, varName, fileName, tLvl)
 [K, N] = size(dataLagr);
 %% Open file.
 fileName = [fileName, '.', num2str(tLvl), '.plt'];

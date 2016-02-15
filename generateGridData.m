@@ -48,6 +48,9 @@
 %>   - <code>markE0TE0T</code> @f$[3 \times 3 \text{ (cell)}]@f$:
 %>     the @f$(n^-, n^+)@f$th entry of this cell is a sparse @f$K \times K@f$
 %>     array whose @f$(k^-,k^+)@f$th entry is one if @f$E_{k^-n^-}=E_{k^+n^+}@f$
+%>   - <code>markV0TV0T</code> @f$[3 \times 3 \text{ (cell)}]@f$:
+%>     the @f$(n^-, n^+)@f$th entry of this cell is a sparse @f$K \times K@f$
+%>     array whose @f$(k^-,k^+)@f$th entry is one if @f$v_{k^-n^-}=v_{k^+n^+}@f$
 %>   - <code>T0E</code> @f$[\#\mathcal{E} \times 2]@f$:
 %>     global indices of the triangles sharing edge @f$E_n@f$ in the order
 %>     dictated by the direction of the global normal on @f$E_n@f$
@@ -162,7 +165,7 @@ for m = 1 : 2
   g.B(:, m, 2) = g.coordV0T(:, 3, m) - g.coordV0T(:, 1, m);
 end % for
 markEint = g.E0E(:, 2) ~= 0; % mark interior edges
-g.markE0TE0T = cell(3, 3);
+g.markE0TE0T = cell(3, 3); g.markV0TV0T = cell(3, 3);
 for nn = 1 : 3
   for np = 1 : 3
     g.markE0TE0T{nn,np} = sparse(g.numT, g.numT);
@@ -172,6 +175,8 @@ for nn = 1 : 3
     markEn = g.E0E(:, 2) == nn;  markEp = g.E0E(:, 1) == np;
     idx = markEn & markEp & markEint;
     g.markE0TE0T{nn, np}(sub2ind([g.numT, g.numT], g.T0E(idx, 2), g.T0E(idx, 1))) = 1;
+    g.markV0TV0T{nn,np} = sparse(bsxfun(@eq, g.V0T(:,nn), g.V0T(:,np)'));
   end % for
 end % for
+g.mapRef2Phy = @(i,X1,X2) g.B(:,i,1)*X1 + g.B(:,i,2)*X2 + g.coordV0T(:,1,i)*ones(size(X1));
 end % function
