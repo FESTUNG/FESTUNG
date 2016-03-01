@@ -158,16 +158,12 @@ for nn = 1 : 3
   for np = 1 : 3
     markE0TE0TtimesRkn1 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,1));
     markE0TE0TtimesRkn2 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,2));
+    RtildeT = zeros(K*N, N);
     for l = 1 : N
-      ret{1} = ret{1} + kron(bsxfun(@times, markE0TE0TtimesRkn1, dataDisc(:,l).'), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np));
-      ret{2} = ret{2} + kron(bsxfun(@times, markE0TE0TtimesRkn2, dataDisc(:,l).'), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np));
+      RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
     end % for
-%     RtildeT = zeros(K*N, N);
-%     for l = 1 : N
-%       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
-%     end % for
-%     ret{1} = ret{1} + kronVec(markE0TE0TtimesRkn1.', RtildeT).';
-%     ret{2} = ret{2} + kronVec(markE0TE0TtimesRkn2.', RtildeT).';
+    ret{1} = ret{1} + kronVec(markE0TE0TtimesRkn1.', RtildeT).';
+    ret{2} = ret{2} + kronVec(markE0TE0TtimesRkn2.', RtildeT).';
   end % for
   Rkn = Rkn .* markE0Tint(:, nn);
   for l = 1 : N
