@@ -179,20 +179,30 @@
 %> @endparblock
 %
 function ret = assembleMatEdgePhiPhiValUpwind(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad)
+% Extract dimensions
 K = g.numT; N = size(refEdgePhiIntPhiIntOnQuad, 1);
+
+% Determine quadrature rule
+p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
+R = length(W);
+
+% Check function arguments that are directly used
+assert(isequal(size(valOnQuad), [K 3 R]), 'Number of elements does not match size of markE0Tbdr')
+assert(isequal(size(refEdgePhiIntPhiIntOnQuad), [N N 3 R]), 'Wrong size of refEdgePhiIntPhiIntOnQuad')
+assert(isequal(size(refEdgePhiIntPhiExtOnQuad), [N N 3 3 R]), 'Wrong size of refEdgePhiIntPhiExtOnQuad')
+
+% Assemble matrices
 ret = sparse(K*N, K*N);
-p = (sqrt(8*N+1)-3)/2;
-qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
 for nn = 1 : 3
   Rkn = g.areaE0T(:, nn);
   % Diagonal blocks
-  for r = 1 : length(W)
+  for r = 1 : R
     ret = ret + kron(spdiags(W(r) .* Rkn .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
   end
   % Off-diagonal blocks
   for np = 1 : 3
     RknTimesVal = sparse(K*N, N);
-    for r = 1 : length(W)
+    for r = 1 : R
       RknTimesVal = RknTimesVal + kron(W(r) .* Rkn .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
     end
     ret = ret + kronVec(g.markE0TE0T{nn, np}, RknTimesVal);

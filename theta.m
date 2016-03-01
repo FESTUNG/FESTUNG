@@ -107,6 +107,9 @@
 %> @endparblock
 %
 function [XP1, XP2] = theta(nn, np, X1, X2)
+assert(1 <= nn && 3 >= nn, 'nn must be in [1,3]')
+assert(1 <= np && 3 >= np, 'np must be in [1,3]')
+assert(isequal(size(X1), size(X2)), 'X1 and X2 must have the same size')
 switch nn
   case 1
     switch np

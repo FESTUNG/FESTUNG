@@ -61,10 +61,19 @@
 %
 function computeBasesOnQuad(N)
 global gPhi2D gGradPhi2D gPhi1D gThetaPhi1D
+
+% Check for valid number of DOFs: N == (p+1)(p+2)/2
+assert(~isempty(find(N == ((0:4)+1).*((0:4)+2)/2, 1)), 'Number of degrees of freedom does not match a polynomial order') 
+
+% Determine polynomial degree and quadrature orders
 p = (sqrt(8*N+1)-3)/2;
 if p > 0, requiredOrders = [2*p, 2*p+1]; else requiredOrders = 1; end
+
+% Initialize global variables
 gPhi2D = cell(max(requiredOrders),1);  gGradPhi2D  = cell(max(requiredOrders),1);
 gPhi1D = cell(max(requiredOrders),1);  gThetaPhi1D = cell(max(requiredOrders),1);
+
+% Fill global variables
 for it = 1 : length(requiredOrders)
   ord = requiredOrders(it);
   [Q1, Q2, ~] = quadRule2D(ord);

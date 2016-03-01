@@ -96,10 +96,18 @@
 %
 function ret = assembleVecEdgePhiIntFuncContNu(g, markE0Tbdr, funcCont, N)
 global gPhi1D
+
+% Determine quadrature rule and mapping to physical element
 K = g.numT; p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd); 
 Q2X1 = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
 Q2X2 = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
+
+% Check function arguments that are directly used
+assert(isequal(size(markE0Tbdr), [g.numT 3]), 'Wrong number of elements in markE0Tbdr')
+assert(isa(funcCont, 'function_handle'), 'funcCont must be a function_handle')
+
+% Assemble vector
 ret = cell(2, 1);  ret{1} = zeros(K, N);  ret{2} = zeros(K, N);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);

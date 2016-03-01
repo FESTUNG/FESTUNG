@@ -44,7 +44,14 @@
 %> @endparblock
 %
 function ret = computeFuncContNuOnQuadEdge(g, funcCont1, funcCont2, qOrd)
+% Extract dimensions and determine quadrature rule
 K = g.numT;  [Q, W] = quadRule1D(qOrd);
+
+% Check function arguments that are directly used
+assert(isa(funcCont1, 'function_handle'), 'funcCont1 must be a function_handle')
+assert(isa(funcCont2, 'function_handle'), 'funcCont2 must be a function_handle')
+
+% Evaluate function
 ret = zeros(K, 3, length(W));
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);

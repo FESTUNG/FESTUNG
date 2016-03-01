@@ -85,6 +85,11 @@
 %
 function ret = assembleMatElemDphiPhi(g, refElemDphiPhi)
 K = g.numT; N = size(refElemDphiPhi, 1);
+
+% Check function arguments that are directly used
+assert(isequal(size(refElemDphiPhi), [N N 2]), 'Wrong size of refElemDphiPhi')
+
+% Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);
 ret{1} = + kron(spdiags(g.B(:,2,2), 0,K,K), refElemDphiPhi(:,:,1)) ...
          - kron(spdiags(g.B(:,2,1), 0,K,K), refElemDphiPhi(:,:,2));

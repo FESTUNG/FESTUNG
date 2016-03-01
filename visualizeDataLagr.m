@@ -92,6 +92,8 @@ end
 if size(fileTypes,1) > size(fileTypes,2)
   fileTypes = transpose(fileTypes);
 end
+%% Check function arguments
+assert(size(dataLagr, 1) == g.numT, 'Wrong number of elements in dataLagr')
 %% Call correct function for writing file.
 for fileType = fileTypes
   if strcmp(fileType, 'vtk')

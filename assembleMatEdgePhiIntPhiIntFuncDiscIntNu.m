@@ -100,7 +100,15 @@
 %> @endparblock
 %
 function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0Tbdr, refEdgePhiIntPhiIntPhiInt, dataDisc)
+% Extract dimensions
 [K, N] = size(dataDisc);  
+
+% Check function arguments that are directly used
+assert(size(dataDisc, 1) == g.numT, 'Number of elements does not match size of dataDisc')
+assert(isequal(size(markE0Tbdr), [K 3]), 'Number of elements does not match size of markE0Tbdr')
+assert(isequal(size(refEdgePhiIntPhiIntPhiInt), [N N N 3]), 'Wrong size of refEdgePhiIntPhiIntPhiInt')
+
+% Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);
 for n = 1 : 3
   RDkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);

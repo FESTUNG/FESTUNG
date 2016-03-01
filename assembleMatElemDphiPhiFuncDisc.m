@@ -109,6 +109,12 @@
 %
 function ret = assembleMatElemDphiPhiFuncDisc(g, refElemDphiPhiPhi, dataDisc)
 [K, N] = size(dataDisc);
+
+% Check function arguments that are directly used
+assert(size(dataDisc, 1) == g.numT, 'Number of elements does not match size of dataDisc')
+assert(isequal(size(refElemDphiPhiPhi), [N N N 2]), 'Number of DOFs in refElemDphiPhiPhi and dataDisc does not match')
+
+% Assemble matrices
 ret = cell(2, 1);  ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);
 for l = 1 : N
   ret{1} = ret{1} + kron(spdiags(dataDisc(:,l) .* g.B(:,2,2), 0,K,K), refElemDphiPhiPhi(:,:,l,1)) ...

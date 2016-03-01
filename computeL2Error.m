@@ -93,12 +93,21 @@
 %
 function err = computeL2Error(g, dataDisc, funcCont, qOrd)
 global gPhi2D
-N = size(dataDisc, 2); qOrd = max(qOrd,1);
-[Q1, Q2, W] = quadRule2D(qOrd);
+
+% Check function arguments that are directly used
+assert(isa(funcCont, 'function_handle'), 'funcCont must be a function_handle')
+assert(size(dataDisc, 1) == g.numT, 'Wrong number of elements in dataDisc')
+
+% Determine quadrature rule and physical coordinates
+qOrd = max(qOrd,1); [Q1, Q2, W] = quadRule2D(qOrd);
 R = length(W);
-X1 = kron(g.B(:,1,1),Q1)+kron(g.B(:,1,2),Q2)+kron(g.coordV0T(:,1,1),ones(1,R));
-X2 = kron(g.B(:,2,1),Q1)+kron(g.B(:,2,2),Q2)+kron(g.coordV0T(:,1,2),ones(1,R));
+X1 = kron(g.B(:,1,1), Q1) + kron(g.B(:,1,2), Q2) + kron(g.coordV0T(:,1,1), ones(1,R));
+X2 = kron(g.B(:,2,1), Q1) + kron(g.B(:,2,2), Q2) + kron(g.coordV0T(:,1,2), ones(1,R));
+
+% Evaluate analytical and discrete function
 cExOnQuadPts = funcCont(X1, X2); % [K x R]
-cApprxOnQuadPts = dataDisc*gPhi2D{qOrd}'; % [K x R] = [K x N] * [N x R]
-err = sqrt(2*dot((cApprxOnQuadPts - cExOnQuadPts).^2 * W.', g.areaT)); 
+cApprxOnQuadPts = dataDisc * gPhi2D{qOrd}'; % [K x R] = [K x N] * [N x R]
+
+% Compute error
+err = sqrt(2 * dot((cApprxOnQuadPts - cExOnQuadPts).^2 * W.', g.areaT)); 
 end % function

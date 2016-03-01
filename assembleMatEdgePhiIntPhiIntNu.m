@@ -90,7 +90,14 @@
 %> @endparblock
 %
 function ret = assembleMatEdgePhiIntPhiIntNu(g, markE0Tbdr, refEdgePhiIntPhiInt)
+% Extract dimensions
 K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+
+% Check function arguments that are directly used
+assert(isequal(size(markE0Tbdr), [K 3]), 'Number of elements does not match size of markE0Tbdr')
+assert(isequal(size(refEdgePhiIntPhiInt), [N N 3]), 'Wrong size of refEdgePhiIntPhiInt')
+
+% Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);
 for n = 1 : 3
   QNkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);

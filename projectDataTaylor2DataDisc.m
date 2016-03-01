@@ -55,5 +55,7 @@
 %
 function dataDisc = projectDataTaylor2DataDisc(dataTaylor, globMDisc, globMDiscTaylor)
 [K, N] = size(dataTaylor);
+assert(isequal(size(globMDisc), [K*N K*N]), 'Sizes of dataTaylor and globMDisc do not fit')
+assert(isequal(size(globMDiscTaylor), [K*N K*N]), 'Sizes of dataTaylor and globMDiscTaylor do not fit')
 dataDisc = reshape(globMDisc \ (globMDiscTaylor * reshape(dataTaylor', [K*N 1]) ), [N K])';
 end % function

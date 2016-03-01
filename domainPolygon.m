@@ -54,6 +54,8 @@
 %> @endparblock
 %
 function g = domainPolygon(X1, X2, h)
+assert(length(X1) >= 3, 'At least 3 points are required for a 2D domain')
+assert(isequal(size(X1), size(X2)), 'X1 and X2 must be of same size')
 gd = [2; length(X1(:)); X1(:); X2(:)]; % geometry description
 sf = 'polygon';                        % set formula
 ns = double('polygon')';               % name space

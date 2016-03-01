@@ -73,6 +73,6 @@ switch ord
     omega = [0, 3/4, 1/3];
     t = t0 + [0, 1, 0.5] * tau;
   otherwise
-    error('Order not implemented!');
+    error('Order %d not implemented', ord);
 end
 end % function

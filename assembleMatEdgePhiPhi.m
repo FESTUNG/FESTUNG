@@ -116,10 +116,19 @@
 %
 function ret = assembleMatEdgePhiPhi(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
 K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+
+% Check function arguments that are directly used
+assert(isequal(size(markE0Tint), [K 3]), 'Number of elements does not match size of markE0Tint')
+assert(isequal(size(refEdgePhiIntPhiInt), [N N 3]), 'Wrong size of refEdgePhiIntPhiInt')
+assert(isequal(size(refEdgePhiIntPhiExt), [N N 3 3]), 'Wrong size of refEdgePhiIntPhiExt')
+
+% Assemble diagonal blocks
 ret = sparse(K*N, K*N);
 for n = 1 : 3
   ret = ret + kron(spdiags(markE0Tint(:,n),0,K,K), refEdgePhiIntPhiInt(:,:,n));
 end % for
+
+% Assemble off-diagonal blocks
 for nn = 1 : 3
   for np = 1 : 3
     ret = ret - kron(g.markE0TE0T{nn, np}, refEdgePhiIntPhiExt(:,:,nn,np));

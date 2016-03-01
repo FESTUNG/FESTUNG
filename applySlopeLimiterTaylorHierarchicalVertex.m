@@ -118,11 +118,19 @@ global gPhiTaylorV0T
 [K, N] = size(dataTaylor);
 p = (sqrt(8*N+1)-3)/2;
 
+% Check function arguments that are directly used
+assert(K == g.numT, 'Number of elements does not match size of representation matrix dataTaylor')
+assert(N >= 3, 'Number of local degrees of freedom in dataTaylor does not correspond to p>=1')
+assert(size(gPhiTaylorV0T, 1) == g.numT, 'Global variable gPhiTaylorV0T not initialized or with wrong size')
+assert(size(gPhiTaylorV0T, 2) == 3, 'Global variable gPhiTaylorV0T not initialized or with wrong size')
+assert(size(gPhiTaylorV0T, 3) >= 3, 'Global variable gPhiTaylorV0T not initialized or with wrong size')
+
 % Initialize limited coefficients and limiter of previous order
 dataTaylorLim = zeros(size(dataTaylor));
 dataTaylorLim(:, 1) = dataTaylor(:, 1);
 alpha = zeros(K, 1);
 
+% Determine limiter parameter for each order, beginning with highest order
 for ord = p : -1 : 1
   alphaOrd = ones(K, 1);
   indDOF = ord*(ord+1)/2 + 1 : (ord+1)*(ord+2)/2;
@@ -142,13 +150,13 @@ for ord = p : -1 : 1
       alphaTmp = computeVertexBasedLimiter(g, dataTaylor(:, ind(1)), valV0T, markV0TbdrD, dataV0T);
     end
     alphaOrd = min(alphaOrd, alphaTmp);
-  end
+  end %for
   
   % Determine limiter as hierarchical coarsening scheme
   alpha = max(alpha, alphaOrd);
   
   % Apply limiter
   dataTaylorLim(:, indDOF) = bsxfun(@times, alpha, dataTaylor(:, indDOF));
-end
+end %for
 end % function
 

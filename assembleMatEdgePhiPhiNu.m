@@ -128,14 +128,19 @@
 %
 function ret = assembleMatEdgePhiPhiNu(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
 K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+
+% Check function arguments that are directly used
+assert(isequal(size(markE0Tint), [K 3]), 'Number of elements does not match size of markE0Tbdr')
+assert(isequal(size(refEdgePhiIntPhiInt), [N N 3]), 'Wrong size of refEdgePhiIntPhiInt')
+assert(isequal(size(refEdgePhiIntPhiExt), [N N 3 3]), 'Wrong size of refEdgePhiIntPhiExt')
+
+% Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);
 for nn = 1 : 3
   Qkn = 0.5 * g.areaE0T(:,nn);
   for np = 1 : 3
-    ret{1} = ret{1} + ...
-      kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,1)), refEdgePhiIntPhiExt(:,:,nn,np));
-    ret{2} = ret{2} + ...
-      kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,2)), refEdgePhiIntPhiExt(:,:,nn,np));
+    ret{1} = ret{1} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,1)), refEdgePhiIntPhiExt(:,:,nn,np));
+    ret{2} = ret{2} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,2)), refEdgePhiIntPhiExt(:,:,nn,np));
   end % for
   Qkn = markE0Tint(:,nn) .* Qkn;
   ret{1} = ret{1} + kron(spdiags(Qkn .* g.nuE0T(:,nn,1), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));

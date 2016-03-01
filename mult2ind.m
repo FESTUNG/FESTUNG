@@ -55,8 +55,8 @@
 %> @endparblock
 %
 function ind = mult2ind(a)
-  assert(size(a, 2) == 2);
-  p = sum(a, 2);
-  N = p .* (p + 1) / 2;
-  ind = N + 1 + a(:, 2);
+assert(size(a, 2) == 2);
+p = sum(a, 2);
+N = p .* (p + 1) / 2;
+ind = N + 1 + a(:, 2);
 end

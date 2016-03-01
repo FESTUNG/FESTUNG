@@ -65,13 +65,21 @@
 %> @endparblock
 %
 function ret = phiTaylorPhy(g, i, X1, X2)
+assert(size(X1, 1) == g.numT, 'At least one point required in each element')
+assert(isequal(size(X1), size(X2)), 'X1 and X2 must have the same size')
+
+% Determine quadrature rule and mapping to physical elements
 qOrd = ceil((sqrt(8*i+1)-3)/2);
 [Q1, Q2, W] = quadRule2D(qOrd);
 Q2X1 = @(X1, X2) g.B(:, 1, 1) * X1 + g.B(:, 1, 2) * X2 + g.coordV0T(:, 1, 1) * ones(size(X1));
 Q2X2 = @(X1, X2) g.B(:, 2, 1) * X1 + g.B(:, 2, 2) * X2 + g.coordV0T(:, 1, 2) * ones(size(X1));
+
+% Extract dimensions and compute scaling parameters
 R = length(W); K = g.numT; numP = size(X1, 2);
 dX1 = repmat(2 ./ (max(g.coordV0T(:,:,1),[],2) - min(g.coordV0T(:,:,1),[],2)), [1 numP]);
 dX2 = repmat(2 ./ (max(g.coordV0T(:,:,2),[],2) - min(g.coordV0T(:,:,2),[],2)), [1 numP]);
+
+% Evaluate basis functions
 switch i
   case 1 % (0,0)
     ret = ones(K, numP);
@@ -121,6 +129,8 @@ switch i
   case 15 % (0,4)
     ret = ( ( X2 - repmat(g.baryT(:, 2), [1 numP]) ).^4 / 24 - ...
           repmat( ( Q2X2(Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^4 * W' / 12, [1 numP]) ) .* dX2.^4;
+  otherwise
+    error('Taylor basis functions for p>4 not implemented')
 end % switch
 end
 

@@ -44,7 +44,7 @@
 %
 function dataLagr = projectDataTaylor2DataLagr(g, dataDisc)
 [K, N] = size(dataDisc);
-p = (sqrt(8*N+1)-3)/2; 
+assert(K == g.numT, 'Wrong number of elements in dataDisc')
 switch N
   case 1,    L1 = 1/3;                     L2 = 1/3;                    % locally constant
   case 3,    L1 = [0, 1, 0];               L2 = [0, 0, 1];              % locally linear

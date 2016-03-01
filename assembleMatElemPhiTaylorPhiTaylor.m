@@ -48,9 +48,12 @@
 %> @endparblock
 %
 function ret = assembleMatElemPhiTaylorPhiTaylor(g, N)
-p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  
+% Extract dimensions and determine quadrature rule
+p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1); 
 [Q1, Q2, W] = quadRule2D(qOrd);
-K = g.numT;
+K = g.numT; 
+
+% Assemble matrix
 ret = sparse(K*N, K*N);
 for i = 1 : N
   for j = 1 : N
