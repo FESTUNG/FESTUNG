@@ -23,7 +23,7 @@
 %> <code>quadRule1D()</code>
 %>
 %> @param  N    The local number of degrees of freedom
-%> @retval ret  The computed array @f$[N\times N\times 3\times 3\times R]@f$
+%> @retval ret  The computed array @f$[N\times N\times 3\times R]@f$
 %>
 %> This file is part of FESTUNG
 %>
@@ -50,10 +50,10 @@ global gPhi1D
 p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p+1,1);  [~, W] = quadRule1D(qOrd);
 ret = zeros(N, N, 3, length(W)); % [N x N x 3 x R]
 for n = 1 : 3 % 3 edges
-    for i = 1 : N
-      for j = 1 : N
-        ret(i,j,n,:) = gPhi1D{qOrd}(:,i,n).* gPhi1D{qOrd}(:,j,n);
-      end % for
+  for i = 1 : N
+    for j = 1 : N
+      ret(i,j,n,:) = gPhi1D{qOrd}(:,i,n).* gPhi1D{qOrd}(:,j,n);
     end % for
+  end % for
 end % for
 end % function

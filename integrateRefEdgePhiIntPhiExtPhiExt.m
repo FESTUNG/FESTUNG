@@ -68,4 +68,4 @@ for nn = 1 : 3 % 3 edges
     end % for
   end % for
 end % for
-end
+end % function
