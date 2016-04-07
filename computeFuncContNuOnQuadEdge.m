@@ -48,8 +48,8 @@ function ret = computeFuncContNuOnQuadEdge(g, funcCont1, funcCont2, qOrd)
 K = g.numT;  [Q, W] = quadRule1D(qOrd);
 
 % Check function arguments that are directly used
-assert(isa(funcCont1, 'function_handle'), 'funcCont1 must be a function_handle')
-assert(isa(funcCont2, 'function_handle'), 'funcCont2 must be a function_handle')
+validateattributes(funcCont1, {'function_handle'}, {}, mfilename, 'funcCont1');
+validateattributes(funcCont2, {'function_handle'}, {}, mfilename, 'funcCont2');
 
 % Evaluate function
 ret = zeros(K, 3, length(W));

@@ -105,9 +105,9 @@ Q2X1 = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1))
 Q2X2 = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 
 % Check function arguments that are directly used
-assert(isequal(size(markE0Tbdr), [g.numT 3]), 'Wrong number of elements in markE0Tbdr')
-assert(size(dataDisc, 1) == g.numT, 'Wrong number of elements in dataDisc')
-assert(isa(funcCont, 'function_handle'), 'funcCont must be a function_handle')
+validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
+validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc');
 
 % Assemble vector
 ret = zeros(K, N);

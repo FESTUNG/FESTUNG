@@ -59,7 +59,7 @@
 %> @endparblock
 %
 function dataDisc = projectFuncCont2DataTaylor(g, funcCont, ord, globM)
-assert(isa(funcCont, 'function_handle'), 'funcCont must be a function_handle')
+validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 ord = max(ord,1);  [Q1, Q2, W] = quadRule2D(ord);
 K = g.numT; N = size(globM, 1) / K;
 F1 = @(X1, X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));

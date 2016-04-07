@@ -47,7 +47,7 @@ function computeTaylorBasesV0T(g, N)
 
 % Check function arguments that are directly used
 assert(0 < g.numT, 'Number of elements must be greater than zero')
-assert(isequal(size(g.coordV0T), [g.numT 3 2]), 'Vertex coordinates g.coordV0T not initialized or with wrong size')
+validateattributes(g.coordV0T, {'numeric'}, {'size', [g.numT 3 2]}, mfilename, 'g.coordV0T');
 assert(~isempty(find(N == ((0:4)+1).*((0:4)+2)/2, 1)), 'Number of degrees of freedom does not match a polynomial order') % N == (p+1)(p+2)/2
 
 global gPhiTaylorV0T

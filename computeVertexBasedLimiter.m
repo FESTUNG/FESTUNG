@@ -69,8 +69,8 @@
 %
 function alphaE = computeVertexBasedLimiter(g, valCentroid, valV0T, markV0TbdrD, dataV0T)
 % Check function arguments that are directly used
-assert(isequal(size(valCentroid), [g.numT 1]), 'Number of elements does not match size of valCentroid')
-assert(isequal(size(valV0T), [g.numT 3]), 'Number of elements does not match size of valV0T')
+validateattributes(valCentroid, {'numeric'}, {'size', [g.numT 1]}, mfilename, 'valCentroid');
+validateattributes(dataV0T, {'numeric'}, {'size', [g.numT 3]}, mfilename, 'dataV0T');
 
 % Determine for each vertex the min- and max-values of the centroids in 
 % elements adjacent to the vertex

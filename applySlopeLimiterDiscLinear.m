@@ -102,7 +102,7 @@
 %
 function dataDiscLim = applySlopeLimiterDiscLinear(g, dataDisc, markV0TbdrD, dataV0T)
 % Check function arguments that are directly used
-assert(size(dataDisc, 1) == g.numT, 'Number of elements does not match size of representation matrix dataDisc')
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataDisc');
 assert(size(dataDisc, 2) >= 3, 'Number of local degrees of freedom in dataDisc does not correspond to p>=1')
 
 % Evaluate linear reconstruction in vertices

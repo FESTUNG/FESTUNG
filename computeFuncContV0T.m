@@ -40,7 +40,7 @@
 %
 function valV0T = computeFuncContV0T(g, funcCont)
 % Check function arguments that are directly used
-assert(isa(funcCont, 'function_handle'), 'funcCont must be a function_handle')
+validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 
 % Evaluate function
 valV0T = zeros(g.numT,3);

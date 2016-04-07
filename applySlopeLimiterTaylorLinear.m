@@ -99,11 +99,9 @@ function dataTaylorLim = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0Tbdr
 global gPhiTaylorV0T
 
 % Check function arguments that are directly used
-assert(size(dataTaylor, 1) == g.numT, 'Number of elements does not match size of representation matrix dataTaylor')
+validateattributes(dataTaylor, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataTaylor');
 assert(size(dataTaylor, 2) >= 3, 'Number of local degrees of freedom in dataTaylor does not correspond to p>=1')
-assert(size(gPhiTaylorV0T, 1) == g.numT, 'Global variable gPhiTaylorV0T not initialized or with wrong size')
-assert(size(gPhiTaylorV0T, 2) == 3, 'Global variable gPhiTaylorV0T not initialized or with wrong size')
-assert(size(gPhiTaylorV0T, 3) >= 3, 'Global variable gPhiTaylorV0T not initialized or with wrong size')
+validateattributes(gPhiTaylorV0T, {'numeric'}, {'size', [K 3 N]}, mfilename, 'gPhiTaylorV0T');
 
 %% Limit first order derivative terms
 % Compute limiter parameter for each vertex

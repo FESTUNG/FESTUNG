@@ -62,9 +62,9 @@
 %
 function minMaxV0T = computeMinMaxV0TElementPatch(g, valCentroid, markV0TbdrD, dataV0T)
 % Check function arguments that are directly used
-assert(isequal(size(valCentroid), [g.numT 1]), 'Number of elements does not match size of valCentroid')
-assert(isequal(size(markV0TbdrD), [g.numT 3]), 'Number of elements does not match size of markV0TbdrD')
-assert(isequal(size(dataV0T), [g.numT 3]), 'Number of elements does not match size of dataV0T')
+validateattributes(valCentroid, {'numeric'}, {'size', [g.numT 1]}, mfilename, 'valCentroid');
+validateattributes(markV0TbdrD, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markV0TbdrD');
+validateattributes(dataV0T, {'numeric'}, {'size', [g.numT 3]}, mfilename, 'dataV0T');
 
 % Initialize return value: a 2x1-cell with a Kx3-array of minimum and 
 % maximum values per vertex of each triangle

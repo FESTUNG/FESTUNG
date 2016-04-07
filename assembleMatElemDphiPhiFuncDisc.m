@@ -111,8 +111,8 @@ function ret = assembleMatElemDphiPhiFuncDisc(g, refElemDphiPhiPhi, dataDisc)
 [K, N] = size(dataDisc);
 
 % Check function arguments that are directly used
-assert(size(dataDisc, 1) == g.numT, 'Number of elements does not match size of dataDisc')
-assert(isequal(size(refElemDphiPhiPhi), [N N N 2]), 'Number of DOFs in refElemDphiPhiPhi and dataDisc does not match')
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc');
+validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N N 2]}, mfilename, 'refElemDphiPhiPhi');
 
 % Assemble matrices
 ret = cell(2, 1);  ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);

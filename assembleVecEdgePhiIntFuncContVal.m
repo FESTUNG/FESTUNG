@@ -105,9 +105,9 @@ Q2X1 = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1))
 Q2X2 = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 
 % Check function arguments that are directly used
-assert(isequal(size(markE0Tbdr), [g.numT 3]), 'Wrong number of elements in markE0Tbdr')
-assert(isa(funcCont, 'function_handle'), 'funcCont must be a function_handle')
-assert(isequal(size(valOnQuad), [K 3 length(W)]), 'Wrong size for valOnQuad')
+validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
+validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
+validateattributes(valOnQuad, {'numeric'}, {'size', [K 3 length(W)]}, mfilename, 'valOnQuad');
 
 % Assemble vector
 ret = zeros(K, N);

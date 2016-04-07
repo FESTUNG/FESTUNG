@@ -44,8 +44,7 @@ function ret = computeFuncDiscAtPoints(funcDisc, phiAtPoints)
 % Extract and verify dimensions
 nPoints = size(phiAtPoints, 2);
 [K, N] = size(funcDisc);
-assert(K == size(phiAtPoints, 1), 'Number of elements does not match!');
-assert(size(phiAtPoints, 3) == N, 'Number of DOF does not match!');
+validateattributes(phiAtPoints, {'numeric'}, {'size', [K 3 N]}, mfilename, 'phiAtPoints');
 
 % Evaluate function in all given points
 ret = zeros(K, nPoints);

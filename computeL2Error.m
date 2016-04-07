@@ -95,8 +95,8 @@ function err = computeL2Error(g, dataDisc, funcCont, qOrd)
 global gPhi2D
 
 % Check function arguments that are directly used
-assert(isa(funcCont, 'function_handle'), 'funcCont must be a function_handle')
-assert(size(dataDisc, 1) == g.numT, 'Wrong number of elements in dataDisc')
+validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataDisc');
 
 % Determine quadrature rule and physical coordinates
 qOrd = max(qOrd,1); [Q1, Q2, W] = quadRule2D(qOrd);

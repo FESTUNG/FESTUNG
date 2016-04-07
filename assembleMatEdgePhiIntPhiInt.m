@@ -84,8 +84,8 @@ function ret = assembleMatEdgePhiIntPhiInt(g, markE0Tbdr, refEdgePhiIntPhiInt)
 K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
 
 % Check function arguments that are directly used
-assert(isequal(size(markE0Tbdr), [K 3]), 'Number of elements does not match size of markE0Tbdr')
-assert(isequal(size(refEdgePhiIntPhiInt), [N N 3]), 'Wrong size of refEdgePhiIntPhiInt')
+validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
+validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N 3]}, mfilename, 'refEdgePhiIntPhiInt');
 
 % Assemble matrix
 ret = sparse(K*N, K*N);

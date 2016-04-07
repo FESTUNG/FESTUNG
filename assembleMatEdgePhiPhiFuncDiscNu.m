@@ -146,10 +146,10 @@ function ret = assembleMatEdgePhiPhiFuncDiscNu(g, markE0Tint, refEdgePhiIntPhiIn
 [K, N] = size(dataDisc);
 
 % Check function arguments that are directly used
-assert(size(dataDisc, 1) == g.numT, 'Number of elements does not match size of dataDisc')
-assert(isequal(size(markE0Tint), [K 3]), 'Number of elements does not match size of markE0Tbdr')
-assert(isequal(size(refEdgePhiIntPhiIntPhiInt), [N N N 3]), 'Number of DOFs in refEdgePhiIntPhiIntPhiInt and dataDisc do not match')
-assert(isequal(size(refEdgePhiIntPhiExtPhiExt), [N N N 3 3]), 'Number of DOFs in refEdgePhiIntPhiExtPhiExt and dataDisc do not match')
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc');
+validateattributes(markE0Tint, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tint');
+validateattributes(refEdgePhiIntPhiIntPhiInt, {'numeric'}, {'size', [N N N 3]}, mfilename, 'refEdgePhiIntPhiIntPhiInt');
+validateattributes(refEdgePhiIntPhiExtPhiExt, {'numeric'}, {'size', [N N N 3 3]}, mfilename, 'refEdgePhiIntPhiExtPhiExt');
 
 % Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);

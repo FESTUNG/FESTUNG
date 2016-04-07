@@ -187,9 +187,9 @@ p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
 R = length(W);
 
 % Check function arguments that are directly used
-assert(isequal(size(valOnQuad), [K 3 R]), 'Number of elements does not match size of markE0Tbdr')
-assert(isequal(size(refEdgePhiIntPhiIntOnQuad), [N N 3 R]), 'Wrong size of refEdgePhiIntPhiIntOnQuad')
-assert(isequal(size(refEdgePhiIntPhiExtOnQuad), [N N 3 3 R]), 'Wrong size of refEdgePhiIntPhiExtOnQuad')
+validateattributes(valOnQuad, {'numeric'}, {'size', [K 3 R]});
+validateattributes(refEdgePhiIntPhiIntOnQuad, {'numeric'}, {'size', [N N 3 R]});
+validateattributes(refEdgePhiIntPhiExtOnQuad, {'numeric'}, {'size', [N N 3 3 R]});
 
 % Assemble matrices
 ret = sparse(K*N, K*N);

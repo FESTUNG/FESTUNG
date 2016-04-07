@@ -113,9 +113,9 @@ function ret = assembleMatElemDphiPhiFuncDiscVec(g, refElemDphiPhiPhi, dataDisc1
 [K, N] = size(dataDisc1);
 
 % Check function arguments that are directly used
-assert(size(dataDisc1, 1) == g.numT, 'Number of elements does not match size of dataDisc1')
-assert(isequal(size(dataDisc1), size(dataDisc2)), 'Sizes of dataDisc1 and dataDisc2 do not match')
-assert(isequal(size(refElemDphiPhiPhi), [N N N 2]), 'Number of DOFs in refElemDphiPhiPhi and dataDisc1 does not match')
+validateattributes(dataDisc1, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc1');
+validateattributes(dataDisc2, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc2');
+validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N N 2]}, mfilename, 'refElemDphiPhiPhi');
 
 % Assemble matrices
 ret = cell(2, 1);  ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);

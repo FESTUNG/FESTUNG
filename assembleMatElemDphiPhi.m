@@ -87,7 +87,7 @@ function ret = assembleMatElemDphiPhi(g, refElemDphiPhi)
 K = g.numT; N = size(refElemDphiPhi, 1);
 
 % Check function arguments that are directly used
-assert(isequal(size(refElemDphiPhi), [N N 2]), 'Wrong size of refElemDphiPhi')
+validateattributes(refElemDphiPhi, {'numeric'}, {'size', [N N 2]}, mfilename, 'refElemDphiPhi');
 
 % Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);

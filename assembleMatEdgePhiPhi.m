@@ -118,9 +118,9 @@ function ret = assembleMatEdgePhiPhi(g, markE0Tint, refEdgePhiIntPhiInt, refEdge
 K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
 
 % Check function arguments that are directly used
-assert(isequal(size(markE0Tint), [K 3]), 'Number of elements does not match size of markE0Tint')
-assert(isequal(size(refEdgePhiIntPhiInt), [N N 3]), 'Wrong size of refEdgePhiIntPhiInt')
-assert(isequal(size(refEdgePhiIntPhiExt), [N N 3 3]), 'Wrong size of refEdgePhiIntPhiExt')
+validateattributes(markE0Tint, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tint');
+validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N 3]}, mfilename, 'refEdgePhiIntPhiInt');
+validateattributes(refEdgePhiIntPhiExt, {'numeric'}, {'size', [N N 3 3]}, mfilename, 'refEdgePhiIntPhiExt');
 
 % Assemble diagonal blocks
 ret = sparse(K*N, K*N);

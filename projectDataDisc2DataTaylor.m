@@ -55,7 +55,7 @@
 %
 function dataTaylor = projectDataDisc2DataTaylor(dataDisc, globMDisc, globMDiscTaylor)
 [K, N] = size(dataDisc);
-assert(isequal(size(globMDisc), [K*N K*N]), 'Sizes of dataDisc and globMDisc do not fit')
-assert(isequal(size(globMDiscTaylor), [K*N K*N]), 'Sizes of dataDisc and globMDiscTaylor do not fit')
+validateattributes(globMDisc, {'numeric'}, {'size', [K*N K*N]}, mfilename, 'globMDisc');
+validateattributes(globMDiscTaylor, {'numeric'}, {'size', [K*N K*N]}, mfilename, 'globMDiscTaylor');
 dataTaylor = reshape(globMDiscTaylor \ ( globMDisc * reshape(dataDisc', [K*N 1]) ), [N K])';
 end % function

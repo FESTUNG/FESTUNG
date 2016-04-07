@@ -104,9 +104,9 @@ function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0Tbdr, refEdgePh
 [K, N] = size(dataDisc);  
 
 % Check function arguments that are directly used
-assert(size(dataDisc, 1) == g.numT, 'Number of elements does not match size of dataDisc')
-assert(isequal(size(markE0Tbdr), [K 3]), 'Number of elements does not match size of markE0Tbdr')
-assert(isequal(size(refEdgePhiIntPhiIntPhiInt), [N N N 3]), 'Wrong size of refEdgePhiIntPhiIntPhiInt')
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc');
+validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
+validateattributes(refEdgePhiIntPhiIntPhiInt, {'numeric'}, {'size', [N N N 3]}, mfilename, 'refEdgePhiIntPhiIntPhiInt');
 
 % Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);
