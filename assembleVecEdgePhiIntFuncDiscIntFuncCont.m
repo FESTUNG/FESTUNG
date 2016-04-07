@@ -73,11 +73,16 @@
 %>                    computed by <code>projectFuncCont2DataDisc()</code>
 %>                    @f$[K \times N]@f$
 %> @param  funcCont   A function handle for the continuous function
+%> @param areaE0Tbdr (optional) argument to provide precomputed values
+%>                    for the products of <code>markE0Tbdr</code>,
+%>                    and <code>g.areaE0T</code>,
+%>                    @f$[3 \text{ cell}]@f$
 %> @retval ret        The assembled vector @f$[KN]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> Modified by Hennes Hajduk, 2016-04-06
 %> 
 %> @par License
 %> @parblock
@@ -95,7 +100,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncDiscIntFuncCont(g, markE0Tbdr, dataDisc, funcCont)
+function ret = assembleVecEdgePhiIntFuncDiscIntFuncCont(g, markE0Tbdr, dataDisc, funcCont, areaE0Tbdr)
 global gPhi1D
 
 % Determine quadrature rule and mapping to physical element
@@ -114,11 +119,20 @@ ret = zeros(K, N);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   funcAtQ = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
-  Kkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
-  for i = 1 : N
-    for l = 1 : N
-      integral = funcAtQ * ( W .* gPhi1D{qOrd}(:,i,n)' .* gPhi1D{qOrd}(:,l,n)' )';
-      ret(:,i) = ret(:,i) + Kkn .* dataDisc(:,l) .* integral;
+  if nargin > 4
+    for i = 1 : N
+      for l = 1 : N
+        integral = funcAtQ * ( W .* gPhi1D{qOrd}(:,i,n)' .* gPhi1D{qOrd}(:,l,n)' )';
+        ret(:,i) = ret(:,i) + areaE0Tbdr{n} .* dataDisc(:,l) .* integral;
+      end % for
+    end % for
+  else
+    Kkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
+    for i = 1 : N
+      for l = 1 : N
+        integral = funcAtQ * ( W .* gPhi1D{qOrd}(:,i,n)' .* gPhi1D{qOrd}(:,l,n)' )';
+        ret(:,i) = ret(:,i) + Kkn .* dataDisc(:,l) .* integral;
+      end % for
     end % for
   end % for
 end % for

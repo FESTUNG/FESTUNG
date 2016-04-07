@@ -73,11 +73,16 @@
 %> @param  valOnQuad  Array holding the function value @f$a(q_r)@f$ for all
 %>                    quadrature points on all edges. @f$[K\times3\times R]@f$
 %> @param  N          The number of local degrees of freedom @f$[\text{scalar}]@f$
+%> @param areaE0Tbdr (optional) argument to provide precomputed values
+%>                    for the products of <code>markE0Tbdr</code>,
+%>                    and <code>g.areaE0T</code>,
+%>                    @f$[3 \text{ cell}]@f$
 %> @retval ret        The assembled vector @f$[KN]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> Modified by Hennes Hajduk, 2016-04-06
 %> 
 %> @par License
 %> @parblock
@@ -95,7 +100,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncContVal(g, markE0Tbdr, funcCont, valOnQuad, N)
+function ret = assembleVecEdgePhiIntFuncContVal(g, markE0Tbdr, funcCont, valOnQuad, N, areaE0Tbdr)
 global gPhi1D
 
 % Determine quadrature rule and mapping to physical element
@@ -114,11 +119,18 @@ ret = zeros(K, N);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   funcOnQuad = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
-  Kkn = markE0Tbdr(:, n) .* g.areaE0T(:,n);
-  for i = 1 : N
-    integral = (funcOnQuad .* squeeze((valOnQuad(:, n, :) < 0) .* valOnQuad(:, n, :))) * ( W' .* gPhi1D{qOrd}(:,i,n));
-    ret(:,i) = ret(:,i) + Kkn .* integral;
-  end % for
+  if nargin > 5
+    for i = 1 : N
+      integral = (funcOnQuad .* squeeze((valOnQuad(:, n, :) < 0) .* valOnQuad(:, n, :))) * ( W' .* gPhi1D{qOrd}(:,i,n));
+      ret(:,i) = ret(:,i) + areaE0Tbdr{n} .* integral;
+    end % for
+  else
+    Kkn = markE0Tbdr(:, n) .* g.areaE0T(:,n);
+    for i = 1 : N
+      integral = (funcOnQuad .* squeeze((valOnQuad(:, n, :) < 0) .* valOnQuad(:, n, :))) * ( W' .* gPhi1D{qOrd}(:,i,n));
+      ret(:,i) = ret(:,i) + Kkn .* integral;
+    end % for
+  end % if
 end % for
 ret = reshape(ret',K*N,1);
 end % function

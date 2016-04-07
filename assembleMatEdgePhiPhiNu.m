@@ -104,11 +104,16 @@
 %>                    @f$\hat{\mathsf{Q}}^\text{offdiag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiExt()</code>.
 %>                    @f$[N \times N \times 3 \times 3]@f$
+%> @param areaNuE0Tint (optional) argument to provide precomputed values
+%>                    for the products of <code>markE0Tint</code>,
+%>                    <code>g.areaE0T</code>, and <code>g.nuE0T</code>
+%>                    @f$[3 \times 2 \text{ cell}]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> Modified by Hennes Hajduk, 2016-04-06
 %> 
 %> @par License
 %> @parblock
@@ -126,7 +131,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgePhiPhiNu(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
+function ret = assembleMatEdgePhiPhiNu(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, areaNuE0Tint)
 K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
 
 % Check function arguments that are directly used
@@ -137,13 +142,34 @@ validateattributes(refEdgePhiIntPhiExt, {'numeric'}, {'size', [N N 3 3]}, mfilen
 % Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);
 for nn = 1 : 3
-  Qkn = 0.5 * g.areaE0T(:,nn);
-  for np = 1 : 3
-    ret{1} = ret{1} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,1)), refEdgePhiIntPhiExt(:,:,nn,np));
-    ret{2} = ret{2} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,2)), refEdgePhiIntPhiExt(:,:,nn,np));
-  end % for
-  Qkn = markE0Tint(:,nn) .* Qkn;
-  ret{1} = ret{1} + kron(spdiags(Qkn .* g.nuE0T(:,nn,1), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
-  ret{2} = ret{2} + kron(spdiags(Qkn .* g.nuE0T(:,nn,2), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+  if isfield(g, 'areaNuE0TE0T')
+    for np = 1 : 3
+      ret{1} = ret{1} + 0.5 * kron(g.areaNuE0TE0T{nn,np,1}, refEdgePhiIntPhiExt(:,:,nn,np));
+      ret{2} = ret{2} + 0.5 * kron(g.areaNuE0TE0T{nn,np,2}, refEdgePhiIntPhiExt(:,:,nn,np));
+    end % for
+  else
+    Qkn = 0.5 * g.areaE0T(:,nn);
+    for np = 1 : 3
+      ret{1} = ret{1} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,1)), refEdgePhiIntPhiExt(:,:,nn,np));
+      ret{2} = ret{2} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,2)), refEdgePhiIntPhiExt(:,:,nn,np));
+    end % for
+  end % if
+  if nargin > 4
+    ret{1} = ret{1} + kron(spdiags(0.5 * areaNuE0Tint{nn,1}, 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+    ret{2} = ret{2} + kron(spdiags(0.5 * areaNuE0Tint{nn,2}, 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+  else
+    if isfield(g, 'areaNuE0T')
+      ret{1} = ret{1} + kron(spdiags(0.5 * g.areaNuE0T{nn,1} .* markE0Tint(:, nn), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+      ret{2} = ret{2} + kron(spdiags(0.5 * g.areaNuE0T{nn,2} .* markE0Tint(:, nn), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+    else
+      if ~isfield(g, 'areaNuE0TE0T')
+        Qkn = Qkn .* markE0Tint(:,nn);
+      else
+        Qkn = 0.5 * g.areaE0T(:,nn) .* markE0Tint(:, nn);
+      end % if
+      ret{1} = ret{1} + kron(spdiags(Qkn .* g.nuE0T(:,nn,1), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+      ret{2} = ret{2} + kron(spdiags(Qkn .* g.nuE0T(:,nn,2), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+    end
+  end % if
 end % for
 end % function

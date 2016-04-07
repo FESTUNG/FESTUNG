@@ -77,11 +77,16 @@
 %>                    @f$d_h(\mathbf(x))@f$, e.g., as computed by 
 %>                    <code>projectFuncCont2DataDisc()</code>
 %>                    @f$[K \times N]@f$
+%> @param areaNuE0Tbdr (optional) argument to provide precomputed values
+%>                    for the products of <code>markE0Tbdr</code>,
+%>                    <code>g.areaE0T</code>, and <code>g.nuE0T</code>
+%>                    @f$[3 \times 2 \text{ cell}]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> Modified by Hennes Hajduk, 2016-04-06
 %> 
 %> @par License
 %> @parblock
@@ -99,7 +104,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0Tbdr, refEdgePhiIntPhiIntPhiInt, dataDisc)
+function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0Tbdr, refEdgePhiIntPhiIntPhiInt, dataDisc, areaNuE0Tbdr)
 % Extract dimensions
 [K, N] = size(dataDisc);  
 
@@ -111,10 +116,24 @@ validateattributes(refEdgePhiIntPhiIntPhiInt, {'numeric'}, {'size', [N N N 3]}, 
 % Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);
 for n = 1 : 3
-  RDkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
-  for l = 1 : N
-    ret{1} = ret{1} + kron(spdiags(RDkn.*g.nuE0T(:,n,1).*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
-    ret{2} = ret{2} + kron(spdiags(RDkn.*g.nuE0T(:,n,2).*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
-  end
+  if nargin > 4
+    for l = 1 : N
+      ret{1} = ret{1} + kron(spdiags(areaNuE0Tbdr{n,1}.*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
+      ret{2} = ret{2} + kron(spdiags(areaNuE0Tbdr{n,2}.*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
+    end % for
+  else
+    if isfield(g, 'areaNuE0T')
+      for l = 1 : N
+        ret{1} = ret{1} + kron(spdiags(markE0Tbdr(:,n).*g.areaNuE0T{n,1}.*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
+        ret{2} = ret{2} + kron(spdiags(markE0Tbdr(:,n).*g.areaNuE0T{n,2}.*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
+      end % for
+    else
+      RDkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
+      for l = 1 : N
+        ret{1} = ret{1} + kron(spdiags(RDkn.*g.nuE0T(:,n,1).*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
+        ret{2} = ret{2} + kron(spdiags(RDkn.*g.nuE0T(:,n,2).*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
+      end % for
+    end % if
+  end % if
 end % for
 end % function

@@ -26,6 +26,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> Modified by Hennes Hajduk, 2016-04-06
 %> 
 %> @par License
 %> @parblock
@@ -73,6 +74,7 @@ tau         = tEnd/numSteps;               % time step size
 markE0Tint  = g.idE0T == 0;                % [K x 3] mark local edges that are interior
 markE0TbdrN = g.idE0T == 1 | g.idE0T == 3; % [K x 3] mark local edges on the Neumann boundary
 markE0TbdrD = ~(markE0Tint | markE0TbdrN); % [K x 3] mark local edges on the Dirichlet boundary
+g           = computeDerivedGridDataDiffusion(g, markE0Tint, markE0TbdrD, markE0TbdrN);
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', p, N, K)
 %% Lookup table for basis function.
@@ -88,7 +90,7 @@ hatSoffdiag = integrateRefEdgePhiIntPhiExt(N);
 %% Assembly of time-independent global matrices.
 globM  = assembleMatElemPhiPhi(g, hatM);
 globH  = assembleMatElemDphiPhi(g, hatH);
-globQ  = assembleMatEdgePhiPhiNu(g, markE0Tint, hatSdiag, hatSoffdiag);
+globQ  = assembleMatEdgePhiPhiNu(g, markE0Tint, hatSdiag, hatSoffdiag, g.areaNuE0Tint);
 globQN = assembleMatEdgePhiIntPhiIntNu(g, markE0TbdrN, hatSdiag);
 globS  = eta * assembleMatEdgePhiPhi(g, markE0Tint, hatSdiag, hatSoffdiag);
 globSD = eta * assembleMatEdgePhiIntPhiInt(g, markE0TbdrD, hatSdiag);
@@ -105,13 +107,13 @@ for nStep = 1 : numSteps
   fDisc = projectFuncCont2DataDisc(g, @(x1,x2) fCont(t,x1,x2), 2*p, hatM);
   %% Assembly of time-dependent global matrices.
   globG = assembleMatElemDphiPhiFuncDisc(g, hatG, dDisc);
-  globR = assembleMatEdgePhiPhiFuncDiscNu(g, markE0Tint, hatRdiag, hatRoffdiag, dDisc);
+  globR = assembleMatEdgePhiPhiFuncDiscNu(g, markE0Tint, hatRdiag, hatRoffdiag, dDisc, g.areaNuE0Tint);
   %% Assembly of Dirichlet boundary contributions.
-  globRD = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0TbdrD, hatRdiag, dDisc);
-  globJD = assembleVecEdgePhiIntFuncContNu(g, markE0TbdrD, @(x1,x2) cDCont(t,x1,x2), N);
+  globRD = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0TbdrD, hatRdiag, dDisc, g.areaNuE0TbdrD);
+  globJD = assembleVecEdgePhiIntFuncContNu(g, markE0TbdrD, @(x1,x2) cDCont(t,x1,x2), N, g.areaNuE0TbdrD);
   globKD = eta * assembleVecEdgePhiIntFuncCont(g, markE0TbdrD, @(x1,x2) cDCont(t,x1,x2), N);
   %% Assembly of Neumann boundary contributions.
-  globKN = assembleVecEdgePhiIntFuncDiscIntFuncCont(g, markE0TbdrN, dDisc, @(x1,x2) gNCont(t,x1,x2));
+  globKN = assembleVecEdgePhiIntFuncDiscIntFuncCont(g, markE0TbdrN, dDisc, @(x1,x2) gNCont(t,x1,x2), g.areaE0TbdrN);
   %% Assembly of the source contribution.
   globL = globM*reshape(fDisc', K*N, 1);
   %% Building and solving the system.

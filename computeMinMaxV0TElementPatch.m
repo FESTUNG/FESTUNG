@@ -43,6 +43,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> Modified by Hennes Hajduk, 2016-04-06
 %> 
 %> @par License
 %> @parblock
@@ -84,19 +85,27 @@ valD = NaN(g.numT, 3);
 valD(markV0TbdrD) = dataV0T(markV0TbdrD);
 
 for i = 1 : 3
-  % Mark all elements sharing i-th vertex
-  markNbV0T = g.markV0TV0T{i, 1} | g.markV0TV0T{i, 2} | g.markV0TV0T{i, 3}; 
-  
-  % Fix a bug in GNU Octave 4.0.0's implementation of sparse matrix concatenation
-  if exist('OCTAVE_VERSION','builtin')
-    markNbV0T = markNbV0T + 0 * speye(size(markNbV0T, 1), size(markNbV0T, 2));
-  end
-  
-  % Compute min/max per vertex as min/max of centroid values per vertex
-  minMaxV0T{1}(:, i) = min(min(bsxfun(@times, markNbV0T, valCentroidNeg'), [], 2) ...
-                          + shiftCentroidToNeg, valD(:, i));
-  minMaxV0T{2}(:, i) = max(max(bsxfun(@times, markNbV0T, valCentroidPos'), [], 2) ...
-                          - shiftCentroidToPos, valD(:, i));
+  if isfield(g, 'markV0TT0V')
+    % Compute min/max per vertex as min/max of centroid values per vertex
+    minMaxV0T{1}(:, i) = min(min(bsxfun(@times, g.markV0TT0V{i}, valCentroidNeg'), [], 2) ...
+                            + shiftCentroidToNeg, valD(:, i));
+    minMaxV0T{2}(:, i) = max(max(bsxfun(@times, g.markV0TT0V{i}, valCentroidPos'), [], 2) ...
+                            - shiftCentroidToPos, valD(:, i));
+  else
+    % Mark all elements sharing i-th vertex
+    markV0TT0V = g.markV0TV0T{i, 1} | g.markV0TV0T{i, 2} | g.markV0TV0T{i, 3}; 
+    
+    % Fix a bug in GNU Octave 4.0.0's implementation of sparse matrix concatenation
+    if exist('OCTAVE_VERSION','builtin')
+      markV0TT0V = markV0TT0V + 0 * speye(size(markV0TT0V, 1), size(markV0TT0V, 2));
+    end % if
+    
+    % Compute min/max per vertex as min/max of centroid values per vertex
+    minMaxV0T{1}(:, i) = min(min(bsxfun(@times, markV0TT0V, valCentroidNeg'), [], 2) ...
+                            + shiftCentroidToNeg, valD(:, i));
+    minMaxV0T{2}(:, i) = max(max(bsxfun(@times, markV0TT0V, valCentroidPos'), [], 2) ...
+                            - shiftCentroidToPos, valD(:, i));
+  end % if
 end % for
 
 end % function

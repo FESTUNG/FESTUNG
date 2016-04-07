@@ -24,6 +24,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> Modified by Hennes Hajduk, 2016-04-06
 %> 
 %> @par License
 %> @parblock
@@ -74,6 +75,7 @@ tau         = tEnd/numSteps;               % time step size
 markE0Tint  = g.idE0T == 0;                % [K x 3] mark local edges that are interior
 markE0TbdrD = ~markE0Tint;                 % [K x 3] mark local edges on the Dirichlet boundary
 markV0TbdrD = ismember(g.V0T, g.V0E(g.E0T(markE0TbdrD),:)); % [K x 3] mark local vertices on the Dirichlet boundary
+g           = computeDerivedGridDataAdvection(g, markE0TbdrD);
 %% Coefficients and boundary data (LeVeque's solid body rotation).
 G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
 c0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
@@ -129,7 +131,7 @@ for nStep = 1 : numSteps
     globG = assembleMatElemDphiPhiFuncDiscVec(g, hatG, u1Disc, u2Disc);
     globR = assembleMatEdgePhiPhiValUpwind(g, hatRdiagOnQuad, hatRoffdiagOnQuad, vNormalOnQuadEdge);
     % Assembly of Dirichlet boundary contributions
-    globKD = assembleVecEdgePhiIntFuncContVal(g, markE0TbdrD, @(x1,x2) cDCont(t(rkStep),x1,x2), vNormalOnQuadEdge, N);
+    globKD = assembleVecEdgePhiIntFuncContVal(g, markE0TbdrD, @(x1,x2) cDCont(t(rkStep),x1,x2), vNormalOnQuadEdge, N, g.areaE0TbdrD);
     % Assembly of the source contribution
     globL = globM * reshape(fDisc', K*N, 1);
     % Building the system

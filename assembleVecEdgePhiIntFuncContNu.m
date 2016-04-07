@@ -72,11 +72,16 @@
 %>                    assembled @f$[K \times 3]@f$
 %> @param  funcCont   A function handle for the continuous function
 %> @param  N          The number of local degrees of freedom @f$[\text{scalar}]@f$
+%> @param areaNuE0Tbdr (optional) argument to provide precomputed values
+%>                    for the products of <code>markE0Tbdr</code>,
+%>                    <code>g.areaE0T</code>, and <code>g.nuE0T</code>
+%>                    @f$[3 \times 2 \text{ cell}]@f$
 %> @retval ret        The assembled vectors @f$2\times1 \text{ cell}@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> Modified by Hennes Hajduk, 2016-04-06
 %> 
 %> @par License
 %> @parblock
@@ -94,7 +99,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncContNu(g, markE0Tbdr, funcCont, N)
+function ret = assembleVecEdgePhiIntFuncContNu(g, markE0Tbdr, funcCont, N, areaNuE0Tbdr)
 global gPhi1D
 
 % Determine quadrature rule and mapping to physical element
@@ -112,12 +117,28 @@ ret = cell(2, 1);  ret{1} = zeros(K, N);  ret{2} = zeros(K, N);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
-  Jkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
-  for i = 1 : N
-    integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
-    ret{1}(:,i) = ret{1}(:,i) + Jkn .* g.nuE0T(:,n,1) .* integral;
-    ret{2}(:,i) = ret{2}(:,i) + Jkn .* g.nuE0T(:,n,2) .* integral;
-  end % for
+  if nargin > 4
+    for i = 1 : N
+      integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
+      ret{1}(:,i) = ret{1}(:,i) + areaNuE0Tbdr{n,1} .* integral;
+      ret{2}(:,i) = ret{2}(:,i) + areaNuE0Tbdr{n,2} .* integral;
+    end % for
+  else
+    if isfield(g, 'areaNuE0T')
+      for i = 1 : N
+        integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
+        ret{1}(:,i) = ret{1}(:,i) + markE0Tbdr(:,n).*g.areaNuE0T{n,1} .* integral;
+        ret{2}(:,i) = ret{2}(:,i) + markE0Tbdr(:,n).*g.areaNuE0T{n,2} .* integral;
+      end % for
+    else
+      Jkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
+      for i = 1 : N
+        integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
+        ret{1}(:,i) = ret{1}(:,i) + Jkn .* g.nuE0T(:,n,1) .* integral;
+        ret{2}(:,i) = ret{2}(:,i) + Jkn .* g.nuE0T(:,n,2) .* integral;
+      end % for
+    end % if
+  end % if
 end % for
 ret{1} = reshape(ret{1}',K*N,1);  ret{2} = reshape(ret{2}',K*N,1);
 end % function
