@@ -46,15 +46,19 @@
 %
 function mainDiffusion()
 more off % disable paging of output
+tic % Start time measurement
 %% Parameters.
-hmax        = 1/8;    % maximum edge length of triangle
-p           = 2;      % local polynomial degree
-tEnd        = pi;     % end time
-numSteps    = 20;     % number of time steps
-isVisGrid   = true;   % visualization of grid
-isVisSol    = true;   % visualization of solution
-eta         = 1;      % penalty parameter (eta>0)
+hmax            = 1/8;        % maximum edge length of triangle
+p               = 2;          % local polynomial degree
+tEnd            = pi;         % end time
+numSteps        = 20;         % number of time steps
+isVisGrid       = true;       % visualization of grid
+isVisSol        = true;       % visualization of solution
+eta             = 1;          % penalty parameter (eta>0)
+outputBasename  = 'solution'; % Basename of output files
+outputTypes     = cellstr(['vtk';'tec']);
 %% Parameter check.
+diary([outputBasename '.log'])
 assert(p >= 0 && p <= 4, 'Polynomial order must be zero to four.')
 assert(hmax > 0        , 'Maximum edge length must be positive.' )
 assert(numSteps > 0    , 'Number of time steps must be positive.')
@@ -126,8 +130,9 @@ for nStep = 1 : numSteps
   if isVisSol
     cDisc = reshape(sysY(2*K*N+1 : 3*K*N), N, K)';
     cLagr = projectDataDisc2DataLagr(cDisc);
-    visualizeDataLagr(g, cLagr, 'c_h', 'solution', nStep, 'vtk');
+    visualizeDataLagr(g, cLagr, 'c_h', outputBasename, nStep, outputTypes);
   end % if
 end % for
-fprintf('Done.\n')
+fprintf('Total computation time: %g seconds.\n', toc);
+diary off
 end % function
