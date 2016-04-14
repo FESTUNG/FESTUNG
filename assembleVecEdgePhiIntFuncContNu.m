@@ -1,7 +1,7 @@
 % Assembles two vectors containing integrals over edges of products of a basis 
 % function with a continuous function and one of the components of the edge 
 % normal.
-%
+
 %===============================================================================
 %> @file assembleVecEdgePhiIntFuncContNu.m
 %>
@@ -100,6 +100,26 @@
 %> @endparblock
 %
 function ret = assembleVecEdgePhiIntFuncContNu(g, markE0Tbdr, funcCont, N, areaNuE0Tbdr)
+
+% Check function arguments that are directly used
+validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
+validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
+
+if nargin > 4
+  ret = assembleVecEdgePhiIntFuncContNu_withAreaNuE0Tbdr(g, funcCont, N, areaNuE0Tbdr);
+elseif isfield(g, 'areaNuE0T')
+  ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_withAreaNuE0T(g, markE0Tbdr, funcCont, N);
+else
+  ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_noAreaNuE0T(g, markE0Tbdr, funcCont, N);
+end % if
+
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleVecEdgePhiIntFuncContNu()
+%> was called with a precomputed field areaNuE0Tbdr.
+%
+function ret = assembleVecEdgePhiIntFuncContNu_withAreaNuE0Tbdr(g, funcCont, N, areaNuE0Tbdr)
 global gPhi1D
 
 % Determine quadrature rule and mapping to physical element
@@ -108,37 +128,85 @@ qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd);
 Q2X1 = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
 Q2X2 = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 
-% Check function arguments that are directly used
-validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
-validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
-
 % Assemble vector
-ret = cell(2, 1);  ret{1} = zeros(K, N);  ret{2} = zeros(K, N);
+ret = cell(2, 1);  
+ret{1} = zeros(K, N);  
+ret{2} = zeros(K, N);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
-  if nargin > 4
-    for i = 1 : N
-      integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
-      ret{1}(:,i) = ret{1}(:,i) + areaNuE0Tbdr{n,1} .* integral;
-      ret{2}(:,i) = ret{2}(:,i) + areaNuE0Tbdr{n,2} .* integral;
-    end % for
-  else
-    if isfield(g, 'areaNuE0T')
-      for i = 1 : N
-        integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
-        ret{1}(:,i) = ret{1}(:,i) + markE0Tbdr(:,n).*g.areaNuE0T{n,1} .* integral;
-        ret{2}(:,i) = ret{2}(:,i) + markE0Tbdr(:,n).*g.areaNuE0T{n,2} .* integral;
-      end % for
-    else
-      Jkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
-      for i = 1 : N
-        integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
-        ret{1}(:,i) = ret{1}(:,i) + Jkn .* g.nuE0T(:,n,1) .* integral;
-        ret{2}(:,i) = ret{2}(:,i) + Jkn .* g.nuE0T(:,n,2) .* integral;
-      end % for
-    end % if
-  end % if
+  for i = 1 : N
+    integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
+    ret{1}(:,i) = ret{1}(:,i) + areaNuE0Tbdr{n,1} .* integral;
+    ret{2}(:,i) = ret{2}(:,i) + areaNuE0Tbdr{n,2} .* integral;
+  end % for
 end % for
-ret{1} = reshape(ret{1}',K*N,1);  ret{2} = reshape(ret{2}',K*N,1);
+
+ret{1} = reshape(ret{1}',K*N,1);  
+ret{2} = reshape(ret{2}',K*N,1);
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleVecEdgePhiIntFuncContNu()
+%> was called without a precomputed field areaNuE0Tbdr but parameter g provides
+%> a field areaNuE0T.
+%
+function ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_withAreaNuE0T(g, markE0Tbdr, funcCont, N)
+global gPhi1D
+
+% Determine quadrature rule and mapping to physical element
+K = g.numT; p = (sqrt(8*N+1)-3)/2;
+qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd); 
+Q2X1 = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
+Q2X2 = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
+
+% Assemble vector
+ret = cell(2, 1);  
+ret{1} = zeros(K, N);  
+ret{2} = zeros(K, N);
+for n = 1 : 3
+  [Q1, Q2] = gammaMap(n, Q);
+  cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
+  for i = 1 : N
+    integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
+    ret{1}(:,i) = ret{1}(:,i) + markE0Tbdr(:,n).*g.areaNuE0T{n,1} .* integral;
+    ret{2}(:,i) = ret{2}(:,i) + markE0Tbdr(:,n).*g.areaNuE0T{n,2} .* integral;
+  end % for
+end % for
+
+ret{1} = reshape(ret{1}',K*N,1);  
+ret{2} = reshape(ret{2}',K*N,1);
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleVecEdgePhiIntFuncContNu()
+%> was called without a precomputed field areaNuE0Tbdr and parameter g provides
+%> no field areaNuE0T.
+%
+function ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_noAreaNuE0T(g, markE0Tbdr, funcCont, N)
+global gPhi1D
+
+% Determine quadrature rule and mapping to physical element
+K = g.numT; p = (sqrt(8*N+1)-3)/2;
+qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd); 
+Q2X1 = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
+Q2X2 = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
+
+% Assemble vector
+ret = cell(2, 1);  
+ret{1} = zeros(K, N); 
+ret{2} = zeros(K, N);
+for n = 1 : 3
+  [Q1, Q2] = gammaMap(n, Q);
+  cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
+  Jkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
+  for i = 1 : N
+    integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
+    ret{1}(:,i) = ret{1}(:,i) + Jkn .* g.nuE0T(:,n,1) .* integral;
+    ret{2}(:,i) = ret{2}(:,i) + Jkn .* g.nuE0T(:,n,2) .* integral;
+  end % for
+end % for
+
+ret{1} = reshape(ret{1}',K*N,1);  
+ret{2} = reshape(ret{2}',K*N,1);
 end % function

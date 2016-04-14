@@ -156,55 +156,214 @@ validateattributes(markE0Tint, {'logical'}, {'size', [K 3]}, mfilename, 'markE0T
 validateattributes(refEdgePhiIntPhiIntPhiInt, {'numeric'}, {'size', [N N N 3]}, mfilename, 'refEdgePhiIntPhiIntPhiInt');
 validateattributes(refEdgePhiIntPhiExtPhiExt, {'numeric'}, {'size', [N N N 3 3]}, mfilename, 'refEdgePhiIntPhiExtPhiExt');
 
+if nargin > 5
+  if isfield(g, 'areaNuE0TE0T')
+    ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0Tint_wiAreaNuE0TE0T(g, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc, areaNuE0Tint);
+  else
+    ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0Tint_noAreaNuE0TE0T(g, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc, areaNuE0Tint);
+  end
+else
+  if isfield(g, 'areaNuE0TE0T')
+    if isfield(g, 'areaNuE0T')
+      ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc);
+    else
+      ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc);
+    end
+  else
+    if isfield(g, 'areaNuE0T')
+      ret = assembleMatEdgePhiPhiFuncDiscNu_noAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc);
+    else
+      ret = assembleMatEdgePhiPhiFuncDiscNu_noAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc);
+    end    
+  end
+end % if
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiFuncDiscNu()
+%> was called with a precomputed field areaNuE0Tint and parameter g provides
+%> a precomputed field areaNuE0TE0T.
+%
+function ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0Tint_wiAreaNuE0TE0T(g, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc, areaNuE0Tint)
+[K, N] = size(dataDisc);
+
+% Assemble matrices
+ret = cell(2,1); 
+ret{1} = sparse(K*N, K*N); 
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  % Off-diagonal blocks
+  for np = 1 : 3
+    RtildeT = zeros(K*N, N);
+    for l = 1 : N
+      RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
+    end % for
+    ret{1} = ret{1} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,1}.', RtildeT).';
+    ret{2} = ret{2} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,2}.', RtildeT).';
+  end % for
+  % Diagonal blocks
+  for l = 1 : N
+    ret{1} = ret{1} + kron(spdiags(0.5 * areaNuE0Tint{nn,1} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+    ret{2} = ret{2} + kron(spdiags(0.5 * areaNuE0Tint{nn,2} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+  end % for
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiFuncDiscNu()
+%> was called with a precomputed field areaNuE0Tint and parameter g provides
+%> no precomputed field areaNuE0TE0T.
+%
+function ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0Tint_noAreaNuE0TE0T(g, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc, areaNuE0Tint)
+[K, N] = size(dataDisc);
+
+% Assemble matrices
+ret = cell(2,1); 
+ret{1} = sparse(K*N, K*N); 
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  % Off-diagonal blocks
+  Rkn = 0.5 * g.areaE0T(:,nn);
+  for np = 1 : 3
+    markE0TE0TtimesRkn1 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,1));
+    markE0TE0TtimesRkn2 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,2));
+    RtildeT = zeros(K*N, N);
+    for l = 1 : N
+      RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
+    end % for
+    ret{1} = ret{1} + kronVec(markE0TE0TtimesRkn1.', RtildeT).';
+    ret{2} = ret{2} + kronVec(markE0TE0TtimesRkn2.', RtildeT).';
+  end % for
+  % Diagonal blocks
+  for l = 1 : N
+    ret{1} = ret{1} + kron(spdiags(0.5 * areaNuE0Tint{nn,1} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+    ret{2} = ret{2} + kron(spdiags(0.5 * areaNuE0Tint{nn,2} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+  end % for
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiFuncDiscNu()
+%> was called with no precomputed field areaNuE0Tint and parameter g provides
+%> precomputed fields areaNuE0TE0T and areaNuE0T.
+%
+function ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc)
+[K, N] = size(dataDisc);
+
+% Assemble matrices
+ret = cell(2,1); 
+ret{1} = sparse(K*N, K*N); 
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  % Off-diagonal blocks
+  for np = 1 : 3
+    RtildeT = zeros(K*N, N);
+    for l = 1 : N
+      RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
+    end % for
+    ret{1} = ret{1} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,1}.', RtildeT).';
+    ret{2} = ret{2} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,2}.', RtildeT).';
+  end % for
+  % Diagonal blocks
+  for l = 1 : N
+    ret{1} = ret{1} + kron(spdiags(0.5 * g.areaNuE0T{nn,1} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+    ret{2} = ret{2} + kron(spdiags(0.5 * g.areaNuE0T{nn,2} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+  end % for
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiFuncDiscNu()
+%> was called with no precomputed field areaNuE0Tint and parameter g provides
+%> a precomputed field areaNuE0TE0T but no field areaNuE0T.
+%
+function ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc)
+[K, N] = size(dataDisc);
+
+% Assemble matrices
+ret = cell(2,1); 
+ret{1} = sparse(K*N, K*N); 
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  % Off-diagonal blocks
+  for np = 1 : 3
+    RtildeT = zeros(K*N, N);
+    for l = 1 : N
+      RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
+    end % for
+    ret{1} = ret{1} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,1}.', RtildeT).';
+    ret{2} = ret{2} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,2}.', RtildeT).';
+  end % for
+  % Diagonal blocks
+  Rkn = 0.5 * g.areaE0T(:,nn) .* markE0Tint(:, nn);
+  for l = 1 : N
+    ret{1} = ret{1} + kron(spdiags(Rkn .* g.nuE0T(:,nn,1) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+    ret{2} = ret{2} + kron(spdiags(Rkn .* g.nuE0T(:,nn,2) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+  end % for
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiFuncDiscNu()
+%> was called with no precomputed field areaNuE0Tint and parameter g provides
+%> a precomputed field areaNuE0T but no field areaNuE0TE0T.
+%
+function ret = assembleMatEdgePhiPhiFuncDiscNu_noAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc)
+[K, N] = size(dataDisc);
+
+% Assemble matrices
+ret = cell(2,1); 
+ret{1} = sparse(K*N, K*N); 
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  % Off-diagonal blocks
+  Rkn = 0.5 * g.areaE0T(:,nn);
+  for np = 1 : 3
+    markE0TE0TtimesRkn1 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,1));
+    markE0TE0TtimesRkn2 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,2));
+    RtildeT = zeros(K*N, N);
+    for l = 1 : N
+      RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
+    end % for
+    ret{1} = ret{1} + kronVec(markE0TE0TtimesRkn1.', RtildeT).';
+    ret{2} = ret{2} + kronVec(markE0TE0TtimesRkn2.', RtildeT).';
+  end % for
+  % Diagonal blocks
+  for l = 1 : N
+    ret{1} = ret{1} + kron(spdiags(0.5 * g.areaNuE0T{nn,1} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+    ret{2} = ret{2} + kron(spdiags(0.5 * g.areaNuE0T{nn,2} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+  end % for
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiFuncDiscNu()
+%> was called with no precomputed field areaNuE0Tint and parameter g provides
+%> no precomputed fields areaNuE0TE0T or areaNuE0T.
+%
+function ret = assembleMatEdgePhiPhiFuncDiscNu_noAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc)
+[K, N] = size(dataDisc);
+
 % Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);
 for nn = 1 : 3
   % Off-diagonal blocks
-  if isfield(g, 'areaNuE0TE0T')
-    for np = 1 : 3
-      RtildeT = zeros(K*N, N);
-      for l = 1 : N
-        RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
-      end % for
-      ret{1} = ret{1} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,1}.', RtildeT).';
-      ret{2} = ret{2} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,2}.', RtildeT).';
-    end % for
-  else
-    Rkn = 0.5 * g.areaE0T(:,nn);
-    for np = 1 : 3
-      markE0TE0TtimesRkn1 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,1));
-      markE0TE0TtimesRkn2 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,2));
-      RtildeT = zeros(K*N, N);
-      for l = 1 : N
-        RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
-      end % for
-      ret{1} = ret{1} + kronVec(markE0TE0TtimesRkn1.', RtildeT).';
-      ret{2} = ret{2} + kronVec(markE0TE0TtimesRkn2.', RtildeT).';
-    end % for
-  end % if
-  % Diagonal blocks
-  if nargin > 5
+  Rkn = 0.5 * g.areaE0T(:,nn);
+  for np = 1 : 3
+    markE0TE0TtimesRkn1 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,1));
+    markE0TE0TtimesRkn2 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,2));
+    RtildeT = zeros(K*N, N);
     for l = 1 : N
-      ret{1} = ret{1} + kron(spdiags(0.5 * areaNuE0Tint{nn,1} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
-      ret{2} = ret{2} + kron(spdiags(0.5 * areaNuE0Tint{nn,2} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+      RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
     end % for
-  else
-    if isfield(g, 'areaNuE0T')
-      for l = 1 : N
-        ret{1} = ret{1} + kron(spdiags(0.5 * g.areaNuE0T{nn,1} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
-        ret{2} = ret{2} + kron(spdiags(0.5 * g.areaNuE0T{nn,2} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
-      end % for
-    else
-      if ~isfield(g, 'areaNuE0TE0T')
-        Rkn = Rkn .* markE0Tint(:,nn);
-      else
-        Rkn = 0.5 * g.areaE0T(:,nn) .* markE0Tint(:, nn);
-      end % if
-      for l = 1 : N
-        ret{1} = ret{1} + kron(spdiags(Rkn .* g.nuE0T(:,nn,1) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
-        ret{2} = ret{2} + kron(spdiags(Rkn .* g.nuE0T(:,nn,2) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
-      end % for
-    end
-  end % if
+    ret{1} = ret{1} + kronVec(markE0TE0TtimesRkn1.', RtildeT).';
+    ret{2} = ret{2} + kronVec(markE0TE0TtimesRkn2.', RtildeT).';
+  end % for
+  % Diagonal blocks
+  Rkn = Rkn .* markE0Tint(:,nn);
+  for l = 1 : N
+    ret{1} = ret{1} + kron(spdiags(Rkn .* g.nuE0T(:,nn,1) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+    ret{2} = ret{2} + kron(spdiags(Rkn .* g.nuE0T(:,nn,2) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
+  end % for
 end % for
 end % function

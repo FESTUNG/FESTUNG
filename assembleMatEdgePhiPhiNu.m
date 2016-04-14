@@ -1,6 +1,6 @@
 % Assembles two matrices containing integrals over interior edges of products of
 % two basis functions with a component of the edge normal.
-%
+
 %===============================================================================
 %> @file assembleMatEdgePhiPhiNu.m
 %>
@@ -139,37 +139,156 @@ validateattributes(markE0Tint, {'logical'}, {'size', [K 3]}, mfilename, 'markE0T
 validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N 3]}, mfilename, 'refEdgePhiIntPhiInt');
 validateattributes(refEdgePhiIntPhiExt, {'numeric'}, {'size', [N N 3 3]}, mfilename, 'refEdgePhiIntPhiExt');
 
-% Assemble matrices
-ret = cell(2, 1); ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);
-for nn = 1 : 3
+if nargin > 4
   if isfield(g, 'areaNuE0TE0T')
-    for np = 1 : 3
-      ret{1} = ret{1} + 0.5 * kron(g.areaNuE0TE0T{nn,np,1}, refEdgePhiIntPhiExt(:,:,nn,np));
-      ret{2} = ret{2} + 0.5 * kron(g.areaNuE0TE0T{nn,np,2}, refEdgePhiIntPhiExt(:,:,nn,np));
-    end % for
+    ret = assembleMatEdgePhiPhiNu_withAreaNuE0Tint_withAreaNuE0TE0T(g, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, areaNuE0Tint);
   else
-    Qkn = 0.5 * g.areaE0T(:,nn);
-    for np = 1 : 3
-      ret{1} = ret{1} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,1)), refEdgePhiIntPhiExt(:,:,nn,np));
-      ret{2} = ret{2} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,2)), refEdgePhiIntPhiExt(:,:,nn,np));
-    end % for
+    ret = assembleMatEdgePhiPhiNu_withAreaNuE0Tint_noAreaNuE0TE0T(g, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, areaNuE0Tint);
   end % if
-  if nargin > 4
-    ret{1} = ret{1} + kron(spdiags(0.5 * areaNuE0Tint{nn,1}, 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
-    ret{2} = ret{2} + kron(spdiags(0.5 * areaNuE0Tint{nn,2}, 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+else
+  if isfield(g, 'areaNuE0TE0T')
+    if isfield(g, 'areaNuE0T')
+      ret = assembleMatEdgePhiPhiNu_withAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt);
+    else
+      ret = assembleMatEdgePhiPhiNu_withAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt);    
+    end % if
   else
     if isfield(g, 'areaNuE0T')
-      ret{1} = ret{1} + kron(spdiags(0.5 * g.areaNuE0T{nn,1} .* markE0Tint(:, nn), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
-      ret{2} = ret{2} + kron(spdiags(0.5 * g.areaNuE0T{nn,2} .* markE0Tint(:, nn), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+      ret = assembleMatEdgePhiPhiNu_noAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt);
     else
-      if ~isfield(g, 'areaNuE0TE0T')
-        Qkn = Qkn .* markE0Tint(:,nn);
-      else
-        Qkn = 0.5 * g.areaE0T(:,nn) .* markE0Tint(:, nn);
-      end % if
-      ret{1} = ret{1} + kron(spdiags(Qkn .* g.nuE0T(:,nn,1), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
-      ret{2} = ret{2} + kron(spdiags(Qkn .* g.nuE0T(:,nn,2), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
-    end
+      ret = assembleMatEdgePhiPhiNu_noAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt);   
+    end % if
   end % if
+end % if
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiNu()
+%> was called with a precomputed field areaNuE0Tint and the parameter g provides
+%> a precomputed field areaNuE0TE0T.
+%
+function ret = assembleMatEdgePhiPhiNu_withAreaNuE0Tint_withAreaNuE0TE0T(g, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, areaNuE0Tint)
+K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+% Assemble matrices
+ret = cell(2, 1); 
+ret{1} = sparse(K*N, K*N);  
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  for np = 1 : 3
+    ret{1} = ret{1} + 0.5 * kron(g.areaNuE0TE0T{nn,np,1}, refEdgePhiIntPhiExt(:,:,nn,np));
+    ret{2} = ret{2} + 0.5 * kron(g.areaNuE0TE0T{nn,np,2}, refEdgePhiIntPhiExt(:,:,nn,np));
+  end % for
+  ret{1} = ret{1} + kron(spdiags(0.5 * areaNuE0Tint{nn,1}, 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+  ret{2} = ret{2} + kron(spdiags(0.5 * areaNuE0Tint{nn,2}, 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiNu()
+%> was called with a precomputed field areaNuE0Tint and the parameter g provides
+%> no precomputed field areaNuE0TE0T.
+%
+function ret = assembleMatEdgePhiPhiNu_withAreaNuE0Tint_noAreaNuE0TE0T(g, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, areaNuE0Tint)
+K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+% Assemble matrices
+ret = cell(2, 1); 
+ret{1} = sparse(K*N, K*N);  
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  Qkn = 0.5 * g.areaE0T(:,nn);
+  for np = 1 : 3
+    ret{1} = ret{1} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,1)), refEdgePhiIntPhiExt(:,:,nn,np));
+    ret{2} = ret{2} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,2)), refEdgePhiIntPhiExt(:,:,nn,np));
+  end % for
+  ret{1} = ret{1} + kron(spdiags(0.5 * areaNuE0Tint{nn,1}, 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+  ret{2} = ret{2} + kron(spdiags(0.5 * areaNuE0Tint{nn,2}, 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiNu()
+%> was called without a precomputed field areaNuE0Tint and the parameter g provides
+%> precomputed fields areaNuE0TE0T and areaNuE0T.
+%
+function ret = assembleMatEdgePhiPhiNu_withAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
+K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+% Assemble matrices
+ret = cell(2, 1); 
+ret{1} = sparse(K*N, K*N);  
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  for np = 1 : 3
+    ret{1} = ret{1} + 0.5 * kron(g.areaNuE0TE0T{nn,np,1}, refEdgePhiIntPhiExt(:,:,nn,np));
+    ret{2} = ret{2} + 0.5 * kron(g.areaNuE0TE0T{nn,np,2}, refEdgePhiIntPhiExt(:,:,nn,np));
+  end % for
+  ret{1} = ret{1} + kron(spdiags(0.5 * g.areaNuE0T{nn,1} .* markE0Tint(:, nn), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+  ret{2} = ret{2} + kron(spdiags(0.5 * g.areaNuE0T{nn,2} .* markE0Tint(:, nn), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiNu()
+%> was called without a precomputed field areaNuE0Tint and the parameter g provides
+%> a precomputed field areaNuE0TE0T but no field areaNuE0T.
+%
+function ret = assembleMatEdgePhiPhiNu_withAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
+K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+% Assemble matrices
+ret = cell(2, 1); 
+ret{1} = sparse(K*N, K*N);  
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  for np = 1 : 3
+    ret{1} = ret{1} + 0.5 * kron(g.areaNuE0TE0T{nn,np,1}, refEdgePhiIntPhiExt(:,:,nn,np));
+    ret{2} = ret{2} + 0.5 * kron(g.areaNuE0TE0T{nn,np,2}, refEdgePhiIntPhiExt(:,:,nn,np));
+  end % for
+  Qkn = 0.5 * g.areaE0T(:,nn) .* markE0Tint(:, nn);
+  ret{1} = ret{1} + kron(spdiags(Qkn .* g.nuE0T(:,nn,1), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+  ret{2} = ret{2} + kron(spdiags(Qkn .* g.nuE0T(:,nn,2), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiNu()
+%> was called without a precomputed field areaNuE0Tint and the parameter g provides
+%> a precomputed field areaNuE0T but no field areaNuE0TE0T.
+%
+function ret = assembleMatEdgePhiPhiNu_noAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
+K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+% Assemble matrices
+ret = cell(2, 1); 
+ret{1} = sparse(K*N, K*N);  
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  Qkn = 0.5 * g.areaE0T(:,nn);
+  for np = 1 : 3
+    ret{1} = ret{1} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,1)), refEdgePhiIntPhiExt(:,:,nn,np));
+    ret{2} = ret{2} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,2)), refEdgePhiIntPhiExt(:,:,nn,np));
+  end % for
+  ret{1} = ret{1} + kron(spdiags(0.5 * g.areaNuE0T{nn,1} .* markE0Tint(:, nn), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+  ret{2} = ret{2} + kron(spdiags(0.5 * g.areaNuE0T{nn,2} .* markE0Tint(:, nn), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+end % for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that assembleMatEdgePhiPhiNu()
+%> was called without a precomputed field areaNuE0Tint and the parameter g provides
+%> no precomputed fields areaNuE0TE0T or areaNuE0T.
+%
+function ret = assembleMatEdgePhiPhiNu_noAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
+K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+% Assemble matrices
+ret = cell(2, 1); 
+ret{1} = sparse(K*N, K*N);  
+ret{2} = sparse(K*N, K*N);
+for nn = 1 : 3
+  Qkn = 0.5 * g.areaE0T(:,nn);
+  for np = 1 : 3
+    ret{1} = ret{1} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,1)), refEdgePhiIntPhiExt(:,:,nn,np));
+    ret{2} = ret{2} + kron(bsxfun(@times, g.markE0TE0T{nn,np}, Qkn .* g.nuE0T(:,nn,2)), refEdgePhiIntPhiExt(:,:,nn,np));
+  end % for
+  Qkn = Qkn .* markE0Tint(:,nn);
+  ret{1} = ret{1} + kron(spdiags(Qkn .* g.nuE0T(:,nn,1), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
+  ret{2} = ret{2} + kron(spdiags(Qkn .* g.nuE0T(:,nn,2), 0,K,K), refEdgePhiIntPhiInt(:,:,nn));
 end % for
 end % function
