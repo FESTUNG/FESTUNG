@@ -8,4 +8,3 @@ if problemData.isVisSol
   visualizeDataLagr(problemData.g, cLagr, 'c_h', problemData.outputBasename, nStep, problemData.outputTypes);
 end % if
 end % function
-

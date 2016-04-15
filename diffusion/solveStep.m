@@ -8,4 +8,3 @@ sysA = [                                                problemData.globM,      
 sysV = [-problemData.globJD{1}; -problemData.globJD{2}; problemData.globKD-problemData.globKN+problemData.globL];
 problemData.sysY = (problemData.sysW + problemData.tau*sysA) \ (problemData.sysW*problemData.sysY + problemData.tau*sysV);
 end
-

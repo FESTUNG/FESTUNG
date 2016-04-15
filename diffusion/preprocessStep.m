@@ -20,5 +20,4 @@ problemData.globKN = assembleVecEdgePhiIntFuncDiscIntFuncCont(problemData.g, pro
                       dDisc, @(x1,x2) problemData.gNCont(t,x1,x2), problemData.g.areaE0TbdrN);
 %% Assembly of the source contribution.
 problemData.globL = problemData.globM * reshape(fDisc', problemData.K * problemData.N, 1);
-end
-
+end % function

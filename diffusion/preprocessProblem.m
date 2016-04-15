@@ -36,4 +36,4 @@ problemData.globSD = problemData.eta * assembleMatEdgePhiIntPhiInt(problemData.g
                       problemData.g.markE0TbdrD, problemData.hatSdiag);
 problemData.sysW = [ sparse(2 * problemData.K * problemData.N, 3 * problemData.K * problemData.N) ; ...
                      sparse(problemData.K * problemData.N, 2 * problemData.K * problemData.N), problemData.globM ];
-end
+end % function
