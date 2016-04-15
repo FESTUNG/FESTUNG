@@ -14,15 +14,15 @@ problemData.g = computeDerivedGridData(problemData.g);
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
-computeBasesOnQuad(problemData.N);
+problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct);
 %% Computation of matrices on the reference triangle.
-problemData.hatM        = integrateRefElemPhiPhi(problemData.N);
-problemData.hatG        = integrateRefElemDphiPhiPhi(problemData.N);
-problemData.hatH        = integrateRefElemDphiPhi(problemData.N);
-problemData.hatRdiag    = integrateRefEdgePhiIntPhiIntPhiInt(problemData.N);
-problemData.hatRoffdiag = integrateRefEdgePhiIntPhiExtPhiExt(problemData.N);
-problemData.hatSdiag    = integrateRefEdgePhiIntPhiInt(problemData.N);
-problemData.hatSoffdiag = integrateRefEdgePhiIntPhiExt(problemData.N);
+problemData.hatM = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
+problemData.hatG = integrateRefElemDphiPhiPhi(problemData.N, problemData.basesOnQuad);
+problemData.hatH = integrateRefElemDphiPhi(problemData.N, problemData.basesOnQuad);
+problemData.hatRdiag = integrateRefEdgePhiIntPhiIntPhiInt(problemData.N, problemData.basesOnQuad);
+problemData.hatRoffdiag = integrateRefEdgePhiIntPhiExtPhiExt(problemData.N, problemData.basesOnQuad);
+problemData.hatSdiag = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
+problemData.hatSoffdiag = integrateRefEdgePhiIntPhiExt(problemData.N, problemData.basesOnQuad);
 %% Assembly of time-independent global matrices.
 problemData.globM  = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 problemData.globH  = assembleMatElemDphiPhi(problemData.g, problemData.hatH);

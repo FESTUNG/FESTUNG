@@ -1,7 +1,7 @@
 % Compute integrals on the reference triangle, whose integrands consist of all
 % permutations of a basis function with one of the (spatial) derivatives of a
 % basis function.
-%
+
 %===============================================================================
 %> @file integrateRefElemDphiPhi.m
 %>
@@ -23,6 +23,9 @@
 %> @f]
 %>
 %> @param  N    The local number of degrees of freedom
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi2D and gradPhi2D.
 %> @retval ret  The computed array @f$[N\times N\times 2]@f$
 %>
 %> This file is part of FESTUNG
@@ -45,15 +48,15 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefElemDphiPhi(N)
-global gPhi2D gGradPhi2D
+function ret = integrateRefElemDphiPhi(N, basesOnQuad)
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 ret = zeros(N, N, 2); % [ N x N x 2]
 if N > 1 % p > 0
   p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [~,~,W] = quadRule2D(qOrd);
   for i = 1 : N
     for j = 1 : N
       for m = 1 : 2
-        ret(i, j, m) = sum( W' .* gGradPhi2D{qOrd}(:,i,m) .* gPhi2D{qOrd}(:,j) );
+        ret(i, j, m) = sum( W' .* basesOnQuad.gradPhi2D{qOrd}(:,i,m) .* basesOnQuad.phi2D{qOrd}(:,j) );
       end % for
     end % for
   end % for

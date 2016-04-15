@@ -1,6 +1,6 @@
 % Compute integrals on the reference triangle, whose integrands 
 % consist of all permutations of two basis functions.
-%
+
 %===============================================================================
 %> @file integrateRefElemPhiPhi.m
 %>
@@ -20,6 +20,9 @@
 %> @f]
 %>
 %> @param  N    The local number of degrees of freedom
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi2D.
 %> @retval ret  The computed matrix @f$[N\times N]@f$
 %>
 %> This file is part of FESTUNG
@@ -42,13 +45,13 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefElemPhiPhi(N)
-global gPhi2D
+function ret = integrateRefElemPhiPhi(N, basesOnQuad)
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [~,~,W] = quadRule2D(qOrd);
 ret = zeros(N); % [N x N]
 for i = 1 : N
   for j = 1 : N
-    ret(i, j) = sum( W' .* gPhi2D{qOrd}(:, i) .* gPhi2D{qOrd}(:, j) );
+    ret(i, j) = sum( W' .* basesOnQuad.phi2D{qOrd}(:, i) .* basesOnQuad.phi2D{qOrd}(:, j) );
   end % for
 end % for
 end % function

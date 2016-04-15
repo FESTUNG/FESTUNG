@@ -14,20 +14,20 @@ problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...  % [K x 3] mark loca
                             problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD),:)); 
 problemData.g = computeDerivedGridData(problemData.g);       % Precompute some repeatedly evaluated fields
 %% Lookup table for basis function.
-computeBasesOnQuad(problemData.N);
+problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct);
 if problemData.isSlopeLim
-  computeTaylorBasesV0T(problemData.g, problemData.N);
+  problemData.basesOnQuad = computeTaylorBasesV0T(problemData.g, problemData.N, problemData.basesOnQuad);
 end % if
 %% Computation of matrices on the reference triangle.
-problemData.hatM              = integrateRefElemPhiPhi(problemData.N);
-problemData.hatG              = integrateRefElemDphiPhiPhi(problemData.N);
-problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N);
-problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N);
+problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
+problemData.hatG              = integrateRefElemDphiPhiPhi(problemData.N, problemData.basesOnQuad);
+problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
+problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 if problemData.isSlopeLim
   globMTaylor = assembleMatElemPhiTaylorPhiTaylor(problemData.g, problemData.N);
-  problemData.globMDiscTaylor = assembleMatElemPhiDiscPhiTaylor(problemData.g, problemData.N);
+  problemData.globMDiscTaylor = assembleMatElemPhiDiscPhiTaylor(problemData.g, problemData.N, problemData.basesOnQuad);
   problemData.globMCorr = spdiags(1./diag(globMTaylor), 0, problemData.K * problemData.N, problemData.K * problemData.N) * globMTaylor;
 end % if
 end % function

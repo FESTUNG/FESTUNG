@@ -1,6 +1,6 @@
 % Applies the hierarchical vertex based slope limiter to a discrete 
 % function given in Taylor basis.
-%
+
 %===============================================================================
 %> @file applySlopeLimiterTaylorHierarchicalVertex.m
 %>
@@ -88,6 +88,9 @@
 %>                    slope limiting routine. @f$[K \times 3]@f$
 %> @param  dataV0T    The function values for (Dirichlet boundary) vertices
 %>                    specified by <code>markV0TbdrD</code>. @f$[K \times 3]@f$
+%> @param  basesOnQuad  A struct containing precomputed values of (Taylor) basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phiTaylorV0T.
 %> @retval dataTaylorLim   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}^\mathrm{Taylor}c_h@f$. @f$[K \times N]@f$
 %>
@@ -111,9 +114,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataTaylorLim = applySlopeLimiterTaylorHierarchicalVertex(g, dataTaylor, markV0TbdrD, dataV0T)
-global gPhiTaylorV0T
-
+function dataTaylorLim = applySlopeLimiterTaylorHierarchicalVertex(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad)
 % Number of elements and polynomial degree
 [K, N] = size(dataTaylor);
 p = (sqrt(8*N+1)-3)/2;
@@ -121,7 +122,8 @@ p = (sqrt(8*N+1)-3)/2;
 % Check function arguments that are directly used
 validateattributes(dataTaylor, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataTaylor');
 assert(size(dataTaylor, 2) >= 3, 'Number of local degrees of freedom in dataTaylor does not correspond to p>=1')
-validateattributes(gPhiTaylorV0T, {'numeric'}, {'size', [K 3 N]}, mfilename, 'gPhiTaylorV0T');
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
+validateattributes(basesOnQuad.phiTaylorV0T, {'numeric'}, {'size', [K 3 N]}, mfilename, 'phiTaylorV0T');
 
 % Initialize limited coefficients and limiter of previous order
 dataTaylorLim = zeros(size(dataTaylor));
@@ -141,7 +143,7 @@ for ord = p : -1 : 1
     ind = mult2ind(mult);
     
     % Compute limiter parameters for each element
-    valV0T = computeFuncDiscAtPoints(dataTaylor(:, ind), gPhiTaylorV0T(:, :, 1:3));
+    valV0T = computeFuncDiscAtPoints(dataTaylor(:, ind), basesOnQuad.phiTaylorV0T(:, :, 1:3));
     if ord > 1
       alphaTmp = computeVertexBasedLimiter(g, dataTaylor(:, ind(1)), valV0T, markV0TbdrD, valV0T);
     else

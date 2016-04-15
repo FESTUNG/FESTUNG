@@ -73,6 +73,9 @@
 %> @param  valOnQuad  Array holding the function value @f$a(q_r)@f$ for all
 %>                    quadrature points on all edges. @f$[K\times3\times R]@f$
 %> @param  N          The number of local degrees of freedom @f$[\text{scalar}]@f$
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi1D.
 %> @param areaE0Tbdr (optional) argument to provide precomputed values
 %>                    for the products of <code>markE0Tbdr</code>,
 %>                    and <code>g.areaE0T</code>,
@@ -100,7 +103,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncContVal(g, markE0Tbdr, funcCont, valOnQuad, N, areaE0Tbdr)
+function ret = assembleVecEdgePhiIntFuncContVal(g, markE0Tbdr, funcCont, valOnQuad, N, basesOnQuad, areaE0Tbdr)
 % Determine quadrature rule
 p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  
@@ -110,11 +113,12 @@ qOrd = 2*p+1;
 validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 validateattributes(valOnQuad, {'numeric'}, {'size', [g.numT 3 length(W)]}, mfilename, 'valOnQuad');
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
-if nargin > 5
-  ret = assembleVecEdgePhiIntFuncContVal_withAreaE0Tbdr(g, funcCont, valOnQuad, N, areaE0Tbdr, qOrd);
+if nargin > 6
+  ret = assembleVecEdgePhiIntFuncContVal_withAreaE0Tbdr(g, funcCont, valOnQuad, N, basesOnQuad, areaE0Tbdr, qOrd);
 else
-  ret = assembleVecEdgePhiIntFuncContVal_noAreaE0Tbdr(g, markE0Tbdr, funcCont, valOnQuad, N, qOrd);
+  ret = assembleVecEdgePhiIntFuncContVal_noAreaE0Tbdr(g, markE0Tbdr, funcCont, valOnQuad, N, basesOnQuad, qOrd);
 end % if
 
 end % function
@@ -123,9 +127,7 @@ end % function
 %> @brief Helper function for the case that assembleVecEdgePhiIntFuncContVal()
 %> was called with a precomputed field areaE0Tbdr.
 %
-function ret = assembleVecEdgePhiIntFuncContVal_withAreaE0Tbdr(g, funcCont, valOnQuad, N, areaE0Tbdr, qOrd)
-global gPhi1D
-
+function ret = assembleVecEdgePhiIntFuncContVal_withAreaE0Tbdr(g, funcCont, valOnQuad, N, basesOnQuad, areaE0Tbdr, qOrd)
 % Determine quadrature rule
 [Q, W] = quadRule1D(qOrd);
 
@@ -139,7 +141,7 @@ for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   funcOnQuad = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
   for i = 1 : N
-    integral = (funcOnQuad .* squeeze((valOnQuad(:, n, :) < 0) .* valOnQuad(:, n, :))) * ( W' .* gPhi1D{qOrd}(:,i,n));
+    integral = (funcOnQuad .* squeeze((valOnQuad(:, n, :) < 0) .* valOnQuad(:, n, :))) * ( W' .* basesOnQuad.phi1D{qOrd}(:,i,n));
     ret(:,i) = ret(:,i) + areaE0Tbdr{n} .* integral;
   end % for
 end % for
@@ -151,9 +153,7 @@ end % function
 %> @brief Helper function for the case that assembleVecEdgePhiIntFuncContVal()
 %> was called with no precomputed field areaE0Tbdr.
 %
-function ret = assembleVecEdgePhiIntFuncContVal_noAreaE0Tbdr(g, markE0Tbdr, funcCont, valOnQuad, N, qOrd)
-global gPhi1D
-
+function ret = assembleVecEdgePhiIntFuncContVal_noAreaE0Tbdr(g, markE0Tbdr, funcCont, valOnQuad, N, basesOnQuad, qOrd)
 % Determine quadrature rule
 [Q, W] = quadRule1D(qOrd);
 
@@ -168,7 +168,7 @@ for n = 1 : 3
   funcOnQuad = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
   Kkn = markE0Tbdr(:, n) .* g.areaE0T(:,n);
   for i = 1 : N
-    integral = (funcOnQuad .* squeeze((valOnQuad(:, n, :) < 0) .* valOnQuad(:, n, :))) * ( W' .* gPhi1D{qOrd}(:,i,n));
+    integral = (funcOnQuad .* squeeze((valOnQuad(:, n, :) < 0) .* valOnQuad(:, n, :))) * ( W' .* basesOnQuad.phi1D{qOrd}(:,i,n));
     ret(:,i) = ret(:,i) + Kkn .* integral;
   end % for
 end % for

@@ -1,19 +1,19 @@
 % Evaluate Taylor basis functions in the vertices of each element and store
-% them in a global variable.
-%
+% them in a a struct.
+
 %===============================================================================
 %> @file computeTaylorBasesV0T.m
 %>
 %> @brief Evaluate Taylor basis functions in the vertices of each element 
-%>        and store them in a global variable.
+%>        and store them in a struct.
 %===============================================================================
 %>
 %> @brief Evaluate Taylor basis functions in the vertices of each element 
-%>        and store them in a global variable.
+%>        and store them in a struct.
 %>
 %> It evaluates the basis functions provided by <code>phiTaylorPhy()</code>
-%> in all vertices of all elements and stores them in the global array
-%> <code>gPhiTaylorV0T</code> (@f$[K \times 3 \times N]@f$).
+%> in all vertices of all elements and stores them in the array
+%> <code>phiTaylorV0T</code> (@f$[K \times 3 \times N]@f$).
 %> 
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
@@ -22,6 +22,10 @@
 %> @param  N          The number of local degrees of freedom. For polynomial
 %>                    order @f$p@f$, it is given as @f$N = (p+1)(p+2)/2@f$
 %>                    @f$[\text{scalar}]@f$
+%> @param  basesOnQuad  A (possibly empty) struct to which the computed
+%>                    array is added.
+%>
+%> @retval basesOnQuad  The struct with the added array phiTaylorV0T.
 %>
 %> This file is part of FESTUNG
 %>
@@ -43,19 +47,18 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function computeTaylorBasesV0T(g, N)
+function basesOnQuad = computeTaylorBasesV0T(g, N, basesOnQuad)
 
 % Check function arguments that are directly used
 assert(0 < g.numT, 'Number of elements must be greater than zero')
-validateattributes(g.coordV0T, {'numeric'}, {'size', [g.numT 3 2]}, mfilename, 'g.coordV0T');
+validateattributes(g.coordV0T, {'numeric'}, {'size', [g.numT 3 2]}, mfilename, 'g.coordV0T')
 assert(~isempty(find(N == ((0:4)+1).*((0:4)+2)/2, 1)), 'Number of degrees of freedom does not match a polynomial order') % N == (p+1)(p+2)/2
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
-global gPhiTaylorV0T
-
-gPhiTaylorV0T = zeros(g.numT, 3, N);
+basesOnQuad.phiTaylorV0T = zeros(g.numT, 3, N);
 for n = 1 : 3
   for i = 1 : N
-    gPhiTaylorV0T(:, n, i) = phiTaylorPhy(g, i, g.coordV0T(:, n, 1), g.coordV0T(:, n, 2));
+    basesOnQuad.phiTaylorV0T(:, n, i) = phiTaylorPhy(g, i, g.coordV0T(:, n, 1), g.coordV0T(:, n, 2));
   end
 end
 

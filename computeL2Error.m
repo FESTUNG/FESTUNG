@@ -91,9 +91,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function err = computeL2Error(g, dataDisc, funcCont, qOrd)
-global gPhi2D
-
+function err = computeL2Error(g, dataDisc, funcCont, qOrd, basesOnQuad)
 % Check function arguments that are directly used
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 validateattributes(dataDisc, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataDisc');
@@ -106,7 +104,7 @@ X2 = kron(g.B(:,2,1), Q1) + kron(g.B(:,2,2), Q2) + kron(g.coordV0T(:,1,2), ones(
 
 % Evaluate analytical and discrete function
 cExOnQuadPts = funcCont(X1, X2); % [K x R]
-cApprxOnQuadPts = dataDisc * gPhi2D{qOrd}'; % [K x R] = [K x N] * [N x R]
+cApprxOnQuadPts = dataDisc * basesOnQuad.phi2D{qOrd}'; % [K x R] = [K x N] * [N x R]
 
 % Compute error
 err = sqrt(2 * dot((cApprxOnQuadPts - cExOnQuadPts).^2 * W.', g.areaT)); 

@@ -1,5 +1,5 @@
 % Applies a slope limiter to a discrete function given in Taylor basis.
-%
+
 %===============================================================================
 %> @file applySlopeLimiterTaylor.m
 %>
@@ -32,6 +32,9 @@
 %>                    slope limiting routine. @f$[K \times 3]@f$
 %> @param  dataV0T    The function values for (Dirichlet boundary) vertices
 %>                    specified by <code>markV0TbdrD</code>. @f$[K \times 3]@f$
+%> @param  basesOnQuad  A struct containing precomputed values of (Taylor) basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phiTaylorV0T.
 %> @param  type       The type of slope limiter to be used. [<code>string</code>]
 %> @retval dataTaylorLim   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}^\mathrm{Taylor}c_h@f$. @f$[K \times N]@f$
@@ -56,7 +59,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataTaylorLim = applySlopeLimiterTaylor(g, dataTaylor, markV0TbdrD, dataV0T, type)
+function dataTaylorLim = applySlopeLimiterTaylor(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad, type)
 % Set default limiter
 if nargin < 5
   type = 'linear';
@@ -64,11 +67,11 @@ end
 % Apply chosen limiter
 switch type
   case 'linear'
-    dataTaylorLim = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0TbdrD, dataV0T);
+    dataTaylorLim = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad);
   case 'hierarch_vert'
-    dataTaylorLim = applySlopeLimiterTaylorHierarchicalVertex(g, dataTaylor, markV0TbdrD, dataV0T);
+    dataTaylorLim = applySlopeLimiterTaylorHierarchicalVertex(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad);
   case 'strict'
-    dataTaylorLim = applySlopeLimiterTaylorStrict(g, dataTaylor, markV0TbdrD, dataV0T);
+    dataTaylorLim = applySlopeLimiterTaylorStrict(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad);
   otherwise
     error('Unknown limiter type');
 end
