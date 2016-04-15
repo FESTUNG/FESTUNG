@@ -21,21 +21,27 @@ diary([problemName '.log']) % Start logging
 oldpath = addpath(problemName);
 %% Execute problem
 try
-  %% Preprocess and initialize problem
+  %% Pre-process and initialize problem
+  tPreprocess = tic;
   problemData = struct;
   for nFunc = 1 : length(preprocessList)
     problemData = feval(preprocessList{nFunc}, problemData);
   end % for
+  fprintf('Pre-processing time: %g seconds.\n', toc(tPreprocess));
   %% Enter iterative loop
+  tLoop = tic;
   for nStep = 1 : problemData.numSteps
     for nFunc = 1 : length(stepList)
       problemData = feval(stepList{nFunc}, problemData, nStep);
     end % for
   end % for
-  %% Postprocess problem
+  fprintf('Loop time: %g seconds.\n', toc(tLoop));
+  %% Post-process problem
+  tPostprocess = tic;
   for nFunc = 1 : length(postprocessList)
     problemData = feval(postprocessList{nFunc}, problemData);
   end % for
+  fprintf('Post-processing time: %g seconds.\n', toc(tPostprocess))
 catch e
   %% End logging and restore original path
   diary off
