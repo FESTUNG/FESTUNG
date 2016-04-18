@@ -1,3 +1,86 @@
+% Generic main program for arbitrary problems. Call with problem name given
+% as a function argument to start computation.
+
+%===============================================================================
+%> @file main.m
+%>
+%> @brief Generic main program for arbitrary problems. Call with problem 
+%>        name given as a function argument to start computation.
+%===============================================================================
+%>
+%> @brief Generic main program for arbitrary problems. Call with problem 
+%>        name given as a function argument to start computation.
+%>
+%> This routine provides a generic interface for arbitrary problems.
+%> It makes the assumption that any kind of problem can be subdivided into
+%> a number of blocks that are executed after each other:
+%> 
+%>  1. Configuration: Specifies all relevant problem parameters (such as
+%>     mesh width, number of time steps, boundary conditions, etc.).
+%>     See template/configureProblem.m
+%>  2. Pre-processing: Computes all required data fields that are not
+%>     changing over the course of the computation. Typically, this
+%>     contains the computational mesh, stationary matrix blocks, etc.
+%>     See template/preprocessProblem.m
+%>  3. Initialization: Fills data structures necessary for the main loop
+%>     with the initial data necessary to start the computation.
+%>     See template/initializeProblem.m
+%>  4. Main-Loop: Iteratively compute a solution, e.g., at different
+%>     time-levels. Can also consist of only a single iteration (for
+%>     stationary problems).
+%>  5. Post-processing: Performs tasks after the computation of the final
+%>     solution is done. Typically, this can be some kind of error 
+%>     evaluation or similar tasks.
+%>     See template/postprocessProblem.m
+%>
+%> The main loop itself is again subdivided into four parts:
+%> 
+%>  1. Pre-processing: Performs all tasks (e.g., assembly of matrix blocks,
+%>     evaluation of boundary conditions, etc.) that are required for the
+%>     computation of the next solution.
+%>     See template/preprocessStep.m
+%>  2. Solution: Computes the solution at the next step, e.g., at a new
+%>     time level.
+%>     See template/solveStep.m
+%>  3. Post-processing: Performs any tasks that are necessary after
+%>     computing the next solution, e.g., slope-limiting.
+%>     See template/postprocessStep.m
+%>  4. Output: Takes care of any tasks necessary for the visualization or
+%>     interpretation of the computed solution, e.g., writing it to a file.
+%>     See template/outputStep.m
+%>
+%> A struct <code>problemData</code> is passed to and returned from every
+%> routine in the above steps, which allows to store problem data or 
+%> computed values.
+%>
+%> To implement a new problem using this generic framework, simply create
+%> a subfolder and implement all above mentioned routines in this folder.
+%> Then call it as <code>main('folder-name')</code>.
+%>
+%> @param  problemName  The name of the problem to be solved. A folder with
+%>                      matching name must exist and provide all of the 
+%>                      mentioned routines. @f$[\text{string}]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%
 function main(problemName)
 %% Check given problem
 validateattributes(problemName, {'char'},{'nonempty'}, mfilename, 'problemName')
