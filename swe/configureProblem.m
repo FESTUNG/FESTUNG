@@ -64,6 +64,7 @@ problemData.scheme = 'explicit'; % type of time stepping scheme ('explicit' or '
 problemData.t0 = 0;
 problemData.tEnd = 1;
 problemData.numSteps = 150;
+problemData.dt = (problemData.tEnd - problemData.t0) / problemData.numSteps;
 
 %% Model parameters
 problemData.isOSRiem = true; % apply Riemann solver to open sea boundary
@@ -73,6 +74,7 @@ problemData.minValueHeight = 1.e-3; % Minimum water level, values below are rese
 
 %% Analytical solution
 problemData.isSolutionAvail = true;
+problemData.isRhsAvail = true;
 
 % Solution parameters
 height = 0.05;
@@ -80,7 +82,10 @@ A = 0.1;
 B = 0.1;
 C = 0.1;
 problemData.gConst = 9.81;
-problemData.bottomFric = 1;
+
+problemData.isBottomFrictionNonlinear = true; % NOLIBF
+problemData.isBottomFrictionVarying = false; % NWP
+problemData.bottomFrictionCoef = 1;
 
 % Ramping function, bathymetry, and Coriolis coefficient
 problemData.ramp = @(t) 1;
@@ -114,7 +119,7 @@ problemData.f1Cont = @(x1,x2,t) problemData.u_tCont(x1,x2,t) .* problemData.hCon
                        problemData.uCont(x1,x2,t) .* problemData.v_yCont(x1,x2,t) .* problemData.hCont(x1,x2,t) + ... 
                        problemData.uCont(x1,x2,t) .* problemData.vCont(x1,x2,t) .* problemData.h_yCont(x1,x2,t) + ...
                        problemData.gConst * height * problemData.hCont(x1,x2,t) + ...
-                       problemData.bottomFric * sqrt( problemData.uCont(x1,x2,t) .* problemData.uCont(x1,x2,t) + problemData.vCont(x1,x2,t) .* problemData.vCont(x1,x2,t) ) .* problemData.uCont(x1,x2,t) - ...
+                       problemData.bottomFrictionCoef * sqrt( problemData.uCont(x1,x2,t) .* problemData.uCont(x1,x2,t) + problemData.vCont(x1,x2,t) .* problemData.vCont(x1,x2,t) ) .* problemData.uCont(x1,x2,t) - ...
                        problemData.fcCont(x1,x2) .* problemData.vCont(x1,x2,t) .* problemData.hCont(x1,x2,t);
 problemData.f2Cont = @(x1,x2,t) problemData.v_tCont(x1,x2,t) .* problemData.hCont(x1,x2,t) + ...
                        problemData.vCont(x1,x2,t) .* problemData.h_tCont(x1,x2,t) + ...
@@ -124,6 +129,9 @@ problemData.f2Cont = @(x1,x2,t) problemData.v_tCont(x1,x2,t) .* problemData.hCon
                        problemData.vCont(x1,x2,t) .* problemData.vCont(x1,x2,t) .* problemData.h_yCont(x1,x2,t) + ... 
                        problemData.gConst * problemData.h_yCont(x1,x2,t) .* problemData.hCont(x1,x2,t) + ...
                        problemData.gConst * height * problemData.hCont(x1,x2,t) + ...
-                       problemData.bottomFric * sqrt( problemData.uCont(x1,x2,t) .* problemData.uCont(x1,x2,t) + problemData.vCont(x1,x2,t) .* problemData.vCont(x1,x2,t) ) .* problemData.vCont(x1,x2,t) + ...
+                       problemData.bottomFrictionCoef * sqrt( problemData.uCont(x1,x2,t) .* problemData.uCont(x1,x2,t) + problemData.vCont(x1,x2,t) .* problemData.vCont(x1,x2,t) ) .* problemData.vCont(x1,x2,t) + ...
                        problemData.fcCont(x1,x2) .* problemData.uCont(x1,x2,t) .* problemData.hCont(x1,x2,t);
+                     
+% Boundary conditions
+problemData.xiOSCont = problemData.xiCont;
 end % function

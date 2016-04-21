@@ -112,6 +112,7 @@ try
   end % for
   fprintf('Pre-processing time: %g seconds.\n', toc(tPreprocess));
   %% Enter iterative loop
+  fprintf('Entering main loop with %d iterations.\n', problemData.numSteps);
   tLoop = tic;
   for nStep = 1 : problemData.numSteps
     for nFunc = 1 : length(stepList)

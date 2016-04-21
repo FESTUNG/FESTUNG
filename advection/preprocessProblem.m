@@ -13,6 +13,8 @@ problemData.g.markE0TbdrD = ~problemData.g.markE0Tint;       % [K x 3] mark loca
 problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...  % [K x 3] mark local vertices on the Dirichlet boundary
                             problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD),:)); 
 problemData.g = computeDerivedGridData(problemData.g);       % Precompute some repeatedly evaluated fields
+%% Configuration output.
+fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
 problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct);
 if problemData.isSlopeLim

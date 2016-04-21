@@ -74,7 +74,7 @@ problemData.g.markE0TbdrL = problemData.g.idE0T == 1; % [K x 3] mark local edges
 problemData.g.markE0TbdrRA = problemData.g.idE0T == 2; % [K x 3] mark local edges on the open sea boundary
 problemData.g.markE0TbdrRI = problemData.g.idE0T == 3; % [K x 3] mark local edges on the open sea boundary
 problemData.g.markE0TbdrOS = problemData.g.idE0T == 4; % [K x 3] mark local edges on the open sea boundary
-riverBdrs = ~isequal(problemData.g.markE0TbdrRI, zeros(K, 3));
+problemData.isRiverBdr = any(problemData.g.markE0TbdrRI(:));
 problemData.g = computeDerivedGridData(problemData.g);
 
 problemData.outputFrequency = max(floor(problemData.numSteps / problemData.outputCount), 1);
@@ -91,43 +91,78 @@ problemData.sysMinValueCorrection = [ phi(1,0,0) phi(1,1,0) phi(1,0,1) ; ...
                                       phi(3,0,0) phi(3,1,0) phi(3,0,1) ];
 
 %% Computation of matrices on the reference triangle.
-problemData.refElemPhiPhiPhi = integrateRefElemPhiPhiPhi(N, problemData.basesOnQuad);
-problemData.refElemDphiLinPhiPhi = integrateRefElemDphiLinPhiPhi(N, problemData.basesOnQuad);
-problemData.refElemDphiPhi = integrateRefElemDphiPhi(N, problemData.basesOnQuad);
+refElemPhiPhiPhi = integrateRefElemPhiPhiPhi(N, problemData.basesOnQuad);
+refElemDphiLinPhiPhi = integrateRefElemDphiLinPhiPhi(N, problemData.basesOnQuad);
+refElemDphiPhi = integrateRefElemDphiPhi(N, problemData.basesOnQuad);
 problemData.refElemPhiPhi = integrateRefElemPhiPhi(N, problemData.basesOnQuad);
-problemData.refEdgePhiIntPhiInt = integrateRefEdgePhiIntPhiInt(N, problemData.basesOnQuad);
-problemData.refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, problemData.basesOnQuad);
-problemData.refElemDphiPerQuad = integrateRefElemDphiPerQuad(N, problemData.basesOnQuad);
-problemData.refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, problemData.basesOnQuad);
+refEdgePhiIntPhiInt = integrateRefEdgePhiIntPhiInt(N, problemData.basesOnQuad);
+refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, problemData.basesOnQuad);
+refElemDphiPerQuad = integrateRefElemDphiPerQuad(N, problemData.basesOnQuad);
+refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, problemData.basesOnQuad);
 problemData.refEdgePhiIntPhiIntPerQuad = integrateRefEdgePhiIntPhiIntPerQuad(N, problemData.basesOnQuad);
 
 %% L2 projections of time-independent algebraic coefficients.
-problemData.zbDisc = projectFuncCont2DataDisc(problemData.g, problemData.zbCont, 2, eye(3), computeBasesOnQuad(3, struct)); 
 fcDisc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.fcCont(x1,x2), 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+problemData.zbDisc = projectFuncCont2DataDisc(problemData.g, problemData.zbCont, 2, eye(3), computeBasesOnQuad(3, struct)); 
+
+% Evaluate zb in each quadrature point
+qOrd = max(2*p,1); [Q, ~] = quadRule1D(qOrd);
+problemData.zbPerQuad = cell(3,1);
+for n = 1 : 3
+  [Q1,Q2] = gammaMap(n, Q);
+  problemData.zbPerQuad{n} = problemData.zbCont(problemData.g.mapRef2Phy(1,Q1,Q2), problemData.g.mapRef2Phy(2,Q1,Q2));
+end % for
 
 % Visualization of coefficients
-if any(ismember(problemData.outputList, 'zb'))
-  dataLagr = projectDataDisc2DataLagr(problemData.zbDisc);
-  visualizeDataLagr(problemData.g, dataLagr, 'z_b', ['output/' problemData.name '_zb'], 0, problemData.outputTypes);
-end % if
 if any(ismember(problemData.outputList, 'fc'))
   dataLagr = projectDataDisc2DataLagr(fcDisc);
   visualizeDataLagr(problemData.g, dataLagr, 'f_c', ['output/' problemData.name '_fc'], 0, problemData.outputTypes);
 end % if
+if any(ismember(problemData.outputList, 'zb'))
+  dataLagr = projectDataDisc2DataLagr(problemData.zbDisc);
+  visualizeDataLagr(problemData.g, dataLagr, 'z_b', ['output/' problemData.name '_zb'], 0, problemData.outputTypes);
+end % if
 
 %% Assembly of time-independent global matrices corresponding to linear contributions.
-globD = assembleMatElemPhiPhiFuncDisc(problemData.g, problemData.refElemPhiPhiPhi, fcDisc);
-globG = assembleMatElemPhiPhiFuncDiscLin(problemData.g, problemData.refElemDphiLinPhiPhi, problemData.zbDisc);
-globH = assembleMatElemDphiPhi(problemData.g, problemData.refElemDphiPhi);
+% Element matrices
+globD = assembleMatElemPhiPhiFuncDisc(problemData.g, refElemPhiPhiPhi, fcDisc);
+globG = assembleMatElemPhiPhiFuncDiscLin(problemData.g, refElemDphiLinPhiPhi, problemData.zbDisc);
+globH = assembleMatElemDphiPhi(problemData.g, refElemDphiPhi);
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.refElemPhiPhi);
-globQ = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.refEdgePhiIntPhiInt, problemData.refEdgePhiIntPhiExt, problemData.g.areaNuE0Tint);
-globQOS = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrOS, problemData.refEdgePhiIntPhiInt, problemData.g.areaNuE0TbdrOS);
-globQRA = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrRA, problemData.refEdgePhiIntPhiInt, problemData.g.areaNuE0TbdrRA);
 
+% Edge matrices
+globQ = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, problemData.g.areaNuE0Tint);
+globQOS = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrOS, refEdgePhiIntPhiInt, problemData.g.areaNuE0TbdrOS);
+globQRA = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrRA, refEdgePhiIntPhiInt, problemData.g.areaNuE0TbdrRA);
+
+% Derived system matrices
 problemData.sysW = blkdiag(problemData.globM, problemData.globM, problemData.globM);
 problemData.linearTerms = [               sparse(K*N,K*N), globQ{1} + globQOS{1} + globQRA{1} - globH{1},  globQ{2} + globQOS{2} + globQRA{2} - globH{2}; ...
                             problemData.gConst * globG{1},                               sparse(K*N,K*N),                                          -globD; ...
                             problemData.gConst * globG{2},                                         globD,                                 sparse(K*N,K*N) ];
 %% Assembly of time-independent global matrices corresponding to non-linear contributions.
+% Element matrices
+problemData.globF = assembleMatElemDphiPerQuad(problemData.g, refElemDphiPerQuad);
 
+% Edge matrices
+[problemData.globRdiag, problemData.globRoffdiag] = assembleMatEdgePhiNuPerQuad(problemData.g, problemData.g.markE0Tint, refEdgePhiIntPerQuad);
+problemData.globV = assembleMatEdgePhiPerQuad(problemData.g, refEdgePhiIntPerQuad);
+
+% Boundary matrices
+problemData.globROS = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrOS, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrOS);
+globB = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrRA, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrRA);
+problemData.globRdiag = cellfun(@plus, problemData.globRdiag, globB, 'UniformOutput', false);
+
+%% Assembly of bottom-friction terms.
+if problemData.isBottomFrictionVarying
+  error('Not implemented')
+else
+  if problemData.isBottomFrictionNonlinear
+    refElemPhiPerQuad = integrateRefElemPhiPerQuad(N, problemData.basesOnQuad);
+    problemData.globE = assembleMatElemPhiPhi(problemData.g, refElemPhiPerQuad);
+  else
+    problemData.globE = problemData.globM;
+  end % if
+  problemData.globE = problemData.bottomFrictionCoef * problemData.globE;
+end % if
 end % function

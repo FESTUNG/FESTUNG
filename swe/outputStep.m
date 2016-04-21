@@ -51,7 +51,13 @@
 %> @endparblock
 %
 function problemData = outputStep(problemData, nStep)
-% Executed at the end of every loop iteration, e.g., to allow writing the
-% computed solution to file.
+%% Visualize solution.
+visualizeSolution(problemData, nStep);
+
+%% Update waitbar.
+if problemData.isWaitbar
+  percentDone = round( nStep / problemData.numSteps * 100 );
+  problemData.waitbar = waitbar(percentDone / 100, problemData.waitbar, strcat( [ 'Time stepping:', ' ', num2str(percent), str ] ) );
+end % if
 end % function
 
