@@ -50,6 +50,6 @@
 %> @endparblock
 %
 function problemData = postprocessStep(problemData, nStep)
-% Third step in each loop iteration.
+problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.minValueHeight, 1000);
 end
 

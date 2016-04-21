@@ -65,4 +65,10 @@ problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1
 
 %% Visualize initial solution.
 visualizeSolution(problemData, 0);
+
+%% Initialize waitbar.
+if problemData.isWaitbar
+  str  = strcat( ['% done. Simulating refinement level =', ' ', num2str(problemData.refinement), ', p =', ' ', num2str(p), '.' ]);
+  problemData.waitbar = waitbar(0, strcat([ 'Time stepping:', ' ', num2str(0), str ]));
+end % if
 end % function
