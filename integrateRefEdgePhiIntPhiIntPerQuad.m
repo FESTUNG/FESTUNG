@@ -52,7 +52,7 @@ ret = zeros(N, N, 3, length(W)); % [N x N x 3 x R]
 for n = 1 : 3 % 3 edges
   for i = 1 : N
     for j = 1 : N
-      ret(i,j,n,:) = gPhi1D{qOrd}(:,i,n).* gPhi1D{qOrd}(:,j,n);
+      ret(i,j,n,:) = gPhi1D{qOrd}(:,i,n).* gPhi1D{qOrd}(:,j,n) .* W';
     end % for
   end % for
 end % for

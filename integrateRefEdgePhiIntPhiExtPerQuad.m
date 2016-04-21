@@ -55,7 +55,7 @@ for nn = 1 : 3 % 3 edges
   for np = 1 : 3
       for i = 1 : N
         for j = 1 : N
-          ret(i, j, nn, np, :) = gPhi1D{qOrd}(:,i,nn) .* gThetaPhi1D{qOrd}(:,j,nn,np);
+          ret(i, j, nn, np, :) = gPhi1D{qOrd}(:,i,nn) .* gThetaPhi1D{qOrd}(:,j,nn,np) .* W.';
         end % for
       end % for
   end % for

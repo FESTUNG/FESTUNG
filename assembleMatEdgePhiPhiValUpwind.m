@@ -1,7 +1,7 @@
 % Assembles a matrix containing integrals over interior edges of products of
 % two basis functions with the upwind value of a, for each quadrature point 
 % specified, function.
-%
+
 %===============================================================================
 %> @file assembleMatEdgePhiPhiValUpwind.m
 %>
@@ -180,14 +180,15 @@
 %
 function ret = assembleMatEdgePhiPhiValUpwind(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad)
 % Extract dimensions
-K = g.numT; N = size(refEdgePhiIntPhiIntOnQuad, 1);
+[K, ~, R] = size(valOnQuad);
+N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
 % Determine quadrature rule
-p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
-R = length(W);
+% p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
+% R = length(W);
 
 % Check function arguments that are directly used
-validateattributes(valOnQuad, {'numeric'}, {'size', [K 3 R]});
+validateattributes(valOnQuad, {'numeric'}, {'size', [g.numT 3 NaN]});
 validateattributes(refEdgePhiIntPhiIntOnQuad, {'numeric'}, {'size', [N N 3 R]});
 validateattributes(refEdgePhiIntPhiExtOnQuad, {'numeric'}, {'size', [N N 3 3 R]});
 
@@ -197,13 +198,13 @@ for nn = 1 : 3
   Rkn = g.areaE0T(:, nn);
   % Diagonal blocks
   for r = 1 : R
-    ret = ret + kron(spdiags(W(r) .* Rkn .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
+    ret = ret + kron(spdiags(Rkn .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
   end
   % Off-diagonal blocks
   for np = 1 : 3
     RknTimesVal = sparse(K*N, N);
     for r = 1 : R
-      RknTimesVal = RknTimesVal + kron(W(r) .* Rkn .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
+      RknTimesVal = RknTimesVal + kron(Rkn .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
     end
     ret = ret + kronVec(g.markE0TE0T{nn, np}, RknTimesVal);
   end % for
