@@ -54,14 +54,29 @@ if ~isdir('output')
 end % if
 
 %% Triangulation
-X1 = [0 1 1 0]; X2 = [0 0 1 1];
-problemData.g = domainHierarchy(X1, X2, problemData.hmax, problemData.refinement);
-problemData.g.idE = zeros(problemData.g.numE,1);
-problemData.g.idE(problemData.g.baryE(:, 2) == 0) = 1; % south
-problemData.g.idE(problemData.g.baryE(:, 1) == 1) = 4; % east
-problemData.g.idE(problemData.g.baryE(:, 2) == 1) = 1; % north
-problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 1; % west
-problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+switch problemData.gridSource
+  case 'debug'
+    problemData.g = domainSquare(1);
+    problemData.g.idE = zeros(problemData.g.numE,1);
+    problemData.g.idE(problemData.g.baryE(:, 2) == 0) = 1; % south
+    problemData.g.idE(problemData.g.baryE(:, 1) == 1) = 1; % east
+    problemData.g.idE(problemData.g.baryE(:, 2) == 1) = 1; % north
+    problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 1; % west
+    problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+  case 'analytical'
+    X1 = [0 1 1 0]; X2 = [0 0 1 1];
+    problemData.g = domainHierarchy(X1, X2, problemData.hmax, problemData.refinement);
+    problemData.g.idE = zeros(problemData.g.numE,1);
+    problemData.g.idE(problemData.g.baryE(:, 2) == 0) = 1; % south
+    problemData.g.idE(problemData.g.baryE(:, 1) == 1) = 4; % east
+    problemData.g.idE(problemData.g.baryE(:, 2) == 1) = 1; % north
+    problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 1; % west
+    problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+  case 'ADCIRC'
+    error('not implemented')
+  otherwise
+    error('Invalid gridSource given.')
+end % switch
 
 %% Globally constant parameters
 problemData.K = problemData.g.numT; % number of triangles
@@ -102,8 +117,11 @@ refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, problemData.basesOnQuad)
 problemData.refEdgePhiIntPhiIntPerQuad = integrateRefEdgePhiIntPhiIntPerQuad(N, problemData.basesOnQuad);
 
 %% L2 projections of time-independent algebraic coefficients.
-fcDisc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.fcCont(x1,x2), 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
-problemData.zbDisc = projectFuncCont2DataDisc(problemData.g, problemData.zbCont, 2, eye(3), computeBasesOnQuad(3, struct)); 
+fcDisc = projectFuncCont2DataDisc(problemData.g, problemData.fcCont, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+problemData.zbDisc = projectFuncCont2DataDisc(problemData.g, problemData.zbCont, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+
+% Linear representation for globG
+zbDiscLin = projectFuncCont2DataDisc(problemData.g, problemData.zbCont, 2, eye(3), computeBasesOnQuad(3, struct)); 
 
 % Evaluate zb in each quadrature point
 qOrd = max(2*p,1); [Q, ~] = quadRule1D(qOrd);
@@ -116,17 +134,17 @@ end % for
 % Visualization of coefficients
 if any(ismember(problemData.outputList, 'fc'))
   dataLagr = projectDataDisc2DataLagr(fcDisc);
-  visualizeDataLagr(problemData.g, dataLagr, 'f_c', ['output/' problemData.name '_fc'], 0, problemData.outputTypes);
+  visualizeDataLagr(problemData.g, dataLagr, 'f_c', ['output/' problemData.name '_f_c'], 0, problemData.outputTypes);
 end % if
 if any(ismember(problemData.outputList, 'zb'))
-  dataLagr = projectDataDisc2DataLagr(problemData.zbDisc);
-  visualizeDataLagr(problemData.g, dataLagr, 'z_b', ['output/' problemData.name '_zb'], 0, problemData.outputTypes);
+  dataLagr = projectDataDisc2DataLagr(zbDiscLin);
+  visualizeDataLagr(problemData.g, dataLagr, 'z_b', ['output/' problemData.name '_z_b'], 0, problemData.outputTypes);
 end % if
 
 %% Assembly of time-independent global matrices corresponding to linear contributions.
 % Element matrices
 globD = assembleMatElemPhiPhiFuncDisc(problemData.g, refElemPhiPhiPhi, fcDisc);
-globG = assembleMatElemPhiPhiFuncDiscLin(problemData.g, refElemDphiLinPhiPhi, problemData.zbDisc);
+globG = assembleMatElemPhiPhiFuncDiscLin(problemData.g, refElemDphiLinPhiPhi, zbDiscLin);
 globH = assembleMatElemDphiPhi(problemData.g, refElemDphiPhi);
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.refElemPhiPhi);
 
@@ -140,6 +158,7 @@ problemData.sysW = blkdiag(problemData.globM, problemData.globM, problemData.glo
 problemData.linearTerms = [               sparse(K*N,K*N), globQ{1} + globQOS{1} + globQRA{1} - globH{1},  globQ{2} + globQOS{2} + globQRA{2} - globH{2}; ...
                             problemData.gConst * globG{1},                               sparse(K*N,K*N),                                          -globD; ...
                             problemData.gConst * globG{2},                                         globD,                                 sparse(K*N,K*N) ];
+                          
 %% Assembly of time-independent global matrices corresponding to non-linear contributions.
 % Element matrices
 problemData.globF = assembleMatElemDphiPerQuad(problemData.g, refElemDphiPerQuad);
