@@ -53,10 +53,11 @@ end % if
 p = problemData.p;
 if problemData.isSolutionAvail
   % Continuous solution
-  xiEnd = @(x1,x2) problemData.xiCont(x1,x2,problemData.tEnd);
-  hEnd = @(x1,x2) problemData.xiCont(x1,x2,problemData.tEnd) - problemData.zbCont(x1,x2);
-  uEnd = @(x1,x2) problemData.uCont(x1,x2,problemData.tEnd);
-  vEnd = @(x1,x2) problemData.vCont(x1,x2,problemData.tEnd);
+  t = problemData.t0 + problemData.numSteps * problemData.dt;
+  xiEnd = @(x1,x2) problemData.xiCont(x1,x2,t);
+  hEnd = @(x1,x2) problemData.xiCont(x1,x2,t) - problemData.zbCont(x1,x2);
+  uEnd = @(x1,x2) problemData.uCont(x1,x2,t);
+  vEnd = @(x1,x2) problemData.vCont(x1,x2,t);
   
   % Error in free surface elevation (xi)
   err = computeL2Error(problemData.g, problemData.cDisc(:,:,1) + problemData.zbDisc, xiEnd, 2*p, problemData.basesOnQuad);

@@ -51,7 +51,7 @@ if problemData.isSolutionAvail
   uH0Cont = @(x1,x2) h0Cont(x1,x2) .* problemData.uCont(x1,x2,problemData.t0);
   vH0Cont = @(x1,x2) h0Cont(x1,x2) .* problemData.vCont(x1,x2,problemData.t0);
 else
-  h0Cont = @(x1,x2) zeros(size(x1));
+  h0Cont = @(x1,x2)  -problemData.zbCont(x1,x2);
   uH0Cont = @(x1,x2) zeros(size(x1));
   vH0Cont = @(x1,x2) zeros(size(x1));
 end % if

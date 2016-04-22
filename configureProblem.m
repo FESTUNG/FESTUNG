@@ -47,10 +47,12 @@
 %> @endparblock
 %
 function problemData = configureProblem(problemData)
-problemData.name = 'analytical_test'; % Name of the problem
+problemData.name = 'analytical_test'; % Name of the problem ('debug', 'analytical' or basename of ADCIRC-files)
+problemData.gridSource = 'debug'; % Grid source to be used ('debug', 'analytical', 'ADCIRC')
+problemData.configSource = 'none'; % Config source to be used ('none' - everything specified here, 'ADCIRC' - read from ADCIRC file)
 problemData.p = 1; % Polynomial approximation order
 problemData.hmax = 0.3; % Maximum element size of initial grid for analytical tests
-problemData.refinement = 1;  % Grid refinement level
+problemData.refinement = 0;  % Grid refinement level
 
 %% Visualization parameters
 problemData.isVisGrid = false; % Visualize computational grid
@@ -61,20 +63,75 @@ problemData.outputList = { 'u', 'uH', 'v', 'vH', 'xi', 'h', 'zb', 'fc' }; % List
 
 %% Time stepping parameters
 problemData.scheme = 'explicit'; % type of time stepping scheme ('explicit' or 'implicit')
-problemData.t0 = 0;
-problemData.tEnd = 1;
-problemData.numSteps = 150;
+problemData.t0 = 0; % Start time of simulation
+problemData.tEnd = 1; % End time of simulation
+problemData.numSteps = 150; % Number of time steps
 problemData.dt = (problemData.tEnd - problemData.t0) / problemData.numSteps;
 
 %% Model parameters
 problemData.isOSRiem = true; % apply Riemann solver to open sea boundary
-problemData.fluxType = 'Lax-Friedrichs';
+problemData.fluxType = 'Lax-Friedrichs'; % for now, only Lax-Friedrichs is available
 problemData.averaging = 'full-harmonic';
 problemData.minValueHeight = 1.e-3; % Minimum water level, values below are reset to this value
 
+%% Simulation scenario specific parameters
+switch problemData.name
+  case 'debug'
+    problemData = configureDebug(problemData);
+  case 'analytical_test'
+    problemData = configureAnalyticalTest(problemData);
+  otherwise
+    error('Invalid problem name.')
+end % switch
+
+end % function
+
+%% Debugging
+function problemData = configureDebug(problemData)
+problemData.isSolutionAvail = false;
+problemData.isRhsAvail = false;
+problemData.isTidalDomain = false;
+
+% Overwrite parameters
+problemData.gridSource = 'debug';
+problemData.configSource = 'none';
+problemData.numSteps = 1;
+problemData.hmax = 1;
+problemData.refinement = 0;
+problemData.t0 = 0;
+problemData.tEnd = 1;
+problemData.dt = (problemData.tEnd - problemData.t0) / problemData.numSteps;
+
+
+% Solution parameters
+problemData.gConst = 9.81;
+
+problemData.isBottomFrictionNonlinear = true; % NOLIBF
+problemData.isBottomFrictionVarying = false; % NWP
+problemData.bottomFrictionCoef = 0;
+
+% Ramping function, bathymetry, and Coriolis coefficient
+problemData.ramp = @(t) 1;
+problemData.zbCont = @(x1,x2) - 0.1*(1-x1<x2)-0.1;
+problemData.fcCont = @(x1,x2) zeros(size(x1));
+
+% Analytical solution
+problemData.xiCont = @(x1,x2,t) zeros(size(x1));
+problemData.uCont = @(x1,x2,t) zeros(size(x1));
+problemData.vCont = @(x1,x2,t) zeros(size(x1));
+
+% Boundary conditions
+problemData.xiOSCont = @(x1,x2,t) zeros(size(x1));
+end % function
+
 %% Analytical solution
+function problemData = configureAnalyticalTest(problemData)
 problemData.isSolutionAvail = true;
 problemData.isRhsAvail = true;
+problemData.isTidalDomain = false;
+
+problemData.gridSource = 'analytical';
+problemData.configSource = 'none';
 
 % Solution parameters
 height = 0.05;

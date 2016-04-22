@@ -57,7 +57,7 @@ K = problemData.K;
 p = problemData.p;
 N = problemData.N;
 dt = problemData.dt;
-t = nStep * dt;
+t = problemData.t0 + nStep * dt;
 
 % Determine time level at which continuous functions are to be evaluated
 switch problemData.scheme
@@ -70,7 +70,6 @@ switch problemData.scheme
 end % switch
 
 %% Source term contribution
-problemData.globL = cell(3,1);
 if problemData.isRhsAvail
   % Project right hand side functions
   f0Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.f0Cont(x1,x2,tRhs), ...
@@ -80,11 +79,14 @@ if problemData.isRhsAvail
   f2Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.f2Cont(x1,x2,tRhs), ...
             2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   
+  problemData.globL = cell(3,1);
   problemData.globL{1} = problemData.globM * reshape(f0Disc', K*N, 1);
   problemData.globL{2} = problemData.globM * reshape(f1Disc', K*N, 1);
   problemData.globL{3} = problemData.globM * reshape(f2Disc', K*N, 1);
-else
+elseif problemData.isTidalDomain
   error('not implemented')
+else
+  problemData.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 end % if
 
 %% River boundary contributions
