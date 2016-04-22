@@ -47,10 +47,10 @@
 %> @endparblock
 %
 function problemData = configureProblem(problemData)
-problemData.name = 'analytical'; % Name of the problem
+problemData.name = 'analytical_test'; % Name of the problem
 problemData.p = 1; % Polynomial approximation order
 problemData.hmax = 0.3; % Maximum element size of initial grid for analytical tests
-problemData.refinement = 0;  % Grid refinement level
+problemData.refinement = 1;  % Grid refinement level
 
 %% Visualization parameters
 problemData.isVisGrid = false; % Visualize computational grid

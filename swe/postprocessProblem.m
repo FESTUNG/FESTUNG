@@ -48,5 +48,37 @@ function problemData = postprocessProblem(problemData)
 if problemData.isWaitbar
   close(problemData.waitbar)
 end % if
+
+%% Compute error if analytical solution available.
+p = problemData.p;
+if problemData.isSolutionAvail
+  % Continuous solution
+  xiEnd = @(x1,x2) problemData.xiCont(x1,x2,problemData.tEnd);
+  hEnd = @(x1,x2) problemData.xiCont(x1,x2,problemData.tEnd) - problemData.zbCont(x1,x2);
+  uEnd = @(x1,x2) problemData.uCont(x1,x2,problemData.tEnd);
+  vEnd = @(x1,x2) problemData.vCont(x1,x2,problemData.tEnd);
+  
+  % Error in free surface elevation (xi)
+  err = computeL2Error(problemData.g, problemData.cDisc(:,:,1) + problemData.zbDisc, xiEnd, 2*p, problemData.basesOnQuad);
+  fprintf('L2-Error XI: %g\n', err);
+  
+  % Error in primary variable uH
+  err = computeL2Error(problemData.g, problemData.cDisc(:,:,2), @(x1,x2) uEnd(x1,x2) .* hEnd(x1,x2), 2*p, problemData.basesOnQuad);
+  fprintf('L2-Error uH: %g\n', err);
+  
+  % Error in primary variable vH
+  err = computeL2Error(problemData.g, problemData.cDisc(:,:,3), @(x1,x2) vEnd(x1,x2) .* hEnd(x1,x2), 2*p, problemData.basesOnQuad);
+  fprintf('L2-Error vH: %g\n', err);
+  
+  % Error in x-velocity (u)
+  dataDisc = projectQuotientDisc2Disc(problemData.cDisc(:,:,2), problemData.cDisc(:,:,1), max(2*p,1), problemData.refElemPhiPhi, problemData.basesOnQuad);
+  err = computeL2Error(problemData.g, dataDisc, uEnd, 2*p, problemData.basesOnQuad);
+  fprintf('L2-Error  u: %g\n', err);
+  
+  % Error in y-velocity (v)
+  dataDisc = projectQuotientDisc2Disc(problemData.cDisc(:,:,3), problemData.cDisc(:,:,1), max(2*p,1), problemData.refElemPhiPhi, problemData.basesOnQuad);
+  err = computeL2Error(problemData.g, dataDisc, vEnd, 2*p, problemData.basesOnQuad);
+  fprintf('L2-Error  v: %g\n', err);
+end % if
 end
 
