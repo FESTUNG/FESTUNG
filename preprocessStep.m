@@ -147,10 +147,10 @@ end % for
 uuH = cDiscQ0T{2} .* cDiscQ0T{2} ./ cDiscQ0T{1};
 uvH = cDiscQ0T{2} .* cDiscQ0T{3} ./ cDiscQ0T{1};
 vvH = cDiscQ0T{3} .* cDiscQ0T{3} ./ cDiscQ0T{1};
-gHH = 0.5 * problemData.gConst * cDiscQ0T{1} .* cDiscQ0T{1};
+gHH = 0.5 * problemData.gConst * (cDiscQ0T{1} .* cDiscQ0T{1});
 
 problemData.nonlinearTerms = [ -problemData.globF{1} * (uuH + gHH) - problemData.globF{2} * uvH ; ...
-                   -problemData.globF{1} * uvH - problemData.globF{2} * (vvH + gHH) ];
+                               -problemData.globF{1} * uvH - problemData.globF{2} * (vvH + gHH) ];
 problemData.riemannTerms = sparse(3*K*N, 1);
                  
 for nn = 1 : 3
@@ -159,7 +159,7 @@ for nn = 1 : 3
     uuH = cDiscQ0E0Text{2,nn,np} .* cDiscQ0E0Text{2,nn,np} ./ cDiscQ0E0Text{1,nn,np};
     uvH = cDiscQ0E0Text{2,nn,np} .* cDiscQ0E0Text{3,nn,np} ./ cDiscQ0E0Text{1,nn,np};
     vvH = cDiscQ0E0Text{3,nn,np} .* cDiscQ0E0Text{3,nn,np} ./ cDiscQ0E0Text{1,nn,np};
-    gHH = 0.5 * problemData.gConst * cDiscQ0E0Text{1,nn,np} .* cDiscQ0E0Text{1,nn,np};
+    gHH = 0.5 * problemData.gConst * (cDiscQ0E0Text{1,nn,np} .* cDiscQ0E0Text{1,nn,np});
     
     problemData.nonlinearTerms = problemData.nonlinearTerms + ...
                        [ problemData.globRoffdiag{nn,np,1} * (uuH + gHH) + problemData.globRoffdiag{nn,np,2} * uvH ; ...
@@ -175,12 +175,16 @@ for nn = 1 : 3
   uuH = cDiscQ0E0Tint{2,nn} .* cDiscQ0E0Tint{2,nn} ./ cDiscQ0E0Tint{1,nn};
   uvH = cDiscQ0E0Tint{2,nn} .* cDiscQ0E0Tint{3,nn} ./ cDiscQ0E0Tint{1,nn};
   vvH = cDiscQ0E0Tint{3,nn} .* cDiscQ0E0Tint{3,nn} ./ cDiscQ0E0Tint{1,nn};
-  gHH = 0.5 * problemData.gConst * cDiscQ0E0Tint{1,nn} .* cDiscQ0E0Tint{1,nn};
+  gHH = 0.5 * problemData.gConst * (cDiscQ0E0Tint{1,nn} .* cDiscQ0E0Tint{1,nn});
   
   problemData.nonlinearTerms = problemData.nonlinearTerms + ...
                      [ problemData.globRdiag{nn,1} * (uuH + gHH) + problemData.globRdiag{nn,2} * uvH ; ...
                        problemData.globRdiag{nn,1} * uvH + problemData.globRdiag{nn,2} * (vvH + gHH) ];
 
+  % Non-linear contributions of land boundaries
+  problemData.nonlinearTerms = problemData.nonlinearTerms + ...
+                     [ problemData.globRL{nn,1}; problemData.globRL{nn,2} ] * gHH;
+                     
   % Non-linear contributions of Riemann solver on open sea edges
   if problemData.isOSRiem
      problemData.nonlinearTerms = problemData.nonlinearTerms + 0.5 * ...
@@ -207,8 +211,8 @@ for i = 1 : 3
   end % for
 end % for
 problemData.globUOSold = assembleGlobUOS(problemData.g, problemData.g.markE0TbdrOS, problemData.refEdgePhiIntPhiIntPerQuad, heightOSPerQuad, cDiscQ0E0Tint, problemData.g.areaE0TbdrOS);
-problemData.globROSold = assembleGlobROS(problemData.g, problemData.g.markE0TbdrOS, heightOSPerQuad, N, problemData.gConst, problemData.g.areaNuE0TbdrOS);
+problemData.globROSold = assembleGlobROS(problemData.g, problemData.g.markE0TbdrOS, heightOSPerQuad, N, problemData.gConst, problemData.basesOnQuad, problemData.g.areaNuE0TbdrOS);
 if problemData.isOSRiem
-  problemData.globVOSRiem = assembleGlobVOSRiem(problemData.g, problemData.g.markE0TbdrOS, heightOSPerQuad, problemData.refEdgePhiIntPhiIntPerQuad, lambdaOSRiemE0T, problemData.g.areaE0TbdrOS);
+  problemData.globVOSRiem = assembleGlobVOSRiem(problemData.g, problemData.g.markE0TbdrOS, heightOSPerQuad, problemData.refEdgePhiIntPhiIntPerQuad, lambdaOSRiemE0T, problemData.basesOnQuad, problemData.g.areaE0TbdrOS);
 end % if
 end % function

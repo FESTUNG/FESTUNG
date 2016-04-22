@@ -149,6 +149,7 @@ problemData.globF = assembleMatElemDphiPerQuad(problemData.g, refElemDphiPerQuad
 problemData.globV = assembleMatEdgePhiPerQuad(problemData.g, refEdgePhiIntPerQuad);
 
 % Boundary matrices
+problemData.globRL = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrL , refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrL);
 problemData.globROS = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrOS, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrOS);
 globB = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrRA, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrRA);
 problemData.globRdiag = cellfun(@plus, problemData.globRdiag, globB, 'UniformOutput', false);
