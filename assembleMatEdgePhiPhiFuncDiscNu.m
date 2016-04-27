@@ -225,8 +225,8 @@ for nn = 1 : 3
   % Off-diagonal blocks
   Rkn = 0.5 * g.areaE0T(:,nn);
   for np = 1 : 3
-    markE0TE0TtimesRkn1 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,1));
-    markE0TE0TtimesRkn2 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,2));
+    markE0TE0TtimesRkn1 = spdiags(Rkn .* g.nuE0T(:,nn,1), 0,K,K) * g.markE0TE0T{nn, np};
+    markE0TE0TtimesRkn2 = spdiags(Rkn .* g.nuE0T(:,nn,2), 0,K,K) * g.markE0TE0T{nn, np};
     RtildeT = zeros(K*N, N);
     for l = 1 : N
       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
@@ -319,8 +319,8 @@ for nn = 1 : 3
   % Off-diagonal blocks
   Rkn = 0.5 * g.areaE0T(:,nn);
   for np = 1 : 3
-    markE0TE0TtimesRkn1 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,1));
-    markE0TE0TtimesRkn2 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,2));
+    markE0TE0TtimesRkn1 = spdiags(Rkn .* g.nuE0T(:,nn,1), 0,K,K) * g.markE0TE0T{nn, np};
+    markE0TE0TtimesRkn2 = spdiags(Rkn .* g.nuE0T(:,nn,2), 0,K,K) * g.markE0TE0T{nn, np};
     RtildeT = zeros(K*N, N);
     for l = 1 : N
       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
@@ -350,8 +350,8 @@ for nn = 1 : 3
   % Off-diagonal blocks
   Rkn = 0.5 * g.areaE0T(:,nn);
   for np = 1 : 3
-    markE0TE0TtimesRkn1 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,1));
-    markE0TE0TtimesRkn2 = bsxfun(@times, g.markE0TE0T{nn, np}, Rkn.*g.nuE0T(:,nn,2));
+    markE0TE0TtimesRkn1 = spdiags(Rkn .* g.nuE0T(:,nn,1), 0,K,K) * g.markE0TE0T{nn, np};
+    markE0TE0TtimesRkn2 = spdiags(Rkn .* g.nuE0T(:,nn,2), 0,K,K) * g.markE0TE0T{nn, np};
     RtildeT = zeros(K*N, N);
     for l = 1 : N
       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
