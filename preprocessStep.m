@@ -94,23 +94,44 @@ if problemData.isRiverBdr
   error('not implemented')
 end % if
 
+%% Determine quadrature rules
+qOrd1D = 2*p + 1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
+qOrd2D = max(2*p,1); [~, ~, W] = quadRule2D(qOrd2D); numQuad2D = length(W);
+
 %% Compute water height on Open Sea boundaries.
-qOrd1D = max(2*p, 1);  [Q, ~] = quadRule1D(qOrd1D);
 heightOSPerQuad = cell(3,1);
-for n = 1 : 3
-  [Q1, Q2] = gammaMap(n, Q);
-  heightOSPerQuad{n} = problemData.xiOSCont(problemData.g.mapRef2Phy(1,Q1,Q2), problemData.g.mapRef2Phy(2,Q1,Q2), tRhs) - ...
-                        problemData.zbPerQuad{n};
-end % for
+if isfield(problemData, 'xiOSCont')
+  % Analytical function for open sea elevation given
+  [Q, ~] = quadRule1D(max(2*p,1));
+  for n = 1 : 3
+    [Q1, Q2] = gammaMap(n, Q);
+    heightOSPerQuad{n} = problemData.xiOSCont(problemData.g.mapRef2Phy(1,Q1,Q2), problemData.g.mapRef2Phy(2,Q1,Q2), tRhs) - ...
+                          problemData.zbPerQuad{n};
+  end % for
+elseif isfield(problemData, 'xiFreqOS') && isfield(problemData, 'xiAmpOS')
+  % Open sea elevation data given
+	% Since the open sea boundary condition is only used for non-linear
+	% contributions we discretize it explicitly. Otherwise we would have
+	% to make a distinction.
+  numFrequency = size(problemData.xiFreqOS, 2);
+  xiOSPerQuad = zeros(K, numQuad1D);
+  for n = 1 : numFrequency
+    xiOSPerQuad = xiOSPerQuad + repmat(problemData.xiFreqOS{1,n}(t-dt) * problemData.xiAmpOS{1,n} + ...
+                                       problemData.xiFreqOS{2,n}(t-dt) * problemData.xiAmpOS{2,n}, 1, numQuad1D);
+  end % for
+  xiOSPerQuad = problemData.ramp(t-dt) * xiOSPerQuad;
+  for n = 1 : 3
+    heightOSPerQuad{n} = xiOSPerQuad - problemData.zbPerQuad{n};
+  end % for
+else
+  error('No open sea elevation given!')
+end
 
 %% Create lookup tables for solution on quadrature points.
 cDiscQ0T = cell(3,1); % cDisc in quadrature points of triangles
 cDiscQ0E0Tint = cell(3,3); % cDisc in interior quad points of edges
 cDiscQ0E0Text = cell(3,3,3); % cDisc in exterior quad points of edges
 cDiscQ0E0TE0T = cell(3,3,3); % cDisc in quad points of edge on neighboring element
-
-qOrd1D = 2*p + 1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
-qOrd2D = max(2*p,1); [~, ~, W] = quadRule2D(qOrd2D); numQuad2D = length(W);
 
 for i = 1 : 3
   cDiscQ0T{i} = problemData.cDisc(:,:,i) * problemData.basesOnQuad.phi2D{qOrd2D}.';
