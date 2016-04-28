@@ -63,7 +63,8 @@ switch problemData.gridSource
     problemData.g.idE(problemData.g.baryE(:, 2) == 1) = 1; % north
     problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 1; % west
     problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
-  case 'analytical'
+    
+  case 'hierarchical'
     X1 = [0 1 1 0]; X2 = [0 0 1 1];
     problemData.g = domainHierarchy(X1, X2, problemData.hmax, problemData.refinement);
     problemData.g.idE = zeros(problemData.g.numE,1);
@@ -72,8 +73,86 @@ switch problemData.gridSource
     problemData.g.idE(problemData.g.baryE(:, 2) == 1) = 1; % north
     problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 1; % west
     problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+    
   case 'ADCIRC'
-    error('not implemented')
+    projCenter = [problemData.configADCIRC.SLAM0, problemData.configADCIRC.SFEA0];
+    [ problemData.g, depth, forcingOS ] = domainADCIRC(['swe/fort_' problemData.name '.14'], ...
+                                                       ['swe/fort_' problemData.name '.17'], ...
+                                                       problemData.configADCIRC.NBFR, problemData.isSpherical, projCenter);
+    
+    % Bathymetry
+    problemData.zbCont = @(x1,x2) evaluateFuncFromVertexValues(problemData.g, -depth, x1,x2);
+
+    % Convert coordinates to longitude/latitude
+    coordSph = [ problemData.g.coordV(:,1) / 6378206.4 / cos(projCenter(2)) + projCenter(1), ...
+                 problemData.g.coordV(:,2) / 6378206.4 ];
+
+    % Spatial variation of coriolis parameter
+    if problemData.configADCIRC.NCOR == 1 
+      problemData.fcCont = @(x1,x2) evaluateFuncFromVertexValues(problemData.g, 2.0 * 7.29212e-5 * sin(coordSph(:,2)), x1,x2);
+    else
+      problemData.fcCont = @(x1,x2) problemData.configADCIRC.CORI * ones(size(x1));
+    end % if
+    
+    % Newtonian tidal potential
+    if problemData.isTidalDomain
+      numFrequency = problemData.configADCIRC.NTIF;
+      problemData.forcingTidal = cell(2,2,numFrequency);
+      problemData.forcingFrequency = cell(2,numFrequency);
+      for n = 1 : numFrequency
+        problemData.forcingFrequency{1,n} = @(t) cos(problemData.configADCIRC.AMIGT(n) * t);
+        problemData.forcingFrequency{2,n} = @(t) -sin(problemData.configADCIRC.AMIGT(n) * t);
+        semi = round(0.00014 / problemData.configADCIRC.AMIGT(n));
+        switch semi
+          case 1
+            fX1 = problemData.configADCIRC.TPK(n) * problemData.configADCIRC.FFT(n) * ...
+                    problemData.configADCIRC.ETRF(n) * cos(coordSph(:,2)).^2 .* ...
+                    cos(pi/180 * (problemData.configADCIRC.FACET(n) + 2*coordSph(:,1)));
+            fX2 = problemData.configADCIRC.TPK(n) * problemData.configADCIRC.FFT(n) * ...
+                    problemData.configADCIRC.ETRF(n) * cos(coordSph(:,2)).^2 .* ...
+                    sin(pi/180 * (problemData.configADCIRC.FACET(n) + 2*coordSph(:,1)));
+          case 2
+            fX1 = problemData.configADCIRC.TPK(n) * problemData.configADCIRC.FFT(n) * ...
+                    problemData.configADCIRC.ETRF(n) * sin(2*coordSph(:,2)) .* ...
+                    cos(pi/180 * (problemData.configADCIRC.FACET(n) + coordSph(:,1)));
+            fX2 = problemData.configADCIRC.TPK(n) * problemData.configADCIRC.FFT(n) * ...
+                    problemData.configADCIRC.ETRF(n) * sin(2*coordSph(:,2)) .* ...
+                    sin(pi/180 * (problemData.configADCIRC.FACET(n) + coordSph(:,1)));
+          otherwise
+            error(['Unsupported tidal potential frequency ' num2str(semi) '!'])
+        end % switch
+        problemData.forcingTidal{1,1,n} = problemData.gConst ./ (2*problemData.g.areaT) .* ...
+          ( (fX1(problemData.g.V0T(:,2)) - fX1(problemData.g.V0T(:,1))) .* problemData.g.B(:,2,2) - ...
+            (fX1(problemData.g.V0T(:,3)) - fX1(problemData.g.V0T(:,1))) .* problemData.g.B(:,2,1) );
+        problemData.forcingTidal{1,2,n} = problemData.gConst ./ (2*problemData.g.areaT) .* ...
+          ( (fX2(problemData.g.V0T(:,2)) - fX2(problemData.g.V0T(:,1))) .* problemData.g.B(:,2,2) - ...
+            (fX2(problemData.g.V0T(:,3)) - fX2(problemData.g.V0T(:,1))) .* problemData.g.B(:,2,1) );
+        problemData.forcingTidal{2,1,n} = problemData.gConst ./ (2*problemData.g.areaT) .* ...
+          (-(fX1(problemData.g.V0T(:,2)) - fX1(problemData.g.V0T(:,1))) .* problemData.g.B(:,1,2) + ...
+            (fX1(problemData.g.V0T(:,3)) - fX1(problemData.g.V0T(:,1))) .* problemData.g.B(:,1,1) );
+        problemData.forcingTidal{2,2,n} = problemData.gConst ./ (2*problemData.g.areaT) .* ...
+          (-(fX2(problemData.g.V0T(:,2)) - fX2(problemData.g.V0T(:,1))) .* problemData.g.B(:,1,2) + ...
+            (fX2(problemData.g.V0T(:,3)) - fX2(problemData.g.V0T(:,1))) .* problemData.g.B(:,1,1) );
+      end % for
+    end % if
+    
+    % Tidal forcing on open sea boundaries
+    numFrequency = problemData.configADCIRC.NBFR;
+    problemData.xiFreqOS = cell(2,numFrequency);
+    problemData.xiAmpOS = cell(2,numFrequency);
+    for n = 1 : numFrequency
+      problemData.xiFreqOS{1,n} = @(t) cos(problemData.configADCIRC.AMIG(n)*t);
+      problemData.xiFreqOS{2,n} = @(t) -sin(problemData.configADCIRC.AMIG(n)*t);
+      
+      problemData.xiAmpOS{1,n} = sparse(problemData.g.numT,1);
+      problemData.xiAmpOS{1,n}(problemData.g.T0E(problemData.g.idE == 4,1)) = ...
+        problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* cos(pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)));
+      
+      problemData.xiAmpOS{2,n} = sparse(problemData.g.numT,1);
+      problemData.xiAmpOS{2,n}(problemData.g.T0E(problemData.g.idE == 4,1)) = ...
+        problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* sin(pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)));
+    end % for
+
   otherwise
     error('Invalid gridSource given.')
 end % switch

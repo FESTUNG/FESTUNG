@@ -46,149 +46,226 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = configureProblem(problemData)
-problemData.name = 'analytical_test'; % Name of the problem ('debug', 'analytical' or basename of ADCIRC-files)
-problemData.gridSource = 'debug'; % Grid source to be used ('debug', 'analytical', 'ADCIRC')
-problemData.configSource = 'none'; % Config source to be used ('none' - everything specified here, 'ADCIRC' - read from ADCIRC file)
-problemData.p = 1; % Polynomial approximation order
-problemData.hmax = 0.3; % Maximum element size of initial grid for analytical tests
-problemData.refinement = 0;  % Grid refinement level
+function pd = configureProblem(pd)
+%% Name of the problem
+% Influences name of output files and specifies name of ADCIRC input files
+pd.name = 'bahamas'; 
+
+%% Configuration to use: 
+% - 'debug' calls configureDebug()
+% - 'analytical' calls configureAnalyticalTest()
+% - 'ADCIRC' reads 'swe/fort_<name>.15'
+pd.configSource = 'ADCIRC';
+
+%% What kind of grid to use:
+% - 'debug' creates a unit square [0,1]x[0,1] with hmax=1 and boundary
+%   type 1 on all edges
+% - 'hierarchical' creates a unit square [0,1]x[0,1] with specified hmax
+%   and performs uniform refinement according to parameter 'refinement'.
+%   Boundary type 4 on east-boundary, 1 on all others.
+% - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
+pd.gridSource = 'ADCIRC';
+
+pd.p = 1; % Polynomial approximation order
+pd.hmax = 0.3; % Maximum element size of initial grid for analytical tests
+pd.refinement = 0;  % Grid refinement level
 
 %% Visualization parameters
-problemData.isVisGrid = false; % Visualize computational grid
-problemData.isWaitbar = false; % Use waiting bar
-problemData.outputCount = 20; % Number of outputs over total simulation time
-problemData.outputTypes = 'vtk'; % Output file type
-problemData.outputList = { 'u', 'uH', 'v', 'vH', 'xi', 'h', 'zb', 'fc' }; % List of variables to visualize
+pd.isVisGrid = false; % Visualize computational grid
+pd.isWaitbar = false; % Use waiting bar
+pd.outputCount = 200; % Number of outputs over total simulation time
+pd.outputTypes = 'vtk'; % Output file type
+pd.outputList = { 'u', 'uH', 'v', 'vH', 'xi', 'h', 'zb', 'fc' }; % List of variables to visualize
 
 %% Time stepping parameters
-problemData.scheme = 'explicit'; % type of time stepping scheme ('explicit' or 'implicit')
-problemData.t0 = 0; % Start time of simulation
-problemData.tEnd = 1; % End time of simulation
-problemData.numSteps = 150; % Number of time steps
-problemData.dt = (problemData.tEnd - problemData.t0) / problemData.numSteps;
+pd.scheme = 'explicit'; % type of time stepping scheme ('explicit' or 'implicit')
 
 %% Model parameters
-problemData.isOSRiem = true; % apply Riemann solver to open sea boundary
-problemData.fluxType = 'Lax-Friedrichs'; % for now, only Lax-Friedrichs is available
-problemData.averaging = 'full-harmonic';
-problemData.minValueHeight = 1.e-3; % Minimum water level, values below are reset to this value
+pd.isOSRiem = true; % apply Riemann solver to open sea boundary
+pd.fluxType = 'Lax-Friedrichs'; % for now, only Lax-Friedrichs is available
+pd.averaging = 'full-harmonic';
+pd.minValueHeight = 1.e-3; % Minimum water level, values below are reset to this value
 
 %% Simulation scenario specific parameters
-switch problemData.name
+switch pd.configSource
   case 'debug'
-    problemData = configureDebug(problemData);
-  case 'analytical_test'
-    problemData = configureAnalyticalTest(problemData);
+    pd = configureDebug(pd);
+  case 'analytical'
+    pd = configureAnalyticalTest(pd);
+  case 'ADCIRC'
+    pd = configureADCIRC(pd);
   otherwise
-    error('Invalid problem name.')
+    error('Invalid config source.')
 end % switch
 
 end % function
 
 %% Debugging
-function problemData = configureDebug(problemData)
-problemData.isSolutionAvail = false;
-problemData.isRhsAvail = false;
-problemData.isTidalDomain = false;
+function pd = configureDebug(pd)
+pd.isSolutionAvail = false;
+pd.isRhsAvail = false;
+pd.isTidalDomain = false;
+pd.isSpherical = false;
 
 % Overwrite parameters
-problemData.gridSource = 'debug';
-problemData.configSource = 'none';
-problemData.numSteps = 1;
-problemData.hmax = 1;
-problemData.refinement = 0;
-problemData.t0 = 0;
-problemData.tEnd = 1;
-problemData.dt = (problemData.tEnd - problemData.t0) / problemData.numSteps;
+pd.gridSource = 'debug';
+pd.configSource = 'none';
+pd.numSteps = 1;
+pd.hmax = 1;
+pd.refinement = 0;
+pd.t0 = 0;
+pd.tEnd = 1;
+pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
 
 
 % Solution parameters
-problemData.gConst = 9.81;
+pd.gConst = 9.81;
 
-problemData.isBottomFrictionNonlinear = true; % NOLIBF
-problemData.isBottomFrictionVarying = false; % NWP
-problemData.bottomFrictionCoef = 0;
+pd.isBottomFrictionNonlinear = true; % NOLIBF
+pd.isBottomFrictionVarying = false; % NWP
+pd.bottomFrictionCoef = 0;
 
 % Ramping function, bathymetry, and Coriolis coefficient
-problemData.ramp = @(t) 1;
-problemData.zbCont = @(x1,x2) - 0.1*(1-x1<x2)-0.1;
-problemData.fcCont = @(x1,x2) zeros(size(x1));
+pd.ramp = @(t) 1;
+pd.zbCont = @(x1,x2) - 0.1*(1-x1<x2)-0.1;
+pd.fcCont = @(x1,x2) zeros(size(x1));
 
 % Analytical solution
-problemData.xiCont = @(x1,x2,t) zeros(size(x1));
-problemData.uCont = @(x1,x2,t) zeros(size(x1));
-problemData.vCont = @(x1,x2,t) zeros(size(x1));
+pd.xiCont = @(x1,x2,t) zeros(size(x1));
+pd.uCont = @(x1,x2,t) zeros(size(x1));
+pd.vCont = @(x1,x2,t) zeros(size(x1));
 
 % Boundary conditions
-problemData.xiOSCont = @(x1,x2,t) zeros(size(x1));
+pd.xiOSCont = @(x1,x2,t) zeros(size(x1));
 end % function
 
 %% Analytical solution
-function problemData = configureAnalyticalTest(problemData)
-problemData.isSolutionAvail = true;
-problemData.isRhsAvail = true;
-problemData.isTidalDomain = false;
+function pd = configureAnalyticalTest(pd)
+pd.isSolutionAvail = true;
+pd.isRhsAvail = true;
+pd.isTidalDomain = false;
 
-problemData.gridSource = 'analytical';
-problemData.configSource = 'none';
+pd.gridSource = 'analytical';
+pd.configSource = 'none';
+pd.isSpherical = false; 
+
+pd.t0 = 0; % Start time of simulation
+pd.tEnd = 1; % End time of simulation
+pd.numSteps = 150; % Number of time steps
+pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
 
 % Solution parameters
 height = 0.05;
 A = 0.1;
 B = 0.1;
 C = 0.1;
-problemData.gConst = 9.81;
+pd.gConst = 9.81;
 
-problemData.isBottomFrictionNonlinear = true; % NOLIBF
-problemData.isBottomFrictionVarying = false; % NWP
-problemData.bottomFrictionCoef = 1;
+pd.isBottomFrictionNonlinear = true; % NOLIBF
+pd.isBottomFrictionVarying = false; % NWP
+pd.bottomFrictionCoef = 1;
 
 % Ramping function, bathymetry, and Coriolis coefficient
-problemData.ramp = @(t) 1;
-problemData.zbCont = @(x1,x2) -height * (2 - x1 - x2);
-problemData.fcCont = @(x1,x2) x1;
+pd.ramp = @(t) 1;
+pd.zbCont = @(x1,x2) -height * (2 - x1 - x2);
+pd.fcCont = @(x1,x2) x1;
 
 % Analytical solution
-problemData.xiCont = @(x1,x2,t) C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t))) - height*(2-x1-x2);
-problemData.uCont = @(x1,x2,t) A*sin(pi*x1)*cos(2*pi*t);
-problemData.vCont = @(x1,x2,t) B*sin(pi*x2)*cos(2*pi*t);
+pd.xiCont = @(x1,x2,t) C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t))) - height*(2-x1-x2);
+pd.uCont = @(x1,x2,t) A*sin(pi*x1)*cos(2*pi*t);
+pd.vCont = @(x1,x2,t) B*sin(pi*x2)*cos(2*pi*t);
 
 % Auxiliary functions (derivatives etc.)
-problemData.hCont = @(x1,x2,t) problemData.xiCont(x1,x2,t) - problemData.zbCont(x1,x2);
-problemData.u_tCont = @(x1,x2,t)   -2*A*pi*sin(pi*x1)*sin(2*pi*t);
-problemData.u_xCont = @(x1,x2,t)      A*pi*cos(pi*x1)*cos(2*pi*t);
-problemData.v_tCont = @(x1,x2,t)   -2*B*pi*sin(pi*x2)*sin(2*pi*t);
-problemData.v_yCont = @(x1,x2,t)      B*pi*cos(pi*x2)*cos(2*pi*t);
-problemData.h_tCont = @(x1,x2,t)  0.5*C*pi * ( sin(0.5*pi*(x1-t)) + sin(0.5*pi*(x2-t)) );
-problemData.h_xCont = @(x1,x2,t) -0.5*C*pi *   sin(0.5*pi*(x1-t))                       ;
-problemData.h_yCont = @(x1,x2,t) -0.5*C*pi *                       sin(0.5*pi*(x2-t))   ;
+pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
+pd.u_tCont = @(x1,x2,t)   -2*A*pi*sin(pi*x1)*sin(2*pi*t);
+pd.u_xCont = @(x1,x2,t)      A*pi*cos(pi*x1)*cos(2*pi*t);
+pd.v_tCont = @(x1,x2,t)   -2*B*pi*sin(pi*x2)*sin(2*pi*t);
+pd.v_yCont = @(x1,x2,t)      B*pi*cos(pi*x2)*cos(2*pi*t);
+pd.h_tCont = @(x1,x2,t)  0.5*C*pi * ( sin(0.5*pi*(x1-t)) + sin(0.5*pi*(x2-t)) );
+pd.h_xCont = @(x1,x2,t) -0.5*C*pi *   sin(0.5*pi*(x1-t))                       ;
+pd.h_yCont = @(x1,x2,t) -0.5*C*pi *                       sin(0.5*pi*(x2-t))   ;
 
 % Right hand side functions (derived from analytical solution)
-problemData.f0Cont = @(x1,x2,t) problemData.h_tCont(x1,x2,t) + ...
-                      (problemData.u_xCont(x1,x2,t) + problemData.v_yCont(x1,x2,t)) .* problemData.hCont(x1,x2,t) + ...
-                      problemData.uCont(x1,x2,t) .* problemData.h_xCont(x1,x2,t) + ...
-                      problemData.vCont(x1,x2,t) .* problemData.h_yCont(x1,x2,t);
-problemData.f1Cont = @(x1,x2,t) problemData.u_tCont(x1,x2,t) .* problemData.hCont(x1,x2,t) + ...
-                       problemData.uCont(x1,x2,t) .* problemData.h_tCont(x1,x2,t) + ...
-                       ( 2 * problemData.uCont(x1,x2,t) .* problemData.u_xCont(x1,x2,t) + problemData.gConst * problemData.h_xCont(x1,x2,t) ) .* problemData.hCont(x1,x2,t) + ... 
-                       problemData.uCont(x1,x2,t) .* problemData.uCont(x1,x2,t) .* problemData.h_xCont(x1,x2,t) + ...
-                       problemData.uCont(x1,x2,t) .* problemData.v_yCont(x1,x2,t) .* problemData.hCont(x1,x2,t) + ... 
-                       problemData.uCont(x1,x2,t) .* problemData.vCont(x1,x2,t) .* problemData.h_yCont(x1,x2,t) + ...
-                       problemData.gConst * height * problemData.hCont(x1,x2,t) + ...
-                       problemData.bottomFrictionCoef * sqrt( problemData.uCont(x1,x2,t) .* problemData.uCont(x1,x2,t) + problemData.vCont(x1,x2,t) .* problemData.vCont(x1,x2,t) ) .* problemData.uCont(x1,x2,t) - ...
-                       problemData.fcCont(x1,x2) .* problemData.vCont(x1,x2,t) .* problemData.hCont(x1,x2,t);
-problemData.f2Cont = @(x1,x2,t) problemData.v_tCont(x1,x2,t) .* problemData.hCont(x1,x2,t) + ...
-                       problemData.vCont(x1,x2,t) .* problemData.h_tCont(x1,x2,t) + ...
-                       problemData.u_xCont(x1,x2,t) .* problemData.vCont(x1,x2,t) .* problemData.hCont(x1,x2,t) + ...
-                       problemData.uCont(x1,x2,t) .* problemData.vCont(x1,x2,t) .* problemData.h_xCont(x1,x2,t) + ...
-                       2 * problemData.vCont(x1,x2,t) .* problemData.v_yCont(x1,x2,t) .* problemData.hCont(x1,x2,t) + ...
-                       problemData.vCont(x1,x2,t) .* problemData.vCont(x1,x2,t) .* problemData.h_yCont(x1,x2,t) + ... 
-                       problemData.gConst * problemData.h_yCont(x1,x2,t) .* problemData.hCont(x1,x2,t) + ...
-                       problemData.gConst * height * problemData.hCont(x1,x2,t) + ...
-                       problemData.bottomFrictionCoef * sqrt( problemData.uCont(x1,x2,t) .* problemData.uCont(x1,x2,t) + problemData.vCont(x1,x2,t) .* problemData.vCont(x1,x2,t) ) .* problemData.vCont(x1,x2,t) + ...
-                       problemData.fcCont(x1,x2) .* problemData.uCont(x1,x2,t) .* problemData.hCont(x1,x2,t);
+pd.f0Cont = @(x1,x2,t) pd.h_tCont(x1,x2,t) + ...
+                      (pd.u_xCont(x1,x2,t) + pd.v_yCont(x1,x2,t)) .* pd.hCont(x1,x2,t) + ...
+                      pd.uCont(x1,x2,t) .* pd.h_xCont(x1,x2,t) + ...
+                      pd.vCont(x1,x2,t) .* pd.h_yCont(x1,x2,t);
+pd.f1Cont = @(x1,x2,t) pd.u_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
+                       pd.uCont(x1,x2,t) .* pd.h_tCont(x1,x2,t) + ...
+                       ( 2 * pd.uCont(x1,x2,t) .* pd.u_xCont(x1,x2,t) + pd.gConst * pd.h_xCont(x1,x2,t) ) .* pd.hCont(x1,x2,t) + ... 
+                       pd.uCont(x1,x2,t) .* pd.uCont(x1,x2,t) .* pd.h_xCont(x1,x2,t) + ...
+                       pd.uCont(x1,x2,t) .* pd.v_yCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ... 
+                       pd.uCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.h_yCont(x1,x2,t) + ...
+                       pd.gConst * height * pd.hCont(x1,x2,t) + ...
+                       pd.bottomFrictionCoef * sqrt( pd.uCont(x1,x2,t) .* pd.uCont(x1,x2,t) + pd.vCont(x1,x2,t) .* pd.vCont(x1,x2,t) ) .* pd.uCont(x1,x2,t) - ...
+                       pd.fcCont(x1,x2) .* pd.vCont(x1,x2,t) .* pd.hCont(x1,x2,t);
+pd.f2Cont = @(x1,x2,t) pd.v_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
+                       pd.vCont(x1,x2,t) .* pd.h_tCont(x1,x2,t) + ...
+                       pd.u_xCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
+                       pd.uCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.h_xCont(x1,x2,t) + ...
+                       2 * pd.vCont(x1,x2,t) .* pd.v_yCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
+                       pd.vCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.h_yCont(x1,x2,t) + ... 
+                       pd.gConst * pd.h_yCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
+                       pd.gConst * height * pd.hCont(x1,x2,t) + ...
+                       pd.bottomFrictionCoef * sqrt( pd.uCont(x1,x2,t) .* pd.uCont(x1,x2,t) + pd.vCont(x1,x2,t) .* pd.vCont(x1,x2,t) ) .* pd.vCont(x1,x2,t) + ...
+                       pd.fcCont(x1,x2) .* pd.uCont(x1,x2,t) .* pd.hCont(x1,x2,t);
                      
 % Boundary conditions
-problemData.xiOSCont = problemData.xiCont;
+pd.xiOSCont = pd.xiCont;
+end % function
+
+%% ADCIRC
+function pd = configureADCIRC(pd)
+pd.isSolutionAvail = false;
+pd.isRhsAvail = false;
+pd.isTidalDomain = false;
+
+% Verify input files exist
+assert(exist(['swe/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.14" not found!'])
+assert(exist(['swe/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.17" not found!'])
+assert(exist(['swe/fort_' pd.name '.15'], 'file') == 2, ['Config file "swe/fort_' pd.name '.15" not found!'])
+
+%% Read parameter file
+pd.configADCIRC = readConfigADCIRC(['swe/fort_' pd.name '.15']);
+
+%% Map ADCIRC variables to internal names
+% Constants
+pd.gConst = pd.configADCIRC.G;
+
+% Simulation time
+pd.t0 = pd.configADCIRC.STATIM;
+pd.tEnd = pd.configADCIRC.RNDAY * 86400;
+pd.dt = pd.configADCIRC.DT;
+pd.numSteps = (pd.tEnd - pd.t0) / pd.dt;
+
+% Coordinate system
+pd.isSpherical = pd.configADCIRC.ICS == 2;
+
+% bottom friction
+pd.isBottomFrictionVarying = pd.configADCIRC.NWP == 1;
+assert(~pd.isBottomFrictionVarying, 'Spatially varying bottom friction not implemented.');
+
+pd.isBottomFrictionNonlinear = pd.configADCIRC.NOLIBF == 1;
+if pd.isBottomFrictionNonlinear
+  pd.bottomFrictionCoef = pd.configADCIRC.CF;
+else
+  pd.bottomFrictionCoef = pd.configADCIRC.TAU;
+end % if
+
+% Ramping
+switch pd.configADCIRC.NRAMP
+  case 0
+    pd.ramp = @(t_days) 1;
+  case 1
+    pd.ramp = @(t_days) ((t_days - pd.configADCIRC.STATIM + ...
+                                   pd.configADCIRC.REFTIM) / pd.configADCIRC.DRAMP) * ...
+                                 (t_days < pd.configADCIRC.STATIM - ...
+                                   pd.configADCIRC.REFTIM + pd.configADCIRC.DRAMP) + ...
+                                 (t_days >= pd.configADCIRC.STATIM - pd.configADCIRC.REFTIM + pd.configADCIRC.DRAMP);
+  otherwise
+    error('Invalid value for NRAMP')
+end % switch
+    
+% Newtonian tidal potential
+pd.isTidalDomain = pd.configADCIRC.NTIP == 1;
 end % function
