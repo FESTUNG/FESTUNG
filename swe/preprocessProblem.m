@@ -146,11 +146,13 @@ switch problemData.gridSource
       
       problemData.xiAmpOS{1,n} = sparse(problemData.g.numT,1);
       problemData.xiAmpOS{1,n}(problemData.g.T0E(problemData.g.idE == 4,1)) = ...
-        problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* cos(pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)));
+        problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+        cos( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
       
       problemData.xiAmpOS{2,n} = sparse(problemData.g.numT,1);
       problemData.xiAmpOS{2,n}(problemData.g.T0E(problemData.g.idE == 4,1)) = ...
-        problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* sin(pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)));
+        problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+        sin( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
     end % for
 
   otherwise

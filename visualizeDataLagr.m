@@ -132,7 +132,7 @@ end % switch
 fprintf(file, '    <Piece NumberOfPoints="%d" NumberOfCells="%d">\n',K*numP,K);
 fprintf(file, '      <Points>\n');
 fprintf(file, '        <DataArray type="Float32" NumberOfComponents="3" format="ascii">\n');
-fprintf(file, '          %.3e %.3e %.3e\n',  [P1, P2, zeros(numP*K, 1)]');
+fprintf(file, '          %.9e %.9e %.3e\n',  [P1, P2, zeros(numP*K, 1)]');
 fprintf(file, '        </DataArray>\n');
 fprintf(file, '      </Points>\n');
 fprintf(file, '      <Cells>\n');

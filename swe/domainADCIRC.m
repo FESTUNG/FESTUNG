@@ -124,8 +124,9 @@ offset = offset + 1 + 2 * numEbdrOS;
 % Open sea boundary forcings
 forcingOS = zeros(numForcingOS, numEbdrOS, 2);
 if numEbdrOS > 0
-  for i = 1 : numEbdrOS
+  for i = 1 : numForcingOS
     forcingOS(i, :, :) = [ data(offset : 2 : offset+2*numEbdrOS-2), data(offset+1 : 2 : offset+2*numEbdrOS-1) ];
+    offset = offset + 2*numEbdrOS;
   end % for
 end % if
 
