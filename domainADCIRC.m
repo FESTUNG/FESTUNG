@@ -171,5 +171,9 @@ g.idE(adcirc2g(idxEbdrRiv)) = 3;  % river boundary
 g.idE(adcirc2g(idxEbdrOS)) = 4;   % open sea boundary
 g.idE0T = g.idE(g.E0T);           % local edge IDs
 assert(isequal(isnan(g.idE), zeros(numE, 1)), 'Missing edge type specification')
+
+% Reorder boundary forcings
+[~, I] = sort(adcirc2g(idxEbdrOS));
+forcingOS = forcingOS(:,I,:);
 end % function
 

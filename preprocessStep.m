@@ -84,13 +84,24 @@ if problemData.isRhsAvail
   problemData.globL{2} = problemData.globM * reshape(f1Disc', K*N, 1);
   problemData.globL{3} = problemData.globM * reshape(f2Disc', K*N, 1);
 elseif problemData.isTidalDomain
-  error('not implemented')
+  % Add tidal potential contribution
+  numFrequency = size(problemData.forcingTidal, 3);
+  problemData.globL = { sparse(K*N,1); sparse(K*N,K*N); sparse(K*N,K*N) };
+  for n = 1 : numFrequency
+    problemData.globL{2} = problemData.globL{2} + problemData.forcingFrequency{1,n}(tRhs) * problemData.forcingTidal{1,1,n} + ...
+                                                  problemData.forcingFrequency{2,n}(tRhs) * problemData.forcingTidal{1,2,n};
+    problemData.globL{3} = problemData.globL{3} + problemData.forcingFrequency{1,n}(tRhs) * problemData.forcingTidal{2,1,n} + ...
+                                                  problemData.forcingFrequency{2,n}(tRhs) * problemData.forcingTidal{2,2,n};
+  end % for
+  hDisc = reshape(problemData.cDisc(:,:,1), K*N, 1);
+  problemData.globL{2} = problemData.ramp(tRhs) * problemData.globL{2} * hDisc;
+  problemData.globL{3} = problemData.ramp(tRhs) * problemData.globL{3} * hDisc;
 else
   problemData.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 end % if
 
 %% River boundary contributions
-if problemData.isRiverBdr
+if problemData.g.numEbdrRiv > 0
   error('not implemented')
 end % if
 
