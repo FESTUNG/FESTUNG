@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd.name = 'east'; 
+pd.name = 'test2'; 
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()

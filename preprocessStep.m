@@ -100,14 +100,23 @@ else
   problemData.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 end % if
 
+%% Determine quadrature rules
+qOrd1D = 2*p+1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
+qOrd2D = max(2*p,1); [~, ~, W] = quadRule2D(qOrd2D); numQuad2D = length(W);
+
 %% River boundary contributions
 if problemData.g.numEbdrRiv > 0
-  error('not implemented')
+  uRiv = kron(problemData.ramp(tRhs) * problemData.uRiv, ones(numQuad1D,1));
+  vRiv = kron(problemData.ramp(tRhs) * problemData.vRiv, ones(numQuad1D,1));
+  for n = 1: 3
+    hRiv = kron(problemData.ramp(tRhs) * problemData.xiRiv, ones(numQuad1D,1)) - reshape(problemData.zbPerQuad{n}.', K*numQuad1D,1);
+    problemData.globL{1} = problemData.globL{1} - problemData.globB{n,1} * (uRiv .* hRiv) + problemData.globB{n,2} * (vRiv .* hRiv);
+    problemData.globL{2} = problemData.globL{2} - problemData.globB{n,1} * (uRiv .* uRiv .* hRiv + 0.5*problemData.gConst * hRiv .* hRiv) + ...
+                                                  problemData.globB{n,2} * (uRiv .* vRiv .* hRiv);
+    problemData.globL{3} = problemData.globL{3} - problemData.globB{n,1} * (uRiv .* vRiv .* hRiv) + ...
+                                                  problemData.globB{n,2} * (vRiv .* vRiv .* hRiv + 0.5*problemData.gConst * hRiv .* hRiv);
+  end
 end % if
-
-%% Determine quadrature rules
-qOrd1D = 2*p + 1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
-qOrd2D = max(2*p,1); [~, ~, W] = quadRule2D(qOrd2D); numQuad2D = length(W);
 
 %% Compute water height on Open Sea boundaries.
 heightOSPerQuad = cell(3,1);

@@ -1,4 +1,4 @@
-function [g, depth, forcingOS] = domainADCIRC(grid_file, conn_file, numForcingOS, isSpherical, projCenter)
+function [g, depth, forcingOS, flowRateRiv] = domainADCIRC(grid_file, conn_file, numForcingOS, isSpherical, projCenter)
 % Set default values for input parameters
 switch nargin
   case 3
@@ -96,14 +96,14 @@ if numEbdrRiv > 0
   data = fgets(fileID);
   [xi, uv] = strtok(data);
   [u, v] = strtok(uv);
-  flowRateRiv(1,:) = [ str2double(xi(4)), str2double(u(3)), str2double(v(4)) ];
+  flowRateRiv(1,:) = [ str2double(xi(4:end)), str2double(u(3:end)), str2double(v(4:end)) ];
   for j = 2 : numEbdrRiv
     data = cell2mat(textscan(fileID, '%f', 'CommentStyle', '!'));
     idxEbdrRiv(j) = data(2);
     data = fgets(fileID);
     [xi, uv] = strtok(data);
     [u, v] = strtok(uv);
-    flowRateRiv(j,:) = [ str2double(xi(4)), str2double(u(3)), str2double(v(4)) ];
+    flowRateRiv(j,:) = [ str2double(xi(4:end)), str2double(u(3:end)), str2double(v(4:end)) ];
   end % for
   data = cell2mat(textscan(fileID, '%f', 'CommentStyle', '!'));
   offset = 1;
@@ -175,5 +175,7 @@ assert(isequal(isnan(g.idE), zeros(numE, 1)), 'Missing edge type specification')
 % Reorder boundary forcings
 [~, I] = sort(adcirc2g(idxEbdrOS));
 forcingOS = forcingOS(:,I,:);
+[~, I] = sort(adcirc2g(idxEbdrRiv));
+flowRateRiv = flowRateRiv(I,:);
 end % function
 

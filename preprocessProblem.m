@@ -76,9 +76,10 @@ switch problemData.gridSource
     
   case 'ADCIRC'
     projCenter = [problemData.configADCIRC.SLAM0, problemData.configADCIRC.SFEA0];
-    [ problemData.g, depth, forcingOS ] = domainADCIRC(['swe/fort_' problemData.name '.14'], ...
-                                                       ['swe/fort_' problemData.name '.17'], ...
-                                                       problemData.configADCIRC.NBFR, problemData.isSpherical, projCenter);
+    [ problemData.g, depth, forcingOS, flowRateRiv ] = domainADCIRC(['swe/fort_' problemData.name '.14'], ...
+                                                         ['swe/fort_' problemData.name '.17'], ...
+                                                         problemData.configADCIRC.NBFR, ...
+                                                         problemData.isSpherical, projCenter);
     
     % Bathymetry
     problemData.zbCont = @(x1,x2) evaluateFuncFromVertexValues(problemData.g, -depth, x1,x2);
@@ -140,21 +141,29 @@ switch problemData.gridSource
     numFrequency = problemData.configADCIRC.NBFR;
     problemData.xiFreqOS = cell(2,numFrequency);
     problemData.xiAmpOS = cell(2,numFrequency);
-    markEbdrOS = problemData.g.idE == 4;
+    markTbdrOS = problemData.g.T0E(problemData.g.idE == 4, 1);
     for n = 1 : numFrequency
       problemData.xiFreqOS{1,n} = @(t) cos(problemData.configADCIRC.AMIG(n)*t);
       problemData.xiFreqOS{2,n} = @(t) -sin(problemData.configADCIRC.AMIG(n)*t);
       
       problemData.xiAmpOS{1,n} = sparse(problemData.g.numT,1);
-      problemData.xiAmpOS{1,n}(problemData.g.T0E(markEbdrOS,1)) = ...
-        problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
-        cos( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
+      problemData.xiAmpOS{1,n}(markTbdrOS) = problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+                                             cos( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
       
       problemData.xiAmpOS{2,n} = sparse(problemData.g.numT,1);
-      problemData.xiAmpOS{2,n}(problemData.g.T0E(markEbdrOS,1)) = ...
-        problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
-        sin( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
+      problemData.xiAmpOS{2,n}(markTbdrOS) = problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+                                             sin( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
     end % for
+    
+    % River inflow
+    markEbdrRiv = problemData.g.idE == 3;
+    markTbdrRiv = problemData.g.T0E(markEbdrRiv, 1);
+    problemData.xiRiv = sparse(problemData.g.numT, 1);
+    problemData.xiRiv(markTbdrRiv) = flowRateRiv(:,1);
+    problemData.uRiv = sparse(problemData.g.numT, 1);
+    problemData.uRiv(markTbdrRiv) = flowRateRiv(:,2) .* problemData.g.nuE(markEbdrRiv,1) - flowRateRiv(:,3) .* problemData.g.nuE(markEbdrRiv,2);
+    problemData.vRiv = sparse(problemData.g.numT, 1);
+    problemData.vRiv(markTbdrRiv) = flowRateRiv(:,2) .* problemData.g.nuE(markEbdrRiv,2) + flowRateRiv(:,3) .* problemData.g.nuE(markEbdrRiv,1);
 
   otherwise
     error('Invalid gridSource given.')
@@ -254,6 +263,7 @@ problemData.globRL = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g
 problemData.globROS = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrOS, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrOS);
 globB = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrRA, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrRA);
 problemData.globRdiag = cellfun(@plus, problemData.globRdiag, globB, 'UniformOutput', false);
+problemData.globB = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrRI, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrRI);
 
 %% Assembly of bottom-friction terms.
 if problemData.isBottomFrictionVarying
