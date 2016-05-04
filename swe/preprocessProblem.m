@@ -140,17 +140,18 @@ switch problemData.gridSource
     numFrequency = problemData.configADCIRC.NBFR;
     problemData.xiFreqOS = cell(2,numFrequency);
     problemData.xiAmpOS = cell(2,numFrequency);
+    markEbdrOS = problemData.g.idE == 4;
     for n = 1 : numFrequency
       problemData.xiFreqOS{1,n} = @(t) cos(problemData.configADCIRC.AMIG(n)*t);
       problemData.xiFreqOS{2,n} = @(t) -sin(problemData.configADCIRC.AMIG(n)*t);
       
       problemData.xiAmpOS{1,n} = sparse(problemData.g.numT,1);
-      problemData.xiAmpOS{1,n}(problemData.g.T0E(problemData.g.idE == 4,1)) = ...
+      problemData.xiAmpOS{1,n}(problemData.g.T0E(markEbdrOS,1)) = ...
         problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
         cos( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
       
       problemData.xiAmpOS{2,n} = sparse(problemData.g.numT,1);
-      problemData.xiAmpOS{2,n}(problemData.g.T0E(problemData.g.idE == 4,1)) = ...
+      problemData.xiAmpOS{2,n}(problemData.g.T0E(markEbdrOS,1)) = ...
         problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
         sin( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
     end % for
@@ -265,5 +266,16 @@ else
     problemData.globE = problemData.globM;
   end % if
   problemData.globE = problemData.bottomFrictionCoef * problemData.globE;
+end % if
+
+%% Assembly of rhs terms.
+if problemData.isTidalDomain
+  for n = 1 : size(problemData.forcingTidal, 3)
+    for i = 1 : 2
+      for j = 1 : 2
+        problemData.forcingTidal{i,j,n} = assembleMatElemPhiPhiFuncDiscConst(problemData.g, problemData.refElemPhiPhi, problemData.forcingTidal{i,j,n});
+      end % for
+    end % for
+  end % for
 end % if
 end % function
