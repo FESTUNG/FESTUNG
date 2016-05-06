@@ -14,18 +14,18 @@
 %> The matrix @f$\mathsf{D} \in \mathbb{R}^{KN\times KN}@f$ is block
 %> diagonal and defined component-wise by
 %> @f[
-%>   [\mathsf{M}]_{(k-1)N+i,(k-1)N+j} = \sum_{l=1}^N {fc}_{kl} \int_{T_k} 
+%>   [\mathsf{D}]_{(k-1)N+i,(k-1)N+j} = \sum_{l=1}^N {fc}_{kl} \int_{T_k} 
 %>      \varphi_{ki} \varphi_{kj} \varphi_{kl} \mathrm{d} \mathbf{x} \,.
 %> @f]
 %> All other entries are zero.
 %> For the assembly we define element local matrices 
-%> @f$\mathsf{M}_{T_k} \in \mathbb{R}^{N\times N}@f$ as
+%> @f$\mathsf{D}_{T_k} \in \mathbb{R}^{N\times N}@f$ as
 %> @f[
-%>   [\mathsf{M}_{T_k}]_{i,j} = \int_{T_k} 
+%>   [\mathsf{D}_{T_k}]_{i,j} = \int_{T_k} 
 %>      \varphi_{ki} \varphi_{kj} \mathrm{d} \mathbf{x} \,,
 %> @f]
 %> and rewrite the global matrix as 
-%> @f$\mathsf{M} = \mathrm{diag}(\mathsf{M}_{T_1}, \ldots, \mathsf{M}_{T_K})@f$.
+%> @f$\mathsf{D} = \mathrm{diag}(\mathsf{D}_{T_1}, \ldots, \mathsf{D}_{T_K})@f$.
 %> In this implementation, the element integrals are backtransformed to the
 %> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
 %> mapping @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$
@@ -64,7 +64,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2016 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock

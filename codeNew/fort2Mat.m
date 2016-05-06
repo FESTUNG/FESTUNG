@@ -1,5 +1,5 @@
-function [g, fcAlg, zbAlg, NOLIBF, NWP, bottomFric, NTIP, F, fT, ramping, xiRI, uRI, vRI, NBFR, xiOSX, xiOST, G, DT, STATIM, RNDAY, H0, ... 
-					NSTAE, XEL, YEL, NSTAV, XEV, YEV] = fort2Mat(name)
+function [ g, fcAlg, zbAlg, NOLIBF, NWP, bottomFric, NTIP, NRAMP, F, fT, ramping, xiRI, uRI, vRI, NBFR, xiOSX, xiOST, G, DT, STATIM, RNDAY, ...
+           H0, NSTAE, XEL, YEL, NSTAV, XEV, YEV] = fort2Mat(name)
         
 [ ICS, NOLIBF, NWP, NCOR, NTIP, NRAMP, G, DT, STATIM, REFTIM, RNDAY, DRAMP, H0, SLAM0, SFEA0, TAU, CF, CORI, NTIF, TPK, AMIGT, ...
   ETRF, FFT, FACET, NBFR, AMIG, FF, FACE, NSTAE, XEL, YEL, NSTAV, XEV, YEV] = fort15Read(['fort_' name '.15']);
@@ -13,7 +13,7 @@ g.idE(NRAEDN) = 2;
 g.idE(NRIEDN) = 3;
 g.idE(NSEDN ) = 4;
 g.idE0T = g.idE(g.E0T); % local edge IDs
-fprintf(['Grid construction for ' AGRID 'successful.\n']); % TODO asserts
+fprintf(['Grid construction for ' AGRID 'successful.\n']);
 % general parameters
 SLAM = g.coordV(:,1)/6378206.4/cos(SFEA0) + SLAM0;
 SFEA = g.coordV(:,2)/6378206.4;

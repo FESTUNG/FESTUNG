@@ -1,5 +1,5 @@
 function [ interface, name, g, zbAlg, fcAlg, gConst, NOLIBF, NWP, bottomFric, F0, F0Alg, rhsAlg, F1Alg, F2Alg, xiOSAlg, t0, tEnd, dt, numSteps, ...
-					 minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, ramping, xiRI, uRI, vRI, ...
+					 minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, NRAMP, ramping, xiRI, uRI, vRI, ...
 					 rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, trianglesE, coordinatesE, NSTAV, trianglesV, coordinatesV ] = userInput(problem, refinement)
 switch problem
 	case 0 % for debugging purposes
@@ -13,11 +13,12 @@ switch problem
     g = domainSquare(1);
 		g.idE = zeros(g.numE,1);
 		g.idE(g.baryE(:, 2) == 0) = 1; % south
-		g.idE(g.baryE(:, 1) == 1) = 1; % east
+		g.idE(g.baryE(:, 1) == 1) = 4; % east
 		g.idE(g.baryE(:, 2) == 1) = 1; % north
 		g.idE(g.baryE(:, 1) == 0) = 1; % west
 		g.idE0T = g.idE(g.E0T);
-    zbAlg  = @(x1,x2) - 0.1*(1-x1<x2)-0.1;
+%     zbAlg  = @(x1,x2) -0.1*(x1==x1);
+		zbAlg  = @(x1,x2) -0.1*(1-x1<x2)-0.1;
     %% Coefficients, right hand sides, and boundary conditions
     fcAlg    = @(x1,x2  )  0*x1;
     gConst   = 9.81;
@@ -28,8 +29,8 @@ switch problem
     xi = @(x1,x2,t) 0*x1;
      u = @(x1,x2,t) 0*x1;
      v = @(x1,x2,t) 0*x1;
-		xiOSAlg = @(x1,x2,t) 0*x1;
-		ramping = @(t) 1;
+		xiOSAlg = @(x1,x2,t) (x1==x1);
+    NRAMP = 0;
 		xiRI = []; uRI = []; vRI = []; F1Alg = []; F2Alg = [];
        
     F0    = 0;
@@ -37,8 +38,8 @@ switch problem
     rhsAlg   = 0;
     %% Time stepping parameters
     t0       = 0;
-    tEnd     = 1;
-    numSteps = 1;
+    tEnd     = 0.01;
+    numSteps = 5;
     %% Postprocessing parameter
     minTol      = 0.001;            % values of c1 in each vertex must be at least as high as this tolerance 
     %% Output parameters
@@ -81,8 +82,7 @@ switch problem
     fcAlg    = @(x1,x2  )  x1;
     gConst   = 9.81;
     bottomFric = 1;
-    NOLIBF = 1; NWP = 0;
-    ramping  = @(t) 1;
+    NOLIBF = 1; NWP = 0; NRAMP = 0;
     
     % solution
     xi = @(x1,x2,t) C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t))) - height*(2-x1-x2);
@@ -152,12 +152,12 @@ switch problem
     F1Alg    = @(x1,x2,t) zeros(size(x1));
     F2Alg    = @(x1,x2,t) zeros(size(x1));
     NBFR     = 5;
-		ramping  = @(t) 1;
-    xiOSAlg  = @(x1,x2,t) 0.075 * cos( 0.000067597751162*t - pi/180*194.806 ) ...
-                        + 0.095 * cos( 0.000072921165921*t - pi/180*206.265 ) ...
-                        + 0.10  * cos( 0.000137879713787*t - pi/180*340.0   ) ...
-                        + 0.395 * cos( 0.000140518917083*t - pi/180*  0.0   ) ...
-                        + 0.06  * cos( 0.000145444119418*t - pi/180*42.97180);
+    NRAMP    = 0;
+    xiOSAlg  = @(x1,x2,t) 0.075 * cos(0.000067597751162*t - pi/180*194.806 ) ...
+                        + 0.095 * cos(0.000072921165921*t - pi/180*206.265 ) ...
+                        + 0.10  * cos(0.000137879713787*t - pi/180*340.0   ) ...
+                        + 0.395 * cos(0.000140518917083*t - pi/180*  0.0   ) ...
+                        + 0.06  * cos(0.000145444119418*t - pi/180*42.97180);
     %% Time stepping parameters
     t0       = 0;
     tEnd     = 12*24*3600;
@@ -187,7 +187,7 @@ switch problem
     %% General parameters
     % specifies usage of interface 'ADCIRC' means everything is provided from ADCIRC parameter files only name of files has to be specified
     interface = 'ADCIRC';
-    name      = 'east';
+    name      = 'gom3k';
     %% Domain specification
     gridGen   = 'unnecessary';
     coordSys  = 'unnecessary';
@@ -223,7 +223,32 @@ switch problem
     %% Output parameters
     isVisGrid   = false;            % visualization of grid
 		isVisParam  = false;						% visualization of zb and fc
-    numPlots    = 120;              % number of plots for whole visualization
+    numPlots    = 72;               % number of plots for whole visualization
+    isVisu      = true;             % visualization of x-velocity component
+    isVisuH     = false;            % visualization of x-momentum component
+    isVisv      = true;             % visualization of y-velocity component
+    isVisvH     = false;            % visualization of y-momentum component
+    isVisxi     = true;             % visualization of free surface elevation
+    isSolAvail  = false;            % if solution available compute the error of the method
+                                    % user must then create function handles H, u and v parametrizing the height and both velocity components
+		%% station parameter
+		useStations = false;						% whether or not to use elevation and velocity recording stations
+  case 5 % arbitrary ADCIRC input
+    %% General parameters
+    % specifies usage of interface 'ADCIRC' means everything is provided from ADCIRC parameter files only name of files has to be specified
+    interface = 'ADCIRC';
+    name      = 'east';
+    %% Domain specification
+    gridGen   = 'unnecessary';
+    coordSys  = 'unnecessary';
+    %% Coefficients, right hand sides, and boundary conditions
+    F1Alg   = [];
+    F2Alg   = [];
+    xiOSAlg = [];
+    %% Output parameters
+    isVisGrid   = false;            % visualization of grid
+		isVisParam  = false;						% visualization of zb and fc
+    numPlots    = 200;              % number of plots for whole visualization
     isVisu      = true;             % visualization of x-velocity component
     isVisuH     = false;            % visualization of x-momentum component
     isVisv      = true;             % visualization of y-velocity component
@@ -247,7 +272,7 @@ warning('on', 'all');
 %% grid construction
 fprintf('Construct grid and read parameters.\n');
 if strcmp(interface, 'ADCIRC')
-  [ g, fcAlg, zbAlg, NOLIBF, NWP, bottomFric, tidalDomain, F, fT, ramping, xiRI, uRI, vRI, NBFR, xiOSX, xiOST, gConst, dt, t0, tEnd, minTol, ... 
+  [ g, fcAlg, zbAlg, NOLIBF, NWP, bottomFric, tidalDomain, NRAMP, F, fT, ramping, xiRI, uRI, vRI, NBFR, xiOSX, xiOST, gConst, dt, t0, tEnd, minTol, ... 
     NSTAE, XEL, YEL, NSTAV, XEV, YEV] = fort2Mat(name);
   rhsOSAlg = 0;
 elseif strcmp(interface, 'none')
@@ -296,7 +321,7 @@ end % if
 %% time stepping specification
 fprintf('Determine length and number of timesteps for simulation.\n')
 if     exist('dt', 'var') && ~exist('numSteps', 'var')
-  numSteps = (tEnd-t0) / dt;
+  numSteps = round((tEnd-t0) / dt);
 elseif ~exist('dt', 'var') && exist('numSteps', 'var')
   dt = (tEnd-t0) / numSteps;
 elseif  exist('dt', 'var') && exist('numSteps', 'var')
@@ -308,7 +333,7 @@ else
   error('Either time increment or number of time steps has to be specified.');
 end % if
 numPlots = min(numPlots, numSteps);
-output = max(floor(numSteps / numPlots), 1); % for plotting only after certain times
+output = max(floor(round(numSteps / numPlots * 1000) / 1000), 1); % for plotting only after certain times
 
 if isSolAvail
   if exist('xiOSAlg', 'var')
@@ -333,7 +358,7 @@ if isSolAvail
 		warning('Specification of river boundary condition for y-velocity component might be in conflict with analytical solution. Please check!');
   else 
     % boundary condition specification
-     vRI = @(x1,x2,t)  v(x1,x2,t); % TODO specification of river boundary with function handles
+     vRI = @(x1,x2,t)  v(x1,x2,t);
   end % if
 else
   xi = []; u = []; v = [];
@@ -346,9 +371,14 @@ if ~exist('rhsAlg', 'var')
   rhsAlg = 0;
 elseif strcmp(interface, 'ADCIRC')
   if rhsAlg == 1
-    warning('Possible conflicts for right hand sides of momentum equations. Please check!');
+    warning('Possible conflicts for right hand sides of momentum equations. Algebraic right hand sides are being neglected.');
   end % if
   rhsAlg = 0;
+end % if
+
+% various
+if ~NRAMP
+  ramping = [];
 end % if
 
 %% stations

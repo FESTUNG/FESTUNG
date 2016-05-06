@@ -138,7 +138,7 @@ end % switch
 fprintf(file, '    <Piece NumberOfPoints="%d" NumberOfCells="%d">\n',K*numP,K);
 fprintf(file, '      <Points>\n');
 fprintf(file, '        <DataArray type="Float32" NumberOfComponents="3" format="ascii">\n');
-fprintf(file, '          %.3e %.3e %.3e\n',  [P1, P2, zeros(numP*K, 1)]');
+fprintf(file, '          %.12e %.12e %.1e\n',  [P1, P2, zeros(numP*K, 1)]');
 fprintf(file, '        </DataArray>\n');
 fprintf(file, '      </Points>\n');
 fprintf(file, '      <Cells>\n');
@@ -215,9 +215,9 @@ fprintf(file, 'N=%d, E=%d, ', length(P1), numT);
 fprintf(file, 'ET=TRIANGLE, F=FEBLOCK, ');
 fprintf(file, 'SOLUTIONTIME=%.3e\n\n', tLvl);
 %% Point coordinates and data.
-fprintf(file, '%.3e %.3e %.3e %.3e %.3e\n', P1);
+fprintf(file, '%.12e %.12e %.12e %.12e %.12e\n', P1);
 fprintf(file, '\n\n');
-fprintf(file, '%.3e %.3e %.3e %.3e %.3e\n', P2);
+fprintf(file, '%.12e %.12e %.12e %.12e %.12e\n', P2);
 fprintf(file, '\n\n');
 fprintf(file, '%.3e %.3e %.3e %.3e %.3e\n', dataLagr);
 fprintf(file, '\n');

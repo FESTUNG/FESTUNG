@@ -91,6 +91,7 @@
 %
 function g = computeDerivedGridDataSWE(g, markE0Tint, markE0TbdrL, markE0TbdrRA, markE0TbdrRI, markE0TbdrOS)
 g.areaE0Tint				= cell(3,1	);
+g.areaE0TbdrL				= cell(3,1	);
 g.areaE0TbdrOS			= cell(3,1	);
 g.areaNuE0Tint			= cell(3,2	);
 g.areaNuE0TbdrL			= cell(3,2	);
@@ -103,6 +104,7 @@ g.areaNuMarkE0TE0T	= cell(3,3,2);
 areaNuE0T						= cell(3,2  );
 for nn = 1 : 3
 	g.areaE0Tint	{nn} = g.areaE0T(:,nn) .* markE0Tint	(:,nn);
+	g.areaE0TbdrL {nn} = g.areaE0T(:,nn) .* markE0TbdrL (:,nn);
 	g.areaE0TbdrOS{nn} = g.areaE0T(:,nn) .* markE0TbdrOS(:,nn);
 	for m = 1 : 2
 			areaNuE0T			{nn,m} = g.areaE0T(:,nn) .* g.nuE0T(:,nn,m);

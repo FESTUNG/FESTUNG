@@ -17,7 +17,7 @@ Coarse Mesh                              ! 24 CHARACTER ALPANUMERIC RUN IDENTIFI
  1.E-1 ! DT - TIME STEP (IN SECONDS) ! 86.4
  0.0    ! STATIM - STARTING TIME (IN DAYS)
  0.0    ! REFTIM - REFERENCE TIME (IN DAYS)
- 3.0E-3 ! RNDAY - TOTAL LENGTH OF SIMULATION (IN DAYS)
+ 3.E-3 ! RNDAY - TOTAL LENGTH OF SIMULATION (IN DAYS)
  1      ! IRK - TEMPORAL SCHEME: 1=Euler Forward; 2=2nd order Runge-Kutta
  0      ! Riemann solver switch parameter 0-HLL, 1-Roe, 2-Roe+entropy fix, 3-Lax-Friedrichs
  0      ! ITRANS - 0=TRANSIENT SIMULATION, 1=STEADY STATE SIMULATION
