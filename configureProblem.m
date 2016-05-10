@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd.name = 'test2'; 
+pd.name = 'east'; 
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -76,6 +76,7 @@ pd.isWaitbar = false; % Use waiting bar
 pd.outputCount = 200; % Number of outputs over total simulation time
 pd.outputTypes = 'vtk'; % Output file type
 pd.outputList = { 'u', 'uH', 'v', 'vH', 'xi', 'h', 'zb', 'fc' }; % List of variables to visualize
+pd.isVisStations = true; % Output stations
 
 %% Time stepping parameters
 pd.scheme = 'explicit'; % type of time stepping scheme ('explicit' or 'implicit')
