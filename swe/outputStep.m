@@ -51,7 +51,7 @@
 %> @endparblock
 %
 function problemData = outputStep(problemData, nStep)
-%% Visualize solution.
+%% Visualize solution and evaluate stations.
 visualizeSolution(problemData, nStep);
 
 %% Update waitbar.

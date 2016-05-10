@@ -49,6 +49,20 @@ if problemData.isWaitbar
   close(problemData.waitbar)
 end % if
 
+%% Save stations.
+if problemData.isVisStations
+  if ~isempty(problemData.dataElev)
+    data = problemData.dataElev;
+    save('output/elev.mat', 'data')
+    fprintf('Data written to output/elev.mat\n')
+  end % if
+  if ~isempty(problemData.dataVel)
+    data = problemData.dataVel;
+    save('output/vel.mat', 'data')
+    fprintf('Data written to output/vel.mat\n')
+  end % if
+end % if
+
 %% Compute error if analytical solution available.
 p = problemData.p;
 if problemData.isSolutionAvail

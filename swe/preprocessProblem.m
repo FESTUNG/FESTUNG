@@ -165,6 +165,21 @@ switch problemData.gridSource
     problemData.vRiv = sparse(problemData.g.numT, 1);
     problemData.vRiv(markTbdrRiv) = flowRateRiv(:,2) .* problemData.g.nuE(markEbdrRiv,2) + flowRateRiv(:,3) .* problemData.g.nuE(markEbdrRiv,1);
 
+    % Stations
+    if problemData.isVisStations
+      if problemData.configADCIRC.NSTAE == 0 && problemData.configADCIRC.NSTAV == 0
+        warning('No stations specified! Disabling station output.')
+        problemData.isVisStation = false;
+      else
+        % Find triangle indices for each station
+        coordElev = [ problemData.configADCIRC.XEL, problemData.configADCIRC.YEL ];
+        problemData.stationElev = coord2triangle(problemData.g, coordElev(:,1), coordElev(:,2));
+        problemData.dataElev = cell(size(problemData.stationElev));
+        coordVel = [ problemData.configADCIRC.XEV, problemData.configADCIRC.YEV ];
+        problemData.stationVel = coord2triangle(problemData.g, coordVel(:,1), coordVel(:,2));
+        problemData.dataVel = cell(size(problemData.stationVel,1),2);
+      end % if
+    end % if
   otherwise
     error('Invalid gridSource given.')
 end % switch
