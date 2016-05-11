@@ -1,16 +1,17 @@
-function [ICS, NOLIBF, NWP, NCOR, NTIP, NRAMP, G, DT, STATIM, REFTIM, RNDAY, DRAMP, H0, SLAM0, SFEA0, TAU, CF, CORI, NTIF, TPK, AMIGT, ETRF, FFT, FACET, NBFR, AMIG, FF, FACE, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE, NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV] = fort15Read(file)
+function [ICS, NOLIBF, NWP, NCOR, NTIP, NRAMP, G, NDTVAR, DT, STATIM, REFTIM, RNDAY, ITRANS, CONVCR, DRAMP, H0, SLAM0, SFEA0, TAU, CF, CORI, NTIF, TPK, AMIGT, ETRF, FFT, FACET, NBFR, AMIG, FF, FACE, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE, NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV, NHSTAR, NHSINC] = fort15Read(file)
 fileID = fopen(file  );
-RUNDES = fgets(fileID); % unused
-RUNID  = fgets(fileID); % unused
-IHOT   = cell2mat(textscan(fileID, '%f \n', 'CommentStyle', '!')); % not supported yet
-OUTP   =				  textscan(fileID, '%s \n', 'CommentStyle', '!') ; % not supported yet
+RUNDES = fgets(fileID); % This variable is not used
+RUNID  = fgets(fileID); % This variable is not used
+IHOT   = cell2mat(textscan(fileID, '%f \n', 'CommentStyle', '!')); % This feature is not supported
+OUTP   =				  textscan(fileID, '%s \n', 'CommentStyle', '!') ; % This feature is not supported
 param  = cell2mat(textscan(fileID, '%f   ', 'CommentStyle', '!'));
 ICS		 = param(1); assert(ICS		 == 1 || ICS		== 2, 'Invalid type of coordinate system.'				);
-NOLIBF = param(2); assert(NOLIBF == 0 || NOLIBF == 1, 'Invalid type of bottom friction.'					); % test
+NOLIBF = param(2); assert(NOLIBF == 0 || NOLIBF == 1, 'Invalid type of bottom friction.'					);
 NWP		 = param(3); assert(NWP		 == 0 || NWP    == 1,	'Invalid type of bottom friction variation.');
 NCOR   = param(4); assert(NCOR   == 0 || NCOR   == 1, 'Invalid type of Coriolis parameter.'				);
 NTIP   = param(5); assert(NTIP   == 0 || NTIP   == 1, 'Invalid type of Newtonian tide potential.' );
-NWS    = param(6); assert(NWS    == 0 || NWS    == 1, 'Invalid type of wind stress.'							); % TODO
+% This feature is not supported
+NWS    = param(6); assert(NWS    == 0 || NWS    == 1, 'Invalid type of wind stress.'							);
 NRAMP  = param(7); assert(NRAMP  == 0 || NRAMP  == 1, 'Invalid type ramping.'											);
 G			 = param(8); assert(isscalar(G),								'G has to be a real number.'								);
 % This feature is not supported
@@ -19,27 +20,32 @@ XI		 = param(10:3:10+3*NQUAD-3);
 YI		 = param(11:3:10+3*NQUAD-2);
 W			 = param(12:3:10+3*NQUAD-1);
 dataCountr = 10+3*NQUAD;
-NDTVAR = param(dataCountr); dataCountr = dataCountr+1; assert(NDTVAR == 0 || NDTVAR == 1,		'Invalid type time increment selection.'								); % TODO
+NDTVAR = param(dataCountr); dataCountr = dataCountr+1; assert(NDTVAR == 0 || NDTVAR == 1,		'Invalid type time increment selection.'								);
 DT		 = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(DT) && DT > 0,				'Time increment has to be a positive real number.'			);
 STATIM = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(STATIM),							'Start time has to be a real number.'										);
-REFTIM = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(REFTIM),							'Reference time has to be a real number.'								); % TODO: usage?
+% This variable is not used
+REFTIM = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(REFTIM),							'Reference time has to be a real number.'								);
 RNDAY  = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(RNDAY) && RNDAY > 0, 'Invalid total length of simulation.'										);
+% This feature is not supported
 IRK    = param(dataCountr); dataCountr = dataCountr+1; assert(IRK    == 0 || ...
-																															IRK    == 1 || IRK    == 2,		'Invalid Runge-Kutta scheme.'														); % TODO 
+																															IRK    == 1 || IRK    == 2,		'Invalid Runge-Kutta scheme.'														);
+% This feature is not supported
 ISLOPE = param(dataCountr); dataCountr = dataCountr+1; assert(ISLOPE == 0 || ISLOPE == 1 ...
-																													 || ISLOPE == 2 || ISLOPE == 3,		'Invalid slope limiter or Riemann solver selection.'		); % TODO
+																													 || ISLOPE == 2 || ISLOPE == 3,		'Invalid slope limiter or Riemann solver selection.'		);
 ITRANS = param(dataCountr); dataCountr = dataCountr+1; assert(ITRANS == 0 || ITRANS == 1,		'The program must reach steady-state or run full time.' );
 																					 assert(IRK >= 1 || ITRANS == 1,	'If no time-stepping scheme is used, the problem must be steady-state.' );
-CONVCR = param(dataCountr); dataCountr = dataCountr+1; % TODO + assert
-DRAMP  = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(DRAMP) && DRAMP >= 0, 'Ramping duration has to be positive.'									); % TODO: check UTBEST
+CONVCR = param(dataCountr); dataCountr = dataCountr+1; assert(ITRANS == 0 || ...
+																															CONVCR >  0,					'The tolerance for convergence of steady-state must be positive');
+% This is done differently than in UTBEST
+DRAMP  = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(DRAMP) && DRAMP >= 0, 'Ramping duration has to be positive.'									);
 H0		 = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(H0) && H0 > 0, 'Minimum cutoff depth has to be positive.'										);
 SLAM0  = param(dataCountr); dataCountr = dataCountr+1;
 SFEA0  = param(dataCountr); dataCountr = dataCountr+1; assert( isscalar(SLAM0) && isscalar(SFEA0), ['Reference coordinates for spherical ' ...
 																																												'coordinates (CPP projection) must be real-valued numbers.']);
 TAU		 = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(TAU), 'The linear bottom friction coefficient has to be a real number.'			);
 CF		 = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(TAU), 'The non linear bottom friction coefficient has to be a real number.'	);
-NVISC  = param(dataCountr); dataCountr = dataCountr+1; % TODO: check UTBEST
-ESL		 = param(dataCountr); dataCountr = dataCountr+1; % TODO: check UTBEST
+NVISC  = param(dataCountr); dataCountr = dataCountr+1; % This feature is not supported since we solve the fully hyberbolic problem
+ESL		 = param(dataCountr); dataCountr = dataCountr+1; % This feature is not supported since we solve the fully hyberbolic problem
 CORI	 = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(CORI), 'The Coriolis parameter has to be a real number.'											);
 NTIF	 = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(NTIF) && round(NTIF) == NTIF, 'Invalid number of tide potential forcings.'		);
 TIPOTAG = cell( NTIF,1);
@@ -119,7 +125,7 @@ NOUTGV   = param(dataCountr); dataCountr = dataCountr+1; % TODO, asserts
 TOUTSGV  = param(dataCountr); dataCountr = dataCountr+1; % TODO, asserts
 TOUTFGV  = param(dataCountr); dataCountr = dataCountr+1; % TODO, asserts
 NSPOOLGV = param(dataCountr); dataCountr = dataCountr+1; % TODO, asserts
-NHSTAR   = param(dataCountr); dataCountr = dataCountr+1; % TODO: check UTBEST
-NHSINC   = param(dataCountr); % TODO: check UTBEST
+NHSTAR   = param(dataCountr); dataCountr = dataCountr+1; % TODO
+NHSINC   = param(dataCountr); % TODO
 fclose(fileID);
 end % function

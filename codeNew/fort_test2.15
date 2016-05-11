@@ -17,10 +17,10 @@ Coarse Mesh                              ! 24 CHARACTER ALPANUMERIC RUN IDENTIFI
  1.E-1 ! DT - TIME STEP (IN SECONDS) ! 86.4
  0.0    ! STATIM - STARTING TIME (IN DAYS)
  0.0    ! REFTIM - REFERENCE TIME (IN DAYS)
- 3.E-3 ! RNDAY - TOTAL LENGTH OF SIMULATION (IN DAYS)
- 1      ! IRK - TEMPORAL SCHEME: 1=Euler Forward; 2=2nd order Runge-Kutta
+ 3.0E-3 ! RNDAY - TOTAL LENGTH OF SIMULATION (IN DAYS)
+ 0      ! IRK - TEMPORAL SCHEME: 1=Euler Forward; 2=2nd order Runge-Kutta
  0      ! Riemann solver switch parameter 0-HLL, 1-Roe, 2-Roe+entropy fix, 3-Lax-Friedrichs
- 0      ! ITRANS - 0=TRANSIENT SIMULATION, 1=STEADY STATE SIMULATION
+ 1      ! ITRANS - 0=TRANSIENT SIMULATION, 1=STEADY STATE SIMULATION
  1.0E-5 ! CONVCR - Conv. Criteria, used only in steady state calculation.
  2.5E-5 ! DRAMP - DURATION OF RAMP FUNCTION (IN DAYS)
  0.05    ! H0 - MINIMUM CUTOFF DEPTH

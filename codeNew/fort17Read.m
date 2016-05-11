@@ -1,9 +1,7 @@
 function [g, NEDGES, NEDNO, NLEDN, NRAEDN, NRIEDN, ETRI, UNRI, UTRI, NSEDN, EMO, EFA] = fort17Read(file, g, NBFR)
 %% The program numbers edges of a mesh implicitly, and may have a different edge numbering than specified by the fort.17 file, 
 %% but since essential boundary conditions are specified in the fort-files, boundary edges have to be identified and later renumbered.
-% evtl TODO: usage in userInput: nur den Teil der Methode verwenden, der
-% wirklich gebraucht wird
-% TODO: assert g?
+% TODO: asserts for g
 assert(isscalar(NBFR) && round(NBFR) == NBFR && NBFR >= 0, 'Invalid number of open sea boundary forcings.');
 fileID     = fopen(file);
 edgeData   = cell2mat(textscan(fileID, '%f', 'CommentStyle', '!'));
@@ -13,7 +11,7 @@ assert(NEDGES >= 3, 'Invalid number of edges');
 NEDNO      = [edgeData(3:5:5*NEDGES-2), edgeData(4:5:5*NEDGES-1)];
 assert(min(NEDNO(:)) >= 1 && max(NEDNO(:)) <= g.numV, 'Non existing nodes appear in edge information.');
 NEDEL      = [edgeData(5:5:5*NEDGES  ), edgeData(6:5:5*NEDGES+1)];
-assert(min(NEDNO(:)) >= 1 && max(NEDNO(:)) <= g.numT, 'Non existing elements appear in edge information.');
+assert(min(NEDEL(:)) >= 0 && max(NEDEL(:)) <= g.numT, 'Non existing elements appear in edge information.');
 NELED      = [edgeData(1+5*NEDGES+2:4:1+5*NEDGES+4*g.numT-2), ...
 				  	  edgeData(1+5*NEDGES+3:4:1+5*NEDGES+4*g.numT-1), ...
 					    edgeData(1+5*NEDGES+4:4:1+5*NEDGES+4*g.numT  )];

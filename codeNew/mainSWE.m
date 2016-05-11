@@ -11,9 +11,9 @@ wbarOpt		 = 'off';
 fileTypes  = 'vtk';
 
 fprintf('Read user input.\n');
-[ interface, name, g, zbAlg, fcAlg, gConst, NOLIBF, NWP, bottomFric, F0, F0Alg, rhsAlg, F1Alg, F2Alg, xiOSAlg, t0, tEnd, dt, numSteps, ...
-	minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, NRAMP, ramping, ...
-  xiRI, uRI, vRI, rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, triE, coordE, NSTAV, triV, coordV ] = userInput(problem, refinement);
+[ interface, name, g, zbAlg, fcAlg, gConst, NDTVAR, NOLIBF, NWP, bottomFric, F0, F0Alg, rhsAlg, F1Alg, F2Alg, xiOSAlg, t0, tEnd, dt, numSteps, ...
+	ITRANS, CONVCR, minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, NRAMP, ramping, ...
+  xiRI, uRI, vRI, rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, triE, coordE, NSTAV, triV, coordV, NHSTAR, NHSINC ] = userInput(problem, refinement);
 %% initial conditions
 if isSolAvail % use exact solution at initial time
   xi0 = @(x1,x2) xi(x1,x2,t0);
@@ -92,7 +92,7 @@ for nn = 1:3
   aux = cell(2,1);
   for m = 1:2
     aux{m} = g.mapRef2Phy(m, Q1, Q2);
-    quadPhysPts1D{nn,1} = reshape(aux{m}.', R1D*K, 1);
+    quadPhysPts1D{nn,m} = reshape(aux{m}.', R1D*K, 1);
     kronNuE0T{nn,m} = kron(g.nuE0T(:,nn,m), ones(R1D,1));
   end % for
 	zbEvalOnQuad1D{nn} = zbAlg(aux{1}, aux{2});
@@ -262,12 +262,13 @@ cDG        = zeros(K,N,3);
 cDG(:,:,1) = projectFuncCont2DataDisc(g, @(x1,x2)  xi0(x1,x2) - zbAlg(x1,x2)              , 2*p, refElemPhiPhi);
 cDG(:,:,2) = projectFuncCont2DataDisc(g, @(x1,x2) (xi0(x1,x2) - zbAlg(x1,x2)) .* u0(x1,x2), 2*p, refElemPhiPhi);
 cDG(:,:,3) = projectFuncCont2DataDisc(g, @(x1,x2) (xi0(x1,x2) - zbAlg(x1,x2)) .* v0(x1,x2), 2*p, refElemPhiPhi);
+
 cElemOnQuad = cell(3,1);
 cEdgeInt = cell(3,3);
 cEdgeExt = cell(3,3,3);
 cEdgeExtInt = cell(3,3,3);
 %% correction for unknown c1
-cDG(:,:,1) = applyMinValueExceedance2DataDisc(cDG(:,:,1), corrSys, nStep, minTol, 1000);
+cDG(:,:,1) = applyMinValueExceedance2DataDisc(g, cDG(:,:,1), corrSys, nStep, minTol, 20);
 %% visualize initial solution
 UDG = zeros(K,N,2);
 if isVisu || isVisv
@@ -422,7 +423,7 @@ while t < tEnd
   %% solution dependent contributions
   % lookup table for solution
 	for I = 1:3
-    cElemOnQuad{I} = reshape(gPhi2D{2*p} * cDG(:,:,I).', R2D*K, 1);
+    cElemOnQuad{I} = reshape(gPhi2D{max(2*p,1)} * cDG(:,:,I).', R2D*K, 1);
 	end % for
 	
   %% element contributions
@@ -465,9 +466,8 @@ while t < tEnd
       nonLinearity = nonLinearity + [ globRoffdiag{nn,np,1} * (uuH + quadraticH) + globRoffdiag{nn,np,2} * uvH;
                                       globRoffdiag{nn,np,1} * uvH + globRoffdiag{nn,np,2} * (vvH + quadraticH) ];
 			if strcmp(fluxType, 'Lax-Friedrichs')
-        lambda = computeLaxFriedrichsCoefficientSWE( 'interior', averaging, nn, np, kronNuE0T, [], [], [], [], [], HL, [], ...
-                                                     cEdgeInt, cEdgeExtInt, gConst );
-				riem = riem + [ globV{nn,np} * (lambda .* (cEdgeInt{1,nn} - cEdgeExtInt{1,nn,np}));
+        lambda = computeLaxFriedrichsCoefficientSWE('interior', averaging, kronNuE0T, gConst, nn, cEdgeInt, np, cEdgeExtInt, HL);
+ 				riem = riem + [ globV{nn,np} * (lambda .* (cEdgeInt{1,nn} - cEdgeExtInt{1,nn,np}));
 												globV{nn,np} * (lambda .* (cEdgeInt{2,nn} - cEdgeExtInt{2,nn,np}));
 												globV{nn,np} * (lambda .* (cEdgeInt{3,nn} - cEdgeExtInt{3,nn,np})) ];
 			else
@@ -498,13 +498,12 @@ while t < tEnd
     elseif strcmp(land, 'riemann')
       uHR =  nuE0Tdiff{nn} .* cEdgeInt{2,nn} - 2 * nuE0Tprod{nn} .* cEdgeInt{3,nn};
       vHR = -nuE0Tdiff{nn} .* cEdgeInt{3,nn} - 2 * nuE0Tprod{nn} .* cEdgeInt{2,nn};
-      uuHR = uHR.^2 ./ cEdgeInt{1,nn};
-      uvHR = uHR .* vHR ./ cEdgeInt{1,nn};
-      vvHR = vHR.^2 ./ cEdgeInt{1,nn};
 			if strcmp(fluxType, 'Lax-Friedrichs')
-	      lambda = computeLaxFriedrichsCoefficientSWE( 'land', [], nn, [], kronNuE0T, cEdgeInt{2,nn}, uHR, cEdgeInt{3,nn}, vHR, cEdgeInt{1,nn}, ...
-                                                     [], [], [], [], gConst );
-				nonLinearity = nonLinearity + 0.5 * ...
+	      lambda = computeLaxFriedrichsCoefficientSWE('land', [], kronNuE0T, gConst, nn, cEdgeInt, [], [], cEdgeInt{1,nn}, uHR, vHR);
+				uuHR = uHR.^2 ./ cEdgeInt{1,nn};
+        uvHR = uHR .* vHR ./ cEdgeInt{1,nn};
+        vvHR = vHR.^2 ./ cEdgeInt{1,nn};
+        nonLinearity = nonLinearity + 0.5 * ...
        [ globRL{nn,1} * (uuH + uuHR + 2 * quadraticH) + globRL{nn,2} * (uvH + uvHR) + globVL{nn} * (lambda .* (cEdgeInt{2,nn} - uHR)); ...
          globRL{nn,1} * (uvH + uvHR) + globRL{nn,2} * (vvH + vvHR + 2 * quadraticH) + globVL{nn} * (lambda .* (cEdgeInt{3,nn} - vHR)) ];
 			else
@@ -547,7 +546,7 @@ while t < tEnd
       nonLinearity = nonLinearity + 0.5 * [ globROS{nn,1} * (uuH + quadraticH) + globROS{nn,2} * uvH; 
                                             globROS{nn,1} * uvH + globROS{nn,2} * (vvH +quadraticH) ];
 			if strcmp(fluxType, 'Lax-Friedrichs')
-				lambda = computeLaxFriedrichsCoefficientSWE('openSea', averaging, nn, [], kronNuE0T, [], [], [], [], [], HL, HOS, cEdgeInt, [], gConst);
+				lambda = computeLaxFriedrichsCoefficientSWE('openSea', averaging, kronNuE0T, gConst, nn, cEdgeInt, [], [], HL, [], [], HOS);
 				riemOS = riemOS + globVOS{nn} * (lambda .* (cEdgeInt{1,nn} - HOS{nn}));
 			else
 				error('Unknown type of flux approximation.');
@@ -569,6 +568,10 @@ while t < tEnd
 		end % if
   end % for
 	
+  if ITRANS == 1 % steady state simulation
+    tmp = sysY;
+  end % if
+  
 	% building and solving the system
   sysV = [ globL{1} - globLRI{1}; globL{2} - globLRI{2}; globL{3} - globLRI{3} ];
 	switch scheme
@@ -583,12 +586,16 @@ while t < tEnd
 		otherwise
 			error('Invalid scheme.')  
 	end % switch
+	
+	if ITRANS == 1
+		l2 = (sysY - tmp).^2;
+	end % if
 
   cDG(:,:,1)  = reshape(sysY(        1 :   K*N), N, K).';
   cDG(:,:,2)  = reshape(sysY(  K*N + 1 : 2*K*N), N, K).';
   cDG(:,:,3)  = reshape(sysY(2*K*N + 1 : 3*K*N), N, K).';
   % correction for unknown c1
-	cDG(:,:,1) = applyMinValueExceedance2DataDisc(cDG(:,:,1), corrSys, nStep, minTol, 1000);
+	cDG(:,:,1) = applyMinValueExceedance2DataDisc(g, cDG(:,:,1), corrSys, nStep, minTol, 20);
   
   % visualization
   if mod(nStep,output) == 0
@@ -642,6 +649,12 @@ while t < tEnd
 	if strcmp(wbarOpt, 'on')
 	  percent = round( nStep / numSteps * 100);
 		wbar = waitbar( percent/100, wbar, strcat( [ 'Time stepping:', ' ', num2str(percent), str ] ) );
+	end % if
+	if ITRANS == 1
+		if l2 < CONVCR
+			fprintf('\n\n Steady state is reached.');
+			break;
+		end % if
 	end % if
 end % while
 fprintf(['Done. ' num2str(toc) ' seconds needed for simulation.\n']);

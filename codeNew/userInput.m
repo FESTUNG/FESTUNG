@@ -1,6 +1,6 @@
-function [ interface, name, g, zbAlg, fcAlg, gConst, NOLIBF, NWP, bottomFric, F0, F0Alg, rhsAlg, F1Alg, F2Alg, xiOSAlg, t0, tEnd, dt, numSteps, ...
-					 minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, NRAMP, ramping, xiRI, uRI, vRI, ...
-					 rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, trianglesE, coordinatesE, NSTAV, trianglesV, coordinatesV ] = userInput(problem, refinement)
+function [ interface, name, g, zbAlg, fcAlg, gConst, NDTVAR, NOLIBF, NWP, bottomFric, F0, F0Alg, rhsAlg, F1Alg, F2Alg, xiOSAlg, t0, tEnd, dt, numSteps, ...
+					 ITRANS, CONVCR, minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, NRAMP, ramping, xiRI, uRI, vRI, ...
+					 rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, trianglesE, coordinatesE, NSTAV, trianglesV, coordinatesV, NHSTAR, NHSINC ] = userInput(problem, refinement)
 switch problem
 	case 0 % for debugging purposes
 		interface = 'none';
@@ -32,6 +32,7 @@ switch problem
 		xiOSAlg = @(x1,x2,t) (x1==x1);
     NRAMP = 0;
 		xiRI = []; uRI = []; vRI = []; F1Alg = []; F2Alg = [];
+    NDTVAR = 0; ITRANS = 0; CONVCR = []; NHSTAR = 0; NHSINC = [];
        
     F0    = 0;
     F0Alg = [];
@@ -83,9 +84,10 @@ switch problem
     gConst   = 9.81;
     bottomFric = 1;
     NOLIBF = 1; NWP = 0; NRAMP = 0;
+    NDTVAR = 0; ITRANS = 0; CONVCR = []; NHSTAR = 0; NHSINC = [];
     
     % solution
-    xi = @(x1,x2,t) C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t))) - height*(2-x1-x2);
+    xi = @(x1,x2,t) C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t))) - height*(2-x1-x2); % note that with this zb the value at point (1,1) is zero
      u = @(x1,x2,t) A*sin(pi*x1)*cos(2*pi*t);
      v = @(x1,x2,t) B*sin(pi*x2)*cos(2*pi*t);
     
@@ -161,7 +163,7 @@ switch problem
     %% Time stepping parameters
     t0       = 0;
     tEnd     = 12*24*3600;
-    dt       = 15;
+    dt       = 7.5;
     %% Postprocessing parameter
     minTol      = 0.001;            % values of c1 in each vertex must be at least as high as this tolerance 
     %% Output parameters
@@ -237,6 +239,31 @@ switch problem
     %% General parameters
     % specifies usage of interface 'ADCIRC' means everything is provided from ADCIRC parameter files only name of files has to be specified
     interface = 'ADCIRC';
+    name      = 'gom';
+    %% Domain specification
+    gridGen   = 'unnecessary';
+    coordSys  = 'unnecessary';
+    %% Coefficients, right hand sides, and boundary conditions
+    F1Alg   = [];
+    F2Alg   = [];
+    xiOSAlg = [];
+    %% Output parameters
+    isVisGrid   = false;            % visualization of grid
+		isVisParam  = false;						% visualization of zb and fc
+    numPlots    = 200;              % number of plots for whole visualization
+    isVisu      = true;             % visualization of x-velocity component
+    isVisuH     = false;            % visualization of x-momentum component
+    isVisv      = true;             % visualization of y-velocity component
+    isVisvH     = false;            % visualization of y-momentum component
+    isVisxi     = true;             % visualization of free surface elevation
+    isSolAvail  = false;            % if solution available compute the error of the method
+                                    % user must then create function handles H, u and v parametrizing the height and both velocity components
+		%% station parameter
+		useStations = false;						% whether or not to use elevation and velocity recording stations
+  case 6
+    %% General parameters
+    % specifies usage of interface 'ADCIRC' means everything is provided from ADCIRC parameter files only name of files has to be specified
+    interface = 'ADCIRC';
     name      = 'east';
     %% Domain specification
     gridGen   = 'unnecessary';
@@ -272,8 +299,8 @@ warning('on', 'all');
 %% grid construction
 fprintf('Construct grid and read parameters.\n');
 if strcmp(interface, 'ADCIRC')
-  [ g, fcAlg, zbAlg, NOLIBF, NWP, bottomFric, tidalDomain, NRAMP, F, fT, ramping, xiRI, uRI, vRI, NBFR, xiOSX, xiOST, gConst, dt, t0, tEnd, minTol, ... 
-    NSTAE, XEL, YEL, NSTAV, XEV, YEV] = fort2Mat(name);
+  [ g, fcAlg, zbAlg, NOLIBF, NWP, bottomFric, tidalDomain, NRAMP, F, fT, ramping, xiRI, uRI, vRI, NBFR, xiOSX, xiOST, gConst, NDTVAR, dt, t0, tEnd, ...
+		ITRANS, CONVCR, minTol, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NHSTAR, NHSINC ] = fort2Mat(name);
   rhsOSAlg = 0;
 elseif strcmp(interface, 'none')
   tidalDomain = 0;
@@ -283,7 +310,7 @@ elseif strcmp(interface, 'none')
     NBFR = [];
   elseif strcmp(gridGen, 'ADCIRCgrid')
     if strcmp(coordSys, 'unknown')
-      [ICS, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, SLAM0, SFEA0] = fort15Read(['fort_' name '.15']);
+      [ICS, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, SLAM0, SFEA0] = fort15Read(['fort_' name '.15']);
       [g, DP] = fort14Read(['fort_' name '.14'], ICS, SLAM0, SFEA0);
     elseif strcmp(coordSys, 'cartesian')
       [g, DP] = fort14Read(['fort_' name '.14'], 1);
@@ -358,7 +385,7 @@ if isSolAvail
 		warning('Specification of river boundary condition for y-velocity component might be in conflict with analytical solution. Please check!');
   else 
     % boundary condition specification
-     vRI = @(x1,x2,t)  v(x1,x2,t);
+     vRI = @(x1,x2,t)  v(x1,x2,t); % TODO specification of river boundary with function handles
   end % if
 else
   xi = []; u = []; v = [];
