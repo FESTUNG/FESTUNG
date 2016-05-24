@@ -1,9 +1,10 @@
 function [ g, fcAlg, zbAlg, NOLIBF, NWP, bottomFric, NTIP, NRAMP, F, fT, ramping, xiRI, uRI, vRI, NBFR, xiOSX, xiOST, G, NDTVAR, DT, STATIM, RNDAY, ...
-           ITRANS, CONVCR, H0, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NHSTAR, NHSINC] = fort2Mat(name)
+           IRK, ISLOPE, ITRANS, CONVCR, H0, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NHSTAR, NHSINC] = fort2Mat(name)
         
-[ ICS, NOLIBF, NWP, NCOR, NTIP, NRAMP, G, NDTVAR, DT, STATIM, REFTIM, RNDAY, ITRANS, CONVCR, DRAMP, H0, SLAM0, SFEA0, TAU, CF, CORI, NTIF, TPK, AMIGT, ...
-  ETRF, FFT, FACET, NBFR, AMIG, FF, FACE, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NHSTAR, NHSINC] = fort15Read(['fort_' name '.15']);
-% , NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE, NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV
+[ ICS, NOLIBF, NWP, NCOR, NTIP, NRAMP, G, NDTVAR, DT, STATIM, RNDAY, IRK, ISLOPE, ITRANS, CONVCR, DRAMP, H0, SLAM0, SFEA0, TAU, CF, CORI, NTIF, TPK, AMIGT, ...
+  ETRF, FFT, FACET, NBFR, AMIG, FF, FACE, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE, NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV, ...
+	NHSTAR, NHSINC] = fort15Read(['fort_' name '.15']);
+% TODO: NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE, NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV
 [g, DP, AGRID]  = fort14Read(['fort_' name '.14'], ICS, SLAM0, SFEA0);
 [g, NEDGES, NEDNO, NLEDN, NRAEDN, NRIEDN, ETRI, UNRI, UTRI, NSEDN, EMO, EFA] = fort17Read(['fort_' name '.17'], g, NBFR);
 [g, NLEDN, NRAEDN, NRIEDN, NSEDN] = generateGridDataFromADCIRC(g, NEDGES, NEDNO, NLEDN, NRAEDN, NRIEDN, NSEDN);
@@ -25,6 +26,7 @@ else
 	fcAlg = @(x1,x2) CORI*(x1==x1);
 end % if
 zbAlg = @(x1,x2) evaluateFuncFromVertexValues(g,-DP,x1,x2);
+assert( max( max( abs( DP(g.V0T) + zbAlg(g.coordV0T(:,:,1), g.coordV0T(:,:,2)) ) ) ) < 10^-5, 'Bathymetry not constructed correctly.' ); % unusal large tol
 if NWP == 0
 	if NOLIBF == 0
 		bottomFric = TAU;
@@ -42,7 +44,8 @@ end % if
 fX = cell(2,1);
 fT = cell(2,NTIF);
 if NRAMP
-	ramping = @(t_days) ((t_days-STATIM+REFTIM)/DRAMP)*(t_days < STATIM-REFTIM+DRAMP) + (t_days >= STATIM-REFTIM+DRAMP);
+% 	ramping = @(t_days) ((t_days-STATIM+REFTIM)/DRAMP)*(t_days < STATIM-REFTIM+DRAMP) + (t_days >= STATIM-REFTIM+DRAMP); % TODO unify use of REFTIM
+	ramping = @(t_days) ((t_days-STATIM)/DRAMP)*(t_days < STATIM+DRAMP) + (t_days >= STATIM+DRAMP);
 else
 	ramping = @(t_days) 1;
 end % if

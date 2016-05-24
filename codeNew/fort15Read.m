@@ -1,4 +1,4 @@
-function [ICS, NOLIBF, NWP, NCOR, NTIP, NRAMP, G, NDTVAR, DT, STATIM, REFTIM, RNDAY, ITRANS, CONVCR, DRAMP, H0, SLAM0, SFEA0, TAU, CF, CORI, NTIF, TPK, AMIGT, ETRF, FFT, FACET, NBFR, AMIG, FF, FACE, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE, NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV, NHSTAR, NHSINC] = fort15Read(file)
+function [ICS, NOLIBF, NWP, NCOR, NTIP, NRAMP, G, NDTVAR, DT, STATIM, RNDAY, IRK, ISLOPE, ITRANS, CONVCR, DRAMP, H0, SLAM0, SFEA0, TAU, CF, CORI, NTIF, TPK, AMIGT, ETRF, FFT, FACET, NBFR, AMIG, FF, FACE, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE, NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV, NHSTAR, NHSINC] = fort15Read(file)
 fileID = fopen(file  );
 RUNDES = fgets(fileID); % This variable is not used
 RUNID  = fgets(fileID); % This variable is not used
@@ -11,10 +11,11 @@ NWP		 = param(3); assert(NWP		 == 0 || NWP    == 1,	'Invalid type of bottom fric
 NCOR   = param(4); assert(NCOR   == 0 || NCOR   == 1, 'Invalid type of Coriolis parameter.'				);
 NTIP   = param(5); assert(NTIP   == 0 || NTIP   == 1, 'Invalid type of Newtonian tide potential.' );
 % This feature is not supported
-NWS    = param(6); assert(NWS    == 0 || NWS    == 1, 'Invalid type of wind stress.'							);
+NWS    = param(6); % assert(NWS    == 0 || NWS    == 1, 'Invalid type of wind stress.'							); % TODO
+									 assert(NWS		 == 0								, 'Wind stress is not supported.'							);
 NRAMP  = param(7); assert(NRAMP  == 0 || NRAMP  == 1, 'Invalid type ramping.'											);
 G			 = param(8); assert(isscalar(G),								'G has to be a real number.'								);
-% This feature is not supported
+% Our framework does not make use of the following variables
 NQUAD  = param(9);
 XI		 = param(10:3:10+3*NQUAD-3);
 YI		 = param(11:3:10+3*NQUAD-2);
@@ -26,10 +27,9 @@ STATIM = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(STATIM),	
 % This variable is not used
 REFTIM = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(REFTIM),							'Reference time has to be a real number.'								);
 RNDAY  = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(RNDAY) && RNDAY > 0, 'Invalid total length of simulation.'										);
-% This feature is not supported
 IRK    = param(dataCountr); dataCountr = dataCountr+1; assert(IRK    == 0 || ...
 																															IRK    == 1 || IRK    == 2,		'Invalid Runge-Kutta scheme.'														);
-% This feature is not supported
+% This feature is not supported yet
 ISLOPE = param(dataCountr); dataCountr = dataCountr+1; assert(ISLOPE == 0 || ISLOPE == 1 ...
 																													 || ISLOPE == 2 || ISLOPE == 3,		'Invalid slope limiter or Riemann solver selection.'		);
 ITRANS = param(dataCountr); dataCountr = dataCountr+1; assert(ITRANS == 0 || ITRANS == 1,		'The program must reach steady-state or run full time.' );
@@ -95,7 +95,7 @@ elseif ICS == 2
 	SLEL = param(dataCountr  :2:dataCountr+2*NSTAE-2);
 	SFEL = param(dataCountr+1:2:dataCountr+2*NSTAE-1);
 	 XEL = 6378206.4*pi/180*(SLEL-SLAM0)*cos(pi/180*SFEA0);
-	 YEL = 6378206.4*pi/180*SFEL;
+	 YEL = 6378206.4*pi/180*SFEL; % TODO put routine for CPP projection everywhere
 else
   error('Invalid type of coordinate system.');
 end % if

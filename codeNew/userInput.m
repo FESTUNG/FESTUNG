@@ -1,6 +1,6 @@
 function [ interface, name, g, zbAlg, fcAlg, gConst, NDTVAR, NOLIBF, NWP, bottomFric, F0, F0Alg, rhsAlg, F1Alg, F2Alg, xiOSAlg, t0, tEnd, dt, numSteps, ...
-					 ITRANS, CONVCR, minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, NRAMP, ramping, xiRI, uRI, vRI, ...
-					 rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, trianglesE, coordinatesE, NSTAV, trianglesV, coordinatesV, NHSTAR, NHSINC ] = userInput(problem, refinement)
+					 IRK, ISLOPE, ITRANS, CONVCR, minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, NRAMP, ramping, ...
+					 xiRI, uRI, vRI, rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, triE, coordE, NSTAV, triV, coordV, NHSTAR, NHSINC ] = userInput(problem, refinement)
 switch problem
 	case 0 % for debugging purposes
 		interface = 'none';
@@ -33,7 +33,8 @@ switch problem
     NRAMP = 0;
 		xiRI = []; uRI = []; vRI = []; F1Alg = []; F2Alg = [];
     NDTVAR = 0; ITRANS = 0; CONVCR = []; NHSTAR = 0; NHSINC = [];
-       
+		IRK = 1; ISLOPE = [];
+    
     F0    = 0;
     F0Alg = [];
     rhsAlg   = 0;
@@ -78,13 +79,14 @@ switch problem
     A = 0.1;
     B = 0.1;
     C = 0.1;
-    zbAlg  = @(x1,x2) -height*(2-x1-x2);
+    zbAlg  = @(x1,x2) -height*(2-x1-x2); % TODO non-zero 
     %% Coefficients, right hand sides, and boundary conditions
     fcAlg    = @(x1,x2  )  x1;
     gConst   = 9.81;
     bottomFric = 1;
     NOLIBF = 1; NWP = 0; NRAMP = 0;
     NDTVAR = 0; ITRANS = 0; CONVCR = []; NHSTAR = 0; NHSINC = [];
+		IRK = 1; ISLOPE = [];
     
     % solution
     xi = @(x1,x2,t) C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t))) - height*(2-x1-x2); % note that with this zb the value at point (1,1) is zero
@@ -155,6 +157,8 @@ switch problem
     F2Alg    = @(x1,x2,t) zeros(size(x1));
     NBFR     = 5;
     NRAMP    = 0;
+    NDTVAR = 0; ITRANS = 0; CONVCR = []; NHSTAR = 0; NHSINC = [];
+		IRK = 1; ISLOPE = [];
     xiOSAlg  = @(x1,x2,t) 0.075 * cos(0.000067597751162*t - pi/180*194.806 ) ...
                         + 0.095 * cos(0.000072921165921*t - pi/180*206.265 ) ...
                         + 0.10  * cos(0.000137879713787*t - pi/180*340.0   ) ...
@@ -163,13 +167,13 @@ switch problem
     %% Time stepping parameters
     t0       = 0;
     tEnd     = 12*24*3600;
-    dt       = 7.5;
+    dt       = 15;
     %% Postprocessing parameter
     minTol      = 0.001;            % values of c1 in each vertex must be at least as high as this tolerance 
     %% Output parameters
     isVisGrid   = false;            % visualization of grid
 		isVisParam  = false;						% visualization of zb and fc
-    numPlots    = 200;              % number of plots for whole visualization
+    numPlots    = 240;              % number of plots for whole visualization
     isVisu      = true;             % visualization of x-velocity component
     isVisuH     = false;            % visualization of x-momentum component
     isVisv      = true;             % visualization of y-velocity component
@@ -293,14 +297,14 @@ end % switch
 fprintf('\n SOLVING PROBLEM: %s \n\n', upper(name));
 %% create folders for output
 warning('off', 'all');
-mkdir('output');
+mkdir(['output_' name]);
 warning('on', 'all');
 
 %% grid construction
 fprintf('Construct grid and read parameters.\n');
 if strcmp(interface, 'ADCIRC')
   [ g, fcAlg, zbAlg, NOLIBF, NWP, bottomFric, tidalDomain, NRAMP, F, fT, ramping, xiRI, uRI, vRI, NBFR, xiOSX, xiOST, gConst, NDTVAR, dt, t0, tEnd, ...
-		ITRANS, CONVCR, minTol, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NHSTAR, NHSINC ] = fort2Mat(name);
+		IRK, ISLOPE, ITRANS, CONVCR, minTol, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NHSTAR, NHSINC ] = fort2Mat(name);
   rhsOSAlg = 0;
 elseif strcmp(interface, 'none')
   tidalDomain = 0;
@@ -310,7 +314,7 @@ elseif strcmp(interface, 'none')
     NBFR = [];
   elseif strcmp(gridGen, 'ADCIRCgrid')
     if strcmp(coordSys, 'unknown')
-      [ICS, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, SLAM0, SFEA0] = fort15Read(['fort_' name '.15']);
+      [ICS, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, ~, SLAM0, SFEA0] = fort15Read(['fort_' name '.15']);
       [g, DP] = fort14Read(['fort_' name '.14'], ICS, SLAM0, SFEA0);
     elseif strcmp(coordSys, 'cartesian')
       [g, DP] = fort14Read(['fort_' name '.14'], 1);
@@ -335,6 +339,7 @@ elseif strcmp(interface, 'none')
       error('The marked open sea edges are not located on the boundary.');
     end % if
     zbAlg = @(x1,x2) evaluateFuncFromVertexValues(g,-DP,x1,x2);
+		assert( max( max( abs( DP(g.V0T) + zbAlg(g.coordV0T(:,:,1), g.coordV0T(:,:,2)) ) ) ) < 10^-5, 'Bathymetry not constructed correctly.' ); % unusal large tol
   else
     error('Invalid grid construction option.');
   end % if
@@ -361,6 +366,9 @@ else
 end % if
 numPlots = min(numPlots, numSteps);
 output = max(floor(round(numSteps / numPlots * 1000) / 1000), 1); % for plotting only after certain times
+if output ~= numSteps / numPlots
+	warning('The number of created plots could differ from the specified number of plots.');
+end % if
 
 if isSolAvail
   if exist('xiOSAlg', 'var')
@@ -410,30 +418,33 @@ end % if
 
 %% stations
 if useStations
+	if NDTVAR == 1
+		error('For variable time step size the use of output stations is not supported.');
+	end % if
 	if NSTAE == 0 && NSTAV == 0
 		warning('No stations are specified.')
 		useStations = false;
 	else
-		coordinatesE = [XEL; YEL].';
-		trianglesE = cell(1, NSTAE);
+		coordE = [XEL; YEL].';
+		triE = cell(1, NSTAE);
 		for i = 1:NSTAE
-			trianglesE{i} = findTrinagle(g, coordinatesE(i,1), coordinatesE(i,2));
+			triE{i} = findTrinagle(g, coordE(i,1), coordE(i,2));
 		end % for
-		coordinatesV = [XEV; YEV].';
-		trianglesE = cell2mat(trianglesE);
-		trianglesV = cell(1, NSTAV);
+		coordV = [XEV; YEV].';
+		triE = cell2mat(triE);
+		triV = cell(1, NSTAV);
 		for i = 1:NSTAV
-			trianglesV{i} = findTrinagle(g, coordinatesV(i,1), coordinatesV(i,2));
+			triV{i} = findTrinagle(g, coordV(i,1), coordV(i,2));
 		end % for
-		trianglesV = cell2mat(trianglesV);
+		triV = cell2mat(triV);
 	end % if
 end % if
 if ~useStations
   NSTAE = [];
   NSTAV = [];
-  trianglesE = [];
-  coordinatesE = [];
-  trianglesV = [];
-  coordinatesV = [];
+  triE = [];
+  coordE = [];
+  triV = [];
+  coordV = [];
 end % if
 end % function
