@@ -1,4 +1,6 @@
-function [ICS, NOLIBF, NWP, NCOR, NTIP, NRAMP, G, NDTVAR, DT, STATIM, RNDAY, IRK, ISLOPE, ITRANS, CONVCR, DRAMP, H0, SLAM0, SFEA0, TAU, CF, CORI, NTIF, TPK, AMIGT, ETRF, FFT, FACET, NBFR, AMIG, FF, FACE, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE, NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV, NHSTAR, NHSINC] = fort15Read(file)
+function [ ICS, NOLIBF, NWP, NCOR, NTIP, NRAMP, G, NDTVAR, DT, STATIM, RNDAY, IRK, ISLOPE, ITRANS, CONVCR, DRAMP, H0, SLAM0, SFEA0, TAU, CF, CORI, ...
+					 NTIF, TPK, AMIGT, ETRF, FFT, FACET, NBFR, AMIG, FF, FACE, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE, ...
+					 NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV, NHSTAR, NHSINC ] = fort15Read(file)
 fileID = fopen(file  );
 RUNDES = fgets(fileID); % This variable is not used
 RUNID  = fgets(fileID); % This variable is not used
@@ -27,16 +29,15 @@ STATIM = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(STATIM),	
 % This variable is not used
 REFTIM = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(REFTIM),							'Reference time has to be a real number.'								);
 RNDAY  = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(RNDAY) && RNDAY > 0, 'Invalid total length of simulation.'										);
-IRK    = param(dataCountr); dataCountr = dataCountr+1; assert(IRK    == 0 || ...
-																															IRK    == 1 || IRK    == 2,		'Invalid Runge-Kutta scheme.'														);
-% This feature is not supported yet
+IRK    = param(dataCountr); dataCountr = dataCountr+1; assert(IRK    == 0 || IRK    == 1 ... % TODO: test IRK = 0,1,2 in utbest
+																													 ||	IRK    == 2 || IRK    == 3,		'Invalid Runge-Kutta scheme.'														);
 ISLOPE = param(dataCountr); dataCountr = dataCountr+1; assert(ISLOPE == 0 || ISLOPE == 1 ...
 																													 || ISLOPE == 2 || ISLOPE == 3,		'Invalid slope limiter or Riemann solver selection.'		);
 ITRANS = param(dataCountr); dataCountr = dataCountr+1; assert(ITRANS == 0 || ITRANS == 1,		'The program must reach steady-state or run full time.' );
 																					 assert(IRK >= 1 || ITRANS == 1,	'If no time-stepping scheme is used, the problem must be steady-state.' );
 CONVCR = param(dataCountr); dataCountr = dataCountr+1; assert(ITRANS == 0 || ...
 																															CONVCR >  0,					'The tolerance for convergence of steady-state must be positive');
-% This is done differently than in UTBEST
+% This is done slightly different than in UTBEST
 DRAMP  = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(DRAMP) && DRAMP >= 0, 'Ramping duration has to be positive.'									);
 H0		 = param(dataCountr); dataCountr = dataCountr+1; assert(isscalar(H0) && H0 > 0, 'Minimum cutoff depth has to be positive.'										);
 SLAM0  = param(dataCountr); dataCountr = dataCountr+1;

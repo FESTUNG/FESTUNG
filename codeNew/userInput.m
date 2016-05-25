@@ -1,6 +1,6 @@
 function [ interface, name, g, zbAlg, fcAlg, gConst, NDTVAR, NOLIBF, NWP, bottomFric, F0, F0Alg, rhsAlg, F1Alg, F2Alg, xiOSAlg, t0, tEnd, dt, numSteps, ...
 					 IRK, ISLOPE, ITRANS, CONVCR, minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, NRAMP, ramping, ...
-					 xiRI, uRI, vRI, rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, triE, coordE, NSTAV, triV, coordV, NHSTAR, NHSINC ] = userInput(problem, refinement)
+					 rhsRIAlg, xiRI, uRI, vRI, rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, triE, coordE, NSTAV, triV, coordV, NHSTAR, NHSINC ] = userInput(problem, refinement)
 switch problem
 	case 0 % for debugging purposes
 		interface = 'none';
@@ -14,7 +14,7 @@ switch problem
 		g.idE = zeros(g.numE,1);
 		g.idE(g.baryE(:, 2) == 0) = 1; % south
 		g.idE(g.baryE(:, 1) == 1) = 4; % east
-		g.idE(g.baryE(:, 2) == 1) = 1; % north
+		g.idE(g.baryE(:, 2) == 1) = 3; % north
 		g.idE(g.baryE(:, 1) == 0) = 1; % west
 		g.idE0T = g.idE(g.E0T);
 %     zbAlg  = @(x1,x2) -0.1*(x1==x1);
@@ -31,13 +31,18 @@ switch problem
      v = @(x1,x2,t) 0*x1;
 		xiOSAlg = @(x1,x2,t) (x1==x1);
     NRAMP = 0;
-		xiRI = []; uRI = []; vRI = []; F1Alg = []; F2Alg = [];
+		% double useage: fort and algebraic of the following three
+		xiRI = @(x1,x2,t) xi(x1,x2,t);
+		 uRI = @(x1,x2,t)  u(x1,x2,t);
+		 vRI = @(x1,x2,t)  v(x1,x2,t); 
+		F1Alg = []; F2Alg = [];
     NDTVAR = 0; ITRANS = 0; CONVCR = []; NHSTAR = 0; NHSINC = [];
-		IRK = 1; ISLOPE = [];
+		IRK = 1; ISLOPE = 2;
     
     F0    = 0;
     F0Alg = [];
     rhsAlg   = 0;
+		rhsRIAlg = 1;
     %% Time stepping parameters
     t0       = 0;
     tEnd     = 0.01;
@@ -86,7 +91,7 @@ switch problem
     bottomFric = 1;
     NOLIBF = 1; NWP = 0; NRAMP = 0;
     NDTVAR = 0; ITRANS = 0; CONVCR = []; NHSTAR = 0; NHSINC = [];
-		IRK = 1; ISLOPE = [];
+		IRK = 1; ISLOPE = 2;
     
     % solution
     xi = @(x1,x2,t) C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t))) - height*(2-x1-x2); % note that with this zb the value at point (1,1) is zero
@@ -106,6 +111,7 @@ switch problem
     F0    = 1;
     F0Alg = @(x1,x2,t) H_t(x1,x2,t) + (u_x(x1,x2,t) + v_y(x1,x2,t)) .* H(x1,x2,t) + u(x1,x2,t) .* H_x(x1,x2,t) + v(x1,x2,t) .* H_y(x1,x2,t);
     rhsAlg   = 1;
+		rhsRIAlg = 1;
     F1Alg = @(x1,x2,t) u_t(x1,x2,t) .* H(x1,x2,t) + u(x1,x2,t) .* H_t(x1,x2,t) ...
                        + ( 2 * u(x1,x2,t) .* u_x(x1,x2,t) + gConst * H_x(x1,x2,t) ) .* H(x1,x2,t) ... 
                        + u(x1,x2,t) .* u(x1,x2,t) .* H_x(x1,x2,t) + u(x1,x2,t) .* v_y(x1,x2,t) .* H(x1,x2,t) ... 
@@ -153,12 +159,13 @@ switch problem
     F0       = 0;
     F0Alg    = @(x1,x2,t) zeros(size(x1));
     rhsAlg   = 0;
+		rhsRIAlg = 1;
     F1Alg    = @(x1,x2,t) zeros(size(x1));
     F2Alg    = @(x1,x2,t) zeros(size(x1));
     NBFR     = 5;
     NRAMP    = 0;
     NDTVAR = 0; ITRANS = 0; CONVCR = []; NHSTAR = 0; NHSINC = [];
-		IRK = 1; ISLOPE = [];
+		IRK = 1; ISLOPE = 2;
     xiOSAlg  = @(x1,x2,t) 0.075 * cos(0.000067597751162*t - pi/180*194.806 ) ...
                         + 0.095 * cos(0.000072921165921*t - pi/180*206.265 ) ...
                         + 0.10  * cos(0.000137879713787*t - pi/180*340.0   ) ...
@@ -305,7 +312,7 @@ fprintf('Construct grid and read parameters.\n');
 if strcmp(interface, 'ADCIRC')
   [ g, fcAlg, zbAlg, NOLIBF, NWP, bottomFric, tidalDomain, NRAMP, F, fT, ramping, xiRI, uRI, vRI, NBFR, xiOSX, xiOST, gConst, NDTVAR, dt, t0, tEnd, ...
 		IRK, ISLOPE, ITRANS, CONVCR, minTol, NSTAE, XEL, YEL, NSTAV, XEV, YEV, NHSTAR, NHSINC ] = fort2Mat(name);
-  rhsOSAlg = 0;
+  rhsOSAlg = 0; rhsRIAlg = 0;
 elseif strcmp(interface, 'none')
   tidalDomain = 0;
   rhsOSAlg = 1;
@@ -351,7 +358,6 @@ if isVisGrid
 end % if
 
 %% time stepping specification
-fprintf('Determine length and number of timesteps for simulation.\n')
 if     exist('dt', 'var') && ~exist('numSteps', 'var')
   numSteps = round((tEnd-t0) / dt);
 elseif ~exist('dt', 'var') && exist('numSteps', 'var')
@@ -387,13 +393,13 @@ if isSolAvail
     warning('Specification of river boundary condition for x-velocity component might be in conflict with analytical solution. Please check!');
   else 
     % boundary condition specification
-     uRI = @(x1,x2,t)  u(x1,x2,t);
+     uRI = @(x1,x2,t) u(x1,x2,t);
   end % if
 	if exist('vRIAlg', 'var')
 		warning('Specification of river boundary condition for y-velocity component might be in conflict with analytical solution. Please check!');
   else 
     % boundary condition specification
-     vRI = @(x1,x2,t)  v(x1,x2,t); % TODO specification of river boundary with function handles
+     vRI = @(x1,x2,t)  v(x1,x2,t);
   end % if
 else
   xi = []; u = []; v = [];
