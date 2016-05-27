@@ -1,4 +1,4 @@
-function problemData = postprocessStep(problemData, ~)
-% No postprocessing necessary
+function problemData = postprocessStep(problemData, nStep)
+problemData.isFinished = nStep >= problemData.numSteps;
 end % function
 

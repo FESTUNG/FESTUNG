@@ -1,4 +1,5 @@
 function problemData = initializeProblem(problemData)
+problemData.isFinished = false;
 %% Initial data.
 problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 2*problemData.p+1, ...
                                              problemData.hatM, problemData.basesOnQuad);

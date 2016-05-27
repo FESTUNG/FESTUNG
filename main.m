@@ -27,7 +27,9 @@
 %>     See template/initializeProblem.m
 %>  4. Main-Loop: Iteratively compute a solution, e.g., at different
 %>     time-levels. Can also consist of only a single iteration (for
-%>     stationary problems).
+%>     stationary problems). A new iteration is entered whenever the
+%>     parameter <code>problemData.isFinished</code> is not set to
+%>     <code>true</code>.
 %>  5. Post-processing: Performs tasks after the computation of the final
 %>     solution is done. Typically, this can be some kind of error 
 %>     evaluation or similar tasks.
@@ -43,7 +45,10 @@
 %>     time level.
 %>     See template/solveStep.m
 %>  3. Post-processing: Performs any tasks that are necessary after
-%>     computing the next solution, e.g., slope-limiting.
+%>     computing the next solution, e.g., slope-limiting. This is usually
+%>     also the place to decide, whether the main loop should be
+%>     terminated. For this, <code>problemData.isFinished</code> must be
+%>     set to <code>true</code>.
 %>     See template/postprocessStep.m
 %>  4. Output: Takes care of any tasks necessary for the visualization or
 %>     interpretation of the computed solution, e.g., writing it to a file.
@@ -112,14 +117,19 @@ try
   end % for
   fprintf('Pre-processing time: %g seconds.\n', toc(tPreprocess));
   %% Enter iterative loop
-  fprintf('Entering main loop with %d iterations.\n', problemData.numSteps);
+  fprintf('Entering main loop.\n');
+  assert(isstruct(problemData) && isfield(problemData, 'isFinished') && islogical(problemData.isFinished), ...
+    'Struct "problemData" must contain a logical variable "isFinished".');
   tLoop = tic;
-  for nStep = 1 : problemData.numSteps
+  nStep = 0;
+  while ~problemData.isFinished
+    nStep = nStep + 1;
     for nFunc = 1 : length(stepList)
       problemData = feval(stepList{nFunc}, problemData, nStep);
     end % for
-  end % for
-  fprintf('Loop time: %g seconds.\n', toc(tLoop));
+  end % while
+  tLoop = toc(tLoop);
+  fprintf('Loop time: %d iterations in %g seconds (on avg. %g seconds per iteration).\n', nStep, tLoop, tLoop/nStep);
   %% Post-process problem
   tPostprocess = tic;
   for nFunc = 1 : length(postprocessList)

@@ -1,4 +1,4 @@
 function problemData = postprocessStep(problemData, nStep)
-% Third step in each loop iteration.
+problemData.isFinished = nStep >= problemData.numSteps;
 end % function
 
