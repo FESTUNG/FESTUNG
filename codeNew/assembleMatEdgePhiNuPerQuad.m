@@ -3,9 +3,9 @@ K = g.numT;
 retDiag = cell(3,2); retOffdiag = cell(3,3,2);
 for nn = 1 : 3
 	for np = 1 : 3
-		if isfield(g, 'areaNuMarkE0TE0T')
-			retOffdiag{nn,np,1} = 0.5 * kron(g.areaNuMarkE0TE0T{nn,np,1}, refEdgePhiIntPerQuad(:,:,nn));
-			retOffdiag{nn,np,2} = 0.5 * kron(g.areaNuMarkE0TE0T{nn,np,2}, refEdgePhiIntPerQuad(:,:,nn));
+		if isfield(g, 'areaNuE0TE0T')
+			retOffdiag{nn,np,1} = 0.5 * kron(g.areaNuE0TE0T{nn,np,1}, refEdgePhiIntPerQuad(:,:,nn));
+			retOffdiag{nn,np,2} = 0.5 * kron(g.areaNuE0TE0T{nn,np,2}, refEdgePhiIntPerQuad(:,:,nn));
 		else
 			retOffdiag{nn,np,1} = 0.5 * kron(bsxfun(@times,g.markE0TE0T{nn,np}, g.areaE0T(:,nn) .* g.nuE0T(:,nn,1)), refEdgePhiIntPerQuad(:,:,nn));
 			retOffdiag{nn,np,2} = 0.5 * kron(bsxfun(@times,g.markE0TE0T{nn,np}, g.areaE0T(:,nn) .* g.nuE0T(:,nn,2)), refEdgePhiIntPerQuad(:,:,nn));

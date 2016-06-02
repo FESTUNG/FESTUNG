@@ -82,7 +82,7 @@ if NBFR > 0
 		FACE(I)		 = param(3);
 	end % for
 	dataCountr = 4;
-end %if
+end % if
 assert(isvector(AMIG) && isvector(FF) && isvector(FACE), 'Invalid tidal forcing parameters.');
 NOUTE   = param(dataCountr); dataCountr = dataCountr+1; % TODO, asserts
 TOUTSE  = param(dataCountr); dataCountr = dataCountr+1; % TODO, asserts
