@@ -75,12 +75,15 @@ end % if
 if ~isequal(g.T0E(NRIEDN,2), zeros(length(NRIEDN),1))
 	error('Some river edges are located in the interior of the domain.');
 end % if
-xiRI = zeros(g.numT, 1);
- uRI = zeros(g.numT, 1);
- vRI = zeros(g.numT, 1);
-xiRI(g.T0E(NRIEDN,1)) = ETRI;
- uRI(g.T0E(NRIEDN,1)) = UNRI .* g.nuE(NRIEDN, 1) - UTRI .* g.nuE(NRIEDN, 2);
- vRI(g.T0E(NRIEDN,1)) = UNRI .* g.nuE(NRIEDN, 2) + UTRI .* g.nuE(NRIEDN, 1);
+xiRItmp = zeros(g.numE, 1);
+ uRItmp = zeros(g.numE, 1);
+ vRItmp = zeros(g.numE, 1);
+xiRItmp(NRIEDN) = ETRI;
+ uRItmp(NRIEDN) = UNRI .* g.nuE(NRIEDN, 1) - UTRI .* g.nuE(NRIEDN, 2);
+ vRItmp(NRIEDN) = UNRI .* g.nuE(NRIEDN, 2) + UTRI .* g.nuE(NRIEDN, 1);
+xiRI = xiRItmp(g.E0T);
+ uRI =  uRItmp(g.E0T);
+ vRI =  vRItmp(g.E0T);
 % Open sea edges
 if ~isequal(g.T0E(NSEDN,2), zeros(length(NSEDN),1))
 	error('Some open sea edges are located in the interior of the domain.');

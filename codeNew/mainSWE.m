@@ -4,23 +4,23 @@ refinement    = 0;
 p             = 1;
 OSRiem        = 1;
 land          = 'Riemann';
-scheme        = 'semi-implicit Euler'; % 'Runge-Kutta SSP/TVD' or 'semi-implicit Euler'
+scheme        = 'Runge-Kutta SSP/TVD'; % 'Runge-Kutta SSP/TVD' or 'semi-implicit Euler'
 averaging     = 'full-harmonic';
 wbarOpt       = 'off';
 fileTypes     = 'vtk';
-typeSlopeLim  = 'hierarch_vert';  % Type of slope limiter (linear, hierarch_vert, strict)
+typeSlopeLim  = 'linear';       % Type of slope limiter (linear, hierarch_vert, strict)
 
 fprintf('Read user input.\n');
 [ interface, name, g, zbAlg, fcAlg, gConst, NDTVAR, NOLIBF, NWP, bottomFric, F0, F0Alg, rhsAlg, F1Alg, F2Alg, xiOSAlg, t0, tEnd, dt, numSteps, ...
-	ordRK, ISLOPE, ITRANS, CONVCR, minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, tidalDomain, F, fT, NRAMP, ramping, ...
-  rhsRIAlg, xiRI, uRI, vRI, rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, triE, coordE, NSTAV, triV, coordV, NHSTAR, NHSINC ] = userInput(problem, refinement);
+	ordRK, ISLOPE, ITRANS, CONVCR, minTol, output, isVisParam, isVisu, isVisuH, isVisv, isVisvH, isVisxi, isSolAvail, xi, u, v, ...
+  tidalDomain, F, fT, NRAMP, ramping, rhsRIAlg, xiRI, uRI, vRI, rhsOSAlg, NBFR, xiOSX, xiOST, useStations, NSTAE, triE, coordE, ...
+  NSTAV, triV, coordV, NHSTAR, NHSINC ] = userInput(problem, refinement);
 
 isSlopeLim = mod(ISLOPE, 2) == 1;
 if ISLOPE == 0 || ISLOPE == 1
-  fluxType      = 'Roe';
-  return;  % Not supported yet
+  fluxType = 'Roe'; % Not tested yet
 else
-  fluxType      = 'Lax-Friedrichs';
+  fluxType = 'Lax-Friedrichs';
 end % if
 
 %% Parameter check.
@@ -327,6 +327,8 @@ if isVisu || isVisv
     visualizeDataLagr(g, xiLagrange, 'xi_h', [name '_xi'], visNum, ['output_' name] , cd, fileTypes);
   end % if
 end % if
+
+
 %% waitbar
 if strcmp(wbarOpt, 'on')
 	str  = strcat( ['% done. Simulating refinement level =', ' ', num2str(refinement), ', p =', ' ', num2str(p), '.' ]);
@@ -375,78 +377,41 @@ while t < tEnd
     if tidalDomain
       tidePot{1} = sparse(K*N,K*N);
       tidePot{2} = sparse(K*N,K*N);
-      switch scheme
-        case 'Runge-Kutta SSP/TVD'
-          for n = 1 : size(F,3)
-            tidePot{1} = tidePot{1} + fT{1,n}(timeLvls(rkStep))*F{1,1,n} + fT{2,n}(timeLvls(rkStep))*F{1,2,n};
-            tidePot{2} = tidePot{2} + fT{1,n}(timeLvls(rkStep))*F{2,1,n} + fT{2,n}(timeLvls(rkStep))*F{2,2,n};
-          end % for
-          if NRAMP
-            tidePot{1} = ramp * tidePot{1};
-            tidePot{2} = ramp * tidePot{2};
-          end % if
-        case 'semi-implicit Euler'
-          for n = 1 : size(F,3)
-            tidePot{1} = tidePot{1} + fT{1,n}(timeLvls(rkStep))*F{1,1,n} + fT{2,n}(timeLvls(rkStep))*F{1,2,n};
-            tidePot{2} = tidePot{2} + fT{1,n}(timeLvls(rkStep))*F{2,1,n} + fT{2,n}(timeLvls(rkStep))*F{2,2,n};
-          end % for
-          if NRAMP
-            tidePot{1} = ramp * tidePot{1};
-            tidePot{2} = ramp * tidePot{2};
-          end % if
-        otherwise
-          error('Invalid scheme.')
-      end % switch
+
+      for n = 1 : size(F,3)
+        tidePot{1} = tidePot{1} + fT{1,n}(timeLvls(rkStep))*F{1,1,n} + fT{2,n}(timeLvls(rkStep))*F{1,2,n};
+        tidePot{2} = tidePot{2} + fT{1,n}(timeLvls(rkStep))*F{2,1,n} + fT{2,n}(timeLvls(rkStep))*F{2,2,n};
+      end % for
+      if NRAMP
+        tidePot{1} = ramp * tidePot{1};
+        tidePot{2} = ramp * tidePot{2};
+      end % if
     end % if
     if rhsAlg
       if F0
-        switch scheme
-          case 'Runge-Kutta SSP/TVD'
-            F0DG = projectFuncCont2DataDisc(g, @(x1,x2) F0Alg(x1,x2,timeLvls(rkStep)), 2*p, refElemPhiPhi);
-          case 'semi-implicit Euler'
-            F0DG = projectFuncCont2DataDisc(g, @(x1,x2) F0Alg(x1,x2,timeLvls(rkStep)), 2*p, refElemPhiPhi);
-          otherwise
-            error('Invalid scheme.')
-        end % switch
+        F0DG = projectFuncCont2DataDisc(g, @(x1,x2) F0Alg(x1,x2,timeLvls(rkStep)), 2*p, refElemPhiPhi);
         globL{1} = globM * reshape(F0DG', K*N, 1);
       end % if
-      switch scheme
-        case 'Runge-Kutta SSP/TVD'
-          F1DG = projectFuncCont2DataDisc(g, @(x1,x2) F1Alg(x1,x2,timeLvls(rkStep)), 2*p, refElemPhiPhi);
-          F2DG = projectFuncCont2DataDisc(g, @(x1,x2) F2Alg(x1,x2,timeLvls(rkStep)), 2*p, refElemPhiPhi);
-        case 'semi-implicit Euler'
-          F1DG = projectFuncCont2DataDisc(g, @(x1,x2) F1Alg(x1,x2,timeLvls(rkStep)), 2*p, refElemPhiPhi);
-          F2DG = projectFuncCont2DataDisc(g, @(x1,x2) F2Alg(x1,x2,timeLvls(rkStep)), 2*p, refElemPhiPhi);
-        otherwise
-          error('Invalid scheme.')
-      end % switch
+      F1DG = projectFuncCont2DataDisc(g, @(x1,x2) F1Alg(x1,x2,timeLvls(rkStep)), 2*p, refElemPhiPhi);
+      F2DG = projectFuncCont2DataDisc(g, @(x1,x2) F2Alg(x1,x2,timeLvls(rkStep)), 2*p, refElemPhiPhi);
       globL{2} = globM * reshape(F1DG', K*N, 1);
       globL{3} = globM * reshape(F2DG', K*N, 1);
     end % if
     
     if riverBdrs 
-			if rhsRIAlg
-				xiRIStep = xiRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
-				 vRIStep =  uRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
-				 uRIStep =  vRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
-			elseif NRAMP
-				switch scheme
-					case 'Runge-Kutta SSP/TVD'
-						xiRIStep = ramp * xiRI;
-						uRIStep = ramp *  uRI;
-						vRIStep = ramp *  vRI;
-					case 'semi-implicit Euler'
-						xiRIStep = ramp * xiRI;
-						uRIStep = ramp *  uRI;
-						vRIStep = ramp *  vRI;
-					otherwise
-						error('Invalid scheme.')
-				end % switch
+      if rhsRIAlg
+        xiRIStep = xiRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
+         vRIStep =  uRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
+         uRIStep =  vRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
+      elseif NRAMP
+        xiRIStep = ramp * xiRI;
+         uRIStep = ramp *  uRI;
+         vRIStep = ramp *  vRI;
       end % if
     end % if
     
     if openSeaBdrs
-      if strcmp(interface, 'ADCIRC')
+      if strcmp(interface, 'ADCIRC') % TODO better cases
         xiOS = zeros(K*R1D, 1);
         for i = 1 : size(xiOSX,2)
           xiOS = xiOS + xiOST{1,i}(timeLvls(rkStep)) * xiOSX{1,i} + xiOST{2,i}(timeLvls(rkStep)) * xiOSX{2,i};
@@ -564,21 +529,27 @@ while t < tEnd
       
       % river boundary contributions
       if riverBdrs && NRAMP
-        HRI = xiRIStep - zbEvalOnQuad1D{nn};
-        uHRI = uRIStep .* HRI;
-        vHRI = vRIStep .* HRI;
-        uvHRI = uRIStep .* vHRI;
+          HRI = xiRIStep(:,nn) - zbEvalOnQuad1D{nn};
+         uHRI =  uRIStep(:,nn) .*  HRI;
+         vHRI =  vRIStep(:,nn) .*  HRI;
+        uvHRI =  uRIStep(:,nn) .* vHRI;
+
         quadraticHRI = 0.5 * gConst * HRI.^2;
         globLRI{1} = globLRI{1} + globRRI{nn,1} * uHRI + globRRI{nn,2} * vHRI;
-        globLRI{2} = globLRI{2} + globRRI{nn,1} * (uRI .* uHRI + quadraticHRI) + globRRI{nn,2} * uvHRI;
-        globLRI{3} = globLRI{3} + globRRI{nn,1} * uvHRI + globRRI{nn,2} * (vRI .* vHRI + quadraticHRI);
+        globLRI{2} = globLRI{2} + globRRI{nn,1} * (uRIStep(:,nn) .* uHRI + quadraticHRI) + globRRI{nn,2} * uvHRI;
+        globLRI{3} = globLRI{3} + globRRI{nn,1} * uvHRI + globRRI{nn,2} * (vRIStep(:,nn) .* vHRI + quadraticHRI);
+        
+        % well-balanced
+%         globORI = assembleVecEdgePhiIntFuncDiscIntFuncContNu(g, markE0TbdrRI, refEdgePhiIntPhiLinPerQuad, zbExact, reshape(xiRIStep(:,nn), R1D, K).', g.areaNuE0TbdrRI);
+%         nonLinearity = nonLinearity - gConst * [globORI{1}; globORI{2}];
+        
       end % if
       
       % open sea boundary contributions
       if OSRiem
         nonLinearity = nonLinearity + 0.5 * [ globROS{nn,1} * (uuH + quadraticH) + globROS{nn,2} * uvH;
                                               globROS{nn,1} * uvH + globROS{nn,2} * (vvH + quadraticH) ];
-        HOS{nn} = xiOS - zbEvalOnQuad1D{nn};
+        HOS{nn} = xiOS - zbEvalOnQuad1D{nn}; % TODO evtl HOS statt HOS{nn}
         assert(isequal(HOS{nn}<= 0, zeros(K*R1D,1)), 'HOS must be positive.');
         
         uuHOS = cEdgeIntOnQuad{2,nn}.^2 ./ HOS{nn};
@@ -587,6 +558,10 @@ while t < tEnd
         quadraticHOS = 0.5 * gConst * HOS{nn}.^2;
         nonLinearity = nonLinearity + 0.5 * [ globROS{nn,1} * (uuHOS + quadraticHOS) + globROS{nn,2} * uvHOS;
                                               globROS{nn,1} * uvHOS + globROS{nn,2} * (vvHOS + quadraticHOS) ];
+        % well-balanced
+%         globOOS = assembleVecEdgePhiIntFuncDiscIntFuncContNu(g, markE0TbdrOS, refEdgePhiIntPhiLinPerQuad, zbExact, reshape(xiOS, R1D, K).', g.areaNuE0TbdrOS);
+%         nonLinearity = nonLinearity - gConst * [globOOS{1}; globOOS{2}]; % Note: This and same for river boundary are linear terms added here
+        
         if strcmp(fluxType, 'Lax-Friedrichs')
           lambda = computeLaxFriedrichsCoefficientSWE('openSea', averaging, kronNuE0T, gConst, nn, cEdgeIntOnQuad, [], [], HL, [], [], HOS);
           riemOS = riemOS + globVOS{nn} * (lambda .* (cEdgeIntOnQuad{1,nn} - HOS{nn}));
@@ -614,7 +589,7 @@ while t < tEnd
         cDiscDot = sysW \ ( sysV - ( ( linTerms - [sparse(K*N,3*K*N); tidePot{1}, sparse(K*N,2*K*N); tidePot{2}, sparse(K*N,2*K*N)] ) ...
                            * cDiscRK{rkStep} + [ riemOS; nonLinearity + bottomFricPart ] + riem ) );
         if isSlopeLim
-          for I = 1:3
+          for I = 1:1 % only limiting for height
             cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot(K*N*(I-1)+1:K*N*I), [N K])', globM, globMDiscTaylor);
             cDiscDotTaylorLim = applySlopeLimiterTaylor(g, cDiscDotTaylor, markV0TbdrD, NaN(K,3), typeSlopeLim);
             cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
@@ -626,7 +601,8 @@ while t < tEnd
         % Limiting the solution
         if isSlopeLim
           cDV0T = computeFuncContV0T(g, @(x1, x2) cDCont(t(rkStep), x1, x2));
-          cDiscRK{rkStep + 1} = reshape(applySlopeLimiterDisc(g, reshape(cDiscRK{rkStep + 1}, [N K])', markV0TbdrD, cDV0T, globM, globMDiscTaylor, typeSlopeLim)', [K*N 1]);
+          cDiscRK{rkStep + 1} = reshape(applySlopeLimiterDisc(g, reshape(cDiscRK{rkStep + 1}, [N K])', markV0TbdrD, cDV0T, globM, ...
+                                            globMDiscTaylor, typeSlopeLim)', [K*N 1]);
         end % if
       case 'semi-implicit Euler'
         % calculate solution at current time via semi-implicit Euler scheme
@@ -641,7 +617,7 @@ while t < tEnd
 		% correction for unknown c1
 		cDG(:,:,1) = applyMinValueExceedance2DataDisc(g, cDG(:,:,1), corrSys, nStep, minTol, 20);
   end % for
-  
+
 	if ITRANS == 1
 		l2 = sum((cDiscRK{end} - sysY).^2);
 	end % if
