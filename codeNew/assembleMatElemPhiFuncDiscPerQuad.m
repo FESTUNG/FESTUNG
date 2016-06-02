@@ -64,7 +64,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2016 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -86,6 +86,6 @@ function ret = assembleMatElemPhiFuncDiscPerQuad(g, refElemPhiPhiPerQuad, dataDi
 K = g.numT; N = size(refElemPhiPhiPerQuad,1);
 ret = sparse(K*N,K*N);
 for l = 1 : N
-  ret = ret + 2 * kron(spdiags(g.areaT .* dataDisc(:,l), 0, K, K), squeeze(refElemPhiPhiPerQuad(:,l,:)));
+  ret = ret + 2 * kron(spdiags(g.areaT .* dataDisc(:,l), 0, K, K), refElemPhiPhiPerQuad(:,:,l));
 end % for
 end % function

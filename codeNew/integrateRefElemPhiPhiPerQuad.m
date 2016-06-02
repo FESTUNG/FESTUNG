@@ -16,16 +16,16 @@
 %> It computes a multidimensional array @f$\hat{\mathsf{M}}
 %>    \in \mathbb{R}^{N\times N\times R}@f$, which is defined by
 %> @f[
-%> \left[\hat{\mathsf{M}}\right]_{i,j,r} \;:=\;
+%> \left[\hat{\mathsf{M}}\right]_{i,r,l} \;:=\;
 %> \hat{\varphi}_i (\hat{q_r})\,
-%> \hat{\varphi}_j (\hat{q_r})\,
+%> \hat{\varphi}_l (\hat{q_r})\,
 %> \omega_r
 %> @f]
 %> with the quadrature points @f$q_r@f$ given by
 %> <code>quadRule2D()</code>
 %>
 %> @param  N    The local number of degrees of freedom
-%> @retval ret  The computed array @f$[N\times N\times R]@f$
+%> @retval ret  The computed array @f$[N\times R\times N]@f$
 %>
 %> This file is part of FESTUNG
 %>
@@ -50,10 +50,10 @@
 function ret = integrateRefElemPhiPhiPerQuad(N)
 global gPhi2D
 p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [~, ~, W] = quadRule2D(qOrd);
-ret = zeros(N, N, length(W));
+ret = zeros(N, length(W), N);
 for i = 1 : N
-  for j = 1 : N
-    ret(i, j, :) = gPhi2D{qOrd}(:, i) .* gPhi2D{qOrd}(:, j) .* W.';
+  for l = 1 : N
+    ret(i, :, l) = gPhi2D{qOrd}(:, i) .* gPhi2D{qOrd}(:, l) .* W.';
   end % for
 end % for
 end % function

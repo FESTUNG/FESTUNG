@@ -29,7 +29,7 @@ switch problem
     xi = @(x1,x2,t) 0*x1;
      u = @(x1,x2,t) 0*x1;
      v = @(x1,x2,t) 0*x1;
-		xiOSAlg = @(x1,x2,t) (x1==x1);
+		xiOSAlg = @(x1,x2,t) 0*x1;
     NRAMP = 0;
 		% double useage: fort and algebraic of the following three
 		xiRI = @(x1,x2,t) xi(x1,x2,t);
@@ -166,11 +166,11 @@ switch problem
     NRAMP    = 0;
     NDTVAR = 0; ITRANS = 0; CONVCR = []; NHSTAR = 0; NHSINC = [];
 		IRK = 1; ISLOPE = 2;
-    xiOSAlg  = @(x1,x2,t) 0.075 * cos(0.000067597751162*t - pi/180*194.806 ) ...
-                        + 0.095 * cos(0.000072921165921*t - pi/180*206.265 ) ...
-                        + 0.10  * cos(0.000137879713787*t - pi/180*340.0   ) ...
-                        + 0.395 * cos(0.000140518917083*t - pi/180*  0.0   ) ...
-                        + 0.06  * cos(0.000145444119418*t - pi/180*42.97180);
+    xiOSAlg  = @(x1,x2,t) ( 0.075 * cos(0.000067597751162*t - pi/180*194.806 ) ...
+                          + 0.095 * cos(0.000072921165921*t - pi/180*206.265 ) ...
+                          + 0.10  * cos(0.000137879713787*t - pi/180*340.0   ) ...
+                          + 0.395 * cos(0.000140518917083*t - pi/180*  0.0   ) ...
+                          + 0.06  * cos(0.000145444119418*t - pi/180*42.97180) ) * (x1==x1);
     %% Time stepping parameters
     t0       = 0;
     tEnd     = 12*24*3600;
@@ -372,7 +372,7 @@ else
 end % if
 numPlots = min(numPlots, numSteps);
 output = max(floor(round(numSteps / numPlots * 1000) / 1000), 1); % for plotting only after certain times
-if output ~= numSteps / numPlots
+if output ~= numSteps / numPlots && ~NDTVAR
 	warning('The number of created plots could differ from the specified number of plots.');
 end % if
 
@@ -419,7 +419,7 @@ end % if
 
 % various
 if ~NRAMP
-  ramping = [];
+  ramping = @(t) 1;
 end % if
 
 %% stations
