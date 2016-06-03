@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd.name = 'east'; 
+pd.name = 'gom3k'; 
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -58,17 +58,28 @@ pd.name = 'east';
 pd.configSource = 'ADCIRC';
 
 %% What kind of grid to use:
-% - 'debug' creates a unit square [0,1]x[0,1] with hmax=1 and boundary
-%   type 1 on all edges
+% - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
+%   open sea boundary in the east (type 4), and land boundary (type 1) on 
+%   all other edges 
 % - 'hierarchical' creates a unit square [0,1]x[0,1] with specified hmax
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
 pd.gridSource = 'ADCIRC';
 
-pd.p = 1; % Polynomial approximation order
-pd.hmax = 0.3; % Maximum element size of initial grid for analytical tests
-pd.refinement = 0;  % Grid refinement level
+%% Polynomial approximation order
+% Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
+pd.p = 1;
+
+%% Time stepping parameters
+pd.scheme = 'explicit'; % type of time stepping scheme ('explicit' or 'implicit')
+
+%% Model parameters
+pd.typeBdrL = 'riemann'; % Type of land boundary ('reflected', 'riemann', 'natural')
+pd.isRiemOS = true; % apply Riemann solver to open sea boundary
+pd.typeFlux = 'Lax-Friedrichs'; % Type of interior flux ('Lax-Friedrichs')
+pd.averaging = 'full-harmonic';
+pd.minValueHeight = 1.e-3; % Minimum water level, values below are reset to this value
 
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
@@ -77,15 +88,6 @@ pd.outputCount = 200; % Number of outputs over total simulation time
 pd.outputTypes = 'vtk'; % Output file type
 pd.outputList = { 'u', 'uH', 'v', 'vH', 'xi', 'h', 'zb', 'fc' }; % List of variables to visualize
 pd.isVisStations = true; % Output stations
-
-%% Time stepping parameters
-pd.scheme = 'explicit'; % type of time stepping scheme ('explicit' or 'implicit')
-
-%% Model parameters
-pd.isOSRiem = true; % apply Riemann solver to open sea boundary
-pd.fluxType = 'Lax-Friedrichs'; % for now, only Lax-Friedrichs is available
-pd.averaging = 'full-harmonic';
-pd.minValueHeight = 1.e-3; % Minimum water level, values below are reset to this value
 
 %% Simulation scenario specific parameters
 switch pd.configSource
@@ -108,16 +110,16 @@ pd.isRhsAvail = false;
 pd.isTidalDomain = false;
 pd.isSpherical = false;
 
-% Overwrite parameters
-pd.gridSource = 'debug';
-pd.configSource = 'none';
-pd.numSteps = 1;
-pd.hmax = 1;
-pd.refinement = 0;
-pd.t0 = 0;
-pd.tEnd = 1;
-pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
+% Overwrite grid parameters
+pd.gridSource = 'square';
+pd.isSpherical = false;
+pd.hmax = 1; % Maximum element size of initial grid 
 
+% Overwrite time-stepping parameters
+pd.t0 = 0; % Start time of simulation
+pd.tEnd = 0.01; % End time of simulation
+pd.numSteps = 5; % Number of time steps
+pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
 
 % Solution parameters
 pd.gConst = 9.81;
@@ -127,8 +129,10 @@ pd.isBottomFrictionVarying = false; % NWP
 pd.bottomFrictionCoef = 0;
 
 % Ramping function, bathymetry, and Coriolis coefficient
+pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) - 0.1*(1-x1<x2)-0.1;
+% pd.zbCont = @(x1,x2) - 0.1*(1-x1<x2)-0.1;
+pd.zbCont = @(x1,x2) -0.1*(1-x1<x2)-0.1;
 pd.fcCont = @(x1,x2) zeros(size(x1));
 
 % Analytical solution
@@ -137,7 +141,7 @@ pd.uCont = @(x1,x2,t) zeros(size(x1));
 pd.vCont = @(x1,x2,t) zeros(size(x1));
 
 % Boundary conditions
-pd.xiOSCont = @(x1,x2,t) zeros(size(x1));
+pd.xiOSCont = @(x1,x2,t) x1==x1; %pd.xiCont(x1,x2,t);
 end % function
 
 %% Analytical solution
@@ -146,10 +150,13 @@ pd.isSolutionAvail = true;
 pd.isRhsAvail = true;
 pd.isTidalDomain = false;
 
-pd.gridSource = 'analytical';
-pd.configSource = 'none';
+% Overwrite grid parameters
+pd.gridSource = 'hierarchical';
 pd.isSpherical = false; 
+pd.hmax = 0.3; % Maximum element size of initial grid
+pd.refinement = 0;  % Grid refinement level
 
+% Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
 pd.tEnd = 1; % End time of simulation
 pd.numSteps = 150; % Number of time steps
@@ -167,6 +174,7 @@ pd.isBottomFrictionVarying = false; % NWP
 pd.bottomFrictionCoef = 1;
 
 % Ramping function, bathymetry, and Coriolis coefficient
+pd.isRamp = false;
 pd.ramp = @(t) 1;
 pd.zbCont = @(x1,x2) -height * (2 - x1 - x2);
 pd.fcCont = @(x1,x2) x1;
@@ -237,7 +245,7 @@ pd.gConst = pd.configADCIRC.G;
 pd.t0 = pd.configADCIRC.STATIM;
 pd.tEnd = pd.configADCIRC.RNDAY * 86400;
 pd.dt = pd.configADCIRC.DT;
-pd.numSteps = (pd.tEnd - pd.t0) / pd.dt;
+pd.numSteps = round((pd.tEnd - pd.t0) / pd.dt);
 
 % Coordinate system
 pd.isSpherical = pd.configADCIRC.ICS == 2;
@@ -256,13 +264,13 @@ end % if
 % Ramping
 switch pd.configADCIRC.NRAMP
   case 0
+    pd.isRamp = false;
     pd.ramp = @(t_days) 1;
   case 1
-    pd.ramp = @(t_days) ((t_days - pd.configADCIRC.STATIM + ...
-                                   pd.configADCIRC.REFTIM) / pd.configADCIRC.DRAMP) * ...
-                                 (t_days < pd.configADCIRC.STATIM - ...
-                                   pd.configADCIRC.REFTIM + pd.configADCIRC.DRAMP) + ...
-                                 (t_days >= pd.configADCIRC.STATIM - pd.configADCIRC.REFTIM + pd.configADCIRC.DRAMP);
+    pd.isRamp = true;
+    pd.ramp = @(t_days) ((t_days - pd.configADCIRC.STATIM) / pd.configADCIRC.DRAMP) * ...
+                        (t_days < pd.configADCIRC.STATIM + pd.configADCIRC.DRAMP) + ...
+                        (t_days >= pd.configADCIRC.STATIM + pd.configADCIRC.DRAMP);
   otherwise
     error('Invalid value for NRAMP')
 end % switch
