@@ -1,7 +1,7 @@
 % Assembles two matrices containing integrals over edges of products of two 
 % basis functions and a discrete function from the interior of each element  
 % with a component of the edge normal.
-%
+
 %===============================================================================
 %> @file assembleMatEdgePhiIntPhiIntFuncDiscNu.m
 %>
