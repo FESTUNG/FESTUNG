@@ -19,7 +19,10 @@
 %>   \int_{\hat{T}} \hat{\varphi}_i \hat{\varphi}_j hat{\varphi}_l \mathrm{d}\hat{\mathbf{x}} \,.
 %> @f]
 %>
-%> @param  N    The local number of degrees of freedom
+%> @param  N    The local number of degrees of freedom, either as a scalar
+%>              for all three basis functions, or as a vector with three
+%>              entries, specifying the number of degrees of freedom for
+%>              each basis function.
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi2D.
@@ -47,11 +50,16 @@
 %
 function ret = integrateRefElemPhiPhiPhi(N, basesOnQuad)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-p = (sqrt(8*N+1)-3)/2; qOrd = max(2*p, 1); [~, ~, W] = quadRule2D(qOrd);
-ret = zeros(N,N,N);
-for i = 1 : N
-  for j = 1 : N
-    for l = 1 : N
+if length(N) == 1
+  N = N * ones(3,1);
+else
+  validateattributes(N, {'numeric'}, {'numel', 3}, mfilename, 'N')
+end % if
+p = (sqrt(8*max(N)+1)-3)/2; qOrd = max(2*p, 1); [~, ~, W] = quadRule2D(qOrd);
+ret = zeros(N(1),N(2),N(3));
+for i = 1 : N(1)
+  for j = 1 : N(2)
+    for l = 1 : N(3)
       ret(i,j,l) = sum( W.' .* basesOnQuad.phi2D{qOrd}(:,i) .* basesOnQuad.phi2D{qOrd}(:,j) .* basesOnQuad.phi2D{qOrd}(:,l) );
     end % for
   end % for
