@@ -17,47 +17,47 @@ param  = cell2mat(textscan(fileID, '%f   ', 'CommentStyle', '!'));
 
 % Coordinate system
 config.ICS = param(1); 
-assert(config.ICS == 1 || config.ICS == 2, 'Invalid type of coordinate system.');
+assert(ismember(config.ICS, [1, 2]), 'Invalid type of coordinate system.');
 
 % Non-linear bottom friction
 config.NOLIBF = param(2); 
-assert(config.NOLIBF == 0 || config.NOLIBF == 1, 'Invalid type of bottom friction.');
+assert(ismember(config.NOLIBF, [0, 1]), 'Invalid type of bottom friction.');
 
 % Spatially varying bottom friction
 config.NWP = param(3); 
-assert(config.NWP == 0 || config.NWP == 1, 'Invalid type of bottom friction variation.');
+assert(ismember(config.NWP, [0, 1]), 'Invalid type of bottom friction variation.');
 
 % Coriolis parameter
 config.NCOR = param(4); 
-assert(config.NCOR == 0 || config.NCOR == 1, 'Invalid type of Coriolis parameter.');
+assert(ismember(config.NCOR, [0, 1]), 'Invalid type of Coriolis parameter.');
 
 % Newtonian tidal potential
 config.NTIP = param(5); 
-assert(config.NTIP == 0 || config.NTIP == 1, 'Invalid type of Newtonian tide potential.');
+assert(ismember(config.NTIP, [0, 1]), 'Invalid type of Newtonian tide potential.');
 
 % Wind stress
 config.NWS = param(6);
-assert(config.NWS == 0 || config.NWS == 1, 'Invalid type of wind stress.');
+assert(ismember(config.NWS, [0, 1]), 'Invalid type of wind stress.');
 
 % Ramping parameters
 config.NRAMP = param(7); 
-assert(config.NRAMP == 0 || config.NRAMP == 1, 'Invalid type ramping.');
+assert(ismember(config.NRAMP, [0, 1]), 'Invalid type ramping.');
 
 % Gravitational constant
 config.G = param(8);
 assert(isscalar(config.G), 'G has to be a real number.');
 
-% This feature is not supported
-NQUAD = param(9);
-XI = param(10:3:10+3*NQUAD-3);
-YI = param(11:3:10+3*NQUAD-2);
-W = param(12:3:10+3*NQUAD-1);
-dataCountr = 10+3*NQUAD;
+% Quadrature rules (Not used)
+config.NQUAD = param(9);
+config.XI = param(10:3:10+3*config.NQUAD-3);
+config.YI = param(11:3:10+3*config.NQUAD-2);
+config.W = param(12:3:10+3*config.NQUAD-1);
+dataCountr = 10+3*config.NQUAD;
 
 % Time step selection parameter
 config.NDTVAR = param(dataCountr); 
 dataCountr = dataCountr+1; 
-assert(config.NDTVAR == 0 || config.NDTVAR == 1,'Invalid type time increment selection.');
+assert(ismember(config.NDTVAR, [0, 1]),'Invalid type time increment selection.');
 
 % Time step size
 config.DT = param(dataCountr);
@@ -82,23 +82,23 @@ assert(isscalar(config.RNDAY) && config.RNDAY > 0, 'Invalid total length of simu
 % Runge-Kutta time stepping scheme
 config.IRK = param(dataCountr);
 dataCountr = dataCountr+1;
-assert(config.IRK == 0 || config.IRK == 1 || config.IRK == 2,	'Invalid Runge-Kutta scheme.');
+assert(ismember(config.IRK, [0, 1, 2]),	'Invalid Runge-Kutta scheme.');
 
 % Slope reconstruction
 config.ISLOPE = param(dataCountr); 
 dataCountr = dataCountr+1; 
-assert(config.ISLOPE == 0 || config.ISLOPE == 1 || config.ISLOPE == 2 || config.ISLOPE == 3, 'Invalid slope limiter or Riemann solver selection.' );
+assert(ismember(config.ISLOPE, [0, 1, 2, 3]), 'Invalid slope limiter or Riemann solver selection.' );
 
 % Steady-state/transient simulation parameter
 config.ITRANS = param(dataCountr); 
 dataCountr = dataCountr+1;
-assert(config.ITRANS == 0 || config.ITRANS == 1, 'The program must reach steady-state or run full time.');
+assert(ismember(config.ITRANS, [0, 1]), 'The program must reach steady-state or run full time.');
 assert(config.IRK >= 1 || config.ITRANS == 1,	'If no time-stepping scheme is used, the problem must be steady-state.');
 
 % Convergence criteria 
 config.CONVCR = param(dataCountr); 
 dataCountr = dataCountr+1; 
-% TODO assert
+assert(config.ITRANS == 0 || config.CONVCR > 0, 'The tolerance for convergence of steady-state must be positive');
 
 % Ramping period in days
 config.DRAMP = param(dataCountr); 
@@ -115,7 +115,7 @@ config.SLAM0 = param(dataCountr);
 dataCountr = dataCountr+1;
 config.SFEA0 = param(dataCountr); 
 dataCountr = dataCountr+1; 
-assert( isscalar(config.SLAM0) && isscalar(config.SFEA0), 'Reference coordinates for spherical coordinates (CPP projection) must be real-valued numbers.');
+assert(isscalar(config.SLAM0) && isscalar(config.SFEA0), 'Reference coordinates for spherical coordinates (CPP projection) must be real-valued numbers.');
 
 % Linear bottom friction coefficient
 config.TAU = param(dataCountr); 
@@ -127,13 +127,11 @@ config.CF = param(dataCountr);
 dataCountr = dataCountr+1; 
 assert(isscalar(config.CF), 'The non linear bottom friction coefficient has to be a real number.');
 
-% Lateral eddy viscosity
+% Lateral eddy viscosity (Not used)
 config.NVISC = param(dataCountr); 
 dataCountr = dataCountr+1; 
-% TODO: check UTBEST
 config.ESL = param(dataCountr); 
 dataCountr = dataCountr+1; 
-% TODO: check UTBEST
 
 % Coriolis parameter
 config.CORI	= param(dataCountr);
@@ -208,6 +206,7 @@ switch config.ICS
     config.XEL = param(dataCountr  :2:dataCountr+2*config.NSTAE-2);
     config.YEL = param(dataCountr+1:2:dataCountr+2*config.NSTAE-1);
   case 2
+    % TODO put routine for CPP projection everywhere
     config.SLEL = param(dataCountr  :2:dataCountr+2*config.NSTAE-2);
     config.SFEL = param(dataCountr+1:2:dataCountr+2*config.NSTAE-1);
     config.XEL = 6378206.4*pi/180*(config.SLEL-config.SLAM0)*cos(pi/180*config.SFEA0);
