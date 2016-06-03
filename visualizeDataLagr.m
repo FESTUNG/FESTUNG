@@ -94,6 +94,11 @@ if size(fileTypes,1) > size(fileTypes,2)
 end
 %% Check function arguments
 assert(size(dataLagr, 1) == g.numT, 'Wrong number of elements in dataLagr')
+%% Ensure target directory exists
+[dirName,~,~] = fileparts(fileName);
+if ~isempty(dirName) && ~isdir(dirName)
+  mkdir(dirName);
+end % if
 %% Call correct function for writing file.
 for fileType = fileTypes
   if strcmp(fileType, 'vtk')
