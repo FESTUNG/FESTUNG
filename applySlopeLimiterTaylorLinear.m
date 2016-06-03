@@ -101,7 +101,7 @@ global gPhiTaylorV0T
 % Check function arguments that are directly used
 validateattributes(dataTaylor, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataTaylor');
 assert(size(dataTaylor, 2) >= 3, 'Number of local degrees of freedom in dataTaylor does not correspond to p>=1')
-validateattributes(gPhiTaylorV0T, {'numeric'}, {'size', [K 3 N]}, mfilename, 'gPhiTaylorV0T');
+validateattributes(gPhiTaylorV0T, {'numeric'}, {'size', [K 3 NaN]}, mfilename, 'gPhiTaylorV0T');
 
 %% Limit first order derivative terms
 % Compute limiter parameter for each vertex
