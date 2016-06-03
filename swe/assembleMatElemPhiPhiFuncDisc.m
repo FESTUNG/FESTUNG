@@ -14,18 +14,30 @@
 %> The matrix @f$\mathsf{D} \in \mathbb{R}^{KN\times KN}@f$ is block
 %> diagonal and defined component-wise by
 %> @f[
-%>   [\mathsf{M}]_{(k-1)N+i,(k-1)N+j} = \sum_{l=1}^N {fc}_{kl} \int_{T_k} 
-%>      \varphi_{ki} \varphi_{kj} \varphi_{kl} \mathrm{d} \mathbf{x} \,.
+%>   [\mathsf{D}]_{(k-1)N+i,(k-1)N+j} = \sum_{l=1}^{N_\mathrm{data}} {fc}_{kl}
+%>      \int_{T_k} \varphi_{ki}\varphi_{kl}\varphi_{kj}\mathrm{d}\mathbf{x}\,.
 %> @f]
 %> All other entries are zero.
-%> For the assembly we define element local matrices 
-%> @f$\mathsf{M}_{T_k} \in \mathbb{R}^{N\times N}@f$ as
+%> For the implementation, the element integrals are backtransformed to the
+%> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
+%> mapping @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$
+%> defined as
 %> @f[
-%>   [\mathsf{M}_{T_k}]_{i,j} = \int_{T_k} 
-%>      \varphi_{ki} \varphi_{kj} \mathrm{d} \mathbf{x} \,,
+%> \mathbf{F}_k (\hat{\mathbf{x}}) = 
+%>   \mathsf{{B}}_k \hat{\mathbf{x}} + \hat{\mathbf{a}}_{k1}
+%>   \text{ with }
+%> \mathbb{R}^{2\times2} \ni \mathsf{{B}}_k =
+%>   \left[ \hat{\mathbf{a}}_{k2} - \hat{\mathbf{a}}_{k1} | 
+%>          \hat{\mathbf{a}}_{k3} - \hat{\mathbf{a}}_{k1} \right] \,.
+%> @f]
+%> For the assembly we define element local matrices 
+%> @f$\mathsf{D}_{T_k} \in \mathbb{R}^{N\times N \times 3}@f$ as
+%> @f[
+%>   [\mathsf{D}_{T_k}]_{i,j,l} = \int_{T_k} 
+%>      \varphi_{ki} \varphi_{kj} \varphi_{kl} \mathrm{d} \mathbf{x} \,,
 %> @f]
 %> and rewrite the global matrix as 
-%> @f$\mathsf{M} = \mathrm{diag}(\mathsf{M}_{T_1}, \ldots, \mathsf{M}_{T_K})@f$.
+%> @f$\mathsf{D} = \mathrm{diag}(\mathsf{D}_{T_1}, \ldots, \mathsf{D}_{T_K})@f$.
 %> In this implementation, the element integrals are backtransformed to the
 %> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
 %> mapping @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$
@@ -41,7 +53,7 @@
 %> This allows to rewrite the local matrices as 
 %> @f$\mathsf{D}_{T_k} = 2|T_k| \hat{\mathsf{D}}@f$ with
 %> @f[
-%>  \hat{\mathsf{D}} = \begin{bmatrix} \sum_{l=1}^N 
+%>  \hat{\mathsf{D}} = \begin{bmatrix} \sum_{l=1}^{N_\mathrm{data}} 
 %>    \hat{\varphi}_l \hat{\varphi}_1 \hat{\varphi}_1 & \dots & 
 %>    \hat{\varphi}_l \hat{\varphi}_1 \hat{\varphi}_N \\
 %>    \vdots & \ddots & \vdots \\
@@ -54,12 +66,12 @@
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param refElemPhiPhiPhi Local matrix @f$\hat{\mathsf{M}}@f$ as provided
-%>                    by <code>integrateRefElemPhiPhi()</code>.
-%>                    @f$[N \times N]@f$
+%> @param refElemPhiPhiPhi Local matrix @f$\hat{\mathsf{D}}@f$ as provided
+%>                    by <code>integrateRefElemPhiPhiPhi()</code>.
+%>                    @f$[N \times N \times {N_\mathrm{data}}]@f$
 %> @param dataDisc    A representation of the discrete function ,e.g., as 
 %>                    computed by <code>projectFuncCont2DataDisc()</code>
-%>                    @f$[K \times N]@f$
+%>                    @f$[K \times {N_\mathrm{data}}]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
@@ -83,9 +95,15 @@
 %> @endparblock
 %
 function ret = assembleMatElemPhiPhiFuncDisc(g, refElemPhiPhiPhi, dataDisc)
-K = g.numT; N = size(refElemPhiPhiPhi,1);
+[K, dataN] = size(dataDisc); 
+N = size(refElemPhiPhiPhi,1);
+
+% Check function arguments that are directly used
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc');
+validateattributes(refElemPhiPhiPhi, {'numeric'}, {'size', [N N dataN]}, mfilename, 'refElemPhiPhiPhi');
+
 ret = sparse(K*N,K*N);
-for l = 1 : N
+for l = 1 : dataN
   ret = ret + 2 * kron(spdiags(g.areaT .* dataDisc(:,l), 0, K, K), refElemPhiPhiPhi(:,:,l));
 end % for
 end % function
