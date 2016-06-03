@@ -45,8 +45,8 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = preprocessProblem(problemData)
-p = problemData.p;
+function pd = preprocessProblem(pd)
+p = pd.p;
 
 %% Output preprocessing
 if ~isdir('output')
@@ -54,130 +54,148 @@ if ~isdir('output')
 end % if
 
 %% Triangulation
-switch problemData.gridSource
-  case 'debug'
-    problemData.g = domainSquare(1);
-    problemData.g.idE = zeros(problemData.g.numE,1);
-    problemData.g.idE(problemData.g.baryE(:, 2) == 0) = 1; % south
-    problemData.g.idE(problemData.g.baryE(:, 1) == 1) = 1; % east
-    problemData.g.idE(problemData.g.baryE(:, 2) == 1) = 1; % north
-    problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 1; % west
-    problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+switch pd.gridSource
+  case 'square'
+    pd.g = domainSquare(pd.hmax);
+    
+    % Set edge types
+    pd.g.idE = zeros(pd.g.numE,1);
+    pd.g.idE(pd.g.baryE(:, 2) == 0) = 1; % south
+    pd.g.idE(pd.g.baryE(:, 1) == 1) = 4; % east
+    pd.g.idE(pd.g.baryE(:, 2) == 1) = 1; % north
+    pd.g.idE(pd.g.baryE(:, 1) == 0) = 1; % west
+    pd.g.idE0T = pd.g.idE(pd.g.E0T);
+    
+    % Store edge counts
+    pd.g.numEint = sum(pd.g.idE == 0);
+    pd.g.numEbdrL = sum(pd.g.idE == 1);
+    pd.g.numEbdrRA = sum(pd.g.idE == 2);
+    pd.g.numEbdrRI = sum(pd.g.idE == 3);
+    pd.g.numEbdrOS = sum(pd.g.idE == 4);
     
   case 'hierarchical'
     X1 = [0 1 1 0]; X2 = [0 0 1 1];
-    problemData.g = domainHierarchy(X1, X2, problemData.hmax, problemData.refinement);
-    problemData.g.idE = zeros(problemData.g.numE,1);
-    problemData.g.idE(problemData.g.baryE(:, 2) == 0) = 1; % south
-    problemData.g.idE(problemData.g.baryE(:, 1) == 1) = 4; % east
-    problemData.g.idE(problemData.g.baryE(:, 2) == 1) = 1; % north
-    problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 1; % west
-    problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+    pd.g = domainHierarchy(X1, X2, pd.hmax, pd.refinement);
+    
+    % Set edge types
+    pd.g.idE = zeros(pd.g.numE,1);
+    pd.g.idE(pd.g.baryE(:, 2) == 0) = 1; % south
+    pd.g.idE(pd.g.baryE(:, 1) == 1) = 4; % east
+    pd.g.idE(pd.g.baryE(:, 2) == 1) = 1; % north
+    pd.g.idE(pd.g.baryE(:, 1) == 0) = 1; % west
+    pd.g.idE0T = pd.g.idE(pd.g.E0T);
+    
+    % Store edge counts
+    pd.g.numEint = sum(pd.g.idE == 0);
+    pd.g.numEbdrL = sum(pd.g.idE == 1);
+    pd.g.numEbdrRA = sum(pd.g.idE == 2);
+    pd.g.numEbdrRI = sum(pd.g.idE == 3);
+    pd.g.numEbdrOS = sum(pd.g.idE == 4);
     
   case 'ADCIRC'
-    projCenter = [problemData.configADCIRC.SLAM0, problemData.configADCIRC.SFEA0];
-    [ problemData.g, depth, forcingOS, flowRateRiv ] = domainADCIRC(['swe/fort_' problemData.name '.14'], ...
-                                                         ['swe/fort_' problemData.name '.17'], ...
-                                                         problemData.configADCIRC.NBFR, ...
-                                                         problemData.isSpherical, projCenter);
+    projCenter = [pd.configADCIRC.SLAM0, pd.configADCIRC.SFEA0];
+    [ pd.g, depth, forcingOS, flowRateRiv ] = domainADCIRC(['swe/fort_' pd.name '.14'], ['swe/fort_' pd.name '.17'], ...
+                                                           pd.configADCIRC.NBFR, pd.isSpherical, projCenter);
     
     % Bathymetry
-    problemData.zbCont = @(x1,x2) evaluateFuncFromVertexValues(problemData.g, -depth, x1,x2);
+    pd.zbCont = @(x1,x2) evaluateFuncFromVertexValues(pd.g, -depth, x1,x2);
+    assert(max( max( abs(depth(pd.g.V0T) + pd.zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2))) ) ) < 1.e-5, ...
+           'Bathymetry incorrectly constructed!');
 
     % Convert coordinates to longitude/latitude
-    coordSph = [ problemData.g.coordV(:,1) / 6378206.4 / cos(projCenter(2)) + projCenter(1), ...
-                 problemData.g.coordV(:,2) / 6378206.4 ];
+    coordSph = [ pd.g.coordV(:,1) / 6378206.4 / cos(projCenter(2)) + projCenter(1), ...
+                 pd.g.coordV(:,2) / 6378206.4 ];
 
     % Spatial variation of coriolis parameter
-    if problemData.configADCIRC.NCOR == 1 
-      problemData.fcCont = @(x1,x2) evaluateFuncFromVertexValues(problemData.g, 2.0 * 7.29212e-5 * sin(coordSph(:,2)), x1,x2);
+    if pd.configADCIRC.NCOR == 1 
+      pd.fcCont = @(x1,x2) evaluateFuncFromVertexValues(pd.g, 2.0 * 7.29212e-5 * sin(coordSph(:,2)), x1,x2);
     else
-      problemData.fcCont = @(x1,x2) problemData.configADCIRC.CORI * ones(size(x1));
+      pd.fcCont = @(x1,x2) pd.configADCIRC.CORI * ones(size(x1));
     end % if
     
     % Newtonian tidal potential
-    if problemData.isTidalDomain
-      numFrequency = problemData.configADCIRC.NTIF;
-      problemData.forcingTidal = cell(2,2,numFrequency);
-      problemData.forcingFrequency = cell(2,numFrequency);
+    if pd.isTidalDomain
+      numFrequency = pd.configADCIRC.NTIF;
+      pd.forcingTidal = cell(2,2,numFrequency);
+      pd.forcingFrequency = cell(2,numFrequency);
       for n = 1 : numFrequency
-        problemData.forcingFrequency{1,n} = @(t) cos(problemData.configADCIRC.AMIGT(n) * t);
-        problemData.forcingFrequency{2,n} = @(t) -sin(problemData.configADCIRC.AMIGT(n) * t);
-        semi = round(0.00014 / problemData.configADCIRC.AMIGT(n));
+        pd.forcingFrequency{1,n} = @(t) cos(pd.configADCIRC.AMIGT(n) * t);
+        pd.forcingFrequency{2,n} = @(t) -sin(pd.configADCIRC.AMIGT(n) * t);
+        semi = round(0.00014 / pd.configADCIRC.AMIGT(n));
         switch semi
           case 1
-            fX1 = problemData.configADCIRC.TPK(n) * problemData.configADCIRC.FFT(n) * ...
-                    problemData.configADCIRC.ETRF(n) * cos(coordSph(:,2)).^2 .* ...
-                    cos(pi/180 * (problemData.configADCIRC.FACET(n) + 2*coordSph(:,1)));
-            fX2 = problemData.configADCIRC.TPK(n) * problemData.configADCIRC.FFT(n) * ...
-                    problemData.configADCIRC.ETRF(n) * cos(coordSph(:,2)).^2 .* ...
-                    sin(pi/180 * (problemData.configADCIRC.FACET(n) + 2*coordSph(:,1)));
+            fX1 = pd.configADCIRC.TPK(n) * pd.configADCIRC.FFT(n) * ...
+                    pd.configADCIRC.ETRF(n) * cos(coordSph(:,2)).^2 .* ...
+                    cos(pi/180 * (pd.configADCIRC.FACET(n) + 2*coordSph(:,1)));
+            fX2 = pd.configADCIRC.TPK(n) * pd.configADCIRC.FFT(n) * ...
+                    pd.configADCIRC.ETRF(n) * cos(coordSph(:,2)).^2 .* ...
+                    sin(pi/180 * (pd.configADCIRC.FACET(n) + 2*coordSph(:,1)));
           case 2
-            fX1 = problemData.configADCIRC.TPK(n) * problemData.configADCIRC.FFT(n) * ...
-                    problemData.configADCIRC.ETRF(n) * sin(2*coordSph(:,2)) .* ...
-                    cos(pi/180 * (problemData.configADCIRC.FACET(n) + coordSph(:,1)));
-            fX2 = problemData.configADCIRC.TPK(n) * problemData.configADCIRC.FFT(n) * ...
-                    problemData.configADCIRC.ETRF(n) * sin(2*coordSph(:,2)) .* ...
-                    sin(pi/180 * (problemData.configADCIRC.FACET(n) + coordSph(:,1)));
+            fX1 = pd.configADCIRC.TPK(n) * pd.configADCIRC.FFT(n) * ...
+                    pd.configADCIRC.ETRF(n) * sin(2*coordSph(:,2)) .* ...
+                    cos(pi/180 * (pd.configADCIRC.FACET(n) + coordSph(:,1)));
+            fX2 = pd.configADCIRC.TPK(n) * pd.configADCIRC.FFT(n) * ...
+                    pd.configADCIRC.ETRF(n) * sin(2*coordSph(:,2)) .* ...
+                    sin(pi/180 * (pd.configADCIRC.FACET(n) + coordSph(:,1)));
           otherwise
             error(['Unsupported tidal potential frequency ' num2str(semi) '!'])
         end % switch
-        problemData.forcingTidal{1,1,n} = problemData.gConst ./ (2*problemData.g.areaT) .* ...
-          ( (fX1(problemData.g.V0T(:,2)) - fX1(problemData.g.V0T(:,1))) .* problemData.g.B(:,2,2) - ...
-            (fX1(problemData.g.V0T(:,3)) - fX1(problemData.g.V0T(:,1))) .* problemData.g.B(:,2,1) );
-        problemData.forcingTidal{1,2,n} = problemData.gConst ./ (2*problemData.g.areaT) .* ...
-          ( (fX2(problemData.g.V0T(:,2)) - fX2(problemData.g.V0T(:,1))) .* problemData.g.B(:,2,2) - ...
-            (fX2(problemData.g.V0T(:,3)) - fX2(problemData.g.V0T(:,1))) .* problemData.g.B(:,2,1) );
-        problemData.forcingTidal{2,1,n} = problemData.gConst ./ (2*problemData.g.areaT) .* ...
-          (-(fX1(problemData.g.V0T(:,2)) - fX1(problemData.g.V0T(:,1))) .* problemData.g.B(:,1,2) + ...
-            (fX1(problemData.g.V0T(:,3)) - fX1(problemData.g.V0T(:,1))) .* problemData.g.B(:,1,1) );
-        problemData.forcingTidal{2,2,n} = problemData.gConst ./ (2*problemData.g.areaT) .* ...
-          (-(fX2(problemData.g.V0T(:,2)) - fX2(problemData.g.V0T(:,1))) .* problemData.g.B(:,1,2) + ...
-            (fX2(problemData.g.V0T(:,3)) - fX2(problemData.g.V0T(:,1))) .* problemData.g.B(:,1,1) );
+        pd.forcingTidal{1,1,n} = pd.gConst ./ (2*pd.g.areaT) .* ...
+          ( (fX1(pd.g.V0T(:,2)) - fX1(pd.g.V0T(:,1))) .* pd.g.B(:,2,2) - ...
+            (fX1(pd.g.V0T(:,3)) - fX1(pd.g.V0T(:,1))) .* pd.g.B(:,2,1) );
+        pd.forcingTidal{1,2,n} = pd.gConst ./ (2*pd.g.areaT) .* ...
+          ( (fX2(pd.g.V0T(:,2)) - fX2(pd.g.V0T(:,1))) .* pd.g.B(:,2,2) - ...
+            (fX2(pd.g.V0T(:,3)) - fX2(pd.g.V0T(:,1))) .* pd.g.B(:,2,1) );
+        pd.forcingTidal{2,1,n} = pd.gConst ./ (2*pd.g.areaT) .* ...
+          (-(fX1(pd.g.V0T(:,2)) - fX1(pd.g.V0T(:,1))) .* pd.g.B(:,1,2) + ...
+            (fX1(pd.g.V0T(:,3)) - fX1(pd.g.V0T(:,1))) .* pd.g.B(:,1,1) );
+        pd.forcingTidal{2,2,n} = pd.gConst ./ (2*pd.g.areaT) .* ...
+          (-(fX2(pd.g.V0T(:,2)) - fX2(pd.g.V0T(:,1))) .* pd.g.B(:,1,2) + ...
+            (fX2(pd.g.V0T(:,3)) - fX2(pd.g.V0T(:,1))) .* pd.g.B(:,1,1) );
       end % for
     end % if
     
     % Tidal forcing on open sea boundaries
-    numFrequency = problemData.configADCIRC.NBFR;
-    problemData.xiFreqOS = cell(2,numFrequency);
-    problemData.xiAmpOS = cell(2,numFrequency);
-    markTbdrOS = problemData.g.T0E(problemData.g.idE == 4, 1);
+    numFrequency = pd.configADCIRC.NBFR;
+    pd.xiFreqOS = cell(2,numFrequency);
+    pd.xiAmpOS = cell(2,numFrequency);
+    markTbdrOS = pd.g.T0E(pd.g.idE == 4, 1);
     for n = 1 : numFrequency
-      problemData.xiFreqOS{1,n} = @(t) cos(problemData.configADCIRC.AMIG(n)*t);
-      problemData.xiFreqOS{2,n} = @(t) -sin(problemData.configADCIRC.AMIG(n)*t);
+      pd.xiFreqOS{1,n} = @(t) cos(pd.configADCIRC.AMIG(n)*t);
+      pd.xiFreqOS{2,n} = @(t) -sin(pd.configADCIRC.AMIG(n)*t);
       
-      problemData.xiAmpOS{1,n} = sparse(problemData.g.numT,1);
-      problemData.xiAmpOS{1,n}(markTbdrOS) = problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
-                                             cos( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
+      pd.xiAmpOS{1,n} = sparse(pd.g.numT,1);
+      pd.xiAmpOS{1,n}(markTbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+                                             cos( pi/180 * (pd.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
       
-      problemData.xiAmpOS{2,n} = sparse(problemData.g.numT,1);
-      problemData.xiAmpOS{2,n}(markTbdrOS) = problemData.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
-                                             sin( pi/180 * (problemData.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
+      pd.xiAmpOS{2,n} = sparse(pd.g.numT,1);
+      pd.xiAmpOS{2,n}(markTbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+                                             sin( pi/180 * (pd.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
     end % for
     
     % River inflow
-    markEbdrRiv = problemData.g.idE == 3;
-    markTbdrRiv = problemData.g.T0E(markEbdrRiv, 1);
-    problemData.xiRiv = sparse(problemData.g.numT, 1);
-    problemData.xiRiv(markTbdrRiv) = flowRateRiv(:,1);
-    problemData.uRiv = sparse(problemData.g.numT, 1);
-    problemData.uRiv(markTbdrRiv) = flowRateRiv(:,2) .* problemData.g.nuE(markEbdrRiv,1) - flowRateRiv(:,3) .* problemData.g.nuE(markEbdrRiv,2);
-    problemData.vRiv = sparse(problemData.g.numT, 1);
-    problemData.vRiv(markTbdrRiv) = flowRateRiv(:,2) .* problemData.g.nuE(markEbdrRiv,2) + flowRateRiv(:,3) .* problemData.g.nuE(markEbdrRiv,1);
+    markEbdrRiv = pd.g.idE == 3;
+    markTbdrRiv = pd.g.T0E(markEbdrRiv, 1);
+    pd.xiRiv = sparse(pd.g.numT, 1);
+    pd.xiRiv(markTbdrRiv) = flowRateRiv(:,1);
+    pd.uRiv = sparse(pd.g.numT, 1);
+    pd.uRiv(markTbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,1) - flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,2);
+    pd.vRiv = sparse(pd.g.numT, 1);
+    pd.vRiv(markTbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,2) + flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,1);
 
     % Stations
-    if problemData.isVisStations
-      if problemData.configADCIRC.NSTAE == 0 && problemData.configADCIRC.NSTAV == 0
+    if pd.isVisStations
+      if pd.configADCIRC.NSTAE == 0 && pd.configADCIRC.NSTAV == 0
         warning('No stations specified! Disabling station output.')
-        problemData.isVisStation = false;
+        pd.isVisStation = false;
       else
         % Find triangle indices for each station
-        coordElev = [ problemData.configADCIRC.XEL, problemData.configADCIRC.YEL ];
-        problemData.stationElev = coord2triangle(problemData.g, coordElev(:,1), coordElev(:,2));
-        problemData.dataElev = cell(size(problemData.stationElev));
-        coordVel = [ problemData.configADCIRC.XEV, problemData.configADCIRC.YEV ];
-        problemData.stationVel = coord2triangle(problemData.g, coordVel(:,1), coordVel(:,2));
-        problemData.dataVel = cell(size(problemData.stationVel,1),2);
+        coordElev = [ pd.configADCIRC.XEL, pd.configADCIRC.YEL ];
+        pd.stationElev = coord2triangle(pd.g, coordElev(:,1), coordElev(:,2));
+        pd.dataElev = cell(size(pd.stationElev));
+        coordVel = [ pd.configADCIRC.XEV, pd.configADCIRC.YEV ];
+        pd.stationVel = coord2triangle(pd.g, coordVel(:,1), coordVel(:,2));
+        pd.dataVel = cell(size(pd.stationVel,1),2);
       end % if
     end % if
   otherwise
@@ -185,120 +203,166 @@ switch problemData.gridSource
 end % switch
 
 %% Globally constant parameters
-problemData.K = problemData.g.numT; % number of triangles
-problemData.N = nchoosek(p + 2, p); % number of local DOFs
-K = problemData.K;
-N = problemData.N;
+pd.outputFrequency = max(floor(pd.numSteps / pd.outputCount), 1);
+pd.K = pd.g.numT; % number of triangles
+pd.N = nchoosek(p + 2, p); % number of local DOFs
+K = pd.K;
+N = pd.N;
 
-problemData.g.markE0Tint = problemData.g.idE0T == 0; % [K x 3] mark local edges that are interior
-problemData.g.markE0TbdrL = problemData.g.idE0T == 1; % [K x 3] mark local edges on the open sea boundary
-problemData.g.markE0TbdrRA = problemData.g.idE0T == 2; % [K x 3] mark local edges on the open sea boundary
-problemData.g.markE0TbdrRI = problemData.g.idE0T == 3; % [K x 3] mark local edges on the open sea boundary
-problemData.g.markE0TbdrOS = problemData.g.idE0T == 4; % [K x 3] mark local edges on the open sea boundary
-problemData.isRiverBdr = any(problemData.g.markE0TbdrRI(:));
-problemData.g = computeDerivedGridData(problemData.g);
+pd.g.markE0Tint = pd.g.idE0T == 0; % [K x 3] mark local edges that are interior
+pd.g.markE0TbdrL = pd.g.idE0T == 1; % [K x 3] mark local edges on the open sea boundary
+pd.g.markE0TbdrRA = pd.g.idE0T == 2; % [K x 3] mark local edges on the open sea boundary
+pd.g.markE0TbdrRI = pd.g.idE0T == 3; % [K x 3] mark local edges on the open sea boundary
+pd.g.markE0TbdrOS = pd.g.idE0T == 4; % [K x 3] mark local edges on the open sea boundary
 
-problemData.outputFrequency = max(floor(problemData.numSteps / problemData.outputCount), 1);
+pd.g = computeDerivedGridData(pd.g);
+
+qOrd1D = 2*p+1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
+pd.g.nuQ0E0T = cell(3,2);
+pd.g.nuE0Tprod = cell(3,1);
+pd.g.nuE0TsqrDiff = cell(3,1);
+pd.g.nuE0Tsqr = cell(3,2);
+for n = 1 : 3
+  pd.g.nuE0Tprod{n} = kron(pd.g.nuE0T(:,n,1) .* pd.g.nuE0T(:,n,2), ones(numQuad1D,1));
+  for m = 1 : 2
+    pd.g.nuE0Tsqr{n,m} = kron(pd.g.nuE0T(:,n,m) .* pd.g.nuE0T(:,n,m), ones(numQuad1D,1));
+    pd.g.nuQ0E0T{n,m} = kron(pd.g.nuE0T(:,n,m), ones(numQuad1D, 1));
+  end % for
+  pd.g.nuE0TsqrDiff{n} = pd.g.nuE0Tsqr{n,2} - pd.g.nuE0Tsqr{n,1};
+end % for
 
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', p, N, K);
 
 %% Lookup table for basis function.
-problemData.basesOnQuad = computeBasesOnQuad(N, struct);
+pd.basesOnQuad = computeBasesOnQuad(N, struct);
 
 %% System matrix for correction of min value exceedence.
-problemData.sysMinValueCorrection = [ phi(1,0,0) phi(1,1,0) phi(1,0,1) ; ...
+pd.sysMinValueCorrection = [ phi(1,0,0) phi(1,1,0) phi(1,0,1) ; ...
                                       phi(2,0,0) phi(2,1,0) phi(2,0,1) ; ...
                                       phi(3,0,0) phi(3,1,0) phi(3,0,1) ];
 
 %% Computation of matrices on the reference triangle.
-refElemPhiPhiPhi = integrateRefElemPhiPhiPhi(N, problemData.basesOnQuad);
-refElemDphiLinPhiPhi = integrateRefElemDphiLinPhiPhi(N, problemData.basesOnQuad);
-refElemDphiPhi = integrateRefElemDphiPhi(N, problemData.basesOnQuad);
-problemData.refElemPhiPhi = integrateRefElemPhiPhi(N, problemData.basesOnQuad);
-refEdgePhiIntPhiInt = integrateRefEdgePhiIntPhiInt(N, problemData.basesOnQuad);
-refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, problemData.basesOnQuad);
-refElemDphiPerQuad = integrateRefElemDphiPerQuad(N, problemData.basesOnQuad);
-refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, problemData.basesOnQuad);
-problemData.refEdgePhiIntPhiIntPerQuad = integrateRefEdgePhiIntPhiIntPerQuad(N, problemData.basesOnQuad);
+pd.refElemPhiPhi = integrateRefElemPhiPhi(N, pd.basesOnQuad);
+refElemPhiPhiPhi = integrateRefElemPhiPhiPhi(N, pd.basesOnQuad);
+refElemDphiLinPhiPhi = integrateRefElemDphiLinPhiPhi(N, pd.basesOnQuad);
+refElemDphiPhi = integrateRefElemDphiPhi(N, pd.basesOnQuad);
+
+refEdgePhiIntPhiInt = integrateRefEdgePhiIntPhiInt(N, pd.basesOnQuad);
+refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, pd.basesOnQuad);
+
+refElemDphiPerQuad = integrateRefElemDphiPerQuad(N, pd.basesOnQuad);
+refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, pd.basesOnQuad);
+pd.refEdgePhiIntPhiIntPerQuad = integrateRefEdgePhiIntPhiIntPerQuad(N, pd.basesOnQuad);
 
 %% L2 projections of time-independent algebraic coefficients.
-fcDisc = projectFuncCont2DataDisc(problemData.g, problemData.fcCont, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
-problemData.zbDisc = projectFuncCont2DataDisc(problemData.g, problemData.zbCont, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
 
 % Linear representation for globG
-zbDiscLin = projectFuncCont2DataDisc(problemData.g, problemData.zbCont, 2, eye(3), computeBasesOnQuad(3, struct)); 
+zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2, eye(3), computeBasesOnQuad(3, struct)); 
 
 % Evaluate zb in each quadrature point
 qOrd = max(2*p,1); [Q, ~] = quadRule1D(qOrd);
-problemData.zbPerQuad = cell(3,1);
+pd.zbPerQuad = cell(3,1);
 for n = 1 : 3
   [Q1,Q2] = gammaMap(n, Q);
-  problemData.zbPerQuad{n} = problemData.zbCont(problemData.g.mapRef2Phy(1,Q1,Q2), problemData.g.mapRef2Phy(2,Q1,Q2));
+  pd.zbPerQuad{n} = pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2));
 end % for
 
 % Visualization of coefficients
-if any(ismember(problemData.outputList, 'fc'))
+if any(ismember(pd.outputList, 'fc'))
   dataLagr = projectDataDisc2DataLagr(fcDisc);
-  visualizeDataLagr(problemData.g, dataLagr, 'f_c', ['output/' problemData.name '_f_c'], 0, problemData.outputTypes);
+  visualizeDataLagr(pd.g, dataLagr, 'f_c', ['output/' pd.name '_f_c'], 0, pd.outputTypes);
 end % if
-if any(ismember(problemData.outputList, 'zb'))
+if any(ismember(pd.outputList, 'zb'))
   dataLagr = projectDataDisc2DataLagr(zbDiscLin);
-  visualizeDataLagr(problemData.g, dataLagr, 'z_b', ['output/' problemData.name '_z_b'], 0, problemData.outputTypes);
+  visualizeDataLagr(pd.g, dataLagr, 'z_b', ['output/' pd.name '_z_b'], 0, pd.outputTypes);
 end % if
 
 %% Assembly of time-independent global matrices corresponding to linear contributions.
 % Element matrices
-globD = assembleMatElemPhiPhiFuncDisc(problemData.g, refElemPhiPhiPhi, fcDisc);
-globG = assembleMatElemPhiPhiFuncDiscLin(problemData.g, refElemDphiLinPhiPhi, zbDiscLin);
-globH = assembleMatElemDphiPhi(problemData.g, refElemDphiPhi);
-problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.refElemPhiPhi);
+globD = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhi, fcDisc);
+globG = assembleMatElemPhiPhiFuncDiscLin(pd.g, refElemDphiLinPhiPhi, zbDiscLin);
+globH = assembleMatElemDphiPhi(pd.g, refElemDphiPhi);
+pd.globM = assembleMatElemPhiPhi(pd.g, pd.refElemPhiPhi);
 
 % Edge matrices
-globQ = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, problemData.g.areaNuE0Tint);
-globQOS = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrOS, refEdgePhiIntPhiInt, problemData.g.areaNuE0TbdrOS);
-globQRA = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrRA, refEdgePhiIntPhiInt, problemData.g.areaNuE0TbdrRA);
+globQ = assembleMatEdgePhiPhiNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, pd.g.areaNuE0Tint);
+globQOS = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrOS);
+globQRA = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrRA);
 
 % Derived system matrices
-problemData.sysW = blkdiag(problemData.globM, problemData.globM, problemData.globM);
-problemData.linearTerms = [               sparse(K*N,K*N), globQ{1} + globQOS{1} + globQRA{1} - globH{1},  globQ{2} + globQOS{2} + globQRA{2} - globH{2}; ...
-                            problemData.gConst * globG{1},                               sparse(K*N,K*N),                                          -globD; ...
-                            problemData.gConst * globG{2},                                         globD,                                 sparse(K*N,K*N) ];
+pd.sysW = blkdiag(pd.globM, pd.globM, pd.globM);
+pd.linearTerms = [               sparse(K*N,K*N), globQ{1} + globQOS{1} + globQRA{1} - globH{1},  globQ{2} + globQOS{2} + globQRA{2} - globH{2}; ...
+                            pd.gConst * globG{1},                               sparse(K*N,K*N),                                          -globD; ...
+                            pd.gConst * globG{2},                                         globD,                                 sparse(K*N,K*N) ];
                           
 %% Assembly of time-independent global matrices corresponding to non-linear contributions.
 % Element matrices
-problemData.globF = assembleMatElemDphiPerQuad(problemData.g, refElemDphiPerQuad);
+pd.globF = assembleMatElemDphiPerQuad(pd.g, refElemDphiPerQuad);
 
 % Edge matrices
-[problemData.globRdiag, problemData.globRoffdiag] = assembleMatEdgePhiNuPerQuad(problemData.g, problemData.g.markE0Tint, refEdgePhiIntPerQuad);
-problemData.globV = assembleMatEdgePhiPerQuad(problemData.g, refEdgePhiIntPerQuad);
+[pd.globRdiag, pd.globRoffdiag] = assembleMatEdgePhiNuPerQuad(pd.g, pd.g.markE0Tint, refEdgePhiIntPerQuad);
+pd.globV = assembleMatEdgePhiPerQuad(pd.g, refEdgePhiIntPerQuad);
 
 % Boundary matrices
-problemData.globRL = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrL , refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrL);
-problemData.globROS = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrOS, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrOS);
-globB = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrRA, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrRA);
-problemData.globRdiag = cellfun(@plus, problemData.globRdiag, globB, 'UniformOutput', false);
-problemData.globB = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrRI, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrRI);
+if pd.g.numEbdrL > 0
+  pd.globRL = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrL);
+  if strcmp(pd.typeBdrL, 'riemann')
+    pd.globVL = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaE0TbdrL);
+  end % if
+end % if
+
+if pd.g.numEbdrRA > 0
+  globRRA = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRA);
+  pd.globRdiag = cellfun(@plus, pd.globRdiag, globRRA, 'UniformOutput', false);
+end % if
+
+if pd.g.numEbdrRI > 0
+  globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
+  if ~pd.isRamping
+    pd.globLRI = { sparse(K*N,1), sparse(K*N,1), sparse(K*N,1) };
+    % TODO: assemble here once
+  end % if
+end % if
+
+if pd.g.numEbdrOS > 0
+  pd.globROS = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrOS);
+  if pd.isRiemOS
+    pd.globVOS = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaE0TbdrOS);
+  end % if
+end % if
+% problemData.globROS = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrOS, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrOS);
+% globB = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrRA, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrRA);
+% problemData.globRdiag = cellfun(@plus, problemData.globRdiag, globB, 'UniformOutput', false);
+% problemData.globB = assembleMatEdgePhiIntNuPerQuad(problemData.g, problemData.g.markE0TbdrRI, refEdgePhiIntPerQuad, problemData.g.areaNuE0TbdrRI);
 
 %% Assembly of bottom-friction terms.
-if problemData.isBottomFrictionVarying
-  error('Not implemented')
-else
-  if problemData.isBottomFrictionNonlinear
-    refElemPhiPerQuad = integrateRefElemPhiPerQuad(N, problemData.basesOnQuad);
-    problemData.globE = assembleMatElemPhiPhi(problemData.g, refElemPhiPerQuad);
+
+if pd.isBottomFrictionVarying
+  bottomFrictionDisc = projectFuncCont2DataDisc(pd.g, pd.bottomFrictionCont, 2*p, pd.refElemPhiPhi);
+  if pd.isBottomFrictionNonlinear
+    refElemPhiPhiPerQuad = integrateRefElemPhiPhiPerQuad(N, pd.basesOnQuad);
+    pd.globE = assembleMatElemPhiFuncDiscPerQuad(pd.g, refElemPhiPhiPerQuad, bottomFrictionDisc);
   else
-    problemData.globE = problemData.globM;
+    pd.globE = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhi, bottomFrictionDisc);
   end % if
-  problemData.globE = problemData.bottomFrictionCoef * problemData.globE;
+else
+  if pd.isBottomFrictionNonlinear
+    refElemPhiPerQuad = integrateRefElemPhiPerQuad(N, pd.basesOnQuad);
+    pd.globE = pd.bottomFrictionCoef * assembleMatElemPhiPhi(pd.g, refElemPhiPerQuad);
+  else
+    pd.globE = pd.bottomFrictionCoef * pd.globM;
+  end % if
 end % if
 
 %% Assembly of rhs terms.
-if problemData.isTidalDomain
-  for n = 1 : size(problemData.forcingTidal, 3)
+if pd.isTidalDomain
+  for n = 1 : size(pd.forcingTidal, 3)
     for i = 1 : 2
       for j = 1 : 2
-        problemData.forcingTidal{i,j,n} = assembleMatElemPhiPhiFuncDiscConst(problemData.g, problemData.refElemPhiPhi, problemData.forcingTidal{i,j,n});
+        pd.forcingTidal{i,j,n} = assembleMatElemPhiPhiFuncDiscConst(pd.g, pd.refElemPhiPhi, pd.forcingTidal{i,j,n});
       end % for
     end % for
   end % for
