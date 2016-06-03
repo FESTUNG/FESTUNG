@@ -103,7 +103,7 @@ function dataTaylorLim = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0Tbdr
 validateattributes(dataTaylor, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataTaylor');
 assert(size(dataTaylor, 2) >= 3, 'Number of local degrees of freedom in dataTaylor does not correspond to p>=1')
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-validateattributes(basesOnQuad.phiTaylorV0T, {'numeric'}, {'size', [K 3 N]}, mfilename, 'phiTaylorV0T');
+validateattributes(basesOnQuad.phiTaylorV0T, {'numeric'}, {'size', [K 3 NaN]}, mfilename, 'phiTaylorV0T');
 
 %% Limit first order derivative terms
 % Compute limiter parameter for each vertex
