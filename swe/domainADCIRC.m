@@ -152,9 +152,9 @@ assert(isUniquelyDefined, 'At least one edge was given more than one type.')
 
 % Store edge counts
 g.numEint = numEint;
-g.numEbdrLand = numEbdrLand;
-g.numEbdrRad = numEbdrRad;
-g.numEbdrRiv = numEbdrRiv;
+g.numEbdrL = numEbdrLand;
+g.numEbdrRA = numEbdrRad;
+g.numEbdrRI = numEbdrRiv;
 g.numEbdrOS = numEbdrOS;
 
 %% Map edge indices and set edge types
