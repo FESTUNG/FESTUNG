@@ -22,7 +22,7 @@ corr = max(minTol - dataLagrange, 0);
 maxCorr = max(abs(corr(:)));
 if maxCorr > correctionTolerance
   [indx, indy] = find(abs(corr) == maxCorr, 1);
-  error([ 'Unknown at node ' num2str(g.V0T(indx, indy)) ' and step ' num2str(nStep) ' is ' num2str(abs(dataLagrange(indx, indy))) ...
+  error([ 'Unknown at node ' num2str(g.V0T(indx, indy)) ' and step ' num2str(nStep) ' is ' num2str(dataLagrange(indx, indy)) ...
           ', which is below the tolerated minimal value.' ]);
 end % if
 if p == 0
