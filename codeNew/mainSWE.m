@@ -386,6 +386,11 @@ cElemOnQuad = cell(3,1);
 cEdgeIntOnQuad = cell(3,3);
 cEdgeExtOnQuad = cell(3,3,3);
 cEdgeExt2IntOnQuad = cell(3,3,3);
+if riverBdrs && rhsRIAlg % TODO move
+	xiRIStep = zeros(K*R1D,3);
+	 uRIStep = zeros(K*R1D,3);
+	 vRIStep = zeros(K*R1D,3);
+end % if
 
 % visualize initial solution
 UDG = zeros(K,N,2);
@@ -493,30 +498,20 @@ while t < tEnd
       globL{3} = globM * reshape(F2DG', K*N, 1);
     end % if
     
-    if riverBdrs 
-      if rhsRIAlg
-        xiRIStep = xiRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
-         vRIStep =  uRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
-         uRIStep =  vRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
-      elseif NRAMP
-        xiRIStep = ramp * xiRI;
-         uRIStep = ramp *  uRI;
-         vRIStep = ramp *  vRI;
-      end % if
+    if riverBdrs && NRAMP
+      xiRIStep = ramp * xiRI;
+       uRIStep = ramp *  uRI;
+       vRIStep = ramp *  vRI;
     end % if
     
-    if openSeaBdrs
-      if strcmp(interface, 'ADCIRC') % TODO better cases
-        xiOS = zeros(K*R1D, 1);
-        for i = 1 : size(xiOSX,2)
-          xiOS = xiOS + xiOST{1,i}(timeLvls(rkStep)) * xiOSX{1,i} + xiOST{2,i}(timeLvls(rkStep)) * xiOSX{2,i};
-        end % for
-        if NRAMP
-          xiOS = ramp * xiOS;
-        end % if
-      else
-        xiOS = xiOSAlg(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
-      end % if
+    if openSeaBdrs && strcmp(interface, 'ADCIRC') % TODO better cases
+			xiOS = zeros(K*R1D, 1);
+			for i = 1 : size(xiOSX,2)
+				xiOS = xiOS + xiOST{1,i}(timeLvls(rkStep)) * xiOSX{1,i} + xiOST{2,i}(timeLvls(rkStep)) * xiOSX{2,i};
+			end % for
+			if NRAMP
+				xiOS = ramp * xiOS;
+			end % if
     end % if
     
     % initialize fields
@@ -656,7 +651,12 @@ while t < tEnd
       end % if
       
       % river boundary contributions
-      if riverBdrs && NRAMP
+      if riverBdrs && (NRAMP || rhsRIAlg)
+				if rhsRIAlg
+					xiRIStep(:,nn) = xiRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep)); % TODO
+					 vRIStep(:,nn) =  uRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
+					 uRIStep(:,nn) =  vRI(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
+				end % if
           HRI = xiRIStep(:,nn) - zbEvalOnQuad1D{nn};
          uHRI =  uRIStep(:,nn) .*  HRI;
          vHRI =  vRIStep(:,nn) .*  HRI;
@@ -675,6 +675,9 @@ while t < tEnd
       
       % open sea boundary contributions
       if OSRiem
+				if rhsOSAlg
+					xiOS = xiOSAlg(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
+				end % if
         quadraticH = quadraticH - gConst * cEdgeIntOnQuad{1,nn} .* zbEvalOnQuad1D{nn};
         nonLinearity = nonLinearity + 0.5 * [ globROS{nn,1} * (uuH + quadraticH) + globROS{nn,2} * uvH;
                                               globROS{nn,1} * uvH + globROS{nn,2} * (vvH + quadraticH) ];
