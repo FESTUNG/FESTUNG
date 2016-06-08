@@ -183,10 +183,9 @@ refElemPhiPhiPhi     = integrateRefElemPhiPhiPhi    (N);
 refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhiLin (N);
 
 % well-balanced
-refEdgePhiIntPhiExtPhiLin  = integrateRefEdgePhiIntPhiExtPhiLin (N);
-refEdgePhiIntPhiIntPhiLin  = integrateRefEdgePhiIntPhiIntPhiLin (N);
-refElemDphiPhiPhiLin       = integrateRefElemDphiPhiPhiLin      (N);
-% refEdgePhiIntPhiLinPerQuad = integrateRefEdgePhiIntPhiLinPerQuad(N);
+refEdgePhiIntPhiExtPhiLin  = integrateRefEdgePhiIntPhiExtPhiLin(N);
+refEdgePhiIntPhiIntPhiLin  = integrateRefEdgePhiIntPhiIntPhiLin(N);
+refElemDphiPhiPhiLin       = integrateRefElemDphiPhiPhiLin     (N);
 
 % only use zbDG for visualization and for error analysis
 zbDG = projectFuncCont2DataDisc(g, @(x1,x2) zbAlg(x1,x2), 2*p, refElemPhiPhi);
@@ -309,7 +308,6 @@ if riverBdrs
   globRRI = assembleMatEdgePhiIntNuPerQuad(g, markE0TbdrRI, refEdgePhiIntPerQuad, g.areaNuE0TbdrRI);
 end % if
 if openSeaBdrs
-  HOS = cell(3,1);
   globROS = assembleMatEdgePhiIntNuPerQuad(g, markE0TbdrOS, refEdgePhiIntPerQuad, g.areaNuE0TbdrOS);
   if OSRiem
     globVOS = assembleMatEdgePhiIntPerQuad(g, markE0TbdrOS, refEdgePhiIntPerQuad, g.areaE0TbdrOS);
@@ -680,12 +678,12 @@ while t < tEnd
         quadraticH = quadraticH - gConst * cEdgeIntOnQuad{1,nn} .* zbEvalOnQuad1D{nn};
         nonLinearity = nonLinearity + 0.5 * [ globROS{nn,1} * (uuH + quadraticH) + globROS{nn,2} * uvH;
                                               globROS{nn,1} * uvH + globROS{nn,2} * (vvH + quadraticH) ];
-        HOS{nn} = xiOS - zbEvalOnQuad1D{nn}; % TODO evtl HOS statt HOS{nn}
-        assert(isequal(HOS{nn}<= 0, zeros(K*R1D,1)), 'HOS must be positive.');
+        HOS = xiOS - zbEvalOnQuad1D{nn}; % TODO evtl HOS statt HOS{nn}
+        assert(isequal(HOS <= 0, zeros(K*R1D,1)), 'Height is not positive on open sea boundaries.');
         
-        uuHOS = cEdgeIntOnQuad{2,nn}.^2 ./ HOS{nn};
-        uvHOS = cEdgeIntOnQuad{2,nn} .* cEdgeIntOnQuad{3,nn} ./ HOS{nn};
-        vvHOS = cEdgeIntOnQuad{3,nn}.^2 ./ HOS{nn};
+        uuHOS = cEdgeIntOnQuad{2,nn}.^2 ./ HOS;
+        uvHOS = cEdgeIntOnQuad{2,nn} .* cEdgeIntOnQuad{3,nn} ./ HOS;
+        vvHOS = cEdgeIntOnQuad{3,nn}.^2 ./ HOS;
         quadraticHOS = gConst * xiOS .* (0.5 * xiOS - zbEvalOnQuad1D{nn});
         nonLinearity = nonLinearity + 0.5 * [ globROS{nn,1} * (uuHOS + quadraticHOS) + globROS{nn,2} * uvHOS;
                                               globROS{nn,1} * uvHOS + globROS{nn,2} * (vvHOS + quadraticHOS) ];
@@ -696,17 +694,20 @@ while t < tEnd
         if strcmp(fluxType, 'Lax-Friedrichs')
           lambda = computeLaxFriedrichsCoefficientSWE( 'openSea', averaging, kronNuE0T, gConst, nn, cEdgeIntOnQuad, HEdgeIntOnQuad, ...
                                                        [], [], HEdgeExt2IntOnQuad, HL, [], [], HOS );
-          riemOS = riemOS + globVOS{nn} * (lambda .* (HEdgeIntOnQuad - HOS{nn}));
+          riemOS = riemOS + globVOS{nn} * (lambda .* (HEdgeIntOnQuad - HOS));
         else
           error('Unknown type of flux approximation.');
         end % if
       elseif openSeaBdrs
-        HOS{nn} = xiOS - zbEvalOnQuad1D{nn};
-        assert(isequal(HOS{nn} <= 0, zeros(K*R1D,1)), 'HOS must be positive.');
+				if rhsOSAlg
+					xiOS = xiOSAlg(physQuadPts1D{nn,1}, physQuadPts1D{nn,2}, timeLvls(rkStep));
+				end % if
+        HOS = xiOS - zbEvalOnQuad1D{nn};
+        assert(isequal(HOS <= 0, zeros(K*R1D,1)), 'HOS must be positive.');
         
-        uuHOS = cEdgeIntOnQuad{2,nn}.^2 ./ HOS{nn};
-        uvHOS = cEdgeIntOnQuad{2,nn} .* cEdgeIntOnQuad{3,nn} ./ HOS{nn};
-        vvHOS = cEdgeIntOnQuad{3,nn}.^2 ./ HOS{nn};
+        uuHOS = cEdgeIntOnQuad{2,nn}.^2 ./ HOS;
+        uvHOS = cEdgeIntOnQuad{2,nn} .* cEdgeIntOnQuad{3,nn} ./ HOS;
+        vvHOS = cEdgeIntOnQuad{3,nn}.^2 ./ HOS;
         quadraticHOS = gConst * xiOS .* (0.5 * xiOS - zbEvalOnQuad1D{nn});
         nonLinearity = nonLinearity + [ globROS{nn,1} * (uuHOS + quadraticHOS) + globROS{nn,2} * uvHOS;
 																				globROS{nn,1} * uvHOS + globROS{nn,2} * (vvHOS + quadraticHOS) ];
@@ -740,10 +741,7 @@ while t < tEnd
           end % for
         end % if
         % Compute next step
-%         max(abs(omega(rkStep) * sysY))
-%         max(abs(dt * cDiscDot))
-        
-        cDiscRK{rkStep + 1} = omega(rkStep) * sysY + (1 - omega(rkStep)) * (cDiscRK{rkStep} + dt * cDiscDot);
+        cDiscRK{rkStep + 1} = omega(rkStep) * cDiscRK{1} + (1 - omega(rkStep)) * (cDiscRK{rkStep} + dt * cDiscDot);
         % Limiting the solution
 
 % 				if isSlopeLim

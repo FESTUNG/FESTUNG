@@ -29,15 +29,15 @@ elseif strcmp(edgeType, 'land')
 elseif  strcmp(edgeType, 'openSea')
   assert(nargin == 14, 'Invalid number of input arguments.')
   if strcmp(averaging, 'full-harmonic')
-    HR = sqrt(HOS{nn});
+    HR = sqrt(HOS);
     ret = abs( ( cEdgeIntOnQuad{2,nn} .* kronNuE0T{nn,1} + cEdgeIntOnQuad{3,nn} .* kronNuE0T{nn,2} ) ./ (HL .* HR) ) ...
-          + sqrt( gConst * (HEdgeIntOnQuad.^1.5 + HOS{nn}.^1.5) ./ (HL + HR) );
+          + sqrt( gConst * (HEdgeIntOnQuad.^1.5 + HOS.^1.5) ./ (HL + HR) );
   elseif strcmp(averaging, 'semi-harmonic')
-    ret = abs( ( cEdgeIntOnQuad{2,nn} .* kronNuE0T{nn,1} + cEdgeIntOnQuad{3,nn} .* kronNuE0T{nn,2} ) ./ (HL .* sqrt(HOS{nn})) ) ...
-          + sqrt( gConst / 2 * (HEdgeIntOnQuad + HOS{nn}) );
+    ret = abs( ( cEdgeIntOnQuad{2,nn} .* kronNuE0T{nn,1} + cEdgeIntOnQuad{3,nn} .* kronNuE0T{nn,2} ) ./ (HL .* sqrt(HOS)) ) ...
+          + sqrt( gConst / 2 * (HEdgeIntOnQuad + HOS) );
   elseif strcmp(averaging, 'mean')
-    ret = abs( ( cEdgeIntOnQuad{2,nn} .* kronNuE0T{nn,1} + cEdgeIntOnQuad{3,nn} .* kronNuE0T{nn,2} ) .* ( HOS{nn} + HEdgeIntOnQuad ) ...
-            ./ ( 2 * (HEdgeIntOnQuad .* HOS{nn}) ) ) + sqrt( gConst / 2 * (HEdgeIntOnQuad + HOS{nn}) );
+    ret = abs( ( cEdgeIntOnQuad{2,nn} .* kronNuE0T{nn,1} + cEdgeIntOnQuad{3,nn} .* kronNuE0T{nn,2} ) .* ( HOS + HEdgeIntOnQuad ) ...
+            ./ ( 2 * (HEdgeIntOnQuad .* HOS) ) ) + sqrt( gConst / 2 * (HEdgeIntOnQuad + HOS) );
   else
     error('Unknown type of averaging.');
   end % if
