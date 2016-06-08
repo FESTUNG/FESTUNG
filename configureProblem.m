@@ -49,13 +49,13 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd.name = 'gom3k'; 
+pd.name = 'debug'; 
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
-pd.configSource = 'ADCIRC';
+pd.configSource = 'debug';
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -65,20 +65,24 @@ pd.configSource = 'ADCIRC';
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-pd.gridSource = 'ADCIRC';
+pd.gridSource = 'square';
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
 pd.p = 1;
 
 %% Time stepping parameters
-pd.scheme = 'explicit'; % type of time stepping scheme ('explicit' or 'implicit')
+pd.schemeType = 'explicit'; % type of time stepping scheme ('explicit' or 'semi-implicit')
+pd.schemeOrder = min(pd.p+1,2);
 
 %% Model parameters
-pd.typeBdrL = 'riemann'; % Type of land boundary ('reflected', 'riemann', 'natural')
-pd.isRiemOS = true; % apply Riemann solver to open sea boundary
-pd.typeFlux = 'Lax-Friedrichs'; % Type of interior flux ('Lax-Friedrichs')
+% Some may be overwritten by fort.15 config files
+pd.typeFlux = 'Lax-Friedrichs'; % Type of interior flux ('Lax-Friedrichs', 'Roe')
+pd.isRiemOS = true; % Riemann solver type on open sea boundary ('Lax-Friedrichs', 'Roe', or 'none')
+pd.typeFluxL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', or 'riemann')
 pd.averaging = 'full-harmonic';
+pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
+pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
 pd.minValueHeight = 1.e-3; % Minimum water level, values below are reset to this value
 
 %% Visualization parameters
@@ -131,7 +135,6 @@ pd.bottomFrictionCoef = 0;
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-% pd.zbCont = @(x1,x2) - 0.1*(1-x1<x2)-0.1;
 pd.zbCont = @(x1,x2) -0.1*(1-x1<x2)-0.1;
 pd.fcCont = @(x1,x2) zeros(size(x1));
 
@@ -141,7 +144,7 @@ pd.uCont = @(x1,x2,t) zeros(size(x1));
 pd.vCont = @(x1,x2,t) zeros(size(x1));
 
 % Boundary conditions
-pd.xiOSCont = @(x1,x2,t) x1==x1; %pd.xiCont(x1,x2,t);
+pd.xiOSCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
 end % function
 
 %% Analytical solution
