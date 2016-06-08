@@ -57,7 +57,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgePhiIntPhiExtPhiExt(N, basesOnQuad)
+function ret = integrateRefEdgePhiIntPhiIntPhiExt(N, basesOnQuad)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 if length(N) == 1
   N = N * ones(3,1);
