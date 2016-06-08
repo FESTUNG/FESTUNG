@@ -803,6 +803,7 @@ while t < tEnd
 		cDG(:,:,2)  = reshape(cDiscRK{rkStep + 1}(  K*N + 1 : 2*K*N), N, K).';
 		cDG(:,:,3)  = reshape(cDiscRK{rkStep + 1}(2*K*N + 1 : 3*K*N), N, K).';
 		% correction for unknown c1
+		checkBoundsOfDataDisc(cDG(:,:,1), -20, 20, nStep); % TODO 20 standardisieren
 		cDG(:,:,1) = applyMinValueExceedance2DataDisc(g, cDG(:,:,1) - zbDG, corrSys, nStep, minTol, 20); % TODO error message in apply...
   end % for
 
