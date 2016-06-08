@@ -1,6 +1,6 @@
 % Assembles a matrix, containing integrals of products of two Taylor 
 % basis functions.
-%
+
 %===============================================================================
 %> @file assembleMatElemPhiTaylorPhiTaylor.m
 %>
