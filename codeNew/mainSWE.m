@@ -8,7 +8,8 @@ scheme        = 'Runge-Kutta SSP/TVD'; % 'Runge-Kutta SSP/TVD' or 'semi-implicit
 averaging     = 'full-harmonic';
 wbarOpt       = 'off';
 fileTypes     = 'vtk';
-typeSlopeLim  = 'linear';       % Type of slope limiter (linear, hierarch_vert, strict)
+typeSlopeLim  = 'linear';							 % Type of slope limiter (linear, hierarch_vert, strict)
+elevTol       = 20;
 
 fprintf('Read user input.\n');
 [ interface, name, g, zbAlg, fcAlg, gConst, NDTVAR, NOLIBF, NWP, bottomFric, F0, F0Alg, rhsAlg, F1Alg, F2Alg, xiOSAlg, t0, tEnd, dt, numSteps, ...
@@ -19,6 +20,7 @@ fprintf('Read user input.\n');
 isSlopeLim = mod(ISLOPE, 2) == 1;
 if ISLOPE == 0 || ISLOPE == 1
   fluxType = 'Roe'; % Not tested yet
+	return % debug
 else
   fluxType = 'Lax-Friedrichs';
 end % if
@@ -95,18 +97,21 @@ refElemPhiLinPhiLin = integrateRefElemPhiPhi(3);
 fcDG = projectFuncCont2DataDisc(g, @(x1,x2) fcAlg(x1,x2), 2, refElemPhiLinPhiLin);
 zbExact = projectFuncCont2DataDisc(g, zbAlg, 2, refElemPhiLinPhiLin); % This is used for the exact linear DG representation of zb
 zbEvalOnQuad1D = cell(3,1);                                           % This is used for boundary conditions
-zbEvalOnQuadTheta1D = cell(3,3);                                           % This is used for boundary conditions
-auxZb = cell(3,3);
+zbEvalOnQuadTheta = cell(3,3);                                        % This is used for boundary conditions
 
+zbLagrange = projectDataDisc2DataLagr(zbExact);
 if isVisParam
-	zbLagrange = projectDataDisc2DataLagr(zbExact);
 	visualizeDataLagr(g, zbLagrange, 'z_b', [name, '_z_b'], [], ['output_' name] , cd, fileTypes);
 	fcLagrange = projectDataDisc2DataLagr(fcDG);
 	visualizeDataLagr(g, fcLagrange, 'f_c', [name, '_f_c'], [], ['output_' name] , cd, fileTypes);
 end % if
+zbLagrange = zbLagrange + minTol;
 
 physQuadPts1D = cell(3,2);
 kronNuE0T = cell(3,2);
+
+zbEvalTheta2IntOnQuad = cell(3,3);
+
 for nn = 1:3
 	[Q1, Q2] = gammaMap(nn, Q);
   aux = cell(2,1);
@@ -119,8 +124,9 @@ for nn = 1:3
   zbEvalOnQuad1D{nn} = reshape(zbEvalOnQuad1D{nn}.', R1D*K, 1);
   for np = 1:3
     [QP1, QP2] = theta(nn, np, Q1, Q2);
-    zbEvalOnQuadTheta1D{nn,np} = zbAlg(g.mapRef2Phy(1, QP1, QP2), g.mapRef2Phy(2, QP1, QP2));
-    zbEvalOnQuadTheta1D{nn,np} = reshape(zbEvalOnQuadTheta1D{nn,np}.', R1D*K, 1);
+    zbEvalOnQuadTheta{nn,np} = zbAlg(g.mapRef2Phy(1, QP1, QP2), g.mapRef2Phy(2, QP1, QP2));
+    zbEvalTheta2IntOnQuad{nn,np} = reshape(zbEvalOnQuadTheta{nn,np}.' * g.markE0TE0T{nn,np}.', R1D*K, 1);
+    zbEvalOnQuadTheta{nn,np} = reshape(zbEvalOnQuadTheta{nn,np}.', R1D*K, 1);
   end % for
 end % for
 
@@ -189,12 +195,6 @@ refElemDphiPhiPhiLin       = integrateRefElemDphiPhiPhiLin     (N);
 
 % only use zbDG for visualization and for error analysis
 zbDG = projectFuncCont2DataDisc(g, @(x1,x2) zbAlg(x1,x2), 2*p, refElemPhiPhi);
-
-for nn = 1:3 % TODO move this
-  for np = 1:3
-    auxZb{nn,np} = reshape(gThetaPhi1D{2*p+1}(:,:,nn,np) * zbDG.' * g.markE0TE0T{nn,np}.', R1D*K, 1);
-  end % for
-end % for
 
 %% assembly of matrices corresponding to linear contributions
 globQOS = assembleMatEdgePhiIntPhiIntNu    (g, markE0TbdrOS, refEdgePhiIntPhiInt,                      g.areaNuE0TbdrOS);
@@ -366,7 +366,7 @@ t     = t0;
 
 % discrete data
 cDG        = zeros(K,N,3);
-cDG(:,:,1) = projectFuncCont2DataDisc(g, @(x1,x2)  xi0(x1,x2)                             , 2*p, refElemPhiPhi); % removed  - zbAlg(x1,x2)
+cDG(:,:,1) = projectFuncCont2DataDisc(g, @(x1,x2)  xi0(x1,x2)                             , 2*p, refElemPhiPhi); % xi
 cDG(:,:,2) = projectFuncCont2DataDisc(g, @(x1,x2) (xi0(x1,x2) - zbAlg(x1,x2)) .* u0(x1,x2), 2*p, refElemPhiPhi);
 cDG(:,:,3) = projectFuncCont2DataDisc(g, @(x1,x2) (xi0(x1,x2) - zbAlg(x1,x2)) .* v0(x1,x2), 2*p, refElemPhiPhi);
 
@@ -380,12 +380,13 @@ if isSlopeLim
 end % if
 
 % correction for unknown c1
-cDG(:,:,1) = applyMinValueExceedance2DataDisc(g, cDG(:,:,1) - zbDG, corrSys, nStep, minTol, 20); % put -zbDG here
+cDG(:,:,1) = applyMinValueExceedance2DataDisc(g, cDG(:,:,1), corrSys, nStep, zbLagrange, elevTol); % xi
 
 cElemOnQuad = cell(3,1);
 cEdgeIntOnQuad = cell(3,3);
 cEdgeExtOnQuad = cell(3,3,3);
 cEdgeExt2IntOnQuad = cell(3,3,3);
+
 if riverBdrs && rhsRIAlg % TODO move
 	xiRIStep = zeros(K*R1D,3);
 	 uRIStep = zeros(K*R1D,3);
@@ -398,26 +399,27 @@ visNum = 0;
 if isVisu || isVisv
   % compute velocities
   UDG = zeros(K, N, 2);
-  UDG(:,:,1) = projectFuncDisc2DataDisc((cDG(:,:,2) * gPhi2D{max(2*p,1)}.') ./ (cDG(:,:,1) * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
-  UDG(:,:,2) = projectFuncDisc2DataDisc((cDG(:,:,3) * gPhi2D{max(2*p,1)}.') ./ (cDG(:,:,1) * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
+  HDG = cDG(:,:,1) - zbDG; % TODO zbDG
+  UDG(:,:,1) = projectFuncDisc2DataDisc((cDG(:,:,2) * gPhi2D{max(2*p,1)}.') ./ (HDG * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
+  UDG(:,:,2) = projectFuncDisc2DataDisc((cDG(:,:,3) * gPhi2D{max(2*p,1)}.') ./ (HDG * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
   if isVisu
-    uLagrange = projectDataDisc2DataLagr(UDG(:,:,1)        );
+    uLagrange = projectDataDisc2DataLagr(UDG(:,:,1) );
     visualizeDataLagr(g,  uLagrange,  'u_h', [name '_u' ], visNum, ['output_' name] , cd, fileTypes);
   end % if
   if isVisuH
-    uHLagrange = projectDataDisc2DataLagr(cDG(:,:,2)       );
+    uHLagrange = projectDataDisc2DataLagr(cDG(:,:,2));
     visualizeDataLagr(g, uHLagrange, 'uH_h', [name '_uH'], visNum, ['output_' name] , cd, fileTypes);
   end % if
   if isVisv
-    vLagrange = projectDataDisc2DataLagr(UDG(:,:,2)        );
+    vLagrange = projectDataDisc2DataLagr(UDG(:,:,2) );
     visualizeDataLagr(g,  vLagrange,  'v_h', [name '_v' ], visNum, ['output_' name] , cd, fileTypes);
   end % if
   if isVisvH
-    vHLagrange = projectDataDisc2DataLagr(cDG(:,:,3)       );
+    vHLagrange = projectDataDisc2DataLagr(cDG(:,:,3));
     visualizeDataLagr(g, vHLagrange, 'vH_h', [name '_vH'], visNum, ['output_' name] , cd, fileTypes);
   end % if
   if isVisxi
-    xiLagrange = projectDataDisc2DataLagr(cDG(:,:,1) + zbDG);
+    xiLagrange = projectDataDisc2DataLagr(cDG(:,:,1));
     visualizeDataLagr(g, xiLagrange, 'xi_h', [name '_xi'], visNum, ['output_' name] , cd, fileTypes);
   end % if
 end % if
@@ -448,9 +450,6 @@ while t < tEnd
 	end % if
   nStep = nStep + 1;
   t     = t + dt;
-  
-  % TODO optimize this
-  cDG(:,:,1) = cDG(:,:,1) + zbDG;
   
   % solution at old time step
   sysY = [ reshape(cDG(:,:,1).', K*N, 1); reshape(cDG(:,:,2).', K*N, 1); reshape(cDG(:,:,3).', K*N, 1) ];
@@ -572,8 +571,8 @@ while t < tEnd
 				cEdgeExtOnQuad{3,nn,np} = reshape(aux, R1D*K, 1);
 				cEdgeExt2IntOnQuad{3,nn,np} = reshape(aux * g.markE0TE0T{nn,np}.', R1D*K, 1);
         
-        HEdgeExtOnQuad = cEdgeExtOnQuad{1,nn,np} - zbEvalOnQuadTheta1D{nn,np};
-        HEdgeExt2IntOnQuad = cEdgeExt2IntOnQuad{1,nn,np} - auxZb{nn,np};
+        HEdgeExtOnQuad = cEdgeExtOnQuad{1,nn,np} - zbEvalOnQuadTheta{nn,np};
+        HEdgeExt2IntOnQuad = cEdgeExt2IntOnQuad{1,nn,np} - zbEvalTheta2IntOnQuad{nn,np};
 				
         uuH = cEdgeExtOnQuad{2,nn,np}.^2 ./ HEdgeExtOnQuad;
         uvH = cEdgeExtOnQuad{2,nn,np} .* cEdgeExtOnQuad{3,nn,np} ./ HEdgeExtOnQuad;
@@ -666,11 +665,6 @@ while t < tEnd
         globLRI{1} = globLRI{1} + globRRI{nn,1} * uHRI + globRRI{nn,2} * vHRI;
         globLRI{2} = globLRI{2} + globRRI{nn,1} * (uRIStep(:,nn) .* uHRI + quadraticHRI) + globRRI{nn,2} * uvHRI;
         globLRI{3} = globLRI{3} + globRRI{nn,1} * uvHRI + globRRI{nn,2} * (vRIStep(:,nn) .* vHRI + quadraticHRI);
-        
-        % well-balanced
-%         globORI = assembleVecEdgePhiIntFuncDiscIntFuncContNu(g, markE0TbdrRI, refEdgePhiIntPhiLinPerQuad, zbExact, reshape(xiRIStep(:,nn), R1D, K).', g.areaNuE0TbdrRI);
-%         nonLinearity = nonLinearity - gConst * [globORI{1}; globORI{2}];
-        
       end % if
       
       % open sea boundary contributions
@@ -690,10 +684,6 @@ while t < tEnd
         quadraticHOS = gConst * xiOS .* (0.5 * xiOS - zbEvalOnQuad1D{nn});
         nonLinearity = nonLinearity + 0.5 * [ globROS{nn,1} * (uuHOS + quadraticHOS) + globROS{nn,2} * uvHOS;
                                               globROS{nn,1} * uvHOS + globROS{nn,2} * (vvHOS + quadraticHOS) ];
-        % well-balanced
-%         globOOS = assembleVecEdgePhiIntFuncDiscIntFuncContNu(g, markE0TbdrOS, refEdgePhiIntPhiLinPerQuad, zbExact, reshape(xiOS, R1D, K).', g.areaNuE0TbdrOS);
-%         nonLinearity = nonLinearity - gConst * [globOOS{1}; globOOS{2}]; % Note: This and same for river boundary are linear terms added here
-        
         if strcmp(fluxType, 'Lax-Friedrichs')
           lambda = computeLaxFriedrichsCoefficientSWE( 'openSea', averaging, kronNuE0T, gConst, nn, cEdgeIntOnQuad, HEdgeIntOnQuad, ...
                                                        [], [], HEdgeExt2IntOnQuad, HL, [], [], HOS );
@@ -719,6 +709,7 @@ while t < tEnd
     
     % building and solving the system
     sysV = [ globL{1} - globLRI{1}; globL{2} - globLRI{2}; globL{3} - globLRI{3} ];
+
     switch scheme
       case 'Runge-Kutta SSP/TVD'
         % Computing the discrete time derivative
@@ -806,8 +797,8 @@ while t < tEnd
 		cDG(:,:,2)  = reshape(cDiscRK{rkStep + 1}(  K*N + 1 : 2*K*N), N, K).';
 		cDG(:,:,3)  = reshape(cDiscRK{rkStep + 1}(2*K*N + 1 : 3*K*N), N, K).';
 		% correction for unknown c1
-		checkBoundsOfDataDisc(cDG(:,:,1), -20, 20, nStep); % TODO 20 standardisieren
-		cDG(:,:,1) = applyMinValueExceedance2DataDisc(g, cDG(:,:,1) - zbDG, corrSys, nStep, minTol, 20); % TODO error message in apply...
+		checkBoundsOfDataDisc(cDG(:,:,1), -elevTol, elevTol, nStep);
+		cDG(:,:,1) = applyMinValueExceedance2DataDisc(g, cDG(:,:,1), corrSys, nStep, zbLagrange, elevTol); % xi
   end % for
 
 	if ITRANS == 1
@@ -815,40 +806,41 @@ while t < tEnd
 	end % if
   
   if mod(nStep, output) == 0 || (ITRANS == 1 && l2 < CONVCR)
-%   if t >= 142560 && mod(nStep, 10) % debug gom
-    UDG(:,:,1) = projectFuncDisc2DataDisc((cDG(:,:,2) * gPhi2D{max(2*p,1)}.') ./ (cDG(:,:,1) * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
-		UDG(:,:,2) = projectFuncDisc2DataDisc((cDG(:,:,3) * gPhi2D{max(2*p,1)}.') ./ (cDG(:,:,1) * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
+    HDG = cDG(:,:,1) - zbDG; % TODO
+    UDG(:,:,1) = projectFuncDisc2DataDisc((cDG(:,:,2) * gPhi2D{max(2*p,1)}.') ./ (HDG * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
+		UDG(:,:,2) = projectFuncDisc2DataDisc((cDG(:,:,3) * gPhi2D{max(2*p,1)}.') ./ (HDG * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
 		visNum = visNum + 1;
 		if isVisu
-			uLagrange = projectDataDisc2DataLagr(UDG(:,:,1)        );
+			 uLagrange = projectDataDisc2DataLagr(UDG(:,:,1));
 			visualizeDataLagr(g,  uLagrange,  'u_h', [name '_u' ] , visNum, ['output_' name] , cd, fileTypes);
 		end % if
 		if isVisuH
-			uHLagrange = projectDataDisc2DataLagr(cDG(:,:,2)       );
+			uHLagrange = projectDataDisc2DataLagr(cDG(:,:,2));
 			visualizeDataLagr(g, uHLagrange, 'uH_h', [name '_uH'], visNum, ['output_' name] , cd, fileTypes);
 		end % if
 		if isVisv
-			vLagrange = projectDataDisc2DataLagr(UDG(:,:,2)        );
+			 vLagrange = projectDataDisc2DataLagr(UDG(:,:,2));
 			visualizeDataLagr(g,  vLagrange,  'v_h', [name '_v' ] , visNum, ['output_' name] , cd, fileTypes);
 		end % if
 		if isVisvH
-			vHLagrange = projectDataDisc2DataLagr(cDG(:,:,3)       );
+			vHLagrange = projectDataDisc2DataLagr(cDG(:,:,3));
 			visualizeDataLagr(g, vHLagrange, 'vH_h', [name '_vH'], visNum, ['output_' name] , cd, fileTypes);
 		end % if
 		if isVisxi
-			xiLagrange = projectDataDisc2DataLagr(cDG(:,:,1) + zbDG);
+			xiLagrange = projectDataDisc2DataLagr(cDG(:,:,1));
 			visualizeDataLagr(g, xiLagrange, 'xi_h', [name '_xi'], visNum, ['output_' name] , cd, fileTypes);
 		end % if
 	end % if
   % save data in stations
   if useStations
 		if ~(mod(nStep,output) == 0) % velocities are not available yet
-			UDG(:,:,1) = projectFuncDisc2DataDisc((cDG(:,:,2) * gPhi2D{max(2*p,1)}.') ./ (cDG(:,:,1) * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
-			UDG(:,:,2) = projectFuncDisc2DataDisc((cDG(:,:,3) * gPhi2D{max(2*p,1)}.') ./ (cDG(:,:,1) * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
+      HDG = cDG(:,:,1) - zbDG; % TODO
+			UDG(:,:,1) = projectFuncDisc2DataDisc((cDG(:,:,2) * gPhi2D{max(2*p,1)}.') ./ (HDG * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
+			UDG(:,:,2) = projectFuncDisc2DataDisc((cDG(:,:,3) * gPhi2D{max(2*p,1)}.') ./ (HDG * gPhi2D{max(2*p,1)}.'), 2*p, refElemPhiPhi);
 		end % if
-    uLagrange  = projectDataDisc2DataLagr(UDG(:,:,1)       );
-    vLagrange  = projectDataDisc2DataLagr(UDG(:,:,2)       );
-    xiLagrange = projectDataDisc2DataLagr(cDG(:,:,1) + zbDG);
+    uLagrange  = projectDataDisc2DataLagr(UDG(:,:,1));
+    vLagrange  = projectDataDisc2DataLagr(UDG(:,:,2));
+    xiLagrange = projectDataDisc2DataLagr(cDG(:,:,1));
 		for stations = 1:NSTAE
 			triangles = triE(stations);
 			elevationInStations(stations, :) = sum(xiLagrange(triangles,:), 1) / length(triangles);
@@ -864,7 +856,7 @@ while t < tEnd
   end % if
 	if NHSTAR == 1 && mod(nStep, NHSINC) == 0
 		fprintf('\n\n')
-		createHotStart([name  '_H_' ], cDG(:,:,1), t);
+		createHotStart([name '_xi_' ], cDG(:,:,1), t);
 		createHotStart([name '_uH_' ], cDG(:,:,2), t);
 		createHotStart([name '_vH_' ], cDG(:,:,3), t);
 	end % if
@@ -884,11 +876,11 @@ if strcmp(wbarOpt, 'on')
 end % if
 %% error computation in last timestep
 if isSolAvail
-	errxi = computeL2Error(g, cDG(:,:,1) + zbDG, @(x1,x2) xi(x1,x2,t)															 , 2*p);
-	erruH = computeL2Error(g, cDG(:,:,2)       , @(x1,x2)  u(x1,x2,t) .* (xi(x1,x2,t)-zbAlg(x1,x2)), 2*p);
-	errvH = computeL2Error(g, cDG(:,:,3)       , @(x1,x2)  v(x1,x2,t) .* (xi(x1,x2,t)-zbAlg(x1,x2)), 2*p);
-	erru  = computeL2Error(g, UDG(:,:,1)       , @(x1,x2)  u(x1,x2,t)															 , 2*p);
-	errv  = computeL2Error(g, UDG(:,:,2)       , @(x1,x2)  v(x1,x2,t)															 , 2*p);
+	errxi = computeL2Error(g, cDG(:,:,1), @(x1,x2) xi(x1,x2,t)															, 2*p);
+	erruH = computeL2Error(g, cDG(:,:,2), @(x1,x2)  u(x1,x2,t) .* (xi(x1,x2,t)-zbAlg(x1,x2)), 2*p);
+	errvH = computeL2Error(g, cDG(:,:,3), @(x1,x2)  v(x1,x2,t) .* (xi(x1,x2,t)-zbAlg(x1,x2)), 2*p);
+	erru  = computeL2Error(g, UDG(:,:,1), @(x1,x2)  u(x1,x2,t)															, 2*p);
+	errv  = computeL2Error(g, UDG(:,:,2), @(x1,x2)  v(x1,x2,t)															, 2*p);
 else
   errxi = -1; erru = -1; errv = -1; erruH = -1; errvH = -1;
 end % if
