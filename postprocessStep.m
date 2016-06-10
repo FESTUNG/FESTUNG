@@ -50,6 +50,11 @@
 %> @endparblock
 %
 function problemData = postprocessStep(problemData, nStep)
+% Ensure water height doesn't fall below threshold
 problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.minValueHeight, 1000);
+
+% Update time level and check for simulation end
+problemData.t = problemData.t + problemData.dt;
+problemData.isFinished = problemData.t >= problemData.tEnd;
 end
 
