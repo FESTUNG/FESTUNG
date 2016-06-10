@@ -51,12 +51,12 @@ end % if
 
 %% Save stations.
 if problemData.isVisStations
-  if ~isempty(problemData.dataElev)
+  if isfield(problemData, 'dataElev')
     data = problemData.dataElev;
     save('output/elev.mat', 'data')
     fprintf('Data written to output/elev.mat\n')
   end % if
-  if ~isempty(problemData.dataVel)
+  if isfield(problemData, 'dataVel')
     data = problemData.dataVel;
     save('output/vel.mat', 'data')
     fprintf('Data written to output/vel.mat\n')
