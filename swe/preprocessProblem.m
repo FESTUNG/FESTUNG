@@ -273,11 +273,19 @@ pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, refElemPhiLinPhiLi
 zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2, eye(3), basesOnQuadLin); 
 
 % Evaluate zb in each quadrature point
-qOrd = max(2*pd.p,1); [Q, ~] = quadRule1D(qOrd);
-pd.zbPerQuad = cell(3,1);
-for n = 1 : 3
-  [Q1,Q2] = gammaMap(n, Q);
-  pd.zbPerQuad{n} = pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2));
+qOrd = max(2*pd.p,1); [Q1, Q2, ~] = quadRule2D(qOrd); numQuad2D = length(Q1);
+pd.zbQ0T = reshape(pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).', K * numQuad2D, 1);
+
+pd.zbQ0E0Tint = cell(3,1);
+pd.zbQ0E0Text = cell(3,3);
+qOrd = max(2*pd.p,1); [Q, ~] = quadRule1D(qOrd); numQuad1D = length(Q);
+for nn = 1 : 3
+  [Q1, Q2] = gammaMap(nn, Q);
+  pd.zbQ0E0Tint{nn} = reshape(pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).', K * numQuad1D, 1);
+  for np = 1 : 3
+    [Q1, Q2] = theta(nn, np, Q1, Q2);
+    pd.zbQ0E0Text{nn,np} = reshape(pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).', K * numQuad1D, 1);
+  end % for
 end % for
 
 if ~isempty(pd.slopeLimList)
@@ -363,7 +371,7 @@ end % if
 % Boundary matrices
 if pd.g.numEbdrL > 0 % Land boundaries
   pd.globRL = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrL);
-  switch pd.typeFluxL
+  switch pd.typeBdrL
     case 'reflected'
       error('not implemented')
     case 'natural'
@@ -385,11 +393,11 @@ if pd.g.numEbdrRI > 0 % River boundaries
   if ~pd.isRamping % TODO rhsRIAlg
     globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
     for n = 1 : 3
-      hRiv = pd.xiRiv(:,n) - pd.zbPerQuad{n};
+      hRiv = pd.xiRiv(:,n) - pd.zbDiscQ0T{n};
       uHRiv = pd.uRiv(:,n) .* hRiv;
       vHRiv = pd.vRiv(:,n) .* hRiv;
       uvHRiv = uHRiv .* pd.vRiv(:,n);
-      gHHRiv = pd.gConst * pd.xiRiv(:,n) .* ( 0.5 * pd.xiRiv(:,n) - pd.zbPerQuad{n} );
+      gHHRiv = pd.gConst * pd.xiRiv(:,n) .* ( 0.5 * pd.xiRiv(:,n) - pd.zbDiscQ0T{n} );
       pd.globLRI{1} = pd.globLRI{1} + globRRI{n,1} * uHRiv + globRRI{n,2} * vHRiv;
       pd.globLRI{2} = pd.globLRI{2} + globRRI{n,1} * (pd.uRiv(:,n) .* uHRiv + gHHRiv) + globRRI{n,2} * uvHRiv;
       pd.globLRI{3} = pd.globLRI{3} + globRRI{n,1} * uvHRiv + globRRI{n,2} * (pd.vRiv(:,n) .* vHRiv + gHHRiv);

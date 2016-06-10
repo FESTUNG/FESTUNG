@@ -51,17 +51,19 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = preprocessStep(problemData, nStep)
+function pd = preprocessStep(pd, nStep)
 % Extract often used variables
-K = problemData.K;
-p = problemData.p;
-N = problemData.N;
-dt = problemData.dt;
-t = problemData.t0 + nStep * dt;
+K = pd.K;
+p = pd.p;
+N = pd.N;
+dt = pd.dt;
+t = pd.t0 + nStep * dt;
+% TODO: variable time step
 
 % Determine time level at which continuous functions are to be evaluated
-switch problemData.scheme
+switch pd.schemeType
   case 'explicit'
+    % TODO: Runge-Kutta
     tRhs = t - dt;
   case 'semi_implicit'
     tRhs = t;
@@ -69,193 +71,257 @@ switch problemData.scheme
     error('Invalid time-stepping scheme.')  
 end % switch
 
-%% Source term contribution
-if problemData.isRhsAvail
-  % Project right hand side functions
-  f0Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.f0Cont(x1,x2,tRhs), ...
-            2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
-  f1Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.f1Cont(x1,x2,tRhs), ...
-            2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
-  f2Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.f2Cont(x1,x2,tRhs), ...
-            2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
-  
-  problemData.globL = cell(3,1);
-  problemData.globL{1} = problemData.globM * reshape(f0Disc', K*N, 1);
-  problemData.globL{2} = problemData.globM * reshape(f1Disc', K*N, 1);
-  problemData.globL{3} = problemData.globM * reshape(f2Disc', K*N, 1);
-elseif problemData.isTidalDomain
-  % Add tidal potential contribution
-  numFrequency = size(problemData.forcingTidal, 3);
-  problemData.globL = { sparse(K*N,1); sparse(K*N,K*N); sparse(K*N,K*N) };
-  for n = 1 : numFrequency
-    problemData.globL{2} = problemData.globL{2} + problemData.forcingFrequency{1,n}(tRhs) * problemData.forcingTidal{1,1,n} + ...
-                                                  problemData.forcingFrequency{2,n}(tRhs) * problemData.forcingTidal{1,2,n};
-    problemData.globL{3} = problemData.globL{3} + problemData.forcingFrequency{1,n}(tRhs) * problemData.forcingTidal{2,1,n} + ...
-                                                  problemData.forcingFrequency{2,n}(tRhs) * problemData.forcingTidal{2,2,n};
-  end % for
-  hDisc = reshape(problemData.cDisc(:,:,1), K*N, 1);
-  problemData.globL{2} = problemData.ramp(tRhs) * problemData.globL{2} * hDisc;
-  problemData.globL{3} = problemData.ramp(tRhs) * problemData.globL{3} * hDisc;
-else
-  problemData.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
-end % if
-
 %% Determine quadrature rules
 qOrd1D = 2*p+1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
 qOrd2D = max(2*p,1); [~, ~, W] = quadRule2D(qOrd2D); numQuad2D = length(W);
 
-%% River boundary contributions
-if problemData.g.numEbdrRiv > 0
-  uRiv = kron(problemData.ramp(tRhs) * problemData.uRiv, ones(numQuad1D,1));
-  vRiv = kron(problemData.ramp(tRhs) * problemData.vRiv, ones(numQuad1D,1));
-  for n = 1: 3
-    hRiv = kron(problemData.ramp(tRhs) * problemData.xiRiv, ones(numQuad1D,1)) - reshape(problemData.zbPerQuad{n}.', K*numQuad1D,1);
-    problemData.globL{1} = problemData.globL{1} - problemData.globB{n,1} * (uRiv .* hRiv) + problemData.globB{n,2} * (vRiv .* hRiv);
-    problemData.globL{2} = problemData.globL{2} - problemData.globB{n,1} * (uRiv .* uRiv .* hRiv + 0.5*problemData.gConst * hRiv .* hRiv) + ...
-                                                  problemData.globB{n,2} * (uRiv .* vRiv .* hRiv);
-    problemData.globL{3} = problemData.globL{3} - problemData.globB{n,1} * (uRiv .* vRiv .* hRiv) + ...
-                                                  problemData.globB{n,2} * (vRiv .* vRiv .* hRiv + 0.5*problemData.gConst * hRiv .* hRiv);
-  end
+%% Create lookup tables for solution on quadrature points.
+cQ0T = cell(3,1); % cDisc in quadrature points of triangles
+cQ0E0Tint = cell(3,3); % cDisc in interior quad points of edges
+cQ0E0Text = cell(3,3,3); % cDisc in exterior quad points of edges
+cQ0E0TE0T = cell(3,3,3); % cDisc in quad points of edge on neighboring element
+
+for i = 1 : 3
+  cQ0T{i} = reshape(pd.basesOnQuad.phi2D{qOrd2D} * pd.cDisc(:,:,i).', numQuad2D * K, 1);
+  for nn = 1 : 3
+    cQ0E0Tint{i,nn} = reshape(pd.basesOnQuad.phi1D{qOrd1D}(:,:,nn) * pd.cDisc(:,:,i).', numQuad1D * K, 1);
+    for np = 1 : 3
+      cDiscThetaPhi = pd.basesOnQuad.thetaPhi1D{qOrd1D}(:,:,nn,np) * pd.cDisc(:,:,i).';
+      cQ0E0Text{i,nn,np} = reshape(cDiscThetaPhi, numQuad1D * K, 1);
+      cQ0E0TE0T{i,nn,np} = reshape(cDiscThetaPhi * pd.g.markE0TE0T{nn,np}.', numQuad1D * K, 1);
+    end % for
+  end % for
+end % for
+
+hQ0T = cQ0T{1} - pd.zbQ0T; % water height (xi - zb) in quadrature points of triangles
+% water height (xi - zb) in interior quad points of edges
+hQ0E0Tint = cellfun(@minus, cQ0E0Tint(1,:).', pd.zbQ0E0Tint, 'UniformOutput', false);
+% water height (xi - zb) in exterior quad points of edges
+hQ0E0Text = cellfun(@minus, squeeze(cQ0E0Text(1,:,:)), pd.zbQ0E0Text, 'UniformOutput', false);
+
+%% Right hand side contribution
+pd.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
+pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
+if pd.isRhsAvail
+  f0Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f0Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  f1Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f1Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  f2Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f2Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  
+  pd.globL{1} = pd.globM * reshape(f0Disc.', K*N, 1);
+  pd.globL{2} = pd.globM * reshape(f1Disc.', K*N, 1);
+  pd.globL{3} = pd.globM * reshape(f2Disc.', K*N, 1);
+end % if
+
+%% Tidal potential contribution
+pd.tidalTerms = { sparse(K*N,K*N); sparse(K*N,K*N) };
+if pd.isTidalDomain
+  numFrequency = size(pd.forcingTidal, 3);
+  for m = 1 : 2
+    for n = 1 : numFrequency
+      pd.tidalTerms{m} = pd.tidalTerms{m} + pd.forcingFrequency{1,n}(tRhs) * pd.forcingTidal{m,1,n} + ...
+                                            pd.forcingFrequency{2,n}(tRhs) * pd.forcingTidal{m,2,n};
+    end % for
+    if pd.isRamp
+      pd.tidalTerms{m} = pd.ramp(tRhs) * pd.tidalTerms{m};
+    end % if
+  end % for
 end % if
 
 %% Compute water height on Open Sea boundaries.
-heightOSPerQuad = cell(3,1);
-if isfield(problemData, 'xiOSCont')
+xiOSQ0E0Tint = cell(3,1);
+if isfield(pd, 'xiOSCont')
   % Analytical function for open sea elevation given
   [Q, ~] = quadRule1D(max(2*p,1));
   for n = 1 : 3
     [Q1, Q2] = gammaMap(n, Q);
-    heightOSPerQuad{n} = problemData.xiOSCont(problemData.g.mapRef2Phy(1,Q1,Q2), problemData.g.mapRef2Phy(2,Q1,Q2), tRhs) - ...
-                          problemData.zbPerQuad{n};
+    xiOSQ0E0Tint{n} = pd.xiOSCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs);
+    xiOSQ0E0Tint{n} = reshape(xiOSQ0E0Tint{n}.', K*numQuad1D,1);
   end % for
-elseif isfield(problemData, 'xiFreqOS') && isfield(problemData, 'xiAmpOS')
+elseif isfield(pd, 'xiFreqOS') && isfield(pd, 'xiAmpOS')
   % Open sea elevation data given
 	% Since the open sea boundary condition is only used for non-linear
 	% contributions we discretize it explicitly. Otherwise we would have
 	% to make a distinction.
-  numFrequency = size(problemData.xiFreqOS, 2);
-  xiOSPerQuad = zeros(K, numQuad1D);
+  numFrequency = size(pd.xiFreqOS, 2);
+  xiOS = zeros(K, numQuad1D);
   for n = 1 : numFrequency
-    xiOSPerQuad = xiOSPerQuad + repmat(problemData.xiFreqOS{1,n}(t-dt) * problemData.xiAmpOS{1,n} + ...
-                                       problemData.xiFreqOS{2,n}(t-dt) * problemData.xiAmpOS{2,n}, 1, numQuad1D);
+    xiOS = xiOS + repmat(pd.xiFreqOS{1,n}(tRhs) * pd.xiAmpOS{1,n} + ...
+                         pd.xiFreqOS{2,n}(tRhs) * pd.xiAmpOS{2,n}, 1, numQuad1D);
   end % for
-  xiOSPerQuad = problemData.ramp(t-dt) * xiOSPerQuad;
+  xiOS = pd.ramp(tRhs) * xiOS;
   for n = 1 : 3
-    heightOSPerQuad{n} = xiOSPerQuad - problemData.zbPerQuad{n};
+    xiOSQ0E0Tint{n} = xiOS;
   end % for
 else
   error('No open sea elevation given!')
 end
 
-%% Create lookup tables for solution on quadrature points.
-cDiscQ0T = cell(3,1); % cDisc in quadrature points of triangles
-cDiscQ0E0Tint = cell(3,3); % cDisc in interior quad points of edges
-cDiscQ0E0Text = cell(3,3,3); % cDisc in exterior quad points of edges
-cDiscQ0E0TE0T = cell(3,3,3); % cDisc in quad points of edge on neighboring element
+%% Compute river boundary values.
+if pd.g.numEbdrRI > 0 && pd.isRamping
+  xiRiv = kron(pd.ramp(tRhs) * pd.xiRiv, ones(numQuad1D,1));
+  uRiv = kron(pd.ramp(tRhs) * pd.uRiv, ones(numQuad1D,1));
+  vRiv = kron(pd.ramp(tRhs) * pd.vRiv, ones(numQuad1D,1));
+end % if
 
-for i = 1 : 3
-  cDiscQ0T{i} = problemData.cDisc(:,:,i) * problemData.basesOnQuad.phi2D{qOrd2D}.';
-  for nn = 1 : 3
-    cDiscQ0E0Tint{i,nn} = problemData.cDisc(:,:,i) * problemData.basesOnQuad.phi1D{qOrd1D}(:,:,nn).';
-    for np = 1 : 3
-      cDiscQ0E0Text{i,nn,np} = problemData.cDisc(:,:,i) * problemData.basesOnQuad.thetaPhi1D{qOrd1D}(:,:,nn,np).';
-      cDiscQ0E0TE0T{i,nn,np} = problemData.g.markE0TE0T{nn,np} * cDiscQ0E0Text{i,nn,np};
-    end % for
-  end % for
-end % for
+%% Evaluate bottom friction contributions.
+if pd.isBottomFrictionNonlinear
+  normUoverH = sqrt(cQ0T{2} .* cQ0T{2} + cQ0T{3} .* cQ0T{3}) ./ (hQ0T .* hQ0T);
+  pd.bottomFrictionTerms = [ pd.globE * (normUoverH .* cQ0T{2}) ; pd.globE * (normUoverH .* cQ0T{3}) ];
+else
+  pd.bottomFrictionTerms = [ pd.globE * reshape(pd.cDisc(:,:,2).', K*N, 1) ; pd.globE * reshape(pd.cDisc(:,:,3).', K*N, 1) ];
+end % if
 
-%%  Create lookup tables for eigenvalues for Lax-Friedrichs flux.
-switch problemData.fluxType
-  case 'Lax-Friedrichs'
-    [lambdaE0TE0T, lambdaOSRiemE0T] = computeLaxFriedrichsCoefficientsSWE(problemData.g, problemData.gConst, cDiscQ0E0Tint, cDiscQ0E0TE0T, heightOSPerQuad, numQuad1D, problemData.averaging, problemData.isOSRiem);
-  otherwise
-    error('Unknown fluxType.')
-end
+%% Non-linear terms in quadrature points of triangles.
+uuH = cQ0T{2} .* cQ0T{2} ./ hQ0T;
+uvH = cQ0T{2} .* cQ0T{3} ./ hQ0T;
+vvH = cQ0T{3} .* cQ0T{3} ./ hQ0T;
+gHH = 0.5 * pd.gConst * (cQ0T{1} .* cQ0T{1});
 
-%% Linearize lookup tables for solution and eigenvalues on quadrature points.
-for i = 1 : 3
-  cDiscQ0T{i} = reshape(cDiscQ0T{i}.', K * numQuad2D, 1);
-  for nn = 1 : 3
-    cDiscQ0E0Tint{i,nn} = reshape(cDiscQ0E0Tint{i,nn}.', K * numQuad1D, 1);
-    for np = 1 : 3
-      cDiscQ0E0Text{i,nn,np} = reshape(cDiscQ0E0Text{i,nn,np}.', K * numQuad1D, 1);
-      cDiscQ0E0TE0T{i,nn,np} = reshape(cDiscQ0E0TE0T{i,nn,np}.', K * numQuad1D, 1);
-    end % for
-    lambdaE0TE0T{i,nn} = reshape(lambdaE0TE0T{i,nn}.', K * numQuad1D, 1);
-  end % for
-end % for
-
-%% Evaluate non-linear terms on quadrature points.
-% Non-linear terms in quadrature points of triangles
-uuH = cDiscQ0T{2} .* cDiscQ0T{2} ./ cDiscQ0T{1};
-uvH = cDiscQ0T{2} .* cDiscQ0T{3} ./ cDiscQ0T{1};
-vvH = cDiscQ0T{3} .* cDiscQ0T{3} ./ cDiscQ0T{1};
-gHH = 0.5 * problemData.gConst * (cDiscQ0T{1} .* cDiscQ0T{1});
-
-problemData.nonlinearTerms = [ -problemData.globF{1} * (uuH + gHH) - problemData.globF{2} * uvH ; ...
-                               -problemData.globF{1} * uvH - problemData.globF{2} * (vvH + gHH) ];
-problemData.riemannTerms = sparse(3*K*N, 1);
-                 
+pd.riemannTerms = sparse(3*K*N, 1);
+pd.nonlinearTerms = [ -pd.globF{1} * (uuH + gHH) - pd.globF{2} * uvH ; ...
+                      -pd.globF{1} * uvH - pd.globF{2} * (vvH + gHH) ];
+                             
+%% Non-linear terms in quadrature points of edges.
 for nn = 1 : 3
   % Non-linear terms in exterior quadrature points of edges
   for np = 1 : 3
-    uuH = cDiscQ0E0Text{2,nn,np} .* cDiscQ0E0Text{2,nn,np} ./ cDiscQ0E0Text{1,nn,np};
-    uvH = cDiscQ0E0Text{2,nn,np} .* cDiscQ0E0Text{3,nn,np} ./ cDiscQ0E0Text{1,nn,np};
-    vvH = cDiscQ0E0Text{3,nn,np} .* cDiscQ0E0Text{3,nn,np} ./ cDiscQ0E0Text{1,nn,np};
-    gHH = 0.5 * problemData.gConst * (cDiscQ0E0Text{1,nn,np} .* cDiscQ0E0Text{1,nn,np});
+    uuH = cQ0E0Text{2,nn,np} .* cQ0E0Text{2,nn,np} ./ hQ0E0Text{nn,np};
+    uvH = cQ0E0Text{2,nn,np} .* cQ0E0Text{3,nn,np} ./ hQ0E0Text{nn,np};
+    vvH = cQ0E0Text{3,nn,np} .* cQ0E0Text{3,nn,np} ./ hQ0E0Text{nn,np};
+    gHH = 0.5 * pd.gConst * (cQ0E0Text{1,nn,np} .* cQ0E0Text{1,nn,np});
     
-    problemData.nonlinearTerms = problemData.nonlinearTerms + ...
-                       [ problemData.globRoffdiag{nn,np,1} * (uuH + gHH) + problemData.globRoffdiag{nn,np,2} * uvH ; ...
-                         problemData.globRoffdiag{nn,np,1} * uvH + problemData.globRoffdiag{nn,np,2} * (vvH + gHH) ];
+    switch pd.typeFlux
+      case 'Lax-Friedrichs'
+        pd.nonlinearTerms = pd.nonlinearTerms + ...
+          [ pd.globRoffdiag{nn,np,1} * (uuH + gHH) + pd.globRoffdiag{nn,np,2} * uvH ; ...
+            pd.globRoffdiag{nn,np,1} * uvH + pd.globRoffdiag{nn,np,2} * (vvH + gHH) ];
                        
-    problemData.riemannTerms = problemData.riemannTerms + ...
-                       [ problemData.globV{nn,np} * (lambdaE0TE0T{nn,np} .* (cDiscQ0E0Tint{1,nn} - cDiscQ0E0TE0T{1,nn,np})) ; ...
-                         problemData.globV{nn,np} * (lambdaE0TE0T{nn,np} .* (cDiscQ0E0Tint{2,nn} - cDiscQ0E0TE0T{2,nn,np})) ; ...
-                         problemData.globV{nn,np} * (lambdaE0TE0T{nn,np} .* (cDiscQ0E0Tint{3,nn} - cDiscQ0E0TE0T{3,nn,np})) ];
+        lambda = computeLaxFriedrichsCoefficientSWE('interior', pd.averaging, nn, np, pd.g.nuQ0E0T, [], [], [], [], [], sqrt(cQ0E0Tint{1,nn}), [], cQ0E0Tint, cQ0E0TE0T, pd.gConst );
+        pd.riemannTerms = pd.riemannTerms + ...
+                          [ pd.globV{nn,np} * (lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np})) ; ...
+                            pd.globV{nn,np} * (lambda .* (cQ0E0Tint{2,nn} - cQ0E0TE0T{2,nn,np})) ; ...
+                            pd.globV{nn,np} * (lambda .* (cQ0E0Tint{3,nn} - cQ0E0TE0T{3,nn,np})) ];
+
+      case 'Roe'
+        error('not implemented')
+        
+      otherwise
+        error('Invalid flux type for interior edges.')
+    end % switch
   end % for
   
   % Non-linear terms in interior quadrature points of edges
-  uuH = cDiscQ0E0Tint{2,nn} .* cDiscQ0E0Tint{2,nn} ./ cDiscQ0E0Tint{1,nn};
-  uvH = cDiscQ0E0Tint{2,nn} .* cDiscQ0E0Tint{3,nn} ./ cDiscQ0E0Tint{1,nn};
-  vvH = cDiscQ0E0Tint{3,nn} .* cDiscQ0E0Tint{3,nn} ./ cDiscQ0E0Tint{1,nn};
-  gHH = 0.5 * problemData.gConst * (cDiscQ0E0Tint{1,nn} .* cDiscQ0E0Tint{1,nn});
+  uuH = cQ0E0Tint{2,nn} .* cQ0E0Tint{2,nn} ./ hQ0E0Tint{nn};
+  uvH = cQ0E0Tint{2,nn} .* cQ0E0Tint{3,nn} ./ hQ0E0Tint{nn};
+  vvH = cQ0E0Tint{3,nn} .* cQ0E0Tint{3,nn} ./ hQ0E0Tint{nn};
+  gHH = 0.5 * pd.gConst * (cQ0E0Tint{1,nn} .* cQ0E0Tint{1,nn});
   
-  problemData.nonlinearTerms = problemData.nonlinearTerms + ...
-                     [ problemData.globRdiag{nn,1} * (uuH + gHH) + problemData.globRdiag{nn,2} * uvH ; ...
-                       problemData.globRdiag{nn,1} * uvH + problemData.globRdiag{nn,2} * (vvH + gHH) ];
+  pd.nonlinearTerms = pd.nonlinearTerms + ...
+    [ pd.globRdiag{nn,1} * (uuH + gHH) + pd.globRdiag{nn,2} * uvH ; ...
+      pd.globRdiag{nn,1} * uvH + pd.globRdiag{nn,2} * (vvH + gHH) ];
 
-  % Non-linear contributions of land boundaries
-  problemData.nonlinearTerms = problemData.nonlinearTerms + ...
-                     [ problemData.globRL{nn,1}; problemData.globRL{nn,2} ] * gHH;
-                     
-  % Non-linear contributions of Riemann solver on open sea edges
-  if problemData.isOSRiem
-     problemData.nonlinearTerms = problemData.nonlinearTerms + 0.5 * ...
-                        [ problemData.globROS{nn,1} * (uuH + gHH) + problemData.globROS{nn,2} * uvH ; ...
-                          problemData.globROS{nn,1} * uvH + problemData.globROS{nn,2} * (vvH + gHH) ];
+  % Land boundary contributions
+  if pd.g.numEbdrL > 0
+    switch pd.typeBdrL
+      case 'natural'
+        pd.nonlinearTerms = pd.nonlinearTerms + [ pd.globRL{nn,1}; pd.globRL{nn,2} ] * gHH;
+
+      case 'reflected'
+        uHL = pd.g.nuE0Tsqr{nn,2} .* cQ0E0Tint{2,nn} - pd.g.nuE0Tprod{nn} .* cQ0E0Tint{3,nn};
+        vHL = pd.g.nuE0Tsqr{nn,1} .* cQ0E0Tint{3,nn} - pd.g.nuE0Tprod{nn} .* cQ0E0Tint{2,nn};
+        uuHL = uHL .* uHL ./ hQ0E0Tint{nn};
+        uvHL = uHL .* vHL ./ hQ0E0Tint{nn};
+        vvHL = vHL .* vHL ./ hQ0E0Tint{nn};
+        % TODO: landFlux
+        pd.nonlinearTerms = pd.nonlinearTerms + ...
+          [ pd.globRdiag{nn,1} * (uuHL + gHH) + pd.globRdiag{nn,2} * uvHL ; ...
+            pd.globRdiag{nn,1} * uvHL + pd.globRdiag{nn,2} * (vvHL + gHH) ];
+
+      case 'riemann'
+        uHriem = pd.g.nuE0TsqrDiff{nn} .* cQ0E0Tint{2,nn} - 2 * pd.g.nuE0Tprod{nn} .* cQ0E0Tint{3,nn};
+        vHriem = -pd.g.nuE0TsqrDiff{nn} .* cQ0E0Tint{3,nn} - 2 * pd.g.nuE0Tprod{nn} .* cQ0E0Tint{2,nn};
+        uuHriem = uHriem .* uHriem ./ cQ0E0Tint{1,nn};
+        uvHriem = uHriem .* vHriem ./ cQ0E0Tint{1,nn};
+        vvHriem = vHriem .* vHriem ./ cQ0E0Tint{1,nn};
+        
+        switch pd.typeFlux
+          case 'Lax-Friedrichs'
+%             lambda = computeLaxFriedrichsCoefficientSWE('land', [], nn, [], pd.g.nuQ0E0T, cDiscQ0E0Tint{2,nn}, uHriem, cDiscQ0E0Tint{2,nn}, vHriem, cDiscQ0E0Tint{1,nn}, [], [], [], [], pd.gConst);
+            lambda = ( (cQ0E0Tint{2,nn} + uHriem) .* pd.g.nuQ0E0T{nn,1} + (cQ0E0Tint{3,nn} + vHriem) .* pd.g.nuQ0E0T{nn,2} ) ./ (2 * cQ0E0Tint{1,nn}) + sqrt(pd.gConst * cQ0E0Tint{1,nn});
+            % TODO: land flux
+            pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
+              [ pd.globRL{nn,1} * (uuH + uuHriem + 2 * gHH) + pd.globRL{nn,2} * (uvH + uvHriem) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHriem)); ...
+                pd.globRL{nn,1} * (uvH + uvHriem) + pd.globRL{nn,2} * (vvH + vvHriem + 2 * gHH) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHriem)) ];
+            
+          case 'Roe'
+            error('not implemented')
+                                          
+          otherwise
+            error('Invalid flux type for land boundaries.')
+        end % switch
+        
+      otherwise
+        error('Invalid type for land boundary treatment.')
+    end % switch
+  end % if
+
+  % River boundary contributions
+  if pd.g.numEbdrRI > 0 && pd.isRamping
+    hRiv = xiRiv - pd.zbQ0E0Tint{nn};
+    uHRiv = uRiv .* hRiv;
+    vHRiv = vRiv .* hRiv;
+    uvHRiv = uRiv .* vHRiv;
+    gHHRiv = 0.5 * pd.gConst * (hRiv .* hRiv);
+    
+    pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{nn,1} * uHRiv + pd.globRRI{nn,2} * vHRiv;
+    pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uRiv .* uHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
+    pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vRiv .* vHRiv + gHHRiv);
+  end % if
+  
+  % Open Sea boundary contributions
+  if pd.g.numEbdrOS > 0
+    hOS = xiOSQ0E0Tint{nn} - pd.zbQ0E0Tint{nn};
+    validateattributes(hOS, {'numeric'}, {'>', 0})
+    uuHOS = cQ0E0Tint{2,nn} .* cQ0E0Tint{2,nn} ./ hOS;
+    uvHOS = cQ0E0Tint{2,nn} .* cQ0E0Tint{3,nn} ./ hOS;
+    vvHOS = cQ0E0Tint{3,nn} .* cQ0E0Tint{3,nn} ./ hOS;
+    gHHOS = pd.gConst * xiOSQ0E0Tint{nn} .* (0.5 * xiOSQ0E0Tint{nn} - pd.zbQ0E0Tint{nn});
+    
+    if pd.isRiemOS
+      pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
+        [ pd.globROS{nn,1} * (uuH + uuHOS + gHH + gHHOS) + pd.globROS{nn,2} * (uvH + uvHOS) ; ...
+          pd.globROS{nn,1} * (uuH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHH + gHHOS) ];
+      
+      switch pd.typeFlux
+        case 'Lax-Friedrichs'
+%           lambda = computeLaxFriedrichsCoefficientSWE('openSea', pd.averaging, nn, [], pd.g.nuQ0E0T, [], [], [], [], [], sqrt(cDiscQ0E0Tint{1,nn}), heightOSPerQuad, cDiscQ0E0Tint, [], pd.gConst);
+          switch pd.averaging
+            case 'full-harmonic'
+              hInt = sqrt(cQ0E0Tint{1,nn});
+              hExt = sqrt(hOSQ0E0Tint{nn});
+              lambda = abs( (cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2}) ./ (hInt .* hExt) ) + ...
+                            sqrt(pd.gConst * (cQ0E0Tint{1,nn}.^1.5 + hOSQ0E0T{nn}.^1.5) ./ (hInt + hExt));
+              
+            case 'semi-harmonic'
+              error('not implemented')
+            case 'mean'
+              error('not implemented')
+            otherwise
+              error('Invalid averaging type for open sea boundary flux')
+          end % switch
+          pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + pd.globVOS{nn} * (lambda .* (cQ0E0Tint{1,nn} - hOSQ0E0T{nn}));
+          
+        case 'Roe'
+          error('not implemented')
+          
+        otherwise
+          error('Invalid flux type for land boundaries.')
+      end % switch
+    else
+      pd.nonlinearTerms = pd.nonlinearTerms + ...
+        [ pd.globROS{nn,1} * (uuHOS + gHHOS) + pd.globROS{nn,2} * uvHOS ; ...
+          pd.globROS{nn,1} * uvHOS + pd.globROS{nn,2} * (vvHOS + gHHOS) ];
+    end % if
   end % if
 end % for
-
-%% Evaluate bottom friction contributions.
-if problemData.isBottomFrictionNonlinear
-  normUoverH = sqrt(cDiscQ0T{2} .* cDiscQ0T{2} + cDiscQ0T{3} .* cDiscQ0T{3}) ./ ...
-                              (cDiscQ0T{1} .* cDiscQ0T{1});
-  problemData.bottomFrictionTerms = [ problemData.globE * (normUoverH .* cDiscQ0T{2}) ; ...
-                                      problemData.globE * (normUoverH .* cDiscQ0T{3}) ];
-else
-  problemData.bottomFrictionTerms = [ problemData.globE * reshape(problemData.cDisc(:,:,2).', K*N, 1) ; ...
-                                      problemData.globE * reshape(problemData.cDisc(:,:,3).', K*N, 1) ];
-end % if
-
-%% Other terms.
-for i = 1 : 3
-  for n = 1 : 3
-    cDiscQ0E0Tint{i,n} = reshape(cDiscQ0E0Tint{i,n}, numQuad1D, K).';
-  end % for
-end % for
-problemData.globUOSold = assembleGlobUOS(problemData.g, problemData.g.markE0TbdrOS, problemData.refEdgePhiIntPhiIntPerQuad, heightOSPerQuad, cDiscQ0E0Tint, problemData.g.areaE0TbdrOS);
-problemData.globROSold = assembleGlobROS(problemData.g, problemData.g.markE0TbdrOS, heightOSPerQuad, N, problemData.gConst, problemData.basesOnQuad, problemData.g.areaNuE0TbdrOS);
-if problemData.isOSRiem
-  problemData.globVOSRiem = assembleGlobVOSRiem(problemData.g, problemData.g.markE0TbdrOS, heightOSPerQuad, problemData.refEdgePhiIntPhiIntPerQuad, lambdaOSRiemE0T, problemData.basesOnQuad, problemData.g.areaE0TbdrOS);
-end % if
 end % function
