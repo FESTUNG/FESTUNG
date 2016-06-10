@@ -79,7 +79,7 @@ pd.schemeOrder = min(pd.p+1,2);
 % Some may be overwritten by fort.15 config files
 pd.typeFlux = 'Lax-Friedrichs'; % Type of interior flux ('Lax-Friedrichs', 'Roe')
 pd.isRiemOS = true; % Riemann solver type on open sea boundary ('Lax-Friedrichs', 'Roe', or 'none')
-pd.typeFluxL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', or 'riemann')
+pd.typeBdrL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', or 'riemann')
 pd.averaging = 'full-harmonic';
 pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
