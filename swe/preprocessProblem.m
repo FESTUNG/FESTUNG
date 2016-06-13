@@ -267,17 +267,17 @@ basesOnQuadLin = computeBasesOnQuad(3, struct);
 refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
 
 fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2*pd.p, refElemPhiLinPhiLin, basesOnQuadLin);
-pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, refElemPhiLinPhiLin, basesOnQuadLin);
+pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, refElemPhiLinPhiLin, basesOnQuadLin);
+pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
 
-% Linear representation for globG
-zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2, eye(3), basesOnQuadLin); 
-
-% Evaluate zb in each quadrature point
+% Evaluate zb in each element's quadrature point
 qOrd = max(2*pd.p,1); [Q1, Q2, ~] = quadRule2D(qOrd); numQuad2D = length(Q1);
 pd.zbQ0T = reshape(pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).', K * numQuad2D, 1);
 
+% Evaluate zb in each edge's quadrature point
 pd.zbQ0E0Tint = cell(3,1);
 pd.zbQ0E0Text = cell(3,3);
+pd.zbQ0E0TE0T = cell(3,3);
 qOrd = max(2*pd.p,1); [Q, ~] = quadRule1D(qOrd); numQuad1D = length(Q);
 for nn = 1 : 3
   [Q1, Q2] = gammaMap(nn, Q);
@@ -285,9 +285,11 @@ for nn = 1 : 3
   for np = 1 : 3
     [Q1, Q2] = theta(nn, np, Q1, Q2);
     pd.zbQ0E0Text{nn,np} = reshape(pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).', K * numQuad1D, 1);
+    pd.zbQ0E0TE0T{nn,np} = reshape(pd.basesOnQuad.thetaPhi1D{2*pd.p+1}(:,:,nn,np) * pd.zbDisc.' * pd.g.markE0TE0T{nn,np}.', K * numQuad1D, 1);
   end % for
 end % for
 
+% Evaluate zb in each vertex
 if ~isempty(pd.slopeLimList)
   pd.zbV0T = computeFuncContV0T(pd.g, pd.zbCont);
 end % if
@@ -298,26 +300,26 @@ if any(ismember(pd.outputList, 'fc'))
   visualizeDataLagr(pd.g, dataLagr, 'f_c', ['output/' pd.name '_f_c'], 0, pd.outputTypes);
 end % if
 if any(ismember(pd.outputList, 'zb'))
-  dataLagr = projectDataDisc2DataLagr(zbDiscLin);
+  dataLagr = projectDataDisc2DataLagr(pd.zbDiscLin);
   visualizeDataLagr(pd.g, dataLagr, 'z_b', ['output/' pd.name '_z_b'], 0, pd.outputTypes);
 end % if
 
 %% Assembly of time-independent global matrices corresponding to linear contributions.
 % Element matrices
 globD = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhiLin, fcDisc);
-globG = assembleMatElemPhiPhiDfuncDisc(pd.g, refElemDphiLinPhiPhi, zbDiscLin);
+globG = assembleMatElemPhiPhiDfuncDisc(pd.g, refElemDphiLinPhiPhi, pd.zbDiscLin);
 globH = assembleMatElemDphiPhi(pd.g, refElemDphiPhi);
 pd.globM = assembleMatElemPhiPhi(pd.g, pd.refElemPhiPhi);
-globU = assembleMatElemDphiPhiFuncDisc(pd.g, refElemDphiPhiPhiLin, zbDiscLin);
+globU = assembleMatElemDphiPhiFuncDisc(pd.g, refElemDphiPhiPhiLin, pd.zbDiscLin);
 
 % Interior edge matrices
 switch pd.typeFlux
-  case 'Roe'
-    error('not implemented')
-    
   case 'Lax-Friedrichs'
     globQ = assembleMatEdgePhiPhiNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, pd.g.areaNuE0Tint);
-    globO = assembleMatEdgePhiPhiFuncDiscNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiIntPhiLin, refEdgePhiIntPhiExtPhiLin, zbDiscLin, pd.g.areaNuE0Tint);
+    globO = assembleMatEdgePhiPhiFuncDiscNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiIntPhiLin, refEdgePhiIntPhiExtPhiLin, pd.zbDiscLin, pd.g.areaNuE0Tint);
+    
+  case 'Roe'
+    error('not implemented')
     
   otherwise
     error('Unknown flux type')
@@ -326,8 +328,8 @@ end % switch
 % Boundary edge matrices
 globQOS = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrOS);
 globQRA = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrRA);
-globOL = assembleMatEdgePhiIntPhiIntFuncDiscNu(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, zbDiscLin, pd.g.areaNuE0TbdrL);
-globORA = assembleMatEdgePhiIntPhiIntFuncDiscNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiIntPhiLin, zbDiscLin, pd.g.areaNuE0TbdrRA);
+globOL = assembleMatEdgePhiIntPhiIntFuncDiscNu(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrL);
+globORA = assembleMatEdgePhiIntPhiIntFuncDiscNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrRA);
 
 % Derived system matrices
 pd.sysW = blkdiag(pd.globM, pd.globM, pd.globM);
@@ -393,11 +395,11 @@ if pd.g.numEbdrRI > 0 % River boundaries
   if ~pd.isRamping % TODO rhsRIAlg
     globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
     for n = 1 : 3
-      hRiv = pd.xiRiv(:,n) - pd.zbDiscQ0T{n};
+      hRiv = pd.xiRiv(:,n) - pd.zbDiscLinQ0T{n};
       uHRiv = pd.uRiv(:,n) .* hRiv;
       vHRiv = pd.vRiv(:,n) .* hRiv;
       uvHRiv = uHRiv .* pd.vRiv(:,n);
-      gHHRiv = pd.gConst * pd.xiRiv(:,n) .* ( 0.5 * pd.xiRiv(:,n) - pd.zbDiscQ0T{n} );
+      gHHRiv = pd.gConst * pd.xiRiv(:,n) .* ( 0.5 * pd.xiRiv(:,n) - pd.zbDiscLinQ0T{n} );
       pd.globLRI{1} = pd.globLRI{1} + globRRI{n,1} * uHRiv + globRRI{n,2} * vHRiv;
       pd.globLRI{2} = pd.globLRI{2} + globRRI{n,1} * (pd.uRiv(:,n) .* uHRiv + gHHRiv) + globRRI{n,2} * uvHRiv;
       pd.globLRI{3} = pd.globLRI{3} + globRRI{n,1} * uvHRiv + globRRI{n,2} * (pd.vRiv(:,n) .* vHRiv + gHHRiv);
