@@ -99,7 +99,7 @@ Q2X2   = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1
 
 % Check function arguments that are directly used
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
-% validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
+validateattributes(markE0Tbdr, {'logical', 'numeric'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
 
 % Assemble vector
 ret = zeros(g.numT, N);
