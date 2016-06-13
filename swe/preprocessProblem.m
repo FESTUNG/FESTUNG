@@ -55,7 +55,7 @@ switch pd.gridSource
     pd.g.idE = zeros(pd.g.numE,1);
     pd.g.idE(pd.g.baryE(:, 2) == 0) = 1; % south
     pd.g.idE(pd.g.baryE(:, 1) == 1) = 4; % east
-    pd.g.idE(pd.g.baryE(:, 2) == 1) = 1; % north
+    pd.g.idE(pd.g.baryE(:, 2) == 1) = 3; % north
     pd.g.idE(pd.g.baryE(:, 1) == 0) = 1; % west
     pd.g.idE0T = pd.g.idE(pd.g.E0T);
     
@@ -316,7 +316,7 @@ globU = assembleMatElemDphiPhiFuncDisc(pd.g, refElemDphiPhiPhiLin, pd.zbDiscLin)
 switch pd.typeFlux
   case 'Lax-Friedrichs'
     globQ = assembleMatEdgePhiPhiNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, pd.g.areaNuE0Tint);
-    globO = assembleMatEdgePhiPhiFuncDiscNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiIntPhiLin, refEdgePhiIntPhiExtPhiLin, pd.zbDiscLin, pd.g.areaNuE0Tint);
+    globO = assembleMatEdgePhiPhiFuncDiscIntNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiIntPhiLin, refEdgePhiIntPhiExtPhiLin, pd.zbDiscLin, pd.g.areaNuE0Tint);
     
   case 'Roe'
     error('not implemented')
@@ -392,7 +392,7 @@ end % if
 
 if pd.g.numEbdrRI > 0 % River boundaries
   pd.globLRI = { sparse(K*N,1), sparse(K*N,1), sparse(K*N,1) };
-  if ~pd.isRamping % TODO rhsRIAlg
+  if ~pd.isRamp % TODO rhsRIAlg
     globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
     for n = 1 : 3
       hRiv = pd.xiRiv(:,n) - pd.zbDiscLinQ0T{n};
