@@ -105,21 +105,21 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatElemPhiPhiDfuncDisc(g, refElemDphiPhiPhi, dataDisc)
+function ret = assembleMatElemPhiPhiDfuncDisc(g, refElemPhiPhiDphi, dataDisc)
 [K, dataN] = size(dataDisc);
-N = size(refElemDphiPhiPhi,1);
+N = size(refElemPhiPhiDphi,1);
 
 % Check function arguments that are directly used
 validateattributes(dataDisc, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc');
-validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N dataN 2]}, mfilename, 'refElemDphiPhiPhi');
+validateattributes(refElemPhiPhiDphi, {'numeric'}, {'size', [N N dataN 2]}, mfilename, 'refElemPhiPhiDphi');
 
 % Assemble matrices
 ret = cell(2, 1);
 ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);
 for l = 1 : dataN
-  ret{1} = ret{1} + kron(spdiags(dataDisc(:,l) .* g.B(:,2,2), 0, K, K), refElemDphiPhiPhi(:,:,l,1)) ...
-                  - kron(spdiags(dataDisc(:,l) .* g.B(:,2,1), 0, K, K), refElemDphiPhiPhi(:,:,l,2));
-  ret{2} = ret{2} - kron(spdiags(dataDisc(:,l) .* g.B(:,1,2), 0, K, K), refElemDphiPhiPhi(:,:,l,1)) ...
-                  + kron(spdiags(dataDisc(:,l) .* g.B(:,1,1), 0, K, K), refElemDphiPhiPhi(:,:,l,2));
+  ret{1} = ret{1} + kron(spdiags(dataDisc(:,l) .* g.B(:,2,2), 0, K, K), refElemPhiPhiDphi(:,:,l,1)) ...
+                  - kron(spdiags(dataDisc(:,l) .* g.B(:,2,1), 0, K, K), refElemPhiPhiDphi(:,:,l,2));
+  ret{2} = ret{2} - kron(spdiags(dataDisc(:,l) .* g.B(:,1,2), 0, K, K), refElemPhiPhiDphi(:,:,l,1)) ...
+                  + kron(spdiags(dataDisc(:,l) .* g.B(:,1,1), 0, K, K), refElemPhiPhiDphi(:,:,l,2));
 end % for
 end % function

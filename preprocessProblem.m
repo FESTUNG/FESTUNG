@@ -248,7 +248,7 @@ pd.refElemPhiPhi = integrateRefElemPhiPhi(N, pd.basesOnQuad);
 refElemPhiPhiPhi = integrateRefElemPhiPhiPhi(N, pd.basesOnQuad);
 refElemDphiPhi = integrateRefElemDphiPhi(N, pd.basesOnQuad);
 
-refElemDphiLinPhiPhi = integrateRefElemDphiPhiPhi([3 N N], pd.basesOnQuad);
+refElemPhiPhiDphiLin = permute(integrateRefElemDphiPhiPhi([3 N N], pd.basesOnQuad), [3 2 1 4]);
 refElemDphiPhiPhiLin = integrateRefElemDphiPhiPhi([N N 3], pd.basesOnQuad);
 refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], pd.basesOnQuad);
 
@@ -266,8 +266,8 @@ pd.refEdgePhiIntPhiIntPerQuad = integrateRefEdgePhiIntPhiIntPerQuad(N, pd.basesO
 basesOnQuadLin = computeBasesOnQuad(3, struct);
 refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
 
-fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2*pd.p, refElemPhiLinPhiLin, basesOnQuadLin);
-pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, refElemPhiLinPhiLin, basesOnQuadLin);
+fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
+pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
 pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
 
 % Evaluate zb in each element's quadrature point
@@ -307,7 +307,7 @@ end % if
 %% Assembly of time-independent global matrices corresponding to linear contributions.
 % Element matrices
 globD = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhiLin, fcDisc);
-globG = assembleMatElemPhiPhiDfuncDisc(pd.g, refElemDphiLinPhiPhi, pd.zbDiscLin);
+globG = assembleMatElemPhiPhiDfuncDisc(pd.g, refElemPhiPhiDphiLin, pd.zbDiscLin);
 globH = assembleMatElemDphiPhi(pd.g, refElemDphiPhi);
 pd.globM = assembleMatElemPhiPhi(pd.g, pd.refElemPhiPhi);
 globU = assembleMatElemDphiPhiFuncDisc(pd.g, refElemDphiPhiPhiLin, pd.zbDiscLin);
