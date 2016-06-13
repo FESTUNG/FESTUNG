@@ -9,7 +9,8 @@ problemData.N           = nchoosek(problemData.p + 2, problemData.p); % number o
 problemData.tau         = problemData.tEnd / problemData.numSteps;  % time step size
 
 problemData.g.markE0Tint  = problemData.g.idE0T == 0;        % [K x 3] mark local edges that are interior
-problemData.g.markE0TbdrD = ~problemData.g.markE0Tint;       % [K x 3] mark local edges on the Dirichlet boundary
+problemData.g.markE0TbdrN = zeros(problemData.g.numT,3);     % [K x 3] mark local edges on the Neumann boundary
+problemData.g.markE0TbdrD = ~(problemData.g.markE0Tint | problemData.g.markE0TbdrN); % [K x 3] mark local edges on the Dirichlet boundary
 problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...  % [K x 3] mark local vertices on the Dirichlet boundary
                             problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD),:)); 
 problemData.g = computeDerivedGridData(problemData.g);       % Precompute some repeatedly evaluated fields

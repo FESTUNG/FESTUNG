@@ -31,12 +31,17 @@ for rkStep = 1 : length(omega)
             @(x1,x2) problemData.cDCont(t(rkStep),x1,x2), vNormalOnQuadEdge, N, ...
             problemData.basesOnQuad, problemData.g.areaE0TbdrD);
           
+  % Assembly of Neumann boundary contributions
+  gNUpwind = @(x1,x2) (problemData.gNCont(t(rkStep),x1,x2) <= 0) .* problemData.gNCont(t(rkStep),x1,x2);
+  globKN = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrN, ...
+            gNUpwind, N, problemData.basesOnQuad);
+          
   % Assembly of the source contribution
   globL = problemData.globM * reshape(fDisc', K*N, 1);
   
   % Building the system
   sysA = -globG{1} - globG{2} + globR;
-  sysV = globL - globKD;
+  sysV = globL - globKD - globKN;
   
   % Computing the discrete time derivative
   cDiscDot = problemData.globM \ (sysV - sysA * cDiscRK{rkStep});

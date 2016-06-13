@@ -2,7 +2,7 @@
 % problem presented in @ref RAWFK2016 . These fields only contain
 % information based on the underlying grid and are therefore constant in
 % time but used in every step. They are saved as part of the grid.
-%
+
 %===============================================================================
 %> @file computeDerivedGridData.m
 %>
@@ -28,9 +28,6 @@
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0TbdrD <code>logical</code> arrays that mark each triangles
-%>                    (Dirichlet boundary) edges on which the vector entries should be
-%>                    assembled @f$[K \times 3]@f$
 %> @retval g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
@@ -59,6 +56,7 @@
 function g = computeDerivedGridData(g)
 g.markV0TT0V = cell(3, 1);
 g.areaE0TbdrD = cell(3, 1);
+g.areaE0TbdrN = g.markE0TbdrN .* g.areaE0T;
 for n = 1 : 3
   % Mark all elements sharing i-th vertex
   g.markV0TT0V{n} = g.markV0TV0T{n, 1} | g.markV0TV0T{n, 2} | g.markV0TV0T{n, 3}; 

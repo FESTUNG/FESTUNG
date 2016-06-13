@@ -29,4 +29,5 @@ problemData.fCont = @(t,x1,x2) zeros(size(x1));
 problemData.u1Cont = @(t,x1,x2) 0.5 - x2;
 problemData.u2Cont = @(t,x1,x2) x1 - 0.5;
 problemData.cDCont = @(t,x1,x2) zeros(size(x1));
+problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 end % function
