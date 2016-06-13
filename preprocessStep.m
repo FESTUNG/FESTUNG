@@ -103,7 +103,6 @@ hQ0E0TE0T = cellfun(@minus, squeeze(cQ0E0TE0T(1,:,:)), pd.zbQ0E0TE0T, 'UniformOu
 
 %% Right hand side contribution
 pd.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
-pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.isRhsAvail
   f0Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f0Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
   f1Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f1Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
@@ -159,10 +158,27 @@ else
 end
 
 %% Compute river boundary values.
-if pd.g.numEbdrRI > 0 && pd.isRamping
-  xiRiv = kron(pd.ramp(tRhs) * pd.xiRiv, ones(numQuad1D,1));
-  uRiv = kron(pd.ramp(tRhs) * pd.uRiv, ones(numQuad1D,1));
-  vRiv = kron(pd.ramp(tRhs) * pd.vRiv, ones(numQuad1D,1));
+pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
+if pd.g.numEbdrRI > 0 % TODO: && pd.isRamp
+  xiRiv = cell(3,1);
+  uRiv = cell(3,1);
+  vRiv = cell(3,1);
+
+  if pd.isRivCont
+    [Q, ~] = quadRule1D(max(2*p,1));
+    for n = 1 : 3
+      [Q1, Q2] = gammaMap(n, Q);
+      xiRiv{n} = reshape(pd.xiRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
+      uRiv{n} = reshape(pd.uRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
+      vRiv{n} = reshape(pd.vRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
+    end % for
+  else
+    for n = 1 : 3
+      xiRiv{n} = kron(pd.ramp(tRhs) * pd.xiRiv, ones(numQuad1D,1));
+      uRiv{n} = kron(pd.ramp(tRhs) * pd.uRiv, ones(numQuad1D,1));
+      vRiv{n} = kron(pd.ramp(tRhs) * pd.vRiv, ones(numQuad1D,1));
+    end % for
+  end % if
 end % if
 
 %% Evaluate bottom friction contributions.
@@ -289,16 +305,16 @@ for nn = 1 : 3
   end % if
 
   % River boundary contributions
-  if pd.g.numEbdrRI > 0 && pd.isRamping
-    hRiv = xiRiv - pd.zbQ0E0Tint{nn};
-    uHRiv = uRiv .* hRiv;
-    vHRiv = vRiv .* hRiv;
-    uvHRiv = uRiv .* vHRiv;
-    gHHRiv = 0.5 * pd.gConst * (hRiv .* hRiv);
+  if pd.g.numEbdrRI > 0 % TODO: && pd.isRamp
+    hRiv = xiRiv{nn} - pd.zbQ0E0Tint{nn};
+    uHRiv = uRiv{nn} .* hRiv;
+    vHRiv = vRiv{nn} .* hRiv;
+    uvHRiv = uRiv{nn} .* vHRiv;
+    gHHRiv = pd.gConst * xiRiv{nn} .* (0.5 * xiRiv{nn} - pd.zbQ0E0Tint{nn});
     
     pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{nn,1} * uHRiv + pd.globRRI{nn,2} * vHRiv;
-    pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uRiv .* uHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
-    pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vRiv .* vHRiv + gHHRiv);
+    pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uRiv{nn} .* uHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
+    pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vRiv{nn} .* vHRiv + gHHRiv);
   end % if
   
   % Open Sea boundary contributions
@@ -311,6 +327,8 @@ for nn = 1 : 3
     gHHOS = pd.gConst * xiOSQ0E0Tint{nn} .* (0.5 * xiOSQ0E0Tint{nn} - pd.zbQ0E0Tint{nn});
     
     if pd.isRiemOS
+      gHHOS = gHH + gHHOS - pd.gConst * cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn};
+      
       pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
         [ pd.globROS{nn,1} * (uuH + uuHOS + gHH + gHHOS) + pd.globROS{nn,2} * (uvH + uvHOS) ; ...
           pd.globROS{nn,1} * (uuH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHH + gHHOS) ];

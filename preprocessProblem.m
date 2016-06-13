@@ -169,16 +169,17 @@ switch pd.gridSource
     % River inflow
     markEbdrRiv = pd.g.idE == 3;
     markTbdrRiv = pd.g.T0E(markEbdrRiv, 1);
-    pd.xiRiv = sparse(pd.g.numT, 1);
-    pd.xiRiv(markTbdrRiv) = flowRateRiv(:,1);
-    pd.uRiv = sparse(pd.g.numT, 1);
-    pd.uRiv(markTbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,1) - flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,2);
-    pd.vRiv = sparse(pd.g.numT, 1);
-    pd.vRiv(markTbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,2) + flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,1);
+    if ~pd.isRivCont
+      pd.xiRiv = sparse(pd.g.numT, 1);
+      pd.xiRiv(markTbdrRiv) = flowRateRiv(:,1);
+      pd.uRiv = sparse(pd.g.numT, 1);
+      pd.uRiv(markTbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,1) - flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,2);
+      pd.vRiv = sparse(pd.g.numT, 1);
+      pd.vRiv(markTbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,2) + flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,1);
+    end % if
 
     % Stations
     if pd.isVisStations
-      error('not implemented')
       if pd.configADCIRC.NSTAE == 0 && pd.configADCIRC.NSTAV == 0
         warning('No stations specified! Disabling station output.')
         pd.isVisStation = false;
@@ -191,6 +192,7 @@ switch pd.gridSource
         pd.stationVel = coord2triangle(pd.g, coordVel(:,1), coordVel(:,2));
         pd.dataVel = cell(size(pd.stationVel,1),2);
       end % if
+      error('not implemented')
     end % if
     
     % Clean out ADCIRC config struct
@@ -208,9 +210,9 @@ K = pd.K;
 N = pd.N;
 
 pd.g.markE0Tint = pd.g.idE0T == 0; % [K x 3] mark local edges that are interior
-pd.g.markE0TbdrL = pd.g.idE0T == 1; % [K x 3] mark local edges on the open sea boundary
-pd.g.markE0TbdrRA = pd.g.idE0T == 2; % [K x 3] mark local edges on the open sea boundary
-pd.g.markE0TbdrRI = pd.g.idE0T == 3; % [K x 3] mark local edges on the open sea boundary
+pd.g.markE0TbdrL = pd.g.idE0T == 1; % [K x 3] mark local edges on the land boundary
+pd.g.markE0TbdrRA = pd.g.idE0T == 2; % [K x 3] mark local edges on the radiation boundary
+pd.g.markE0TbdrRI = pd.g.idE0T == 3; % [K x 3] mark local edges on the river boundary
 pd.g.markE0TbdrOS = pd.g.idE0T == 4; % [K x 3] mark local edges on the open sea boundary
 
 pd.g = computeDerivedGridData(pd.g);
@@ -269,6 +271,7 @@ refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
 fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
 pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
 pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+pd.zbLagr = projectDataDisc2DataLagr(pd.zbDiscLin);
 
 % Evaluate zb in each element's quadrature point
 qOrd = max(2*pd.p,1); [Q1, Q2, ~] = quadRule2D(qOrd); numQuad2D = length(Q1);
@@ -300,8 +303,7 @@ if any(ismember(pd.outputList, 'fc'))
   visualizeDataLagr(pd.g, dataLagr, 'f_c', ['output/' pd.name '_f_c'], 0, pd.outputTypes);
 end % if
 if any(ismember(pd.outputList, 'zb'))
-  dataLagr = projectDataDisc2DataLagr(pd.zbDiscLin);
-  visualizeDataLagr(pd.g, dataLagr, 'z_b', ['output/' pd.name '_z_b'], 0, pd.outputTypes);
+  visualizeDataLagr(pd.g, pd.zbLagr, 'z_b', ['output/' pd.name '_z_b'], 0, pd.outputTypes);
 end % if
 
 %% Assembly of time-independent global matrices corresponding to linear contributions.
@@ -391,18 +393,19 @@ if pd.g.numEbdrRA > 0 % Radiation boundaries
 end % if
 
 if pd.g.numEbdrRI > 0 % River boundaries
+  pd.globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
+  
   pd.globLRI = { sparse(K*N,1), sparse(K*N,1), sparse(K*N,1) };
-  if ~pd.isRamp % TODO rhsRIAlg
-    globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
+  if ~pd.isRamp && ~pd.isRivCont
     for n = 1 : 3
       hRiv = pd.xiRiv(:,n) - pd.zbDiscLinQ0T{n};
       uHRiv = pd.uRiv(:,n) .* hRiv;
       vHRiv = pd.vRiv(:,n) .* hRiv;
       uvHRiv = uHRiv .* pd.vRiv(:,n);
       gHHRiv = pd.gConst * pd.xiRiv(:,n) .* ( 0.5 * pd.xiRiv(:,n) - pd.zbDiscLinQ0T{n} );
-      pd.globLRI{1} = pd.globLRI{1} + globRRI{n,1} * uHRiv + globRRI{n,2} * vHRiv;
-      pd.globLRI{2} = pd.globLRI{2} + globRRI{n,1} * (pd.uRiv(:,n) .* uHRiv + gHHRiv) + globRRI{n,2} * uvHRiv;
-      pd.globLRI{3} = pd.globLRI{3} + globRRI{n,1} * uvHRiv + globRRI{n,2} * (pd.vRiv(:,n) .* vHRiv + gHHRiv);
+      pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{n,1} * uHRiv + pd.globRRI{n,2} * vHRiv;
+      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{n,1} * (pd.uRiv(:,n) .* uHRiv + gHHRiv) + pd.globRRI{n,2} * uvHRiv;
+      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{n,1} * uvHRiv + pd.globRRI{n,2} * (pd.vRiv(:,n) .* vHRiv + gHHRiv);
     end % for
   end % if
 end % if

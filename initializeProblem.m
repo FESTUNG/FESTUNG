@@ -47,17 +47,18 @@ N = pd.N;
 
 %% Primary unknowns H, uH, vH (each K*N).
 if pd.isSolutionAvail
-  h0Cont = @(x1,x2) pd.xiCont(x1,x2,pd.t0) - pd.zbCont(x1,x2);
+  xi0Cont = @(x1,x2) pd.xiCont(x1,x2,pd.t0);
+  h0Cont = @(x1,x2) xi0Cont(x1,x2) - pd.zbCont(x1,x2);
   uH0Cont = @(x1,x2) h0Cont(x1,x2) .* pd.uCont(x1,x2,pd.t0);
   vH0Cont = @(x1,x2) h0Cont(x1,x2) .* pd.vCont(x1,x2,pd.t0);
 else
-  h0Cont = @(x1,x2)  -pd.zbCont(x1,x2);
+  xi0Cont = @(x1,x2) zeros(size(x1));
   uH0Cont = @(x1,x2) zeros(size(x1));
   vH0Cont = @(x1,x2) zeros(size(x1));
 end % if
   
 pd.cDisc = zeros(K,N,3);
-pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g, h0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g, xi0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
 pd.cDisc(:,:,2) = projectFuncCont2DataDisc(pd.g, uH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
 pd.cDisc(:,:,3) = projectFuncCont2DataDisc(pd.g, vH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
 
@@ -71,7 +72,7 @@ for i = 1 : length(pd.slopeLimList)
   end % switch
 end % for
 
-pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.minValueHeight, 1000);
+pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr, 20);
 
 %% Visualize initial solution.
 visualizeSolution(pd, 0);
