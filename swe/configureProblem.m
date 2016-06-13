@@ -83,7 +83,6 @@ pd.typeBdrL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', o
 pd.averaging = 'full-harmonic';
 pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
-pd.minValueHeight = 1.e-3; % Minimum water level, values below are reset to this value
 
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
@@ -145,6 +144,10 @@ pd.vCont = @(x1,x2,t) zeros(size(x1));
 
 % Boundary conditions
 pd.xiOSCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
+pd.isRivCont = true;
+pd.xiRivCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
+pd.uRivCont = @(x1,x2,t) pd.uCont(x1,x2,t);
+pd.vRivCont = @(x1,x2,t) pd.vCont(x1,x2,t);
 end % function
 
 %% Analytical solution
@@ -224,6 +227,7 @@ pd.f2Cont = @(x1,x2,t) pd.v_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
                      
 % Boundary conditions
 pd.xiOSCont = pd.xiCont;
+pd.isRivCont = false;
 end % function
 
 %% ADCIRC
@@ -253,7 +257,7 @@ pd.numSteps = round((pd.tEnd - pd.t0) / pd.dt);
 % Coordinate system
 pd.isSpherical = pd.configADCIRC.ICS == 2;
 
-% bottom friction
+% Bottom friction
 pd.isBottomFrictionVarying = pd.configADCIRC.NWP == 1;
 assert(~pd.isBottomFrictionVarying, 'Spatially varying bottom friction not implemented.');
 
@@ -280,4 +284,7 @@ end % switch
     
 % Newtonian tidal potential
 pd.isTidalDomain = pd.configADCIRC.NTIP == 1;
+
+% Boundary conditions
+pd.isRivCont = false;
 end % function

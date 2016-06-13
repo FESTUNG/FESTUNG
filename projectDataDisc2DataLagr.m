@@ -1,5 +1,5 @@
 % Convert the DG/modal into a Lagrange/nodal basis representation.
-%
+
 %===============================================================================
 %> @file projectDataDisc2DataLagr.m
 %>
@@ -11,6 +11,8 @@
 %>
 %> @param  dataDisc  Coefficient matrix of the DG/modal basis representation.
 %>                   @f$[K \times N]@f$
+%> @param  p         (optional) Polynomial order in Lagrange basis (0, 1, or 2).
+%>                   @f$[\text{scalar}]@f$
 %> @retval The representation matrix of the Lagrange/nodal basis representation.
 %>         @f$[K \times N]@f$ for @f$p \in \{0, 1, 2\}@f$ and
 %>         @f$[K \times 6]@f$ for @f$p > 2@f$, i.e., all higher approximation
@@ -38,11 +40,14 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataLagr = projectDataDisc2DataLagr(dataDisc)
+function dataLagr = projectDataDisc2DataLagr(dataDisc, p)
 [K, N] = size(dataDisc);
-switch N
-  case 1,    L1 = 1/3;                     L2 = 1/3;                    % locally constant
-  case 3,    L1 = [0, 1, 0];               L2 = [0, 0, 1];              % locally linear
+if nargin == 1
+  p = (sqrt(8*N+1)-3)/2;
+end % if
+switch p
+  case 0,    L1 = 1/3;                     L2 = 1/3;                    % locally constant
+  case 1,    L1 = [0, 1, 0];               L2 = [0, 0, 1];              % locally linear
   otherwise, L1 = [0, 1, 0, 1/2, 0, 1/2];  L2 = [0, 0, 1, 1/2, 1/2, 0]; % locally quadratic
 end % switch
 dataLagr = zeros(K, length(L1));

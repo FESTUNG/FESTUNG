@@ -49,12 +49,12 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = postprocessStep(problemData, nStep)
+function pd = postprocessStep(pd, nStep)
 % Ensure water height doesn't fall below threshold
-problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.minValueHeight, 1000);
+pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, nStep, pd.zbLagr, 20);
 
 % Update time level and check for simulation end
-problemData.t = problemData.t + problemData.dt;
-problemData.isFinished = problemData.t >= problemData.tEnd;
+pd.t = pd.t + pd.dt;
+pd.isFinished = pd.t >= pd.tEnd;
 end
 
