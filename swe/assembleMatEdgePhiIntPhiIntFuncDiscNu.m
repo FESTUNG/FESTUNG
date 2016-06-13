@@ -110,7 +110,7 @@ validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT dataN]}, mfilename,
 validateattributes(refEdgePhiIntPhiIntPhiInt, {'numeric'}, {'size', [N N dataN 3]}, mfilename, 'refEdgePhiIntPhiIntPhiLin');
 
 if nargin > 4
-  ret = assembleMatEdgePhiIntPhiIntFuncNu_withAreaNuE0Tbdr(g, refEdgePhiIntPhiIntPhiInt, areaNuE0Tbdr, dataDisc);
+  ret = assembleMatEdgePhiIntPhiIntFuncNu_withAreaNuE0Tbdr(refEdgePhiIntPhiIntPhiInt, areaNuE0Tbdr, dataDisc);
 elseif isfield(g, 'areaNuE0T')
   ret = assembleMatEdgePhiIntPhiIntFuncNu_noAreaNuE0Tbdr_withAreaNuE0T(g, markE0Tbdr, refEdgePhiIntPhiIntPhiInt, dataDisc);
 else
@@ -122,7 +122,7 @@ end % function
 %> @brief Helper function for the case that assembleMatEdgePhiIntPhiIntFuncDiscNu()
 %> was called with a precomputed field areaNuE0Tbdr.
 %
-function ret = assembleMatEdgePhiIntPhiIntFuncNu_withAreaNuE0Tbdr(g, refEdgePhiIntPhiIntPhiInt, areaNuE0Tbdr, dataDisc)
+function ret = assembleMatEdgePhiIntPhiIntFuncNu_withAreaNuE0Tbdr(refEdgePhiIntPhiIntPhiInt, areaNuE0Tbdr, dataDisc)
 % Extract dimensions
 [K, dataN] = size(dataDisc);
 N = size(refEdgePhiIntPhiIntPhiInt, 1);
