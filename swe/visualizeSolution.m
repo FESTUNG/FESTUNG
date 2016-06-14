@@ -6,13 +6,13 @@ if mod(nStep, pd.outputFrequency) == 0
 
   % Visualize water depth (h)
   if any(ismember(pd.outputList, 'h'))
-    dataLagr = projectDataDisc2DataLagr(pd.cDisc(:,:,1));
+    dataLagr = projectDataDisc2DataLagr(pd.cDisc(:,:,1) - pd.zbDisc);
     visualizeDataLagr(pd.g, dataLagr, 'h_h', ['output/' pd.name '_h'], nOutput, pd.outputTypes);
   end % if
 
   % Evaluate water elevation (xi)
   if any(ismember(pd.outputList, 'xi')) || isfield(pd, 'stationElev')
-    dataLagr = projectDataDisc2DataLagr(pd.cDisc(:,:,1) + pd.zbDisc);
+    dataLagr = projectDataDisc2DataLagr(pd.cDisc(:,:,1));
   end % if
 
   % Visualize water elevation (xi)
@@ -39,7 +39,7 @@ if mod(nStep, pd.outputFrequency) == 0
 
   % Evaluate x-velocity (u)
   if any(ismember(pd.outputList, 'u')) || isfield(pd, 'stationVel')
-    dataDisc = projectQuotientDisc2Disc(pd.cDisc(:,:,2), pd.cDisc(:,:,1), 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    dataDisc = projectQuotientDisc2Disc(pd.cDisc(:,:,2), pd.cDisc(:,:,1) - pd.zbDisc, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
     dataLagr = projectDataDisc2DataLagr(dataDisc);
   end % if
 
@@ -67,7 +67,7 @@ if mod(nStep, pd.outputFrequency) == 0
 
   % Evaluate y-velocity (v)
   if any(ismember(pd.outputList, 'v')) || isfield(pd, 'stationVel')
-    dataDisc = projectQuotientDisc2Disc(pd.cDisc(:,:,3), pd.cDisc(:,:,1), 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    dataDisc = projectQuotientDisc2Disc(pd.cDisc(:,:,3), pd.cDisc(:,:,1) - pd.zbDisc, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
     dataLagr = projectDataDisc2DataLagr(dataDisc);
   end % if
 
@@ -81,7 +81,7 @@ if mod(nStep, pd.outputFrequency) == 0
     for n = 1 : length(pd.stationVel)
       dataStationV0T = dataLagr(pd.stationVel{n}(:,1),:); % Extract values in vertices of relevant triangles
       pd.dataVel{n,2} = [ pd.dataVel{n,2} ; ...     % Append mean of barycentric weighted values
-                                   mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
+                          mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
     end % for
   end % if
 end
