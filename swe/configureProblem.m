@@ -80,7 +80,7 @@ pd.schemeOrder = min(pd.p+1,2);
 pd.typeFlux = 'Lax-Friedrichs'; % Type of interior flux ('Lax-Friedrichs', 'Roe')
 pd.isRiemOS = true; % Riemann solver type on open sea boundary ('Lax-Friedrichs', 'Roe', or 'none')
 pd.typeBdrL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', or 'riemann')
-pd.averaging = 'full-harmonic';
+pd.averagingType = 'full-harmonic'; % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
 
