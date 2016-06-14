@@ -101,6 +101,24 @@ hQ0E0Text = cellfun(@minus, squeeze(cQ0E0Text(1,:,:)), pd.zbQ0E0Text, 'UniformOu
 % water height (xi - zb) in quad points of edge on neighboring element
 hQ0E0TE0T = cellfun(@minus, squeeze(cQ0E0TE0T(1,:,:)), pd.zbQ0E0TE0T, 'UniformOutput', false);
 
+markQ0E0TbdrL = cell(3,1);
+markQ0E0TbdrOS = cell(3,1);
+for n = 1 : 3
+  markQ0E0TbdrL{n} = logical(kron(pd.g.markE0TbdrL(:,n), ones(numQuad1D,1)));
+  markQ0E0TbdrOS{n} = logical(kron(pd.g.markE0TbdrOS(:,n), ones(numQuad1D,1)));
+end % for
+
+cRoePikeQ0E0T = cell(3,1);
+% for nn = 1 : 3
+%   hL = sqrt(hQ0E0Tint{nn});
+%   for np = 1 : 3
+%     hR = sqrt(hQ0E0Text{nn,np});
+%     cRoePikeQ0E0T{1,nn,np} = (hL .* hQ0E0Tint{nn} + hR .* hQ0E0Text{nn,np}) ./ (hL + hR);
+%     cRoePikeQ0E0T{2,nn,np} = (hL .* cQ0E0Tint{2,nn} + hR .* cQ0E0Text{2,nn,np}) ./ (hL + hR);
+%     cRoePikeQ0E0T{3,nn,np} = (hL .* cQ0E0Tint{3,nn} + hR .* cQ0E0Text{3,nn,np}) ./ (hL + hR);
+%   end % for
+% end % for
+
 %% Right hand side contribution
 pd.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.isRhsAvail
@@ -208,32 +226,32 @@ for nn = 1 : 3
     vvH = cQ0E0Text{3,nn,np} .* cQ0E0Text{3,nn,np} ./ hQ0E0Text{nn,np};
     gHH = 0.5 * pd.gConst * (cQ0E0Text{1,nn,np} .* cQ0E0Text{1,nn,np});
     
+    switch pd.averaging
+      case 'full-harmonic'
+        hL = sqrt(hQ0E0Tint{nn});
+        hR = sqrt(hQ0E0Text{nn,np});
+        cRoePikeQ0E0T{1} = (hL .* hQ0E0Tint{nn} + hR .* hQ0E0Text{nn,np}) ./ (hL + hR);
+        cRoePikeQ0E0T{2} = (hL .* cQ0E0Tint{2,nn} + hR .* cQ0E0Text{2,nn,np}) ./ (hL + hR);
+        cRoePikeQ0E0T{3} = (hL .* cQ0E0Tint{3,nn} + hR .* cQ0E0Text{3,nn,np}) ./ (hL + hR);
+        
+      case 'semi-harmonic'
+        error('not implemented')
+
+      case 'mean'
+        error('not implemented')
+
+      otherwise
+        error('Unknown averaging type for interior edges')
+    end % switch
+    
     switch pd.typeFlux
       case 'Lax-Friedrichs'
         pd.nonlinearTerms = pd.nonlinearTerms + ...
           [ pd.globRoffdiag{nn,np,1} * (uuH + gHH) + pd.globRoffdiag{nn,np,2} * uvH ; ...
             pd.globRoffdiag{nn,np,1} * uvH + pd.globRoffdiag{nn,np,2} * (vvH + gHH) ];
           
-        switch pd.averaging
-          case 'full-harmonic'
-            hL = sqrt(hQ0E0Tint{nn});
-            hR = sqrt(hQ0E0TE0T{nn,np});
-            lambda = ((hR .* cQ0E0Tint{2,nn} + hL .* cQ0E0TE0T{2,nn,np}) .* pd.g.nuQ0E0T{nn,1} + ...
-                      (hL .* cQ0E0Tint{3,nn} + hL .* cQ0E0TE0T{3,nn,np}) .* pd.g.nuQ0E0T{nn,2}) ./ ...
-                     (hR .* hQ0E0Tint{nn} + hL .* hQ0E0TE0T{nn,np});
-            lambda = setNaN2Zero(abs(lambda)) + ...
-              sqrt(pd.gConst * (hQ0E0Tint{nn}.^1.5 + hQ0E0TE0T{nn,np}.^1.5) ./ (hL + hR));
-            
-          case 'semi-harmonic'
-            error('not implemented')
-            
-          case 'mean'
-            error('not implemented')
-            
-          otherwise
-            error('Unknown averaging type for interior edges')
-        end % switch
-%         lambda = computeLaxFriedrichsCoefficientSWE('interior', pd.averaging, nn, np, pd.g.nuQ0E0T, [], [], [], [], [], sqrt(cQ0E0Tint{1,nn}), [], cQ0E0Tint, cQ0E0TE0T, pd.gConst );
+        lambda = computeLaxFriedrichsCoefficient(cRoePikeQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+          
         pd.riemannTerms = pd.riemannTerms + ...
           [ pd.globV{nn,np} * (lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np})) ; ...
             pd.globV{nn,np} * (lambda .* (cQ0E0Tint{2,nn} - cQ0E0TE0T{2,nn,np})) ; ...
@@ -281,17 +299,18 @@ for nn = 1 : 3
         uvHriem = uHriem .* vHriem ./ hQ0E0Tint{nn};
         vvHriem = vHriem .* vHriem ./ hQ0E0Tint{nn};
         
+        cRoePikeQ0E0T{1}(markQ0E0TbdrL{nn}) = hQ0E0Tint{nn}(markQ0E0TbdrL{nn});
+        cRoePikeQ0E0T{2}(markQ0E0TbdrL{nn}) = (cQ0E0Tint{2,nn}(markQ0E0TbdrL{nn}) + uHriem(markQ0E0TbdrL{nn})) ./ (2 * hQ0E0Tint{nn}(markQ0E0TbdrL{nn}));
+        cRoePikeQ0E0T{3}(markQ0E0TbdrL{nn}) = (cQ0E0Tint{3,nn}(markQ0E0TbdrL{nn}) + uHriem(markQ0E0TbdrL{nn})) ./ (2 * hQ0E0Tint{nn}(markQ0E0TbdrL{nn}));
+        
         switch pd.typeFlux
           case 'Lax-Friedrichs'
-%             lambda = computeLaxFriedrichsCoefficientSWE('land', [], nn, [], pd.g.nuQ0E0T, cDiscQ0E0Tint{2,nn}, uHriem, cDiscQ0E0Tint{2,nn}, vHriem, cDiscQ0E0Tint{1,nn}, [], [], [], [], pd.gConst);
-            lambda = ( (cQ0E0Tint{2,nn} + uHriem) .* pd.g.nuQ0E0T{nn,1} + ...
-                       (cQ0E0Tint{3,nn} + vHriem) .* pd.g.nuQ0E0T{nn,2} ) ./ ...
-                     (2 * hQ0E0Tint{nn}) + sqrt(pd.gConst * sqrt(hQ0E0Tint{nn}));
-            % TODO: land flux
+            lambda = computeLaxFriedrichsCoefficient(cRoePikeQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
             pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
               [ pd.globRL{nn,1} * (uuH + uuHriem + 2 * gHH) + pd.globRL{nn,2} * (uvH + uvHriem) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHriem)); ...
                 pd.globRL{nn,1} * (uvH + uvHriem) + pd.globRL{nn,2} * (vvH + vvHriem + 2 * gHH) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHriem)) ];
-            
+                      % TODO: land flux
+                      
           case 'Roe'
             error('not implemented')
                                           
@@ -333,25 +352,25 @@ for nn = 1 : 3
         [ pd.globROS{nn,1} * (uuH + uuHOS + gHH + gHHOS) + pd.globROS{nn,2} * (uvH + uvHOS) ; ...
           pd.globROS{nn,1} * (uuH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHH + gHHOS) ];
       
+      switch pd.averaging
+        case 'full-harmonic'
+          hL = sqrt(hQ0E0Tint{nn}(markQ0E0TbdrOS{nn}));
+          hR = sqrt(hOSQ0E0Tint(markQ0E0TbdrOS{nn}));
+          cRoePikeQ0E0T{1}(markQ0E0TbdrOS{nn}) = (hL .* hQ0E0Tint{nn}(markQ0E0TbdrOS{nn}) + hR .* hOSQ0E0Tint(markQ0E0TbdrOS{nn})) ./ (hL + hR);
+          cRoePikeQ0E0T{2}(markQ0E0TbdrOS{nn}) = cQ0E0Tint{2,nn}(markQ0E0TbdrOS{nn}) ./ (hL .* hR);
+          cRoePikeQ0E0T{3}(markQ0E0TbdrOS{nn}) = cQ0E0Tint{3,nn}(markQ0E0TbdrOS{nn}) ./ (hL .* hR);
+
+        case 'semi-harmonic'
+          error('not implemented')
+        case 'mean'
+          error('not implemented')
+        otherwise
+          error('Invalid averaging type for open sea boundary flux')
+      end % switch
+        
       switch pd.typeFlux
         case 'Lax-Friedrichs'
-%           lambda = computeLaxFriedrichsCoefficientSWE('openSea', pd.averaging, nn, [], pd.g.nuQ0E0T, [], [], [], [], [], sqrt(cDiscQ0E0Tint{1,nn}), heightOSPerQuad, cDiscQ0E0Tint, [], pd.gConst);
-          switch pd.averaging
-            case 'full-harmonic'
-              hL = sqrt(hQ0E0Tint{nn});
-              hR = sqrt(hOSQ0E0Tint);
-              lambda = abs( (cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + ...
-                             cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2}) ./ ...
-                            (hL .* hR) ) + ...
-                       sqrt(pd.gConst * (hQ0E0Tint{nn}.^1.5 + hOSQ0E0Tint.^1.5) ./ (hL + hR));
-              
-            case 'semi-harmonic'
-              error('not implemented')
-            case 'mean'
-              error('not implemented')
-            otherwise
-              error('Invalid averaging type for open sea boundary flux')
-          end % switch
+          lambda = computeLaxFriedrichsCoefficient(cRoePikeQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
           pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + pd.globVOS{nn} * (lambda .* (hQ0E0Tint{nn} - hOSQ0E0Tint));
           
         case 'Roe'
