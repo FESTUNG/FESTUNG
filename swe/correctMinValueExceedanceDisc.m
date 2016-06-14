@@ -11,7 +11,7 @@ end % if
 
 dataV0T = projectDataDisc2DataLagr(dataDisc, 1);
 corr = max(minTol - dataV0T, 0);
-maxCorr = max(abs(corr(:)));
+maxCorr = max(corr(:));
 
 if maxCorr > correctionTolerance
   [indx, indy] = find(abs(corr) == maxCorr, 1);
@@ -20,7 +20,7 @@ if maxCorr > correctionTolerance
           ' (below the minimum tolerance of ' num2str(correctionTolerance) ').' ]);
 end % if
 
-if any(corr)
+if any(corr(:))
   [indx, indy] = find(abs(corr) == maxCorr, 1);
   warning([ 'A maximum value of ' num2str(maxCorr) ...
             ' had to be added to unknown at local vertex ' num2str(indy) ...
