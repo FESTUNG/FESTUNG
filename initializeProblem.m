@@ -72,7 +72,7 @@ for i = 1 : length(pd.slopeLimList)
   end % switch
 end % for
 
-pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr, 20);
+pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr + pd.minTol, 20);
 
 %% Visualize initial solution.
 visualizeSolution(pd, 0);
