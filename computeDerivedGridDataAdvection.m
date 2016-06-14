@@ -60,6 +60,7 @@ function g = computeDerivedGridDataAdvection(g, markE0TbdrD, markE0TbdrN)
 g.markV0TT0V = cell(3, 1);
 g.areaE0TbdrD = cell(3, 1);
 g.areaE0TbdrN = zeros(g.numT, 3);
+g.areaE0TbdrNotN = cell(3,1);
 for n = 1 : 3
   % Mark all elements sharing i-th vertex
   g.markV0TT0V{n} = g.markV0TV0T{n, 1} | g.markV0TV0T{n, 2} | g.markV0TV0T{n, 3}; 
@@ -69,5 +70,6 @@ for n = 1 : 3
   end % if
   g.areaE0TbdrD{n} = markE0TbdrD(:, n) .* g.areaE0T(:,n);
   g.areaE0TbdrN(:,n) = markE0TbdrN(:, n) .* g.areaE0T(:,n);
+  g.areaE0TbdrNotN{n} = ~markE0TbdrN(:, n) .* g.areaE0T(:,n);
 end % for
 end % function

@@ -131,7 +131,7 @@ for nStep = 1 : numSteps
     vNormalOnQuadEdge = computeFuncContNuOnQuadEdge(g, @(x1,x2) u1Cont(t(rkStep),x1,x2), @(x1,x2) u2Cont(t(rkStep),x1,x2), 2*p+1); % veloc \dot \nu on quadratur points on edges
     % Assembly of time-dependent global matrices
     globG = assembleMatElemDphiPhiFuncDiscVec(g, hatG, u1Disc, u2Disc);
-    globR = assembleMatEdgePhiPhiValUpwind(g, hatRdiagOnQuad, hatRoffdiagOnQuad, vNormalOnQuadEdge);
+    globR = assembleMatEdgePhiPhiValUpwind(g, ~markE0TbdrN, hatRdiagOnQuad, hatRoffdiagOnQuad, vNormalOnQuadEdge, g.areaE0TbdrNotN);
     % Assembly of Dirichlet boundary contributions
     globKD = assembleVecEdgePhiIntFuncContVal(g, markE0TbdrD, @(x1,x2) cDCont(t(rkStep),x1,x2), vNormalOnQuadEdge, N, g.areaE0TbdrD);
     % Assembly of Neumann boundary conditions
