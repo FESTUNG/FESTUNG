@@ -108,15 +108,16 @@
 %> @endparblock
 %
 function ret = assembleMatElemDphiPhiFuncDisc(g, refElemDphiPhiPhi, dataDisc)
-[K, N] = size(dataDisc);
+[K, dataN] = size(dataDisc);
+N = size(refElemDphiPhiPhi, 1);
 
 % Check function arguments that are directly used
-validateattributes(dataDisc, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc');
-validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N N 2]}, mfilename, 'refElemDphiPhiPhi');
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc');
+validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N dataN 2]}, mfilename, 'refElemDphiPhiPhi');
 
 % Assemble matrices
 ret = cell(2, 1);  ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);
-for l = 1 : N
+for l = 1 : dataN
   ret{1} = ret{1} + kron(spdiags(dataDisc(:,l) .* g.B(:,2,2), 0,K,K), refElemDphiPhiPhi(:,:,l,1)) ...
                   - kron(spdiags(dataDisc(:,l) .* g.B(:,2,1), 0,K,K), refElemDphiPhiPhi(:,:,l,2));
   ret{2} = ret{2} - kron(spdiags(dataDisc(:,l) .* g.B(:,1,2), 0,K,K), refElemDphiPhiPhi(:,:,l,1)) ...

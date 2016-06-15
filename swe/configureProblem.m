@@ -69,7 +69,7 @@ pd.gridSource = 'hierarchical';
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
-pd.p = 1;
+pd.p = 2;
 
 %% Time stepping parameters
 pd.schemeType = 'explicit'; % type of time stepping scheme ('explicit' or 'semi-implicit')

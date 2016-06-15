@@ -60,9 +60,9 @@ end % if
 p = (sqrt(8*max(N)+1)-3)/2;  qOrd = max(2*p+1,1);  [~, W] = quadRule1D(qOrd);
 ret = zeros(N(1), N(2), N(3), 3); % [N x N x N x 3]
 for n = 1 : 3 % 3 edges
-  for l = 1 : N(1) % N basisfcts for D(t)
-    for i = 1 : N(2)
-      for j = 1 : N(3)
+  for l = 1 : N(3) % N basisfcts for D(t)
+    for i = 1 : N(1)
+      for j = 1 : N(2)
         ret(i,j,l,n) = sum(W' .* basesOnQuad.phi1D{qOrd}(:,i,n) .* basesOnQuad.phi1D{qOrd}(:,l,n) .* basesOnQuad.phi1D{qOrd}(:,j,n));
       end % for
     end % for
