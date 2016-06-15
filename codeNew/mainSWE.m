@@ -1,7 +1,7 @@
 function [errxi, erru, errv, erruH, errvH] = mainSWE(problem)
 global gPhi2D gPhi1D gThetaPhi1D
 refinement    = 0;
-p             = 0;
+p             = 1;
 OSRiem        = 1;
 land          = 'Riemann';
 scheme        = 'Runge-Kutta SSP/TVD'; % 'Runge-Kutta SSP/TVD' or 'semi-implicit Euler'
@@ -101,9 +101,9 @@ zbEvalOnQuadTheta = cell(3,3);                                        % This is 
 
 zbLagrange = projectDataDisc2DataLagr(zbExact);
 if isVisParam
-	visualizeDataLagr(g, zbLagrange, 'z_b', [name, '_z_b'], [], ['output_' name] , cd, fileTypes);
+	visualizeDataLagr(g, zbLagrange, 'z_b', [name, '_z_b'], 0, ['output_' name] , cd, fileTypes);
 	fcLagrange = projectDataDisc2DataLagr(fcDG);
-	visualizeDataLagr(g, fcLagrange, 'f_c', [name, '_f_c'], [], ['output_' name] , cd, fileTypes);
+	visualizeDataLagr(g, fcLagrange, 'f_c', [name, '_f_c'], 0, ['output_' name] , cd, fileTypes);
 end % if
 zbLagrange = zbLagrange + minTol;
 
@@ -632,7 +632,7 @@ while t < tEnd
         uHR =  nuE0Tdiff{nn} .* cEdgeIntOnQuad{2,nn} - 2 * nuE0Tprod{nn} .* cEdgeIntOnQuad{3,nn};
         vHR = -nuE0Tdiff{nn} .* cEdgeIntOnQuad{3,nn} - 2 * nuE0Tprod{nn} .* cEdgeIntOnQuad{2,nn};
         if strcmp(fluxType, 'Lax-Friedrichs')
-          lambda = computeLaxFriedrichsCoefficientSWE( 'land', [], kronNuE0T, gConst, nn, cEdgeIntOnQuad, [], [], [], [], HL, uHR, vHR );
+          lambda = computeLaxFriedrichsCoefficientSWE( 'land', [], kronNuE0T, gConst, nn, cEdgeIntOnQuad, [], [], [], [], HEdgeIntOnQuad, uHR, vHR );
           
           uuHR = uHR.^2 ./ HEdgeIntOnQuad;
           uvHR = uHR .* vHR ./ HEdgeIntOnQuad;

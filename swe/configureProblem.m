@@ -88,7 +88,7 @@ pd.minTol = 0.001;
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
 pd.isWaitbar = false; % Use waiting bar
-pd.outputCount = 20; % Number of outputs over total simulation time
+pd.outputCount = 25; % Number of outputs over total simulation time
 pd.outputTypes = 'vtk'; % Output file type
 pd.outputList = { 'u', 'uH', 'v', 'vH', 'xi', 'h', 'zb', 'fc' }; % List of variables to visualize
 pd.isVisStations = true; % Output stations

@@ -51,14 +51,14 @@ switch problem
     minTol      = 0.001;            % values of c1 in each vertex must be at least as high as this tolerance 
     %% Output parameters
     isVisGrid   = false;            % visualization of grid
-		isVisParam  = false;						% visualization of zb and fc
+		isVisParam  = true;						% visualization of zb and fc
     numPlots    = 20;               % number of plots for whole visualization
-    isVisu      = false;            % visualization of x-velocity component
-    isVisuH     = false;            % visualization of x-momentum component
-    isVisv      = false;            % visualization of y-velocity component
-    isVisvH     = false;            % visualization of y-momentum component
-    isVisxi     = false;            % visualization of free surface elevation
-    isSolAvail  = false;            % if solution available compute the error of the method
+    isVisu      = true;            % visualization of x-velocity component
+    isVisuH     = true;            % visualization of x-momentum component
+    isVisv      = true;            % visualization of y-velocity component
+    isVisvH     = true;            % visualization of y-momentum component
+    isVisxi     = true;            % visualization of free surface elevation
+    isSolAvail  = true;            % if solution available compute the error of the method
                                     % user must then create function handles H, u and v parametrizing the height and both velocity components
     %% station parameter
 		useStations = false;						% whether or not to use elevation and velocity recording stations		
@@ -132,12 +132,12 @@ switch problem
     minTol      = 0.001;            % values of c1 in each vertex must be at least as high as this tolerance 
     %% Output parameters
     isVisGrid   = false;            % visualization of grid
-		isVisParam  = false;						% visualization of zb and fc
-    numPlots    = 20;               % number of plots for whole visualization
+		isVisParam  = true;						% visualization of zb and fc
+    numPlots    = 25;               % number of plots for whole visualization
     isVisu      = true;             % visualization of x-velocity component
-    isVisuH     = false;            % visualization of x-momentum component
+    isVisuH     = true;            % visualization of x-momentum component
     isVisv      = true;             % visualization of y-velocity component
-    isVisvH     = false;            % visualization of y-momentum component
+    isVisvH     = true;            % visualization of y-momentum component
     isVisxi     = true;             % visualization of free surface elevation
     isSolAvail  = true;             % if solution available compute the error of the method
                                     % user must then create function handles H, u and v parametrizing the height and both velocity components

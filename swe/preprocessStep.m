@@ -79,6 +79,7 @@ qOrd2D = max(2*p,1); [~, ~, W] = quadRule2D(qOrd2D); numQuad2D = length(W);
 cQ0T = cell(3,1); % cDisc in quadrature points of triangles
 cQ0E0Tint = cell(3,3); % cDisc in interior quad points of edges
 cQ0E0Text = cell(3,3,3); % cDisc in exterior quad points of edges
+cQ0E0TE0T = cell(3,3,3); % cDisc in quad points of edge on neighboring element
 jumpQ0E0TE0T = cell(3,3,3); % cDisc in quad points of edge on neighboring element
 
 for i = 1 : 3
@@ -88,8 +89,8 @@ for i = 1 : 3
     for np = 1 : 3
       cDiscThetaPhi = pd.basesOnQuad.thetaPhi1D{qOrd1D}(:,:,nn,np) * pd.cDisc(:,:,i).';
       cQ0E0Text{i,nn,np} = reshape(cDiscThetaPhi, numQuad1D * K, 1);
-      jumpQ0E0TE0T{i,nn,np} = cQ0E0Tint{i,nn} - ...
-                              reshape(cDiscThetaPhi * pd.g.markE0TE0T{nn,np}.', numQuad1D * K, 1);
+      cQ0E0TE0T{i,nn,np} = reshape(cDiscThetaPhi * pd.g.markE0TE0T{nn,np}.', numQuad1D * K, 1);
+      jumpQ0E0TE0T{i,nn,np} = cQ0E0Tint{i,nn} - cQ0E0TE0T{i,nn,np};
     end % for
   end % for
 end % for
@@ -99,6 +100,8 @@ hQ0T = cQ0T{1} - pd.zbQ0T; % water height (xi - zb) in quadrature points of tria
 hQ0E0Tint = cellfun(@minus, cQ0E0Tint(1,:).', pd.zbQ0E0Tint, 'UniformOutput', false);
 % water height (xi - zb) in exterior quad points of edges
 hQ0E0Text = cellfun(@minus, squeeze(cQ0E0Text(1,:,:)), pd.zbQ0E0Text, 'UniformOutput', false);
+% water height (xi - zb) in exterior quad points of edge on neighboring element
+hQ0E0TE0T = cellfun(@minus, squeeze(cQ0E0TE0T(1,:,:)), pd.zbQ0E0TE0T, 'UniformOutput', false);
 
 markQ0E0TbdrL = cell(3,1);
 markQ0E0TbdrOS = cell(3,1);
@@ -214,7 +217,7 @@ for nn = 1 : 3
     vvH = cQ0E0Text{3,nn,np} .* cQ0E0Text{3,nn,np} ./ hQ0E0Text{nn,np};
     gHH = 0.5 * pd.gConst * (cQ0E0Text{1,nn,np} .* cQ0E0Text{1,nn,np});
     
-    cRoePikeQ0E0T = computeAveragedVariablesQ0E0Tint(cQ0E0Tint(:,nn), cQ0E0Text(:,nn,np), hQ0E0Tint{nn}, hQ0E0Text{nn,np}, pd.averagingType);
+    cAvgQ0E0T = computeAveragedVariablesQ0E0Tint(cQ0E0Tint(:,nn), cQ0E0TE0T(:,nn,np), hQ0E0Tint{nn}, hQ0E0TE0T{nn,np}, pd.averagingType);
     
     switch pd.typeFlux
       case 'Lax-Friedrichs'
@@ -222,7 +225,7 @@ for nn = 1 : 3
           [ pd.globRoffdiag{nn,np,1} * (uuH + gHH) + pd.globRoffdiag{nn,np,2} * uvH ; ...
             pd.globRoffdiag{nn,np,1} * uvH + pd.globRoffdiag{nn,np,2} * (vvH + gHH) ];
           
-        lambda = computeLaxFriedrichsCoefficient(cRoePikeQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+        lambda = computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
         pd.riemannTerms = pd.riemannTerms + ...
           [ pd.globV{nn,np} * (lambda .* jumpQ0E0TE0T{1,nn,np}) ; ...
             pd.globV{nn,np} * (lambda .* jumpQ0E0TE0T{2,nn,np}) ; ...
@@ -266,15 +269,18 @@ for nn = 1 : 3
       case 'riemann'
         uHriem = pd.g.nuE0TsqrDiff{nn} .* cQ0E0Tint{2,nn} - 2 * pd.g.nuE0Tprod{nn} .* cQ0E0Tint{3,nn};
         vHriem = -pd.g.nuE0TsqrDiff{nn} .* cQ0E0Tint{3,nn} - 2 * pd.g.nuE0Tprod{nn} .* cQ0E0Tint{2,nn};
-        uuHriem = uHriem .* uHriem ./ hQ0E0Tint{nn};
-        uvHriem = uHriem .* vHriem ./ hQ0E0Tint{nn};
-        vvHriem = vHriem .* vHriem ./ hQ0E0Tint{nn};
         
-        cRoePikeQ0E0T = computeAveragedVariablesQ0E0Tland(cQ0E0Tint(:,nn), {[]; uHriem; vHriem}, hQ0E0Tint{nn}, [], markQ0E0TbdrL{nn}, pd.averagingType);
+        cQ0E0Triem = { [], uHriem, vHriem };
+        cAvgQ0E0T = computeAveragedVariablesQ0E0Tland(cQ0E0Tint(:,nn), cQ0E0Triem, hQ0E0Tint{nn}, [], markQ0E0TbdrL{nn}, pd.averagingType);
         
         switch pd.typeFlux
           case 'Lax-Friedrichs'
-            lambda = computeLaxFriedrichsCoefficient(cRoePikeQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+            uuHriem = uHriem .* uHriem ./ hQ0E0Tint{nn};
+            uvHriem = uHriem .* vHriem ./ hQ0E0Tint{nn};
+            vvHriem = vHriem .* vHriem ./ hQ0E0Tint{nn};
+            
+            lambda = computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+            
             pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
               [ pd.globRL{nn,1} * (uuH + uuHriem + 2 * gHH) + pd.globRL{nn,2} * (uvH + uvHriem) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHriem)); ...
                 pd.globRL{nn,1} * (uvH + uvHriem) + pd.globRL{nn,2} * (vvH + vvHriem + 2 * gHH) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHriem)) ];
@@ -318,14 +324,14 @@ for nn = 1 : 3
       gHHOS = gHH + gHHOS - pd.gConst * cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn};
       
       pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
-        [ pd.globROS{nn,1} * (uuH + uuHOS + gHH + gHHOS) + pd.globROS{nn,2} * (uvH + uvHOS) ; ...
-          pd.globROS{nn,1} * (uuH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHH + gHHOS) ];
+        [ pd.globROS{nn,1} * (uuH + uuHOS + gHHOS) + pd.globROS{nn,2} * (uvH + uvHOS) ; ...
+          pd.globROS{nn,1} * (uvH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHHOS) ];
       
-      cRoePikeQ0E0T = computeAveragedVariablesQ0E0Tos(cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
+      cAvgQ0E0T = computeAveragedVariablesQ0E0Tos(cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
         
       switch pd.typeFlux
         case 'Lax-Friedrichs'
-          lambda = computeLaxFriedrichsCoefficient(cRoePikeQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+          lambda = computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
           pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + pd.globVOS{nn} * (lambda .* (hQ0E0Tint{nn} - hOSQ0E0T));
           
         case 'Roe'
