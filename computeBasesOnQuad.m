@@ -40,6 +40,8 @@
 %>                    @f$[\text{scalar}]@f$
 %> @param  basesOnQuad A (possibly empty) struct to which the computed
 %>                    arrays are added. @f$[\text{struct}]@f$
+%> @param  requiredOrders (optional) An array providing a list of all
+%>                    required quadrature orders.
 %>
 %> @retval  basesOnQuad A struct with the computed array.
 %>
@@ -63,15 +65,21 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function basesOnQuad = computeBasesOnQuad(N, basesOnQuad)
+function basesOnQuad = computeBasesOnQuad(N, basesOnQuad, requiredOrders)
 % Check for valid number of DOFs: N == (p+1)(p+2)/2
 assert(~isempty(find(N == ((0:4)+1).*((0:4)+2)/2, 1)), ...
   'Number of degrees of freedom does not match a polynomial order')
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
 % Determine polynomial degree and quadrature orders
-p = (sqrt(8*N+1)-3)/2;
-if p > 0, requiredOrders = [2*p, 2*p+1]; else requiredOrders = 1; end
+if nargin < 3
+  p = (sqrt(8*N+1)-3)/2;
+  if p > 0
+    requiredOrders = [2*p, 2*p+1]; 
+  else
+    requiredOrders = 1; 
+  end % if
+end % if
 
 % Initialize global variables
 basesOnQuad.phi2D = cell(max(requiredOrders),1);  

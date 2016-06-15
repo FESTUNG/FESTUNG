@@ -235,10 +235,12 @@ end % for
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', pd.p, N, K);
 
 %% Lookup table for basis function.
-pd.basesOnQuad = computeBasesOnQuad(N, struct);
+requiredOrders = unique([max(2*pd.p, 1), 2*pd.p+1, 2, 3], 'sorted');
+pd.basesOnQuad = computeBasesOnQuad(N, struct, requiredOrders);
 if ~isempty(pd.slopeLimList)
   pd.basesOnQuad = computeTaylorBasesV0T(pd.g, N, pd.basesOnQuad);
 end % if
+basesOnQuadLin = computeBasesOnQuad(3, struct);
 
 %% System matrix for correction of min value exceedence.
 pd.sysMinValueCorrection = [ phi(1,0,0) phi(1,1,0) phi(1,0,1) ; ...
@@ -250,24 +252,32 @@ pd.refElemPhiPhi = integrateRefElemPhiPhi(N, pd.basesOnQuad);
 refElemPhiPhiPhi = integrateRefElemPhiPhiPhi(N, pd.basesOnQuad);
 refElemDphiPhi = integrateRefElemDphiPhi(N, pd.basesOnQuad);
 
-refElemPhiPhiDphiLin = permute(integrateRefElemDphiPhiPhi([3 N N], pd.basesOnQuad), [3 2 1 4]);
-refElemDphiPhiPhiLin = integrateRefElemDphiPhiPhi([N N 3], pd.basesOnQuad);
-refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], pd.basesOnQuad);
+refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
+
+if pd.p == 0
+  refElemPhiPhiDphiLin = permute(integrateRefElemDphiPhiPhi([3 N N], basesOnQuadLin), [3 2 1 4]);
+  refElemDphiPhiPhiLin = integrateRefElemDphiPhiPhi([N N 3], basesOnQuadLin);
+  refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], basesOnQuadLin);
+
+  refEdgePhiIntPhiIntPhiLin = integrateRefEdgePhiIntPhiIntPhiInt([N N 3], basesOnQuadLin);
+  refEdgePhiIntPhiExtPhiLin = permute(integrateRefEdgePhiIntPhiIntPhiExt([N 3 N], basesOnQuadLin), [1 3 2 4 5]);
+else
+  refElemPhiPhiDphiLin = permute(integrateRefElemDphiPhiPhi([3 N N], pd.basesOnQuad), [3 2 1 4]);
+  refElemDphiPhiPhiLin = integrateRefElemDphiPhiPhi([N N 3], pd.basesOnQuad);
+  refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], pd.basesOnQuad);
+
+  refEdgePhiIntPhiIntPhiLin = integrateRefEdgePhiIntPhiIntPhiInt([N N 3], pd.basesOnQuad);
+  refEdgePhiIntPhiExtPhiLin = permute(integrateRefEdgePhiIntPhiIntPhiExt([N 3 N], pd.basesOnQuad), [1 3 2 4 5]);
+end % if
 
 refEdgePhiIntPhiInt = integrateRefEdgePhiIntPhiInt(N, pd.basesOnQuad);
 refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, pd.basesOnQuad);
-
-refEdgePhiIntPhiIntPhiLin = integrateRefEdgePhiIntPhiIntPhiInt([N N 3], pd.basesOnQuad);
-refEdgePhiIntPhiExtPhiLin = permute(integrateRefEdgePhiIntPhiIntPhiExt([N 3 N], pd.basesOnQuad), [1 3 2 4 5]);
 
 refElemDphiPerQuad = integrateRefElemDphiPerQuad(N, pd.basesOnQuad);
 refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, pd.basesOnQuad);
 pd.refEdgePhiIntPhiIntPerQuad = integrateRefEdgePhiIntPhiIntPerQuad(N, pd.basesOnQuad);
 
 %% L2 projections of time-independent algebraic coefficients.
-basesOnQuadLin = computeBasesOnQuad(3, struct);
-refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
-
 fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
 pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
 pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
