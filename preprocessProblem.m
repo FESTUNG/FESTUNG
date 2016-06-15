@@ -274,21 +274,23 @@ pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, pd.refElemPhiPhi, 
 pd.zbLagr = projectDataDisc2DataLagr(pd.zbDiscLin);
 
 % Evaluate zb in each element's quadrature point
-qOrd = max(2*pd.p,1); [Q1, Q2, ~] = quadRule2D(qOrd); numQuad2D = length(Q1);
+[Q1, Q2, ~] = quadRule2D(max(2*pd.p,1)); numQuad2D = length(Q1);
 pd.zbQ0T = reshape(pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).', K * numQuad2D, 1);
 
 % Evaluate zb in each edge's quadrature point
 pd.zbQ0E0Tint = cell(3,1);
 pd.zbQ0E0Text = cell(3,3);
 pd.zbQ0E0TE0T = cell(3,3);
-qOrd = max(2*pd.p,1); [Q, ~] = quadRule1D(qOrd); numQuad1D = length(Q);
+[Q, ~] = quadRule1D(2*pd.p+1); numQuad1D = length(Q);
 for nn = 1 : 3
   [Q1, Q2] = gammaMap(nn, Q);
-  pd.zbQ0E0Tint{nn} = reshape(pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).', K * numQuad1D, 1);
+  zbTheta = pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).';
+  pd.zbQ0E0Tint{nn} = reshape(zbTheta, K * numQuad1D, 1);
   for np = 1 : 3
-    [Q1, Q2] = theta(nn, np, Q1, Q2);
-    pd.zbQ0E0Text{nn,np} = reshape(pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).', K * numQuad1D, 1);
-    pd.zbQ0E0TE0T{nn,np} = reshape(pd.basesOnQuad.thetaPhi1D{2*pd.p+1}(:,:,nn,np) * pd.zbDisc.' * pd.g.markE0TE0T{nn,np}.', K * numQuad1D, 1);
+    [QP1, QP2] = theta(nn, np, Q1, Q2);
+    zbTheta = pd.zbCont(pd.g.mapRef2Phy(1,QP1,QP2), pd.g.mapRef2Phy(2,QP1,QP2)).';
+    pd.zbQ0E0Text{nn,np} = reshape(zbTheta, K * numQuad1D, 1);
+    pd.zbQ0E0TE0T{nn,np} = reshape(zbTheta * pd.g.markE0TE0T{nn,np}.', K * numQuad1D, 1);
   end % for
 end % for
 
