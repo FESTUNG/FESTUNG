@@ -110,16 +110,17 @@
 %> @endparblock
 %
 function ret = assembleMatElemDphiPhiFuncDiscVec(g, refElemDphiPhiPhi, dataDisc1, dataDisc2)
-[K, N] = size(dataDisc1);
+[K, dataN] = size(dataDisc1);
+N = size(refElemDphiPhiPhi,1);
 
 % Check function arguments that are directly used
-validateattributes(dataDisc1, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc1');
-validateattributes(dataDisc2, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc2');
-validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N N 2]}, mfilename, 'refElemDphiPhiPhi');
+validateattributes(dataDisc1, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc1');
+validateattributes(dataDisc2, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc2');
+validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N dataN 2]}, mfilename, 'refElemDphiPhiPhi');
 
 % Assemble matrices
 ret = cell(2, 1);  ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);
-for l = 1 : N
+for l = 1 : dataN
   ret{1} = ret{1} + kron(spdiags(dataDisc1(:,l) .* g.B(:,2,2), 0,K,K), refElemDphiPhiPhi(:,:,l,1)) ...
                   - kron(spdiags(dataDisc1(:,l) .* g.B(:,2,1), 0,K,K), refElemDphiPhiPhi(:,:,l,2));
   ret{2} = ret{2} - kron(spdiags(dataDisc2(:,l) .* g.B(:,1,2), 0,K,K), refElemDphiPhiPhi(:,:,l,1)) ...
