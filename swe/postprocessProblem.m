@@ -73,6 +73,11 @@ if problemData.isSolutionAvail
   uEnd = @(x1,x2) problemData.uCont(x1,x2,t);
   vEnd = @(x1,x2) problemData.vCont(x1,x2,t);
   
+  % Error in water height (H)
+  hDisc = problemData.cDisc(:,:,1) - problemData.zbDisc;
+  err = computeL2Error(problemData.g, hDisc, hEnd, 2*p, problemData.basesOnQuad);
+  fprintf('L2-Error H: %g\n', err);
+  
   % Error in free surface elevation (xi)
   err = computeL2Error(problemData.g, problemData.cDisc(:,:,1), xiEnd, 2*p, problemData.basesOnQuad);
   fprintf('L2-Error XI: %g\n', err);
@@ -86,12 +91,14 @@ if problemData.isSolutionAvail
   fprintf('L2-Error vH: %g\n', err);
   
   % Error in x-velocity (u)
-  dataDisc = projectQuotientDisc2Disc(problemData.cDisc(:,:,2), problemData.cDisc(:,:,1) - problemData.zbDisc, max(2*p,1), problemData.refElemPhiPhi, problemData.basesOnQuad);
+  dataQ0T = (problemData.cDisc(:,:,2) * problemData.basesOnQuad.phi2D{max(2*p,1)}.') ./ (hDisc * problemData.basesOnQuad.phi2D{max(2*p,1)}.');
+  dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   err = computeL2Error(problemData.g, dataDisc, uEnd, 2*p, problemData.basesOnQuad);
   fprintf('L2-Error  u: %g\n', err);
   
   % Error in y-velocity (v)
-  dataDisc = projectQuotientDisc2Disc(problemData.cDisc(:,:,3), problemData.cDisc(:,:,1) - problemData.zbDisc, max(2*p,1), problemData.refElemPhiPhi, problemData.basesOnQuad);
+  dataQ0T = (problemData.cDisc(:,:,3) * problemData.basesOnQuad.phi2D{max(2*p,1)}.') ./ (hDisc * problemData.basesOnQuad.phi2D{max(2*p,1)}.');
+  dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   err = computeL2Error(problemData.g, dataDisc, vEnd, 2*p, problemData.basesOnQuad);
   fprintf('L2-Error  v: %g\n', err);
 end % if
