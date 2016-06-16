@@ -124,6 +124,7 @@ pd.t0 = 0; % Start time of simulation
 pd.tEnd = 0.01; % End time of simulation
 pd.numSteps = 5; % Number of time steps
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
+pd.isSteadyState = false;
 
 % Solution parameters
 pd.gConst = 9.81;
@@ -168,6 +169,7 @@ pd.t0 = 0; % Start time of simulation
 pd.tEnd = 1; % End time of simulation
 pd.numSteps = 150; % Number of time steps
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
+pd.isSteadyState = false;
 
 % Solution parameters
 height = 0.05;
@@ -254,6 +256,9 @@ pd.t0 = pd.configADCIRC.STATIM;
 pd.tEnd = pd.configADCIRC.RNDAY * 86400;
 pd.dt = pd.configADCIRC.DT;
 pd.numSteps = round((pd.tEnd - pd.t0) / pd.dt);
+
+pd.isSteadyState = pd.configADCIRC.ITRANS == 1;
+pd.convergenceCriterion = pd.configADCIRC.CONVCR;
 
 % Coordinate system
 pd.isSpherical = pd.configADCIRC.ICS == 2;

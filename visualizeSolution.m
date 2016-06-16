@@ -1,6 +1,6 @@
 function visualizeSolution(pd, nStep)
-if mod(nStep, pd.outputFrequency) == 0
-  nOutput = nStep / pd.outputFrequency;
+if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
+  nOutput = ceil(nStep / pd.outputFrequency);
 
   %% Depth and elevation
 
