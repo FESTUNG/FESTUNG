@@ -168,14 +168,16 @@ switch pd.gridSource
     
     % River inflow
     markEbdrRiv = pd.g.idE == 3;
-    markTbdrRiv = pd.g.T0E(markEbdrRiv, 1);
     if ~pd.isRivCont
-      pd.xiRiv = sparse(pd.g.numT, 1);
-      pd.xiRiv(markTbdrRiv) = flowRateRiv(:,1);
-      pd.uRiv = sparse(pd.g.numT, 1);
-      pd.uRiv(markTbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,1) - flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,2);
-      pd.vRiv = sparse(pd.g.numT, 1);
-      pd.vRiv(markTbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,2) + flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,1);
+      xiRivE = sparse(pd.g.numE, 1);
+      xiRivE(markEbdrRiv) = flowRateRiv(:,1);
+      uRivE = sparse(pd.g.numE, 1);
+      uRivE(markEbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,1) - flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,2);
+      vRivE = sparse(pd.g.numE, 1);
+      vRivE(markEbdrRiv) = flowRateRiv(:,2) .* pd.g.nuE(markEbdrRiv,2) + flowRateRiv(:,3) .* pd.g.nuE(markEbdrRiv,1);
+      pd.xiRivQ0E0T = xiRivE(pd.g.E0T);
+      pd.uRivQ0E0T = uRivE(pd.g.E0T);
+      pd.vRivQ0E0T = vRivE(pd.g.E0T);
     end % if
 
     % Stations
@@ -196,7 +198,7 @@ switch pd.gridSource
     end % if
     
     % Clean out ADCIRC config struct
-    pd = rmfield(pd, pd.configADCIRC);
+    pd = rmfield(pd, 'configADCIRC');
     
   otherwise
     error('Invalid gridSource given.')
@@ -405,19 +407,25 @@ if pd.g.numEbdrRA > 0 % Radiation boundaries
 end % if
 
 if pd.g.numEbdrRI > 0 % River boundaries
-  pd.globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
+  if ~pd.isRivCont
+    pd.xiRivQ0E0T = kron(pd.xiRivQ0E0T, ones(numQuad1D,1));
+    pd.uRivQ0E0T = kron(pd.uRivQ0E0T, ones(numQuad1D,1));
+    pd.vRivQ0E0T = kron(pd.vRivQ0E0T, ones(numQuad1D,1));
+  end % if
   
-  pd.globLRI = { sparse(K*N,1), sparse(K*N,1), sparse(K*N,1) };
+  pd.globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
+  pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
+  
   if ~pd.isRamp && ~pd.isRivCont
     for n = 1 : 3
-      hRiv = pd.xiRiv(:,n) - pd.zbDiscLinQ0T{n};
-      uHRiv = pd.uRiv(:,n) .* hRiv;
-      vHRiv = pd.vRiv(:,n) .* hRiv;
-      uvHRiv = uHRiv .* pd.vRiv(:,n);
-      gHHRiv = pd.gConst * pd.xiRiv(:,n) .* ( 0.5 * pd.xiRiv(:,n) - pd.zbDiscLinQ0T{n} );
+      hRiv = pd.xiRivQ0E0T(:,n) - pd.zbQ0E0Tint{n};
+      uHRiv = pd.uRivQ0E0T(:,n) .* hRiv;
+      vHRiv = pd.vRivQ0E0T(:,n) .* hRiv;
+      uvHRiv = uHRiv .* pd.vRivQ0E0T(:,n);
+      gHHRiv = pd.gConst * pd.xiRivQ0E0T(:,n) .* ( 0.5 * pd.xiRivQ0E0T(:,n) - pd.zbQ0E0Tint{n} );
       pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{n,1} * uHRiv + pd.globRRI{n,2} * vHRiv;
-      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{n,1} * (pd.uRiv(:,n) .* uHRiv + gHHRiv) + pd.globRRI{n,2} * uvHRiv;
-      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{n,1} * uvHRiv + pd.globRRI{n,2} * (pd.vRiv(:,n) .* vHRiv + gHHRiv);
+      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{n,1} * (pd.uRivQ0E0T(:,n) .* uHRiv + gHHRiv) + pd.globRRI{n,2} * uvHRiv;
+      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{n,1} * uvHRiv + pd.globRRI{n,2} * (pd.vRivQ0E0T(:,n) .* vHRiv + gHHRiv);
     end % for
   end % if
 end % if

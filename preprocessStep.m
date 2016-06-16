@@ -80,7 +80,6 @@ cQ0T = cell(3,1); % cDisc in quadrature points of triangles
 cQ0E0Tint = cell(3,3); % cDisc in interior quad points of edges
 cQ0E0Text = cell(3,3,3); % cDisc in exterior quad points of edges
 cQ0E0TE0T = cell(3,3,3); % cDisc in quad points of edge on neighboring element
-jumpQ0E0TE0T = cell(3,3,3); % cDisc in quad points of edge on neighboring element
 
 for i = 1 : 3
   cQ0T{i} = reshape(pd.basesOnQuad.phi2D{qOrd2D} * pd.cDisc(:,:,i).', numQuad2D * K, 1);
@@ -90,7 +89,6 @@ for i = 1 : 3
       cDiscThetaPhi = pd.basesOnQuad.thetaPhi1D{qOrd1D}(:,:,nn,np) * pd.cDisc(:,:,i).';
       cQ0E0Text{i,nn,np} = reshape(cDiscThetaPhi, numQuad1D * K, 1);
       cQ0E0TE0T{i,nn,np} = reshape(cDiscThetaPhi * pd.g.markE0TE0T{nn,np}.', numQuad1D * K, 1);
-      jumpQ0E0TE0T{i,nn,np} = cQ0E0Tint{i,nn} - cQ0E0TE0T{i,nn,np};
     end % for
   end % for
 end % for
@@ -139,53 +137,55 @@ end % if
 
 %% Compute water height on Open Sea boundaries.
 xiOSQ0E0Tint = cell(3,1);
-if isfield(pd, 'xiOSCont')
-  % Analytical function for open sea elevation given
-  [Q, ~] = quadRule1D(max(2*p,1));
-  for n = 1 : 3
-    [Q1, Q2] = gammaMap(n, Q);
-    xiOSQ0E0Tint{n} = pd.xiOSCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs);
-    xiOSQ0E0Tint{n} = reshape(xiOSQ0E0Tint{n}.', K*numQuad1D,1);
-  end % for
-elseif isfield(pd, 'xiFreqOS') && isfield(pd, 'xiAmpOS')
-  % Open sea elevation data given
-	% Since the open sea boundary condition is only used for non-linear
-	% contributions we discretize it explicitly. Otherwise we would have
-	% to make a distinction.
-  numFrequency = size(pd.xiFreqOS, 2);
-  xiOS = zeros(K, numQuad1D);
-  for n = 1 : numFrequency
-    xiOS = xiOS + repmat(pd.xiFreqOS{1,n}(tRhs) * pd.xiAmpOS{1,n} + ...
-                         pd.xiFreqOS{2,n}(tRhs) * pd.xiAmpOS{2,n}, 1, numQuad1D);
-  end % for
-  xiOS = pd.ramp(tRhs) * xiOS;
-  for n = 1 : 3
-    xiOSQ0E0Tint{n} = xiOS;
-  end % for
-else
-  error('No open sea elevation given!')
-end
+if pd.g.numEbdrOS > 0
+  if isfield(pd, 'xiOSCont')
+    % Analytical function for open sea elevation given
+    [Q, ~] = quadRule1D(max(2*p,1));
+    for n = 1 : 3
+      [Q1, Q2] = gammaMap(n, Q);
+      xiOSQ0E0Tint{n} = pd.xiOSCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs);
+      xiOSQ0E0Tint{n} = reshape(xiOSQ0E0Tint{n}.', K*numQuad1D,1);
+    end % for
+  elseif isfield(pd, 'xiFreqOS') && isfield(pd, 'xiAmpOS')
+    % Open sea elevation data given
+    % Since the open sea boundary condition is only used for non-linear
+    % contributions we discretize it explicitly. Otherwise we would have
+    % to make a distinction.
+    numFrequency = size(pd.xiFreqOS, 2);
+    xiOS = zeros(K, 1);
+    for n = 1 : numFrequency
+      xiOS = xiOS + pd.xiFreqOS{1,n}(tRhs) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(tRhs) * pd.xiAmpOS{2,n};
+    end % for
+    xiOS = pd.ramp(tRhs) * kron(xiOS, ones(numQuad1D, 1));
+    for n = 1 : 3
+      xiOSQ0E0Tint{n} = xiOS;
+    end % for
+  else
+    error('No open sea elevation given!')
+  end % if
+end % if
 
 %% Compute river boundary values.
-pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
-if pd.g.numEbdrRI > 0 % TODO: && pd.isRamp
-  xiRiv = cell(3,1);
-  uRiv = cell(3,1);
-  vRiv = cell(3,1);
+if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
+  pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
+  
+  xiRivQ0E0T = cell(3,1);
+  uRivQ0E0T = cell(3,1);
+  vRivQ0E0T = cell(3,1);
 
   if pd.isRivCont
     [Q, ~] = quadRule1D(max(2*p,1));
     for n = 1 : 3
       [Q1, Q2] = gammaMap(n, Q);
-      xiRiv{n} = reshape(pd.xiRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
-      uRiv{n} = reshape(pd.uRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
-      vRiv{n} = reshape(pd.vRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
+      xiRivQ0E0T{n} = reshape(pd.xiRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
+      uRivQ0E0T{n} = reshape(pd.uRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
+      vRivQ0E0T{n} = reshape(pd.vRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
     end % for
   else
     for n = 1 : 3
-      xiRiv{n} = kron(pd.ramp(tRhs) * pd.xiRiv, ones(numQuad1D,1));
-      uRiv{n} = kron(pd.ramp(tRhs) * pd.uRiv, ones(numQuad1D,1));
-      vRiv{n} = kron(pd.ramp(tRhs) * pd.vRiv, ones(numQuad1D,1));
+      xiRivQ0E0T{n} = pd.ramp(tRhs) * pd.xiRivQ0E0T(:,n);
+      uRivQ0E0T{n} = pd.ramp(tRhs) * pd.uRivQ0E0T(:,n);
+      vRivQ0E0T{n} = pd.ramp(tRhs) * pd.vRivQ0E0T(:,n);
     end % for
   end % if
 end % if
@@ -227,9 +227,9 @@ for nn = 1 : 3
           
         lambda = computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
         pd.riemannTerms = pd.riemannTerms + ...
-          [ pd.globV{nn,np} * (lambda .* jumpQ0E0TE0T{1,nn,np}) ; ...
-            pd.globV{nn,np} * (lambda .* jumpQ0E0TE0T{2,nn,np}) ; ...
-            pd.globV{nn,np} * (lambda .* jumpQ0E0TE0T{3,nn,np}) ];
+          [ pd.globV{nn,np} * (lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np})) ; ...
+            pd.globV{nn,np} * (lambda .* (cQ0E0Tint{2,nn} - cQ0E0TE0T{2,nn,np})) ; ...
+            pd.globV{nn,np} * (lambda .* (cQ0E0Tint{3,nn} - cQ0E0TE0T{3,nn,np})) ];
 
       case 'Roe'
         error('not implemented')
@@ -299,16 +299,16 @@ for nn = 1 : 3
   end % if
 
   % River boundary contributions
-  if pd.g.numEbdrRI > 0 % TODO: && pd.isRamp
-    hRiv = xiRiv{nn} - pd.zbQ0E0Tint{nn};
-    uHRiv = uRiv{nn} .* hRiv;
-    vHRiv = vRiv{nn} .* hRiv;
-    uvHRiv = uRiv{nn} .* vHRiv;
-    gHHRiv = pd.gConst * xiRiv{nn} .* (0.5 * xiRiv{nn} - pd.zbQ0E0Tint{nn});
+  if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
+    hRiv = xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn};
+    uHRiv = uRivQ0E0T{nn} .* hRiv;
+    vHRiv = vRivQ0E0T{nn} .* hRiv;
+    uvHRiv = uRivQ0E0T{nn} .* vHRiv;
+    gHHRiv = pd.gConst * xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn});
     
     pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{nn,1} * uHRiv + pd.globRRI{nn,2} * vHRiv;
-    pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uRiv{nn} .* uHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
-    pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vRiv{nn} .* vHRiv + gHHRiv);
+    pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uRivQ0E0T{nn} .* uHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
+    pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vRivQ0E0T{nn} .* vHRiv + gHHRiv);
   end % if
   
   % Open Sea boundary contributions
