@@ -443,12 +443,15 @@ if pd.isTidalDomain
   for n = 1 : size(pd.forcingTidal, 3)
     for i = 1 : 2
       for j = 1 : 2
-        pd.forcingTidal{i,j,n} = assembleMatElemPhiPhiFuncDiscConst(pd.g, pd.refElemPhiPhi, pd.forcingTidal{i,j,n});
+        pd.forcingTidal{i,j,n} = assembleMatElemPhiPhiFuncDisc(pd.g, pd.refElemPhiPhi, pd.forcingTidal{i,j,n});
       end % for
     end % for
   end % for
 end % if
 
 %% Variable timestepping preparation.
-% TODO: variable time step
+if pd.isAdaptiveTimestep
+  pd.avgDiff = sum(abs(pd.g.coordV0T(:,[1 2 3],:) - pd.g.coordV0T(:,[2 3 1],:)), 2) / 3;
+  pd.avgDepth = -sum(pd.zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2)), 2) / 3;
+end % if
 end % function

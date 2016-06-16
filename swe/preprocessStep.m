@@ -57,7 +57,7 @@ K = pd.K;
 p = pd.p;
 N = pd.N;
 
-if pd.isVariableTimestep
+if pd.isAdaptiveTimestep
   pd.dt = selectTimeStepSWE(pd.avgDiff(:,1), pd.avgDiff(:,2), pd.avgDepth, pd.gConst, pd.dt, nStep);
 end % if
 
@@ -97,7 +97,8 @@ for i = 1 : 3
   end % for
 end % for
 
-hQ0T = cQ0T{1} - pd.zbQ0T; % water height (xi - zb) in quadrature points of triangles
+% water height (xi - zb) in quadrature points of triangles
+hQ0T = cQ0T{1} - pd.zbQ0T;
 % water height (xi - zb) in interior quad points of edges
 hQ0E0Tint = cellfun(@minus, cQ0E0Tint(1,:).', pd.zbQ0E0Tint, 'UniformOutput', false);
 % water height (xi - zb) in exterior quad points of edges
