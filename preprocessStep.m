@@ -65,7 +65,7 @@ switch pd.schemeType
   case 'explicit'
     % TODO: Runge-Kutta
     tRhs = t - dt;
-  case 'semi_implicit'
+  case 'semi-implicit'
     tRhs = t;
   otherwise
     error('Invalid time-stepping scheme.')  

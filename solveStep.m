@@ -55,8 +55,7 @@ K = pd.K;
 N = pd.N;
 dt = pd.dt;
        
-% Build system matrix and right hand side vectors
-sysA = [ sparse(K*N,K*N); pd.tidalTerms{1}; pd.tidalTerms{2} ];
+% Build right hand side vector
 sysV = cell2mat(pd.globL) - cell2mat(pd.globLRI) - ...
        [ sparse(K*N,1); pd.nonlinearTerms + pd.bottomFrictionTerms] - ... 
        pd.riemannTerms;
@@ -70,10 +69,12 @@ sysH = sysY(1:K*N) - reshape(pd.zbDisc.', K*N,1);
 % Compute solution at next time step using explicit or semi-implicit scheme
 switch pd.schemeType
   case 'explicit'
+    sysA = [ sparse(K*N,K*N); pd.tidalTerms{1}; pd.tidalTerms{2} ];
     cDiscDot = pd.sysW \ (sysV - pd.linearTerms * sysY + sysA * sysH );
     sysY = sysY + dt * cDiscDot;
 
   case 'semi-implicit'
+    sysA = [ sparse(K*N,3*K*N); pd.tidalTerms{1}, sparse(K*N,2*K*N); pd.tidalTerms{2}, sparse(K*N,2*K*N) ];
     sysY = (pd.sysW + dt * (pd.linearTerms - sysA)) \ (pd.sysW * sysY + dt * sysV);
           
   otherwise
