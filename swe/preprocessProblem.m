@@ -406,6 +406,7 @@ if pd.g.numEbdrRA > 0 % Radiation boundaries
   pd.globRdiag = cellfun(@plus, pd.globRdiag, globRRA, 'UniformOutput', false);
 end % if
 
+pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.g.numEbdrRI > 0 % River boundaries
   if ~pd.isRivCont
     pd.xiRivQ0E0T = kron(pd.xiRivQ0E0T, ones(numQuad1D,1));
@@ -414,7 +415,6 @@ if pd.g.numEbdrRI > 0 % River boundaries
   end % if
   
   pd.globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
-  pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
   
   if ~pd.isRamp && ~pd.isRivCont
     for n = 1 : 3
