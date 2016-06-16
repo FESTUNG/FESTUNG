@@ -53,7 +53,7 @@ if pd.isSolutionAvail
   vH0Cont = @(x1,x2) h0Cont(x1,x2) .* pd.vCont(x1,x2,pd.t0);
 else
   xi0Cont = @(x1,x2) zeros(size(x1));
-  uH0Cont = @(x1,x2) zeros(size(x1));
+  uH0Cont = @(x1,x2) ones(size(x1)) .* (xi0Cont(x1,x2) - pd.zbCont(x1,x2));
   vH0Cont = @(x1,x2) zeros(size(x1));
 end % if
   

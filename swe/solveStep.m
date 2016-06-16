@@ -70,7 +70,8 @@ sysH = sysY(1:K*N) - reshape(pd.zbDisc.', K*N,1);
 % Compute solution at next time step using explicit or semi-implicit scheme
 switch pd.schemeType
   case 'explicit'
-    sysY = sysY + dt * ( pd.sysW \ (sysV - pd.linearTerms * sysY - sysA * sysH ) );
+    cDiscDot = pd.sysW \ (sysV - pd.linearTerms * sysY + sysA * sysH );
+    sysY = sysY + dt * cDiscDot;
 
   case 'semi-implicit'
     sysY = (pd.sysW + dt * (pd.linearTerms - sysA)) \ (pd.sysW * sysY + dt * sysV);

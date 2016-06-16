@@ -49,13 +49,13 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd.name = 'analytical_test'; 
+pd.name = 'test2'; 
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
-pd.configSource = 'analytical';
+pd.configSource = 'ADCIRC';
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -65,7 +65,7 @@ pd.configSource = 'analytical';
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-pd.gridSource = 'hierarchical';
+pd.gridSource = 'ADCIRC';
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
@@ -88,10 +88,10 @@ pd.minTol = 0.001;
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
 pd.isWaitbar = false; % Use waiting bar
-pd.outputCount = 25; % Number of outputs over total simulation time
+pd.outputCount = 72; % Number of outputs over total simulation time
 pd.outputTypes = 'vtk'; % Output file type
 pd.outputList = { 'u', 'uH', 'v', 'vH', 'xi', 'h', 'zb', 'fc' }; % List of variables to visualize
-pd.isVisStations = true; % Output stations
+pd.isVisStations = false; % Output stations
 
 %% Simulation scenario specific parameters
 switch pd.configSource
