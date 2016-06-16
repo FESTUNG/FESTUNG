@@ -123,8 +123,11 @@ pd.hmax = 1; % Maximum element size of initial grid
 pd.t0 = 0; % Start time of simulation
 pd.tEnd = 0.01; % End time of simulation
 pd.numSteps = 5; % Number of time steps
+
+pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
-pd.isSteadyState = false;
+
+pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
 pd.gConst = 9.81;
@@ -168,8 +171,11 @@ pd.refinement = 0;  % Grid refinement level
 pd.t0 = 0; % Start time of simulation
 pd.tEnd = 1; % End time of simulation
 pd.numSteps = 150; % Number of time steps
+
+pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
-pd.isSteadyState = false;
+
+pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
 height = 0.05;
@@ -257,6 +263,10 @@ pd.tEnd = pd.configADCIRC.RNDAY * 86400;
 pd.dt = pd.configADCIRC.DT;
 pd.numSteps = round((pd.tEnd - pd.t0) / pd.dt);
 
+% Adaptive time stepping
+pd.isAdaptiveTimestep = pd.configADCIRC.NDTVAR == 1;
+
+% Steady state simulation
 pd.isSteadyState = pd.configADCIRC.ITRANS == 1;
 pd.convergenceCriterion = pd.configADCIRC.CONVCR;
 

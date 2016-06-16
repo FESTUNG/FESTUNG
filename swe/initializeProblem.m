@@ -86,4 +86,9 @@ end % if
 %% Initialize time stepping
 pd.isFinished = false;
 pd.t = pd.t0;
+
+if pd.isAdaptiveTimestep
+  pd.avgDiff = sum(abs(pd.g.coordV0T(:,[1 2 3],:) - pd.g.coordV0T(:,[2 3 1],:)), 2) / 3;
+  pd.avgDepth = -sum(pd.zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2)), 2) / 3;
+end % if
 end % function

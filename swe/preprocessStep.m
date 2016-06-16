@@ -56,9 +56,13 @@ function pd = preprocessStep(pd, nStep)
 K = pd.K;
 p = pd.p;
 N = pd.N;
+
+if pd.isVariableTimestep
+  pd.dt = selectTimeStepSWE(pd.avgDiff(:,1), pd.avgDiff(:,2), pd.avgDepth, pd.gConst, pd.dt, nStep);
+end % if
+
 dt = pd.dt;
 t = pd.t0 + nStep * dt;
-% TODO: variable time step
 
 % Determine time level at which continuous functions are to be evaluated
 switch pd.schemeType
