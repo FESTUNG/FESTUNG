@@ -66,7 +66,7 @@ sysY = [ reshape(pd.cDisc(:,:,1).', K*N, 1) ; ...
          reshape(pd.cDisc(:,:,2).', K*N, 1) ; ...
          reshape(pd.cDisc(:,:,3).', K*N, 1) ];
 sysH = sysY(1:K*N) - reshape(pd.zbDisc.', K*N,1);
-       
+
 % Compute solution at next time step using explicit or semi-implicit scheme
 switch pd.schemeType
   case 'explicit'
@@ -79,6 +79,13 @@ switch pd.schemeType
   otherwise
     error('Invalid time-stepping scheme')
 end % switch
+
+% Compute change
+if pd.isSteadyState
+  pd.changeL2 = norm(sysY - [ reshape(pd.cDisc(:,:,1).', K*N, 1) ; ...
+                              reshape(pd.cDisc(:,:,2).', K*N, 1) ; ...
+                              reshape(pd.cDisc(:,:,3).', K*N, 1) ], 2);
+end % if
 
 % Reshape linearized vector to solution vectors
 pd.cDisc(:,:,1) = reshape(sysY(        1 :   K*N), N, K).';

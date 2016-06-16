@@ -56,5 +56,11 @@ pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueC
 % Update time level and check for simulation end
 pd.t = pd.t + pd.dt;
 pd.isFinished = pd.t >= pd.tEnd;
+
+% Check for steady state convergence
+if pd.isSteadyState && pd.changeL2 < pd.convergenceCriterion
+  fprintf('Steady state is reached.\n')
+  pd.isFinished = true;
+end % if
 end
 
