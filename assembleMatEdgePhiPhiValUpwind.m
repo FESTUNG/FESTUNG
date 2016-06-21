@@ -143,6 +143,9 @@
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
+%> @param  markE0Tbdr <code>logical</code> arrays that mark each triangles
+%>                    (boundary) edges on which the matrix blocks should be
+%>                    assembled @f$[K \times 3]@f$
 %> @param refEdgePhiIntPhiIntOnQuad  Local matrix 
 %>                    @f$\hat{\mathsf{R}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiIntPerQuad()</code>.
@@ -156,11 +159,16 @@
 %>                    For a normal velocity these can be computed by 
 %>                    <code>computeFuncContNuOnQuadEdge()</code>.
 %>                    @f$[K \times 3 \times R]@f$
+%> @param areaE0Tbdr (optional) argument to provide precomputed values
+%>                    for the products of <code>markE0Tbdr</code>, and
+%>                    <code>g.areaE0T</code>
+%>                    @f$[3 \times 1 \text{ cell}]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>                      Modified by Hennes Hajduk 2016-06-14
 %> 
 %> @par License
 %> @parblock
@@ -178,8 +186,25 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgePhiPhiValUpwind(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad)
+function ret = assembleMatEdgePhiPhiValUpwind(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr)
 % Extract dimensions
+[K, ~, R] = size(valOnQuad);
+N = size(refEdgePhiIntPhiIntOnQuad, 1);
+
+% Check function arguments that are directly used
+validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
+validateattributes(valOnQuad, {'numeric'}, {'size', [K 3 NaN]});
+validateattributes(refEdgePhiIntPhiIntOnQuad, {'numeric'}, {'size', [N N 3 R]});
+validateattributes(refEdgePhiIntPhiExtOnQuad, {'numeric'}, {'size', [N N 3 3 R]});
+
+if nargin > 5
+  ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr);
+else
+  ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad);
+end % for
+end % function
+
+function ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr)
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
@@ -187,15 +212,36 @@ N = size(refEdgePhiIntPhiIntOnQuad, 1);
 % p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
 % R = length(W);
 
-% Check function arguments that are directly used
-validateattributes(valOnQuad, {'numeric'}, {'size', [g.numT 3 NaN]});
-validateattributes(refEdgePhiIntPhiIntOnQuad, {'numeric'}, {'size', [N N 3 R]});
-validateattributes(refEdgePhiIntPhiExtOnQuad, {'numeric'}, {'size', [N N 3 3 R]});
+% Assemble matrices
+ret = sparse(K*N, K*N);
+for nn = 1 : 3
+  % Diagonal blocks
+  for r = 1 : R
+    ret = ret + kron(spdiags(areaE0Tbdr{nn} .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
+  end
+  % Off-diagonal blocks
+  for np = 1 : 3
+    RknTimesVal = sparse(K*N, N);
+    for r = 1 : R
+      RknTimesVal = RknTimesVal + kron(areaE0Tbdr{nn} .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
+    end
+    ret = ret + kronVec(g.markE0TE0T{nn, np}, RknTimesVal);
+  end % for
+end % for
+end % function
+
+function ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad)
+[K, ~, R] = size(valOnQuad);
+N = size(refEdgePhiIntPhiIntOnQuad, 1);
+
+% Determine quadrature rule
+% p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
+% R = length(W);
 
 % Assemble matrices
 ret = sparse(K*N, K*N);
 for nn = 1 : 3
-  Rkn = g.areaE0T(:, nn);
+  Rkn = markE0Tbdr(:,nn) .* g.areaE0T(:, nn);
   % Diagonal blocks
   for r = 1 : R
     ret = ret + kron(spdiags(Rkn .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
