@@ -1,5 +1,7 @@
 function problemData = postprocessProblem(problemData)
-% No postprocessing necessary.
+addpath('swe');
+problemData.sweData = postprocessProblem(problemData.sweData);
+rmpath('swe');
 addpath('transport');
 problemData.transportData = postprocessProblem(problemData.transportData);
 rmpath('transport');
