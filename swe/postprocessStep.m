@@ -50,9 +50,6 @@
 %> @endparblock
 %
 function pd = postprocessStep(pd, nStep)
-% Ensure water height doesn't fall below threshold
-pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, nStep, pd.zbLagr + pd.minTol, 20);
-
 % Update time level and check for simulation end
 pd.t = pd.t + pd.dt;
 pd.isFinished = pd.t >= pd.tEnd;
