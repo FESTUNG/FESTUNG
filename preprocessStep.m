@@ -207,6 +207,7 @@ gHH = 0.5 * pd.gConst * (cQ0T{1} .* cQ0T{1});
 pd.riemannTerms = sparse(3*K*N, 1);
 pd.nonlinearTerms = [ -pd.globF{1} * (uuH + gHH) - pd.globF{2} * uvH ; ...
                       -pd.globF{1} * uvH - pd.globF{2} * (vvH + gHH) ];
+pd.massFlux = zeros(K, 3, length(Q));
                              
 %% Non-linear terms in quadrature points of edges.
 for nn = 1 : 3
@@ -230,7 +231,14 @@ for nn = 1 : 3
           [ pd.globV{nn,np} * (lambda .* jumpQ0E0TE0T{1,nn,np}) ; ...
             pd.globV{nn,np} * (lambda .* jumpQ0E0TE0T{2,nn,np}) ; ...
             pd.globV{nn,np} * (lambda .* jumpQ0E0TE0T{3,nn,np}) ];
+        
+        % for debugging
+        cAvgQ0E0T{2} = setNaN2Zero(cAvgQ0E0T{2});
+        cAvgQ0E0T{3} = setNaN2Zero(cAvgQ0E0T{3});
 
+        pd.massFlux(:,nn,:) = pd.massFlux(:,nn,:) + 0.5 * reshape( setNaN2Zero( cAvgQ0E0T{2} .* pd.g.nuQ0E0T{nn,1}  ...
+                                                                              + cAvgQ0E0T{3} .* pd.g.nuQ0E0T{nn,2} ) ...
+                                                                  + lambda .* jumpQ0E0TE0T{1,nn,np}, [length(Q), K] )';
       case 'Roe'
         error('not implemented')
         
@@ -248,6 +256,9 @@ for nn = 1 : 3
   pd.nonlinearTerms = pd.nonlinearTerms + ...
     [ pd.globRdiag{nn,1} * (uuH + gHH) + pd.globRdiag{nn,2} * uvH ; ...
       pd.globRdiag{nn,1} * uvH + pd.globRdiag{nn,2} * (vvH + gHH) ];
+  
+%   pd.massFlux(:,nn,:) = pd.massFlux(:,nn,:) + reshape( cQ0E0Tint{2,nn} .* kron(pd.g.nuE0T(:,nn,1), ones(length(Q),1)) ...
+%                                                      + cQ0E0Tint{3,nn} .* kron(pd.g.nuE0T(:,nn,2), ones(length(Q),1)), [length(Q), K] )';
 
   % Land boundary contributions
   if pd.g.numEbdrL > 0
