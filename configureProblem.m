@@ -73,7 +73,6 @@ pd.p = 1;
 
 %% Time stepping parameters
 pd.schemeType = 'explicit'; % type of time stepping scheme ('explicit' or 'semi-implicit')
-pd.schemeOrder = min(pd.p+1,2);
 
 %% Model parameters
 % Some may be overwritten by fort.15 config files
@@ -83,7 +82,7 @@ pd.typeBdrL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', o
 pd.averagingType = 'full-harmonic'; % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
-pd.minTol = 0.001;
+
 
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
@@ -112,7 +111,9 @@ function pd = configureDebug(pd)
 pd.isSolutionAvail = false;
 pd.isRhsAvail = false;
 pd.isTidalDomain = false;
-pd.isSpherical = false;
+pd.schemeOrder = min(pd.p+1,3);
+
+pd.minTol = 0.001;
 
 % Overwrite grid parameters
 pd.gridSource = 'square';
@@ -160,6 +161,9 @@ function pd = configureAnalyticalTest(pd)
 pd.isSolutionAvail = true;
 pd.isRhsAvail = true;
 pd.isTidalDomain = false;
+pd.schemeOrder = min(pd.p+1,3);
+
+pd.minTol = 0.001;
 
 % Overwrite grid parameters
 pd.gridSource = 'hierarchical';
@@ -255,6 +259,11 @@ pd.configADCIRC = readConfigADCIRC(['swe/fort_' pd.name '.15']);
 
 %% Map ADCIRC variables to internal names
 % Constants
+
+pd.schemeOrder = pd.configADCIRC.IRK+1;
+
+pd.minTol = pd.configADCIRC.H0;
+
 pd.gConst = pd.configADCIRC.G;
 
 % Simulation time
