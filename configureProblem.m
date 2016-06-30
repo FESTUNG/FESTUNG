@@ -247,7 +247,6 @@ end % function
 function pd = configureADCIRC(pd)
 pd.isSolutionAvail = false;
 pd.isRhsAvail = false;
-pd.isTidalDomain = false;
 
 % Verify input files exist
 assert(exist(['swe/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.14" not found!'])
