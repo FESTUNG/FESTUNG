@@ -380,7 +380,7 @@ if pd.isBottomFrictionVarying
 else
   if pd.isBottomFrictionNonlinear
     refElemPhiPerQuad = integrateRefElemPhiPerQuad(N, pd.basesOnQuad);
-    pd.globE = pd.bottomFrictionCoef * assembleMatElemPhiPhi(pd.g, refElemPhiPerQuad);
+    pd.globE = pd.bottomFrictionCoef * assembleMatElemPhiPerQuad(g, refElemPhiPerQuad);
   else
     pd.globE = pd.bottomFrictionCoef * pd.globM;
   end % if

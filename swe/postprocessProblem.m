@@ -67,7 +67,7 @@ end % if
 p = problemData.p;
 if problemData.isSolutionAvail
   % Continuous solution
-  t = problemData.t0 + problemData.numSteps * problemData.dt;
+  t = problemData.t;
   xiEnd = @(x1,x2) problemData.xiCont(x1,x2,t);
   hEnd = @(x1,x2) problemData.xiCont(x1,x2,t) - problemData.zbCont(x1,x2);
   uEnd = @(x1,x2) problemData.uCont(x1,x2,t);
