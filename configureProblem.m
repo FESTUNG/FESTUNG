@@ -267,7 +267,7 @@ pd.gConst = pd.configADCIRC.G;
 
 % Simulation time
 pd.t0 = pd.configADCIRC.STATIM;
-pd.tEnd = pd.configADCIRC.RNDAY * 86400;
+pd.tEnd = pd.t0 + pd.configADCIRC.RNDAY * 86400;
 pd.dt = pd.configADCIRC.DT;
 pd.numSteps = round((pd.tEnd - pd.t0) / pd.dt);
 
