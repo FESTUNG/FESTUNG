@@ -72,9 +72,6 @@ pd.cDiscRK0 = [ reshape(pd.cDisc(:,:,1).', K*N, 1) ; ...
                 reshape(pd.cDisc(:,:,3).', K*N, 1) ];
 pd.cDiscRK = pd.cDiscRK0;
 
-% Compute height
-pd.sysH = pd.cDiscRK0(1:K*N) - reshape(pd.zbDisc.', K*N,1);
-
 % Carry out RK steps
 pd.isSubSteppingFinished = false;
 pd = iterateSubSteps(pd, nStep);
