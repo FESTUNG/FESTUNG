@@ -66,7 +66,7 @@ if pd.isTidalDomain
                                             pd.forcingFrequency{2,n}(tRhs) * pd.forcingTidal{m,2,n};
     end % for
     if pd.isRamp
-      pd.tidalTerms{m} = pd.ramp(tRhs) * pd.tidalTerms{m};
+      pd.tidalTerms{m} = pd.ramp(tRhs/86400) * pd.tidalTerms{m};
     end % if
   end % for
 end % if
@@ -92,7 +92,7 @@ if pd.g.numEbdrOS > 0
     for n = 1 : numFrequency
       xiOS = xiOS + pd.xiFreqOS{1,n}(tRhs) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(tRhs) * pd.xiAmpOS{2,n};
     end % for
-    xiOS = pd.ramp(tRhs) * kron(xiOS, ones(numQuad1D, 1));
+    xiOS = pd.ramp(tRhs/86400) * kron(xiOS, ones(numQuad1D, 1));
     for n = 1 : 3
       xiOSQ0E0Tint{n} = xiOS;
     end % for
@@ -119,9 +119,9 @@ if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
     end % for
   else
     for n = 1 : 3
-      xiRivQ0E0T{n} = pd.ramp(tRhs) * pd.xiRivQ0E0T(:,n);
-      uRivQ0E0T{n} = pd.ramp(tRhs) * pd.uRivQ0E0T(:,n);
-      vRivQ0E0T{n} = pd.ramp(tRhs) * pd.vRivQ0E0T(:,n);
+      xiRivQ0E0T{n} = pd.ramp(tRhs/86400) * pd.xiRivQ0E0T(:,n);
+      uRivQ0E0T{n} = pd.ramp(tRhs/86400) * pd.uRivQ0E0T(:,n);
+      vRivQ0E0T{n} = pd.ramp(tRhs/86400) * pd.vRivQ0E0T(:,n);
     end % for
   end % if
 end % if
