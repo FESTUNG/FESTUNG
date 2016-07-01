@@ -4,10 +4,6 @@ K = pd.K;
 p = pd.p;
 N = pd.N;
 
-if pd.isAdaptiveTimestep
-  pd.dt = selectTimeStepSWE(pd.avgDiff(:,1), pd.avgDiff(:,2), pd.avgDepth, pd.gConst, pd.dt, nStep);
-end % if
-
 tRhs = pd.tLvls(nSubStep);
 
 %% Determine quadrature rules

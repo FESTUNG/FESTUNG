@@ -440,7 +440,7 @@ end % if
 %% Assembly of rhs terms.
 % Assemble Newtonian tide potential matrix
 if pd.isTidalDomain
-  if p == 0
+  if pd.p == 0
     refElemPhiPhiLeastLin = integrateRefElemPhiPhi([N max(N,3)], pd.basesOnQuadLin);
   else
     refElemPhiPhiLeastLin = integrateRefElemPhiPhi([N max(N,3)], pd.basesOnQuad);
