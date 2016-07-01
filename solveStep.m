@@ -54,6 +54,10 @@ function pd = solveStep(pd, nStep)
 K = pd.K;
 N = pd.N;
 
+if pd.isAdaptiveTimestep
+  pd.dt = selectTimeStepSWE(pd.avgDiff(:,1), pd.avgDiff(:,2), pd.avgDepth, pd.gConst, pd.dt, nStep);
+end % if
+
 % Obtain Runge-Kutta rule
 switch pd.schemeType
   case 'explicit'
