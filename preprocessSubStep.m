@@ -199,8 +199,8 @@ for nn = 1 : 3
         vvHL = vHL .* vHL ./ hQ0E0Tint{nn};
         % TODO: landFlux
         pd.nonlinearTerms = pd.nonlinearTerms + ...
-          [ pd.globRdiag{nn,1} * (uuHL + gHH) + pd.globRdiag{nn,2} * uvHL ; ...
-            pd.globRdiag{nn,1} * uvHL + pd.globRdiag{nn,2} * (vvHL + gHH) ];
+          [ pd.globRL{nn,1} * (uuHL + gHH) + pd.globRL{nn,2} * uvHL ; ...
+            pd.globRL{nn,1} * uvHL + pd.globRL{nn,2} * (vvHL + gHH) ];
 
       case 'riemann'
         uHriem = pd.g.nuE0TsqrDiff{nn} .* cQ0E0Tint{2,nn} - 2 * pd.g.nuE0Tprod{nn} .* cQ0E0Tint{3,nn};
