@@ -49,7 +49,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function pd = postprocessStep(pd, nStep)
+function pd = postprocessStep(pd, ~)
 % Update time level and check for simulation end
 pd.t = pd.t + pd.dt;
 pd.isFinished = pd.t >= pd.tEnd;
