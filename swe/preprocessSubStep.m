@@ -57,7 +57,7 @@ if pd.isRhsAvail
 end % if
 
 %% Tidal potential contribution
-pd.tidalTerms = { sparse(K*N,K*N); sparse(K*N,K*N) };
+pd.tidalTerms = { sparse(K*N,K*max(N,3)); sparse(K*N,K*max(N,3)) };
 if pd.isTidalDomain
   numFrequency = size(pd.forcingTidal, 3);
   for m = 1 : 2
