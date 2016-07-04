@@ -4,7 +4,7 @@ N = pd.N;
 dt = pd.dt;
 
 % Compute height
-sysH = computeSumDataData(pd.cDisc(:,:,1), -pd.zbDisc);
+sysH = computeSumDataData(pd.cDisc(:,:,1), -pd.zbDiscLin);
 
 % Build right hand side vector
 sysV = cell2mat(pd.globL) - cell2mat(pd.globLRI) - ...
@@ -14,7 +14,7 @@ sysV = cell2mat(pd.globL) - cell2mat(pd.globLRI) - ...
 % Compute solution at next time step using explicit or semi-implicit scheme
 switch pd.schemeType
   case 'explicit'
-    sysA = [ sparse(K*N,K*N); pd.tidalTerms{1}; pd.tidalTerms{2} ];
+    sysA = [ sparse(K*N,K*max(N,3)); pd.tidalTerms{1}; pd.tidalTerms{2} ];
     cDiscDot = pd.sysW \ (sysV - pd.linearTerms * pd.cDiscRK + sysA * sysH );
     pd.cDiscRK = pd.omega(nSubStep) * pd.cDiscRK0 + (1 - pd.omega(nSubStep)) * (pd.cDiscRK + dt * cDiscDot);
 

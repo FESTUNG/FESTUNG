@@ -64,7 +64,7 @@ switch pd.schemeType
     [pd.tLvls, pd.omega] = rungeKuttaSSP(pd.schemeOrder, pd.dt, pd.t);
 
   case 'semi-implicit'
-    pd.tLvls = pd.t + dt;
+    pd.tLvls = pd.t + pd.dt;
     
   otherwise
     error('Invalid time stepping scheme')

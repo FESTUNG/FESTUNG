@@ -96,13 +96,13 @@
 %
 function ret = assembleMatElemPhiPhiFuncDisc(g, refElemPhiPhiPhi, dataDisc)
 [K, dataN] = size(dataDisc); 
-N = size(refElemPhiPhiPhi,1);
+[N1, N2, ~] = size(refElemPhiPhiPhi);
 
 % Check function arguments that are directly used
 validateattributes(dataDisc, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc');
-validateattributes(refElemPhiPhiPhi, {'numeric'}, {'size', [N N dataN]}, mfilename, 'refElemPhiPhiPhi');
+validateattributes(refElemPhiPhiPhi, {'numeric'}, {'size', [N1 N2 dataN]}, mfilename, 'refElemPhiPhiPhi');
 
-ret = sparse(K*N,K*N);
+ret = sparse(K*N1,K*N2);
 for l = 1 : dataN
   ret = ret + 2 * kron(spdiags(g.areaT .* dataDisc(:,l), 0, K, K), refElemPhiPhiPhi(:,:,l));
 end % for
