@@ -182,6 +182,9 @@ switch pd.gridSource
 
     % Stations
     if pd.isVisStations
+      if pd.isAdaptiveTimestep
+        error('Station output not implemented for adaptive time stepping.');
+      end % if
       if pd.configADCIRC.NSTAE == 0 && pd.configADCIRC.NSTAV == 0
         warning('No stations specified! Disabling station output.')
         pd.isVisStation = false;
@@ -224,14 +227,32 @@ pd.g.nuQ0E0T = cell(3,2);
 pd.g.nuE0Tprod = cell(3,1);
 pd.g.nuE0TsqrDiff = cell(3,1);
 pd.g.nuE0Tsqr = cell(3,2);
-for n = 1 : 3
-  pd.g.nuE0Tprod{n} = kron(pd.g.nuE0T(:,n,1) .* pd.g.nuE0T(:,n,2), ones(numQuad1D,1));
-  for m = 1 : 2
-    pd.g.nuE0Tsqr{n,m} = kron(pd.g.nuE0T(:,n,m) .* pd.g.nuE0T(:,n,m), ones(numQuad1D,1));
-    pd.g.nuQ0E0T{n,m} = kron(pd.g.nuE0T(:,n,m), ones(numQuad1D, 1));
-  end % for
-  pd.g.nuE0TsqrDiff{n} = pd.g.nuE0Tsqr{n,2} - pd.g.nuE0Tsqr{n,1};
-end % for
+switch pd.typeBdrL
+  case 'natural'
+    for n = 1 : 3
+      for m = 1 : 2
+        pd.g.nuQ0E0T{n,m} = kron(pd.g.nuE0T(:,n,m), ones(numQuad1D, 1));
+      end % for
+    end % for
+  case 'reflected'
+    for n = 1 : 3
+      pd.g.nuE0Tprod{n} = kron(pd.g.nuE0T(:,n,1) .* pd.g.nuE0T(:,n,2), ones(numQuad1D,1));
+      for m = 1 : 2
+        pd.g.nuE0Tsqr{n,m} = kron(pd.g.nuE0T(:,n,m) .* pd.g.nuE0T(:,n,m), ones(numQuad1D,1));
+        pd.g.nuQ0E0T{n,m} = kron(pd.g.nuE0T(:,n,m), ones(numQuad1D, 1));
+      end % for
+    end % for
+  case 'riemann'
+    for n = 1 : 3
+      pd.g.nuE0Tprod{n} = kron(pd.g.nuE0T(:,n,1) .* pd.g.nuE0T(:,n,2), ones(numQuad1D,1));
+      for m = 1 : 2
+        pd.g.nuQ0E0T{n,m} = kron(pd.g.nuE0T(:,n,m), ones(numQuad1D, 1));
+      end % for
+      pd.g.nuE0TsqrDiff{n} = kron(pd.g.nuE0T(:,n,2) .* pd.g.nuE0T(:,n,2) -pd.g.nuE0T(:,n,1) .* pd.g.nuE0T(:,n,1), ones(numQuad1D,1));
+    end % for
+  otherwise
+    error('Invalid type for land boundary treatment.')
+end % switch
 
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', pd.p, N, K);
@@ -277,7 +298,6 @@ refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, pd.basesOnQuad);
 
 refElemDphiPerQuad = integrateRefElemDphiPerQuad(N, pd.basesOnQuad);
 refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, pd.basesOnQuad);
-pd.refEdgePhiIntPhiIntPerQuad = integrateRefEdgePhiIntPhiIntPerQuad(N, pd.basesOnQuad);
 
 %% L2 projections of time-independent algebraic coefficients.
 fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
