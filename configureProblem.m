@@ -69,7 +69,7 @@ pd.gridSource = 'ADCIRC';
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
-pd.p = 1;
+pd.p = 0;
 
 %% Time stepping parameters
 pd.schemeType = 'explicit'; % type of time stepping scheme ('explicit' or 'semi-implicit')
@@ -83,6 +83,7 @@ pd.averagingType = 'full-harmonic'; % Averaging type for variables when computin
 pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
 
+pd.elevTol = 20;
 
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
