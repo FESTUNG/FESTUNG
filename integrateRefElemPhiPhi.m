@@ -1,6 +1,6 @@
 % Compute integrals on the reference triangle, whose integrands 
 % consist of all permutations of two basis functions.
-%
+
 %===============================================================================
 %> @file integrateRefElemPhiPhi.m
 %>
@@ -19,10 +19,7 @@
 %>   \int_{\hat{T}} \hat{\varphi}_i \hat{\varphi}_j \mathrm{d}\hat{\mathbf{x}} \,.
 %> @f]
 %>
-%> @param  N    The local number of degrees of freedom, either as a scalar
-%>              for both basis functions, or as a vector with two
-%>              entries, specifying the number of degrees of freedom for
-%>              each basis function.
+%> @param  N    The local number of degrees of freedom
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi2D.
@@ -30,8 +27,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
-%>											Modified by Hennes Hajduk 06/30/2016
+%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -51,17 +47,10 @@
 %
 function ret = integrateRefElemPhiPhi(N, basesOnQuad)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-p = (sqrt(8*max(N)+1)-3)/2;  qOrd = max(2*p, 1);  [~,~,W] = quadRule2D(qOrd);
-
-if length(N) == 1
-  N = N * ones(2,1);
-else
-  validateattributes(N, {'numeric'}, {'numel', 2}, mfilename, 'N')
-end % if
-
-ret = zeros(N(1), N(2));
-for i = 1 : N(1)
-  for j = 1 : N(2)
+p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [~,~,W] = quadRule2D(qOrd);
+ret = zeros(N); % [N x N]
+for i = 1 : N
+  for j = 1 : N
     ret(i, j) = sum( W' .* basesOnQuad.phi2D{qOrd}(:, i) .* basesOnQuad.phi2D{qOrd}(:, j) );
   end % for
 end % for
