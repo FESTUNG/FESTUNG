@@ -85,8 +85,4 @@ if pd.isSteadyState
   pd.changeL2 = norm(pd.cDiscRK - pd.cDiscRK0, 2);
 end % if
 
-% Reshape linearized vector to solution vectors
-pd.cDisc(:,:,1) = reshape(pd.cDiscRK(        1 :   K*N), N, K).';
-pd.cDisc(:,:,2) = reshape(pd.cDiscRK(  K*N + 1 : 2*K*N), N, K).';
-pd.cDisc(:,:,3) = reshape(pd.cDiscRK(2*K*N + 1 : 3*K*N), N, K).';
 end % function
