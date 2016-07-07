@@ -54,6 +54,14 @@ function problemData = outputStep(problemData, nStep)
 %% Visualize solution and evaluate stations.
 visualizeSolution(problemData, nStep);
 
+%% Hot-start file output
+if problemData.isHotStartOutput == 1 && mod(nStep, problemData.hotStartOutputFrequency) == 0
+%   fprintf('\n\n')['output/' problemData.name '_xi_']
+  createHotStart(['output/' problemData.name '_xi_'], problemData.cDisc(:,:,1), problemData.t);
+  createHotStart(['output/' problemData.name '_uH_'], problemData.cDisc(:,:,2), problemData.t);
+  createHotStart(['output/' problemData.name '_vH_'], problemData.cDisc(:,:,3), problemData.t);
+end % if
+
 %% Update waitbar.
 if problemData.isWaitbar
   percentDone = round( nStep / problemData.numSteps * 100 );

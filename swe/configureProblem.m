@@ -312,4 +312,8 @@ pd.isTidalDomain = pd.configADCIRC.NTIP == 1;
 
 % Boundary conditions
 pd.isRivCont = false;
+
+% Hot-start output
+pd.isHotStartOutput = pd.configADCIRC.NHSTAR == 1;
+pd.hotStartOutputFrequency = pd.configADCIRC.NHSINC;
 end % function
