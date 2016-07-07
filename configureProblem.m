@@ -160,6 +160,9 @@ pd.isRivCont = true;
 pd.xiRivCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
 pd.uRivCont = @(x1,x2,t) pd.uCont(x1,x2,t);
 pd.vRivCont = @(x1,x2,t) pd.vCont(x1,x2,t);
+
+% Hot-start output
+pd.isHotStartOutput = false;
 end % function
 
 %% Analytical solution
@@ -247,6 +250,9 @@ pd.f2Cont = @(x1,x2,t) pd.v_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
 % Boundary conditions
 pd.xiOSCont = pd.xiCont;
 pd.isRivCont = false;
+
+% Hot-start output
+pd.isHotStartOutput = false;
 end % function
 
 %% ADCIRC
