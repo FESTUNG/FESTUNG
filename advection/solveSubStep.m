@@ -2,39 +2,9 @@ function problemData = solveSubStep(problemData, ~, nSubStep)
 K = problemData.K;
 N = problemData.N;
 
-% L2 projections of algebraic coefficients
-fDisc  = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.fCont(problemData.t(nSubStep),x1,x2),  ...
-                                  2*problemData.p, problemData.hatM, problemData.basesOnQuad);
-u1Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.u1Cont(problemData.t(nSubStep),x1,x2), ...
-                                  2*problemData.p, problemData.hatM, problemData.basesOnQuad);
-u2Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.u2Cont(problemData.t(nSubStep),x1,x2), ...
-                                  2*problemData.p, problemData.hatM, problemData.basesOnQuad);
-
-% Evaluate normal velocity in quadrature points of edges
-vNormalOnQuadEdge = computeFuncContNuOnQuadEdge(problemData.g, @(x1,x2) problemData.u1Cont(problemData.t(nSubStep),x1,x2), ...
-                      @(x1,x2) problemData.u2Cont(problemData.t(nSubStep),x1,x2), 2*problemData.p+1);
-
-% Assembly of time-dependent global matrices
-globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, u1Disc, u2Disc);
-globR = assembleMatEdgePhiPhiValUpwind(problemData.g, problemData.hatRdiagOnQuad, ...
-                                       problemData.hatRoffdiagOnQuad, vNormalOnQuadEdge);
-
-% Assembly of Dirichlet boundary contributions
-globKD = assembleVecEdgePhiIntFuncContVal(problemData.g, problemData.g.markE0TbdrD, ...
-          @(x1,x2) problemData.cDCont(problemData.t(nSubStep),x1,x2), vNormalOnQuadEdge, N, ...
-          problemData.basesOnQuad, problemData.g.areaE0TbdrD);
-
-% Assembly of Neumann boundary contributions
-gNUpwind = @(x1,x2) (problemData.gNCont(problemData.t(nSubStep),x1,x2) <= 0) .* problemData.gNCont(problemData.t(nSubStep),x1,x2);
-globKN = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrN, ...
-          gNUpwind, N, problemData.basesOnQuad);
-
-% Assembly of the source contribution
-globL = problemData.globM * reshape(fDisc', K*N, 1);
-
 % Building the system
-sysA = -globG{1} - globG{2} + globR;
-sysV = globL - globKD - globKN;
+sysA = -problemData.globG{1} - problemData.globG{2} + problemData.globR;
+sysV = problemData.globL - problemData.globKD - problemData.globKN;
 
 % Computing the discrete time derivative
 cDiscDot = problemData.globM \ (sysV - sysA * problemData.cDiscRK{nSubStep});
@@ -54,7 +24,7 @@ problemData.cDiscRK{nSubStep + 1} = problemData.omega(nSubStep) * problemData.cD
 if problemData.isSlopeLim
   cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont(problemData.t(nSubStep), x1, x2));
   problemData.cDiscRK{nSubStep + 1} = reshape(applySlopeLimiterDisc(problemData.g, reshape(problemData.cDiscRK{nSubStep + 1}, [N K])', problemData.g.markV0TbdrD, ...
-                          cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim)', [K*N 1]);
+                                      cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim)', [K*N 1]);
 end % if
 
 end % function

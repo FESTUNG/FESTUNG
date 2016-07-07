@@ -61,27 +61,27 @@ validateattributes(V0E, {'numeric'}, {'size', [numE 2], '>', 0, '<=', numV}, mfi
 T0E = [ data(5 : 5 : 5*numE), data(6 : 5 : 5*numE+1) ];
 validateattributes(T0E, {'numeric'}, {'size', [numE 2], '>=', 0, '<=', numT}, mfilename, 'T0E');
 offset = 1 + 5 * numE + 1;
-E0T = [ data(offset+1 : 4 : offset+1+4*numT-3), ...
-        data(offset+2 : 4 : offset+1+4*numT-2), ...
-        data(offset+3 : 4 : offset+1+4*numT-1) ];
+E0T = [ data(offset+1 : 4 : offset+4*numT-3), ...
+        data(offset+2 : 4 : offset+4*numT-2), ...
+        data(offset+3 : 4 : offset+4*numT-1) ];
 validateattributes(E0T, {'numeric'}, {'size', [numT 3], '>', 0, '<=', numE}, mfilename, 'E0T');
 offset = offset + 4 * numT;
 
 % Interior edges
 numEint = data(offset);
-idxEint = data(offset+2 : 2 : offset+1+2*numEint);
+idxEint = data(offset+2 : 2 : offset+2*numEint);
 validateattributes(idxEint, {'numeric'}, {'size', [numEint 1], '>', 0, '<=', numE}, mfilename, 'idxEint');
 offset = offset + 1 + 2 * numEint;
 
 % Land edges
 numEbdrLand = data(offset);
-idxEbdrLand = data(offset+2 : 2 : offset+1+2*numEbdrLand);
+idxEbdrLand = data(offset+2 : 2 : offset+2*numEbdrLand);
 validateattributes(idxEbdrLand, {'numeric'}, {'size', [numEbdrLand 1], '>', 0, '<=', numE}, mfilename, 'idxEbdrLand');
 offset = offset + 1 + 2 * numEbdrLand;
 
 % Radiation edges
 numEbdrRad = data(offset);
-idxEbdrRad = data(offset+2 : 2 : offset+1+2*numEbdrRad);
+idxEbdrRad = data(offset+2 : 2 : offset+2*numEbdrRad);
 validateattributes(idxEbdrRad, {'numeric'}, {'size', [numEbdrRad 1], '>', 0, '<=', numE}, mfilename, 'idxEbdrRad');
 offset = offset + 1 + 2 * numEbdrRad;
 
@@ -114,11 +114,13 @@ validateattributes(idxEbdrRiv, {'numeric'}, {'size', [numEbdrRiv 1], '>', 0, '<=
 
 % Open Sea edges
 numEbdrOS = data(offset);
-idxEbdrOS = data(offset+2 : 2 : offset+1+2*numEbdrOS);
+idxEbdrOS = data(offset+2 : 2 : offset+2*numEbdrOS);
 if numEbdrOS > 0
   validateattributes(idxEbdrOS, {'numeric'}, {'size', [numEbdrOS 1], '>', 0, '<=', numE}, mfilename, 'idxEbdrOS');
 end % if
-assert(numEbdrOS == 0 || numForcingOS > 0, 'Open sea boundary given but no boundary forcings.')
+if numEbdrOS ~= 0 && numForcingOS == 0
+  warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
+end % if
 offset = offset + 1 + 2 * numEbdrOS;
 
 % Open sea boundary forcings
