@@ -49,13 +49,13 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd.name = 'debug'; 
+pd.name = 'gom3k'; 
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
-pd.configSource = 'debug';
+pd.configSource = 'ADCIRC';
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -65,7 +65,7 @@ pd.configSource = 'debug';
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-pd.gridSource = 'square';
+pd.gridSource = 'ADCIRC';
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
@@ -73,7 +73,6 @@ pd.p = 0;
 
 %% Time stepping parameters
 pd.schemeType = 'explicit'; % type of time stepping scheme ('explicit' or 'semi-implicit')
-pd.schemeOrder = min(pd.p+1,2);
 
 %% Model parameters
 % Some may be overwritten by fort.15 config files
@@ -83,15 +82,16 @@ pd.typeBdrL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', o
 pd.averagingType = 'full-harmonic'; % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
-pd.minTol = 0.001;
+
+pd.elevTol = 20;
 
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
 pd.isWaitbar = false; % Use waiting bar
-pd.outputCount = 25; % Number of outputs over total simulation time
+pd.outputCount = 200; % Number of outputs over total simulation time
 pd.outputTypes = 'vtk'; % Output file type
 pd.outputList = { 'u', 'uH', 'v', 'vH', 'xi', 'h', 'zb', 'fc' }; % List of variables to visualize
-pd.isVisStations = true; % Output stations
+pd.isVisStations = false; % Output stations
 
 %% Simulation scenario specific parameters
 switch pd.configSource
@@ -112,7 +112,9 @@ function pd = configureDebug(pd)
 pd.isSolutionAvail = true;
 pd.isRhsAvail = true;
 pd.isTidalDomain = false;
-pd.isSpherical = false;
+pd.schemeOrder = min(pd.p+1,3);
+
+pd.minTol = 0.001;
 
 % Overwrite grid parameters
 pd.gridSource = 'square';
@@ -121,9 +123,13 @@ pd.hmax = 2^-6; % Maximum element size of initial grid
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd.tEnd = 100/3142*2*pi; % End time of simulation
-pd.numSteps = 100; % Number of time steps
+pd.tEnd = 0.01; % End time of simulation
+pd.numSteps = 5; % Number of time steps
+
+pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
+
+pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
 pd.gConst = 9.81;
@@ -161,6 +167,9 @@ function pd = configureAnalyticalTest(pd)
 pd.isSolutionAvail = true;
 pd.isRhsAvail = true;
 pd.isTidalDomain = false;
+pd.schemeOrder = min(pd.p+1,3);
+
+pd.minTol = 0.001;
 
 % Overwrite grid parameters
 pd.gridSource = 'hierarchical';
@@ -172,7 +181,11 @@ pd.refinement = 0;  % Grid refinement level
 pd.t0 = 0; % Start time of simulation
 pd.tEnd = 1; % End time of simulation
 pd.numSteps = 150; % Number of time steps
+
+pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
+
+pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
 height = 0.05;
@@ -240,7 +253,6 @@ end % function
 function pd = configureADCIRC(pd)
 pd.isSolutionAvail = false;
 pd.isRhsAvail = false;
-pd.isTidalDomain = false;
 
 % Verify input files exist
 assert(exist(['swe/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.14" not found!'])
@@ -252,13 +264,25 @@ pd.configADCIRC = readConfigADCIRC(['swe/fort_' pd.name '.15']);
 
 %% Map ADCIRC variables to internal names
 % Constants
+
+pd.schemeOrder = pd.configADCIRC.IRK+1;
+
+pd.minTol = pd.configADCIRC.H0;
+
 pd.gConst = pd.configADCIRC.G;
 
 % Simulation time
 pd.t0 = pd.configADCIRC.STATIM;
-pd.tEnd = pd.configADCIRC.RNDAY * 86400;
+pd.tEnd = pd.t0 + pd.configADCIRC.RNDAY * 86400;
 pd.dt = pd.configADCIRC.DT;
 pd.numSteps = round((pd.tEnd - pd.t0) / pd.dt);
+
+% Adaptive time stepping
+pd.isAdaptiveTimestep = pd.configADCIRC.NDTVAR == 1;
+
+% Steady state simulation
+pd.isSteadyState = pd.configADCIRC.ITRANS == 1;
+pd.convergenceCriterion = pd.configADCIRC.CONVCR;
 
 % Coordinate system
 pd.isSpherical = pd.configADCIRC.ICS == 2;
@@ -293,4 +317,8 @@ pd.isTidalDomain = pd.configADCIRC.NTIP == 1;
 
 % Boundary conditions
 pd.isRivCont = false;
+
+% Hot-start output
+pd.isHotStartOutput = pd.configADCIRC.NHSTAR == 1;
+pd.hotStartOutputFrequency = pd.configADCIRC.NHSINC;
 end % function

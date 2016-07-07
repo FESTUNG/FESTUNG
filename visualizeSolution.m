@@ -1,12 +1,13 @@
 function visualizeSolution(pd, nStep)
-if mod(nStep, pd.outputFrequency) == 0
-  nOutput = nStep / pd.outputFrequency;
+if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
+  nOutput = ceil(nStep / pd.outputFrequency);
 
   %% Depth and elevation
+  hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
 
   % Visualize water depth (h)
   if any(ismember(pd.outputList, 'h'))
-    dataLagr = projectDataDisc2DataLagr(pd.cDisc(:,:,1) - pd.zbDisc);
+    dataLagr = projectDataDisc2DataLagr(hDisc);
     visualizeDataLagr(pd.g, dataLagr, 'h_h', ['output/' pd.name '_h'], nOutput, pd.outputTypes);
   end % if
 
@@ -25,7 +26,7 @@ if mod(nStep, pd.outputFrequency) == 0
     for n = 1 : length(pd.stationElev)
       dataStationV0T = dataLagr(pd.stationElev{n}(:,1),:); % Extract values in vertices of relevant triangles
       pd.dataElev{n} = [ pd.dataElev{n} ; ...     % Append mean of barycentric weighted values
-                                  mean(sum(pd.stationElev{n}(:,2:4) .* dataStationV0T, 2)) ];
+                         mean(sum(pd.stationElev{n}(:,2:4) .* dataStationV0T, 2)) ];
     end % for
   end % if
 
@@ -39,7 +40,8 @@ if mod(nStep, pd.outputFrequency) == 0
 
   % Evaluate x-velocity (u)
   if any(ismember(pd.outputList, 'u')) || isfield(pd, 'stationVel')
-    dataDisc = projectQuotientDisc2Disc(pd.cDisc(:,:,2), pd.cDisc(:,:,1) - pd.zbDisc, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
+    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
     dataLagr = projectDataDisc2DataLagr(dataDisc);
   end % if
 
@@ -53,7 +55,7 @@ if mod(nStep, pd.outputFrequency) == 0
     for n = 1 : length(pd.stationVel)
       dataStationV0T = dataLagr(pd.stationVel{n}(:,1),:); % Extract values in vertices of relevant triangles
       pd.dataVel{n,1} = [ pd.dataVel{n,1} ; ...     % Append mean of barycentric weighted values
-                                   mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
+                          mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
     end % for
   end % if
 
@@ -67,7 +69,8 @@ if mod(nStep, pd.outputFrequency) == 0
 
   % Evaluate y-velocity (v)
   if any(ismember(pd.outputList, 'v')) || isfield(pd, 'stationVel')
-    dataDisc = projectQuotientDisc2Disc(pd.cDisc(:,:,3), pd.cDisc(:,:,1) - pd.zbDisc, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    dataQ0T = (pd.cDisc(:,:,3) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
+    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
     dataLagr = projectDataDisc2DataLagr(dataDisc);
   end % if
 

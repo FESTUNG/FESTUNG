@@ -21,7 +21,7 @@ switch averagingType
     cRoePikeQ0E0T{3} = (hR .* cQ0E0Tint{3} + hL .* cQ0E0Text{3}) .* hIntExtInv;
 
   case 'mean'
-    hIntExtInv = 0.5 ./ (hQ0E0Tint + hQ0E0Text);
+    hIntExtInv = 0.5 ./ (hQ0E0Tint .* hQ0E0Text);
     
     cRoePikeQ0E0T{1} = 0.5 * (hQ0E0Tint + hQ0E0Text);
     cRoePikeQ0E0T{2} = (hQ0E0Text .* cQ0E0Tint{2} + hQ0E0Tint .* cQ0E0Text{2}) .* hIntExtInv;

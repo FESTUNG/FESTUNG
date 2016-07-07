@@ -93,7 +93,6 @@ assert(ismember(config.ISLOPE, [0, 1, 2, 3]), 'Invalid slope limiter or Riemann 
 config.ITRANS = param(dataCountr); 
 dataCountr = dataCountr+1;
 assert(ismember(config.ITRANS, [0, 1]), 'The program must reach steady-state or run full time.');
-assert(config.IRK >= 1 || config.ITRANS == 1,	'If no time-stepping scheme is used, the problem must be steady-state.');
 
 % Convergence criteria 
 config.CONVCR = param(dataCountr); 
@@ -281,9 +280,9 @@ dataCountr = dataCountr+1;
 % Output hot start
 config.NHSTAR = param(dataCountr); 
 dataCountr = dataCountr+1;
-% TODO: check UTBEST
+assert(ismember(config.NHSTAR, [0 1]), 'Switch for hot-start output must be one or zero.');
 config.NHSINC = param(dataCountr);
-% TODO: check UTBEST
+assert(config.NHSINC && config.NHSINC >= 1 && round(config.NHSINC) == config.NHSINC, 'Hot-start output not specified correctly.');
 
 %% Close file
 fclose(fileID);
