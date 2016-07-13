@@ -49,10 +49,14 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function pd = postprocessStep(pd, ~)
+function pd = postprocessStep(pd, nStep)
 % Update time level and check for simulation end
 pd.t = pd.t + pd.dt;
-pd.isFinished = pd.t >= pd.tEnd;
+if pd.isAdaptiveTimestep
+  pd.isFinished = pd.t >= pd.tEnd;
+else
+  pd.isFinished = nStep >= pd.numSteps;
+end % if
 
 % Check for steady state convergence
 if pd.isSteadyState && pd.changeL2 < pd.convergenceCriterion
