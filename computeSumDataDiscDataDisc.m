@@ -1,4 +1,4 @@
-function ret = computeSumDataData(dataDisc1, dataDisc2)
+function ret = computeSumDataDiscDataDisc(dataDisc1, dataDisc2)
 [K, N1] = size(dataDisc1);
 [~, N2] = size(dataDisc2);
 
