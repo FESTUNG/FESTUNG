@@ -399,8 +399,16 @@ if pd.isBottomFrictionVarying
   end % if
 else
   if pd.isBottomFrictionNonlinear
+    % Assembling the non linear bottom friction matrix globE, which will then be
+    % applied to each component of |u|*u evaluated in each quadrature point.
+    % Thus, globE is a block-diagonal matrix of size KxR, assembled from a
+    % reference block of size NxR. The assembly operation itself is just
+    % the Kronecker product of a diagonal matrix with the transformation
+    % determinants 2*|T| and the reference block - precisely the same
+    % operation as for the assembly of a mass matrix. The corresponding
+    % routine assembleMatElemPhiPhi is therefore re-used here.
     refElemPhiPerQuad = integrateRefElemPhiPerQuad(N, pd.basesOnQuad);
-    pd.globE = pd.bottomFrictionCoef * assembleMatElemPhiPerQuad(pd.g, refElemPhiPerQuad);
+    pd.globE = pd.bottomFrictionCoef * assembleMatElemPhiPhi(pd.g, refElemPhiPerQuad);
   else
     pd.globE = pd.bottomFrictionCoef * pd.globM;
   end % if
