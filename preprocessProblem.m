@@ -67,15 +67,22 @@ switch pd.gridSource
     pd.g.numEbdrOS = sum(pd.g.idE == 4);
     
   case 'hierarchical'
-    X1 = [0 1 1 0]; X2 = [0 0 1 1];
-    pd.g = domainHierarchy(X1, X2, pd.hmax, pd.refinement);
+%     X1 = [0 1 1 0]; X2 = [0 0 1 1];
+%     pd.g = domainHierarchy(X1, X2, pd.hmax, pd.refinement);
+    pd.g = domainSquare(0.5^pd.refinement);
     
     % Set edge types
     pd.g.idE = zeros(pd.g.numE,1);
-    pd.g.idE(pd.g.baryE(:, 2) == 0) = 1; % south
-    pd.g.idE(pd.g.baryE(:, 1) == 1) = 4; % east
-    pd.g.idE(pd.g.baryE(:, 2) == 1) = 1; % north
-    pd.g.idE(pd.g.baryE(:, 1) == 0) = 1; % west
+    pd.g.idE(pd.g.baryE(:, 2) == 0) = 3; % south
+    pd.g.idE(pd.g.baryE(:, 1) == 1) = 3; % east
+    pd.g.idE(pd.g.baryE(:, 2) == 1) = 3; % north
+    pd.g.idE(pd.g.baryE(:, 1) == 0) = 3; % west
+%     pd.g.idE(pd.g.baryE(:, 2) == 0 & pd.g.baryE(:,1) < 0.5) = 4; % southwest
+%     pd.g.idE(pd.g.baryE(:, 2) == 0 & pd.g.baryE(:,1) > 0.5) = 3; % southeast
+%     pd.g.idE(pd.g.baryE(:, 1) == 1) = 1; % east
+%     pd.g.idE(pd.g.baryE(:, 2) == 1) = 2; % north
+%     pd.g.idE(pd.g.baryE(:, 1) == 0 & pd.g.baryE(:,2) < 0.5) = 4; % southwest
+%     pd.g.idE(pd.g.baryE(:, 1) == 0 & pd.g.baryE(:,2) > 0.5) = 3; % southeast
     pd.g.idE0T = pd.g.idE(pd.g.E0T);
     
     % Store edge counts
@@ -220,7 +227,8 @@ pd.g.markE0TbdrRA = pd.g.idE0T == 2; % [K x 3] mark local edges on the radiation
 pd.g.markE0TbdrRI = pd.g.idE0T == 3; % [K x 3] mark local edges on the river boundary
 pd.g.markE0TbdrOS = pd.g.idE0T == 4; % [K x 3] mark local edges on the open sea boundary
 
-pd.g = computeDerivedGridData(pd.g);
+h = getFunctionHandle('swe/computeDerivedGridData');
+pd.g = h(pd.g);
 
 qOrd1D = 2*pd.p+1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
 pd.g.nuQ0E0T = cell(3,2);
@@ -435,6 +443,10 @@ if pd.g.numEbdrRI > 0 % River boundaries
   end % if
   
   pd.globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
+  
+  if pd.isRiemRiv
+    pd.globVRI = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaE0TbdrRI);
+  end % if
   
   if ~pd.isRamp && ~pd.isRivCont
     for n = 1 : 3
