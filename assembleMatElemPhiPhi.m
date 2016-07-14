@@ -1,5 +1,5 @@
 % Assembles a matrix, containing integrals of products of two basis functions.
-%
+
 %===============================================================================
 %> @file assembleMatElemPhiPhi.m
 %>
