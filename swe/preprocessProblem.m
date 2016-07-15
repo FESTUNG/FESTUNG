@@ -53,10 +53,10 @@ switch pd.gridSource
     
     % Set edge types
     pd.g.idE = zeros(pd.g.numE,1);
-    pd.g.idE(pd.g.baryE(:, 2) == 0) = 1; % south
-    pd.g.idE(pd.g.baryE(:, 1) == 1) = 4; % east
+    pd.g.idE(pd.g.baryE(:, 2) == 0) = 3; % south
+    pd.g.idE(pd.g.baryE(:, 1) == 1) = 3; % east
     pd.g.idE(pd.g.baryE(:, 2) == 1) = 3; % north
-    pd.g.idE(pd.g.baryE(:, 1) == 0) = 1; % west
+    pd.g.idE(pd.g.baryE(:, 1) == 0) = 3; % west
     pd.g.idE0T = pd.g.idE(pd.g.E0T);
     
     % Store edge counts
@@ -94,11 +94,14 @@ switch pd.gridSource
     
   case 'ADCIRC'
     projCenter = [pd.configADCIRC.SLAM0, pd.configADCIRC.SFEA0];
-    [ pd.g, depth, forcingOS, flowRateRiv ] = domainADCIRC(['swe/fort_' pd.name '.14'], ['swe/fort_' pd.name '.17'], ...
-                                                           pd.configADCIRC.NBFR, pd.isSpherical, projCenter);
+    h = getFunctionHandle('swe/domainADCIRC');
+    [ pd.g, depth, forcingOS, flowRateRiv ] = h(['swe/fort_' pd.name '.14'], ['swe/fort_' pd.name '.17'], ...
+                                                 pd.configADCIRC.NBFR, pd.isSpherical, projCenter); % TODO getFunctionHandle oder execin?
     
     % Bathymetry
-    pd.zbCont = @(x1,x2) evaluateFuncFromVertexValues(pd.g, -depth, x1,x2);
+    h = getFunctionHandle('swe/evaluateFuncFromVertexValues');
+    pd.zbCont = @(x1,x2) h(pd.g, -depth, x1,x2); % TODO getFunctionHandle oder execin?
+    
     assert(max( max( abs(depth(pd.g.V0T) + pd.zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2))) ) ) < 1.e-5, ...
            'Bathymetry incorrectly constructed!');
 
@@ -227,8 +230,7 @@ pd.g.markE0TbdrRA = pd.g.idE0T == 2; % [K x 3] mark local edges on the radiation
 pd.g.markE0TbdrRI = pd.g.idE0T == 3; % [K x 3] mark local edges on the river boundary
 pd.g.markE0TbdrOS = pd.g.idE0T == 4; % [K x 3] mark local edges on the open sea boundary
 
-h = getFunctionHandle('swe/computeDerivedGridData');
-pd.g = h(pd.g);
+pd.g = execin('swe/computeDerivedGridData', pd.g);
 
 qOrd1D = 2*pd.p+1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
 pd.g.nuQ0E0T = cell(3,2);
@@ -280,7 +282,7 @@ pd.sysMinValueCorrection = [ phi(1,0,0) phi(1,1,0) phi(1,0,1) ; ...
 
 %% Computation of matrices on the reference triangle.
 pd.refElemPhiPhi = integrateRefElemPhiPhi(N, pd.basesOnQuad);
-refElemPhiPhiPhi = integrateRefElemPhiPhiPhi(N, pd.basesOnQuad);
+refElemPhiPhiPhi = execin('swe/integrateRefElemPhiPhiPhi',N, pd.basesOnQuad);
 refElemDphiPhi = integrateRefElemDphiPhi(N, pd.basesOnQuad);
 
 refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
@@ -288,24 +290,24 @@ refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
 if pd.p == 0
   refElemPhiPhiDphiLin = permute(integrateRefElemDphiPhiPhi([3 N N], basesOnQuadLin), [3 2 1 4]);
   refElemDphiPhiPhiLin = integrateRefElemDphiPhiPhi([N N 3], basesOnQuadLin);
-  refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], basesOnQuadLin);
+  refElemPhiPhiPhiLin  = execin('swe/integrateRefElemPhiPhiPhi',[N N 3], basesOnQuadLin);
 
   refEdgePhiIntPhiIntPhiLin = integrateRefEdgePhiIntPhiIntPhiInt([N N 3], basesOnQuadLin);
-  refEdgePhiIntPhiExtPhiLin = permute(integrateRefEdgePhiIntPhiIntPhiExt([N 3 N], basesOnQuadLin), [1 3 2 4 5]);
+  refEdgePhiIntPhiExtPhiLin = permute(execin('swe/integrateRefEdgePhiIntPhiIntPhiExt',[N 3 N], basesOnQuadLin), [1 3 2 4 5]);
 else
   refElemPhiPhiDphiLin = permute(integrateRefElemDphiPhiPhi([3 N N], pd.basesOnQuad), [3 2 1 4]);
   refElemDphiPhiPhiLin = integrateRefElemDphiPhiPhi([N N 3], pd.basesOnQuad);
-  refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], pd.basesOnQuad);
+  refElemPhiPhiPhiLin  = execin('swe/integrateRefElemPhiPhiPhi',[N N 3], pd.basesOnQuad);
 
   refEdgePhiIntPhiIntPhiLin = integrateRefEdgePhiIntPhiIntPhiInt([N N 3], pd.basesOnQuad);
-  refEdgePhiIntPhiExtPhiLin = permute(integrateRefEdgePhiIntPhiIntPhiExt([N 3 N], pd.basesOnQuad), [1 3 2 4 5]);
+  refEdgePhiIntPhiExtPhiLin = permute(execin('swe/integrateRefEdgePhiIntPhiIntPhiExt',[N 3 N], pd.basesOnQuad), [1 3 2 4 5]);
 end % if
 
 refEdgePhiIntPhiInt = integrateRefEdgePhiIntPhiInt(N, pd.basesOnQuad);
 refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, pd.basesOnQuad);
 
-refElemDphiPerQuad = integrateRefElemDphiPerQuad(N, pd.basesOnQuad);
-refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, pd.basesOnQuad);
+refElemDphiPerQuad = execin('swe/integrateRefElemDphiPerQuad',N, pd.basesOnQuad);
+refEdgePhiIntPerQuad = execin('swe/integrateRefEdgePhiIntPerQuad',N, pd.basesOnQuad);
 
 %% L2 projections of time-independent algebraic coefficients.
 fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
@@ -350,8 +352,8 @@ end % if
 
 %% Assembly of time-independent global matrices corresponding to linear contributions.
 % Element matrices
-globD = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhiLin, fcDisc);
-globG = assembleMatElemPhiPhiDfuncDisc(pd.g, refElemPhiPhiDphiLin, pd.zbDiscLin);
+globD = execin('swe/assembleMatElemPhiPhiFuncDisc',pd.g, refElemPhiPhiPhiLin, fcDisc);
+globG = execin('swe/assembleMatElemPhiPhiDfuncDisc',pd.g, refElemPhiPhiDphiLin, pd.zbDiscLin);
 globH = assembleMatElemDphiPhi(pd.g, refElemDphiPhi);
 pd.globM = assembleMatElemPhiPhi(pd.g, pd.refElemPhiPhi);
 globU = assembleMatElemDphiPhiFuncDisc(pd.g, refElemDphiPhiPhiLin, pd.zbDiscLin);
@@ -372,8 +374,8 @@ end % switch
 % Boundary edge matrices
 globQOS = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrOS);
 globQRA = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrRA);
-globOL = assembleMatEdgePhiIntPhiIntFuncDiscNu(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrL);
-globORA = assembleMatEdgePhiIntPhiIntFuncDiscNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrRA);
+globOL = execin('swe/assembleMatEdgePhiIntPhiIntFuncDiscNu',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrL);
+globORA = execin('swe/assembleMatEdgePhiIntPhiIntFuncDiscNu',pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrRA);
 
 % Derived system matrices
 pd.sysW = blkdiag(pd.globM, pd.globM, pd.globM);
@@ -390,11 +392,11 @@ end % if
 
 %% Assembly of time-independent global matrices corresponding to non-linear contributions.
 % Element matrices
-pd.globF = assembleMatElemDphiPerQuad(pd.g, refElemDphiPerQuad);
+pd.globF = execin('swe/assembleMatElemDphiPerQuad',pd.g, refElemDphiPerQuad);
 
 % Edge matrices
-[pd.globRdiag, pd.globRoffdiag] = assembleMatEdgePhiNuPerQuad(pd.g, pd.g.markE0Tint, refEdgePhiIntPerQuad);
-pd.globV = assembleMatEdgePhiPerQuad(pd.g, refEdgePhiIntPerQuad);
+[pd.globRdiag, pd.globRoffdiag] = execin('swe/assembleMatEdgePhiNuPerQuad',pd.g, pd.g.markE0Tint, refEdgePhiIntPerQuad);
+pd.globV = execin('swe/assembleMatEdgePhiPerQuad',pd.g, refEdgePhiIntPerQuad);
 
 % Bottom-friction terms
 if pd.isBottomFrictionVarying
@@ -403,12 +405,12 @@ if pd.isBottomFrictionVarying
     refElemPhiPhiPerQuad = integrateRefElemPhiPhiPerQuad(N, pd.basesOnQuad);
     pd.globE = assembleMatElemPhiFuncDiscPerQuad(pd.g, refElemPhiPhiPerQuad, bottomFrictionDisc);
   else
-    pd.globE = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhi, bottomFrictionDisc);
+    pd.globE = execin('swe/assembleMatElemPhiPhiFuncDisc',pd.g, refElemPhiPhiPhi, bottomFrictionDisc);
   end % if
 else
   if pd.isBottomFrictionNonlinear
-    refElemPhiPerQuad = integrateRefElemPhiPerQuad(N, pd.basesOnQuad);
-    pd.globE = pd.bottomFrictionCoef * assembleMatElemPhiPerQuad(pd.g, refElemPhiPerQuad);
+    refElemPhiPerQuad = execin('swe/integrateRefElemPhiPerQuad',N, pd.basesOnQuad);
+    pd.globE = pd.bottomFrictionCoef * execin('swe/assembleMatElemPhiPerQuad',pd.g, refElemPhiPerQuad);
   else
     pd.globE = pd.bottomFrictionCoef * pd.globM;
   end % if
@@ -416,21 +418,21 @@ end % if
 
 % Boundary matrices
 if pd.g.numEbdrL > 0 % Land boundaries
-  pd.globRL = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrL);
+  pd.globRL = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrL);
   switch pd.typeBdrL
     case 'reflected'
       error('not implemented')
     case 'natural'
       error('not implemented')
     case 'riemann'
-      pd.globVL = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaE0TbdrL);
+      pd.globVL = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaE0TbdrL);
     otherwise
       error('Unknown flux type for land boundaries')
   end % switch
 end % if
 
 if pd.g.numEbdrRA > 0 % Radiation boundaries
-  globRRA = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRA);
+  globRRA = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRA);
   pd.globRdiag = cellfun(@plus, pd.globRdiag, globRRA, 'UniformOutput', false);
 end % if
 
@@ -442,10 +444,10 @@ if pd.g.numEbdrRI > 0 % River boundaries
     pd.vRivQ0E0T = kron(pd.vRivQ0E0T, ones(numQuad1D,1));
   end % if
   
-  pd.globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
+  pd.globRRI = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
   
   if pd.isRiemRiv
-    pd.globVRI = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaE0TbdrRI);
+    pd.globVRI = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaE0TbdrRI);
   end % if
   
   if ~pd.isRamp && ~pd.isRivCont
@@ -491,4 +493,10 @@ if pd.isAdaptiveTimestep
   pd.avgDiff = sum(abs(pd.g.coordV0T(:,[1 2 3],:) - pd.g.coordV0T(:,[2 3 1],:)), 2) / 3;
   pd.avgDepth = -sum(pd.zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2)), 2) / 3;
 end % if
+
+%% Function handles
+pd.swe_correctMinValueExceedanceDisc = getFunctionHandle('swe/correctMinValueExceedanceDisc');
+pd.swe_projectDataQ0T2DataDisc = getFunctionHandle('swe/projectDataQ0T2DataDisc');
+pd.swe_visualizeSolution = getFunctionHandle('swe/visualizeSolution');
+pd.projectDataDisc2DataLagr = getFunctionHandle('./projectDataDisc2DataLagr');
 end % function
