@@ -55,11 +55,9 @@ function problemData = outputStep(problemData, nStep)
 visualizeSolution(problemData, nStep);
 
 %% Hot-start file output
-if problemData.isHotStartOutput == 1 && mod(nStep, problemData.hotStartOutputFrequency) == 0
-%   fprintf('\n\n')['output/' problemData.name '_xi_']
-  createHotStart(['output/' problemData.name '_xi_'], problemData.cDisc(:,:,1), problemData.t);
-  createHotStart(['output/' problemData.name '_uH_'], problemData.cDisc(:,:,2), problemData.t);
-  createHotStart(['output/' problemData.name '_vH_'], problemData.cDisc(:,:,3), problemData.t);
+if problemData.isHotstartOutput && mod(nStep, problemData.hotstartOutputFrequency) == 0
+  hotstartStep = mod(nStep / problemData.hotstartOutputFrequency, 2);
+  outputHotstart(['output/' problemData.name '_' num2str(hotstartStep)], 'cDisc', problemData.cDisc, 't', problemData.t);
 end % if
 
 %% Update waitbar.
