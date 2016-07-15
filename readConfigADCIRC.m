@@ -11,6 +11,8 @@ config.RUNDES = fgets(fileID);
 config.RUNID = fgets(fileID);
 config.IHOT = cell2mat(textscan(fileID, '%f \n', 'CommentStyle', '!'));
 config.OUTP =	textscan(fileID, '%s \n', 'CommentStyle', '!');
+config.OUTP = config.OUTP{1}{1};
+assert(ismember(config.IHOT, [0, 1]),  'Switch for hot-start input must be one or zero.');
 
 % Numeric parameters
 param  = cell2mat(textscan(fileID, '%f   ', 'CommentStyle', '!'));
