@@ -49,7 +49,7 @@
 %
 function ret = integrateRefElemPhiPerQuad(N, basesOnQuad)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [~, ~, W] = quadRule2D(qOrd);
+p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [~, ~, W] = execin('../quadRule2D',qOrd);
 ret = zeros(N, length(W)); % [N x R]
 for i = 1 : N
 	ret(i, :) = basesOnQuad.phi2D{qOrd}(:,i) .* W.';
