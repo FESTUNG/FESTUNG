@@ -51,16 +51,20 @@ if pd.isSolutionAvail
   h0Cont = @(x1,x2) xi0Cont(x1,x2) - pd.zbCont(x1,x2);
   uH0Cont = @(x1,x2) h0Cont(x1,x2) .* pd.uCont(x1,x2,pd.t0);
   vH0Cont = @(x1,x2) h0Cont(x1,x2) .* pd.vCont(x1,x2,pd.t0);
-else
-  xi0Cont = @(x1,x2) zeros(size(x1));
-  uH0Cont = @(x1,x2) zeros(size(x1));
-  vH0Cont = @(x1,x2) zeros(size(x1));
-end % if
   
-pd.cDisc = zeros(K,N,3);
-pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g, xi0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
-pd.cDisc(:,:,2) = projectFuncCont2DataDisc(pd.g, uH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
-pd.cDisc(:,:,3) = projectFuncCont2DataDisc(pd.g, vH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc = zeros(K,N,3);
+  pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g, xi0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc(:,:,2) = projectFuncCont2DataDisc(pd.g, uH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc(:,:,3) = projectFuncCont2DataDisc(pd.g, vH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+elseif exist([pd.name '_xi0.txt'],'file') && exist([pd.name '_uH0.txt'],'file') && exist([pd.name '_vH0.txt'],'file')
+  pd.cDisc = zeros(K,N,3);
+  pd.cDisc(:,:,1) = computeSumDataData(readHotStart(pd.g,'test2_xi0.txt'), zeros(K,N));
+  pd.cDisc(:,:,2) = computeSumDataData(readHotStart(pd.g,'test2_uH0.txt'), zeros(K,N));
+  pd.cDisc(:,:,3) = computeSumDataData(readHotStart(pd.g,'test2_vH0.txt'), zeros(K,N));
+  validateattributes(pd.cDisc, {'numeric'}, {'size', [K N 3]}, mfilename, 'pd.cDisc');
+else
+  pd.cDisc = zeros(K,N,3);
+end % if
 
 for i = 1 : length(pd.slopeLimList)
   switch pd.slopeLimList{i}
