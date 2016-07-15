@@ -1,8 +1,4 @@
 function problemData = preprocessStep(problemData, nStep)
-addpath('swe');
-problemData.sweData = preprocessStep(problemData.sweData, nStep);
-rmpath('swe');
-addpath('transport');
-problemData.transportData = preprocessStep(problemData.transportData, nStep);
-rmpath('transport');
+problemData.sweData = problemData.swe_preprocessStep(problemData.sweData, nStep);
+problemData.transportData = problemData.transport_preprocessStep(problemData.transportData, nStep);
 end % function
