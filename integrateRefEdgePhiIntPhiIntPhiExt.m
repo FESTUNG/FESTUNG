@@ -65,7 +65,7 @@ else
   validateattributes(N, {'numeric'}, {'numel', 3}, mfilename, 'N')
 end % if
 ret = zeros(N(1), N(2), N(3), 3, 3);
-p = (sqrt(8*max(N)+1)-3)/2;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
+p = (sqrt(8*max(N)+1)-3)/2;  qOrd = 2*p+1;  [~, W] = execin('../quadRule1D',qOrd);
 for nn = 1 : 3 % 3 edges
   for np = 1 : 3
     for l = 1 : N(3)

@@ -50,7 +50,7 @@
 %
 function ret = integrateRefEdgePhiIntPerQuad(N, basesOnQuad)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p+1,1);  [~, W] = quadRule1D(qOrd);
+p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p+1,1);  [~, W] = execin('../quadRule1D',qOrd);
 ret = zeros(N, length(W), 3); % [N x R x 3]
 for i = 1 : N
 	for n = 1 : 3 % 3 edges
