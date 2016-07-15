@@ -1,19 +1,10 @@
 function problemData = preprocessSubStep(problemData, nStep, nSubStep)
+problemData.sweData = problemData.swe_preprocessSubStep(problemData.sweData, nStep, nSubStep);
 
-% TODO swe/preprocessSubStep once implemented, remove projectQuotient:
-% dont't compute these twice
-problemData.transportData.u1Disc = projectQuotientDisc2Disc(problemData.sweData.cDisc(:,:,2), ...
-                                                            problemData.sweData.cDisc(:,:,1) - problemData.sweData.zbDisc, ...
-                                                            2*problemData.sweData.p, problemData.sweData.refElemPhiPhi, problemData.sweData.basesOnQuad);
-problemData.transportData.u2Disc = projectQuotientDisc2Disc(problemData.sweData.cDisc(:,:,3), ...
-                                                            problemData.sweData.cDisc(:,:,1) - problemData.sweData.zbDisc, ...
-                                                            2*problemData.sweData.p, problemData.sweData.refElemPhiPhi, problemData.sweData.basesOnQuad);
-% use mass flux of swe in quadrature points of edges
-problemData.transportData.vNormalOnQuadEdge = problemData.sweData.massFlux;
-% problemData.transportData.vNormalOnQuadEdge = computeFuncDiscNuOnQuadEdge(problemData.transportData.g, problemData.transportData.u1Disc, ...
-%                                                                           problemData.transportData.u2Disc, 2*problemData.transportData.p+1);
+% use velocities of swe for transport problem
+problemData.transportData.vNormalOnQuadEdge = problemData.sweData.massFluxQ0E0T;
+problemData.transportData.u1Disc = problemData.sweData.u1Disc;
+problemData.transportData.u2Disc = problemData.sweData.u2Disc;
 
-addpath('transport');
-problemData.transportData = preprocessSubStep(problemData.transportData, nStep, nSubStep);
-rmpath('transport');
+problemData.transportData = problemData.transport_preprocessSubStep(problemData.transportData, nStep, nSubStep);
 end % function
