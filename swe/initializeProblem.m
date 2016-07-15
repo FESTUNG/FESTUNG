@@ -1,23 +1,27 @@
 % Fills the problem's data structures with initial data (if applicable).
 
 %===============================================================================
-%> @file template/initializeProblem.m
+%> @file swe/initializeProblem.m
 %>
-%> @brief Fills the problem's data structures with initial data (if applicable).
+%> @brief Fills the problem's data structures with initial data.
 %===============================================================================
 %>
-%> @brief Fills the problem's data structures with initial data (if applicable).
+%> @brief Fills the problem's data structures with initial data.
 %>
-%> This routine is called after template/preprocessProblem.m.
+%> This routine is called after swe/preprocessProblem.m.
 %>
 %> Before entering the main loop of the solution algorithm, this routine
 %> fills the problem's data structures with initial data.
 %>
-%> @param  problemData  A struct with problem parameters and precomputed
+%> It loads hotstart data from a file or projects initial data for the
+%> primary variables.
+%> The initial state of the system is visualized.
+%>
+%> @param  pd           A struct with problem parameters and precomputed
 %>                      fields, as provided by configureProblem() and 
 %>                      preprocessProblem(). @f$[\text{struct}]@f$
 %>
-%> @retval problemData  The input struct enriched with initial data.
+%> @retval pd           The input struct enriched with initial data.
 %>                      @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
@@ -45,8 +49,21 @@ p = pd.p;
 K = pd.K;
 N = pd.N;
 
+%% Initialize time stepping
+pd.isFinished = false;
+pd.t = pd.t0;
+
 %% Primary unknowns H, uH, vH (each K*N).
-if pd.isSolutionAvail
+if pd.isHotstartInput
+  hotstartData = readHotstart(pd.hotstartInput);
+  assert(isstruct(hotstartData) && isfield(hotstartData, 'cDisc') && isfield (hotstartData, 't'), ...
+    'Hotstart data does not contain cDisc or t');
+  pd.cDisc = hotstartData.cDisc;
+  pd.t = hotstartData.t;
+  validateattributes(pd.cDisc, {'numeric'}, {'size', [K N 3]}, mfilename, 'pd.cDisc');
+  validateattributes(pd.t, {'numeric'}, {'scalar', '>=', pd.t0, '<', pd.tEnd});
+  fprintf('Hot starting simulation at t=%g\n', pd.t);
+elseif pd.isSolutionAvail
   xi0Cont = @(x1,x2) pd.xiCont(x1,x2,pd.t0);
   h0Cont = @(x1,x2) xi0Cont(x1,x2) - pd.zbCont(x1,x2);
   uH0Cont = @(x1,x2) h0Cont(x1,x2) .* pd.uCont(x1,x2,pd.t0);
@@ -56,12 +73,6 @@ if pd.isSolutionAvail
   pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g, xi0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
   pd.cDisc(:,:,2) = projectFuncCont2DataDisc(pd.g, uH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
   pd.cDisc(:,:,3) = projectFuncCont2DataDisc(pd.g, vH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
-elseif exist([pd.name '_xi0.txt'],'file') && exist([pd.name '_uH0.txt'],'file') && exist([pd.name '_vH0.txt'],'file')
-  pd.cDisc = zeros(K,N,3);
-  pd.cDisc(:,:,1) = computeSumDataData(readHotStart(pd.g,'test2_xi0.txt'), zeros(K,N));
-  pd.cDisc(:,:,2) = computeSumDataData(readHotStart(pd.g,'test2_uH0.txt'), zeros(K,N));
-  pd.cDisc(:,:,3) = computeSumDataData(readHotStart(pd.g,'test2_vH0.txt'), zeros(K,N));
-  validateattributes(pd.cDisc, {'numeric'}, {'size', [K N 3]}, mfilename, 'pd.cDisc');
 else
   pd.cDisc = zeros(K,N,3);
 end % if
@@ -86,8 +97,4 @@ if pd.isWaitbar
   str  = strcat( ['% done. Simulating refinement level =', ' ', num2str(pd.refinement), ', p =', ' ', num2str(p), '.' ]);
   pd.waitbar = waitbar(0, strcat([ 'Time stepping:', ' ', num2str(0), str ]));
 end % if
-
-%% Initialize time stepping
-pd.isFinished = false;
-pd.t = pd.t0;
 end % function

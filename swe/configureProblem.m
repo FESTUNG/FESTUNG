@@ -111,6 +111,7 @@ function pd = configureDebug(pd)
 pd.isSolutionAvail = true;
 pd.isRhsAvail = true;
 pd.isTidalDomain = false;
+pd.isHotstartInput = false;
 pd.isHotstartOutput = false;
 pd.schemeOrder = min(pd.p+1,3);
 
@@ -169,6 +170,7 @@ function pd = configureAnalyticalTest(pd)
 pd.isSolutionAvail = true;
 pd.isRhsAvail = true;
 pd.isTidalDomain = false;
+pd.isHotstartInput = false;
 pd.isHotstartOutput = false;
 pd.schemeOrder = min(pd.p+1,3);
 
@@ -320,7 +322,10 @@ pd.isTidalDomain = pd.configADCIRC.NTIP == 1;
 % Boundary conditions
 pd.isRivCont = false;
 
-% Hot-start output
+% Hot-start input and output
+pd.isHotstartInput = pd.configADCIRC.IHOT == 1;
+pd.hotstartInput = pd.configADCIRC.OUTP;
+
 pd.isHotstartOutput = pd.configADCIRC.NHSTAR == 1;
 pd.hotstartOutputFrequency = pd.configADCIRC.NHSINC;
 end % function
