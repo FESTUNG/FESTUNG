@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd.name = 'gom3k'; 
+pd.name = 'bahamas'; 
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -319,6 +319,6 @@ pd.isTidalDomain = pd.configADCIRC.NTIP == 1;
 pd.isRivCont = false;
 
 % Hot-start output
-pd.isHotStartOutput = pd.configADCIRC.NHSTAR == 1;
-pd.hotStartOutputFrequency = pd.configADCIRC.NHSINC;
+pd.isHotstartOutput = pd.configADCIRC.NHSTAR == 1;
+pd.hotstartOutputFrequency = pd.configADCIRC.NHSINC;
 end % function
