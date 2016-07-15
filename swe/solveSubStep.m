@@ -6,7 +6,7 @@ dt = pd.dt;
 % Compute height from potentially different approximation orders:
 % zbDiscLin is always linear (N=3) while cDisc(:,:,1) can be of any
 % approximation order
-hDisc = computeSumDataDiscDataDisc(pd.cDisc(:,:,1), -pd.zbDiscLin);
+hDisc = reshape(computeSumDataDiscDataDisc(pd.cDisc(:,:,1), -pd.zbDiscLin).', [], 1);
 
 % Build right hand side vector
 sysV = cell2mat(pd.globL) - cell2mat(pd.globLRI) - ...
