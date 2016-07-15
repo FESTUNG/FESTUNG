@@ -12,8 +12,8 @@ problemData.g.markE0Tint  = problemData.g.idE0T == 0;        % [K x 3] mark loca
 problemData.g.markE0TbdrN = zeros(problemData.g.numT,3);     % [K x 3] mark local edges on the Neumann boundary
 problemData.g.markE0TbdrD = ~(problemData.g.markE0Tint | problemData.g.markE0TbdrN); % [K x 3] mark local edges on the Dirichlet boundary
 problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...  % [K x 3] mark local vertices on the Dirichlet boundary
-                            problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD),:)); 
-problemData.g = computeDerivedGridData(problemData.g);       % Precompute some repeatedly evaluated fields
+                            problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD),:));
+problemData.g = execin('transport/computeDerivedGridData',problemData.g);       % Precompute some repeatedly evaluated fields
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
@@ -30,8 +30,10 @@ else
 end % if
 problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
 problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
+refElemPhiPerQuad = execin('swe/integrateRefElemPhiPerQuad',problemData.N, problemData.basesOnQuad);
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
+problemData.globT = assembleMatElemPhiPhi(problemData.g, refElemPhiPerQuad);
 if any(cell2mat(problemData.isSlopeLim))
   globMTaylor = assembleMatElemPhiTaylorPhiTaylor(problemData.g, problemData.N);
   problemData.globMDiscTaylor = assembleMatElemPhiDiscPhiTaylor(problemData.g, problemData.N, problemData.basesOnQuad);
