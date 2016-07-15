@@ -82,8 +82,7 @@ pd.typeBdrL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', o
 pd.averagingType = 'full-harmonic'; % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
-
-pd.elevTol = 20;
+pd.elevTol = 20; % Maximum permissible correction value that can be added to the water level in an element to ensure minTol
 
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
@@ -112,9 +111,8 @@ function pd = configureDebug(pd)
 pd.isSolutionAvail = true;
 pd.isRhsAvail = true;
 pd.isTidalDomain = false;
+pd.isHotstartOutput = false;
 pd.schemeOrder = min(pd.p+1,3);
-
-pd.minTol = 0.001;
 
 % Overwrite grid parameters
 pd.gridSource = 'square';
@@ -133,6 +131,7 @@ pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
 pd.gConst = 9.81;
+pd.minTol = 0.001;
 
 pd.isBottomFrictionNonlinear = true; % NOLIBF
 pd.isBottomFrictionVarying = false; % NWP
@@ -167,9 +166,8 @@ function pd = configureAnalyticalTest(pd)
 pd.isSolutionAvail = true;
 pd.isRhsAvail = true;
 pd.isTidalDomain = false;
+pd.isHotstartOutput = false;
 pd.schemeOrder = min(pd.p+1,3);
-
-pd.minTol = 0.001;
 
 % Overwrite grid parameters
 pd.gridSource = 'hierarchical';
@@ -193,6 +191,7 @@ A = 0.1;
 B = 0.1;
 C = 0.1;
 pd.gConst = 9.81;
+pd.minTol = 0.001;
 
 pd.isBottomFrictionNonlinear = true; % NOLIBF
 pd.isBottomFrictionVarying = false; % NWP
@@ -264,11 +263,8 @@ pd.configADCIRC = readConfigADCIRC(['swe/fort_' pd.name '.15']);
 
 %% Map ADCIRC variables to internal names
 % Constants
-
 pd.schemeOrder = pd.configADCIRC.IRK+1;
-
 pd.minTol = pd.configADCIRC.H0;
-
 pd.gConst = pd.configADCIRC.G;
 
 % Simulation time

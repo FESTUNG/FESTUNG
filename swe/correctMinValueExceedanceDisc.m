@@ -14,7 +14,7 @@ corr = max(minTol - dataV0T, 0);
 maxCorr = max(corr(:));
 
 if maxCorr > correctionTolerance
-  [indx, indy] = find(abs(corr) == maxCorr, 1);
+  [indx, indy] = find(corr == maxCorr, 1);
   error([ 'Unknown at local vertex ' num2str(indy) ' of element ' num2str(indx) ...
           ' in step ' num2str(nStep) ' is ' num2str(dataV0T(indx, indy)) ...
           ' (below the minimum tolerance of ' num2str(correctionTolerance) ').' ]);
