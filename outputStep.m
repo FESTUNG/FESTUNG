@@ -52,7 +52,7 @@
 %
 function problemData = outputStep(problemData, nStep)
 %% Visualize solution and evaluate stations.
-visualizeSolution(problemData, nStep);
+problemData.swe_visualizeSolution(problemData, nStep);
 
 %% Hot-start file output
 if problemData.isHotStartOutput == 1 && mod(nStep, problemData.hotStartOutputFrequency) == 0

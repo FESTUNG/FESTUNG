@@ -76,10 +76,10 @@ for i = 1 : length(pd.slopeLimList)
   end % switch
 end % for
 
-pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr + pd.minTol, pd.elevTol);
+pd.cDisc(:,:,1) = pd.swe_correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr + pd.minTol, pd.elevTol);
 
 %% Visualize initial solution.
-visualizeSolution(pd, 0);
+pd.swe_visualizeSolution(pd, 0);
 
 %% Initialize waitbar.
 if pd.isWaitbar

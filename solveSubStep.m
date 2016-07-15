@@ -4,7 +4,7 @@ N = pd.N;
 dt = pd.dt;
 
 % Compute height
-sysH = reshape(computeSumDataData(pd.cDisc(:,:,1), -pd.zbDiscLin).', K*max(N,3),1);
+sysH = reshape(execin('swe/computeSumDataData',pd.cDisc(:,:,1), -pd.zbDiscLin).', K*max(N,3),1);
 
 % Build right hand side vector
 sysV = cell2mat(pd.globL) - cell2mat(pd.globLRI) - ...
