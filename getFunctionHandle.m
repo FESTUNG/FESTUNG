@@ -18,11 +18,17 @@
 %>
 %> This is helpful, e.g., if a function with the same name exists in the
 %> current path and should not be shadowed.
+%> 
+%> Please note that the called function should not rely on any other
+%> function files, as they might not be in the search path.
 %>
 %> If this function is to be called more than once, then this is 
 %> significantly faster than changing the working directory every time for 
 %> the function call or adding and removing the directory from the search
 %> path.
+%>
+%> For functions that are called only once, execin() might be an
+%> alternative.
 %>
 %> @par Example
 %> @parblock
