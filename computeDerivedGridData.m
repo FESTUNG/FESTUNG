@@ -57,6 +57,7 @@ function g = computeDerivedGridData(g)
 g.markV0TT0V = cell(3, 1);
 g.areaE0TbdrD = cell(3, 1);
 g.areaE0TbdrN = g.markE0TbdrN .* g.areaE0T;
+g.areaE0TbdrNotN = cell(3, 1);
 for n = 1 : 3
   % Mark all elements sharing i-th vertex
   g.markV0TT0V{n} = g.markV0TV0T{n, 1} | g.markV0TV0T{n, 2} | g.markV0TV0T{n, 3}; 
@@ -65,5 +66,6 @@ for n = 1 : 3
     g.markV0TT0V{n} = g.markV0TT0V{n} + 0 * speye(size(g.markV0TT0V{n}, 1), size(g.markV0TT0V{n}, 2));
   end % if
   g.areaE0TbdrD{n} = g.areaE0T(:,n) .* g.markE0TbdrD(:, n);
+  g.areaE0TbdrNotN{n} = g.areaE0T(:,n) .* ~g.markE0TbdrN(:, n);
 end % for
 end % function
