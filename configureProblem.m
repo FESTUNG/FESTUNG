@@ -144,7 +144,7 @@ pd.bottomFrictionCoef = 0;
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) -0.01*(x1==x1);
+pd.zbCont = @(x1,x2) -0.002*(x1==x1);
 pd.fcCont = @(x1,x2) zeros(size(x1));
 
 % Analytical solution
@@ -154,8 +154,8 @@ pd.vCont = @(x1,x2,t) x1 - 0.5;
 
 % Right hand side functions (derived from analytical solution)
 pd.f0Cont = @(x1,x2,t) zeros(size(x1));
-pd.f1Cont = @(x1,x2,t) 0.01*(0.5-x1);
-pd.f2Cont = @(x1,x2,t) 0.01*(0.5-x2);
+pd.f1Cont = @(x1,x2,t) 0.002*(0.5-x1);
+pd.f2Cont = @(x1,x2,t) 0.002*(0.5-x2);
 
 % Boundary conditions
 pd.xiOSCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
