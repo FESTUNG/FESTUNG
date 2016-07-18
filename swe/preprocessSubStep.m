@@ -112,6 +112,7 @@ if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
   vRivQ0E0T = cell(3,1);
 
   if pd.isRivCont
+
     [Q, ~] = quadRule1D(max(2*p,1));
     for n = 1 : 3
       [Q1, Q2] = gammaMap(n, Q);
@@ -267,9 +268,9 @@ for nn = 1 : 3
           vvHRiv = vvH + vRivQ0E0T{nn} .* vHRiv;
           gHHRiv = gHH - pd.gConst * cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn} + gHHRiv;
 
-          pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRRI{nn,1} * (cQ0E0Tint{2,nn} + uHRiv) + pd.globRRI{nn,2} * (cQ0E0Tint{3,nn} + vHRiv) + pd.globVRI{nn} * (0.5 * lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn})) );
-          pd.globLRI{2} = pd.globLRI{2} + 0.5 * ( pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv + pd.globVRI{nn} * (0.5 * lambda .* (cQ0E0Tint{2,nn} - uHRiv)) );
-          pd.globLRI{3} = pd.globLRI{3} + 0.5 * ( pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv) + pd.globVRI{nn} * (0.5 * lambda .* (cQ0E0Tint{3,nn} - vHRiv)) );
+          pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRRI{nn,1} * (cQ0E0Tint{2,nn} + uHRiv) + pd.globRRI{nn,2} * (cQ0E0Tint{3,nn} + vHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn})) );
+          pd.globLRI{2} = pd.globLRI{2} + 0.5 * ( pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHRiv)) );
+          pd.globLRI{3} = pd.globLRI{3} + 0.5 * ( pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHRiv)) );
         case 'Roe'
           error('not implemented')
           

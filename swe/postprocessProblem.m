@@ -92,13 +92,13 @@ if problemData.isSolutionAvail
   
   % Error in x-velocity (u)
   dataQ0T = (problemData.cDisc(:,:,2) * problemData.basesOnQuad.phi2D{max(2*p,1)}.') ./ (hDisc * problemData.basesOnQuad.phi2D{max(2*p,1)}.');
-  dataDisc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+  dataDisc = problemData.swe_projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   err = computeL2Error(problemData.g, dataDisc, uEnd, 2*p, problemData.basesOnQuad);
   fprintf('L2-Error  u: %g\n', err);
   
   % Error in y-velocity (v)
   dataQ0T = (problemData.cDisc(:,:,3) * problemData.basesOnQuad.phi2D{max(2*p,1)}.') ./ (hDisc * problemData.basesOnQuad.phi2D{max(2*p,1)}.');
-  dataDisc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+  dataDisc = problemData.swe_projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   err = computeL2Error(problemData.g, dataDisc, vEnd, 2*p, problemData.basesOnQuad);
   fprintf('L2-Error  v: %g\n', err);
 end % if

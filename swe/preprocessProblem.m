@@ -465,9 +465,9 @@ if pd.g.numEbdrRI > 0 % River boundaries
 end % if
 
 if pd.g.numEbdrOS > 0 % Open sea boundaries
-  pd.globROS = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrOS);
+  pd.globROS = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrOS);
   if pd.isRiemOS
-    pd.globVOS = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaE0TbdrOS);
+    pd.globVOS = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaE0TbdrOS);
   end % if
 end % if
 

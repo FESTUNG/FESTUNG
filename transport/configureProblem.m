@@ -1,7 +1,7 @@
 function problemData = configureProblem(problemData)
 
 %% Parameters. 
-problemData.p          = 0; % local polynomial degree % TODO maybe allow different approximation orders for each species
+problemData.p          = 2; % local polynomial degree % TODO maybe allow different approximation orders for each species
 problemData.numSpecies = 3; % number of species involved
 
 if ~isfield(problemData, 'hmax'), problemData.hmax        = 2^-6; end % maximum edge length of triangle
@@ -48,7 +48,7 @@ i = @(t,x1,x2,P) ep; % linear death rate
 j = @(t,x1,x2,Z) ep; % linear death rate
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = 0; % slope limiting
+  problemData.isSlopeLim{species}  = true; % slope limiting
   problemData.typeSlopeLim{species} = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
