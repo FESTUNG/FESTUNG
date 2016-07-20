@@ -1,11 +1,12 @@
 function problemData = solveSubStep(problemData, ~, nSubStep)
 K = problemData.K;
 N = problemData.N;
+qOrd2D = max(2* problemData.p,1); [Q1, Q2, W] = quadRule2D(qOrd2D); numQuad2D = length(W);
 
 % Assembly of time-dependent global matrices
 globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, problemData.u1Disc, problemData.u2Disc);
-globR = assembleMatEdgePhiPhiValUpwind(problemData.g, problemData.hatRdiagOnQuad, ...
-                                         problemData.hatRoffdiagOnQuad,  problemData.vNormalOnQuadEdge);
+globR = assembleMatEdgePhiPhiValUpwind(problemData.g, problemData.g.markE0Tint, problemData.hatRdiagOnQuad, ...
+                                       problemData.hatRoffdiagOnQuad,  problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN);
 % Building the system
 sysA = -globG{1} - globG{2} + globR;
 
@@ -25,7 +26,8 @@ for species = 1:problemData.numSpecies
             gNUpwind, N, problemData.basesOnQuad);
 
   % Assembly of the source contribution
-  globL = problemData.globM * reshape(fDisc', K*N, 1);
+  globL = problemData.globM * reshape(fDisc', K*N, 1) ...
+        + problemData.globT * reshape(problemData.reactions{species}(problemData.timeLvls(nSubStep), problemData.g.mapRef2Phy(1, Q1, Q2), problemData.g.mapRef2Phy(2, Q1, Q2), problemData.cQ0T).', numQuad2D*K, 1);
 
   % right hand side
   sysV = globL - globKD - globKN;

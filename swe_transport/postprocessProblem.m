@@ -1,9 +1,8 @@
 function problemData = postprocessProblem(problemData)
-addpath('swe');
-problemData.sweData = postprocessProblem(problemData.sweData);
-rmpath('swe');
-addpath('transport');
-problemData.transportData = postprocessProblem(problemData.transportData);
-rmpath('transport');
+h = getFunctionHandle('swe/postprocessProblem');
+problemData.sweData = h(problemData.sweData);
+
+h = getFunctionHandle('transport/postprocessProblem');
+problemData.transportData = h(problemData.transportData);
 end % function
 

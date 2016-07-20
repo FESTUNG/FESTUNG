@@ -21,6 +21,10 @@
 %> <code>g.areaE0T</code>, and <code>markE0Tint</code>.
 %> @f$[3 \times 1 \text{ cell}]@f$
 %>
+%> g.areaE0TbdrRI provides the elementwise products of the vectors 
+%> <code>g.areaE0T</code>, and <code>markE0TbdrRI</code>.
+%> @f$[3 \times 1 \text{ cell}]@f$
+%>
 %> g.areaE0TbdrOS provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, and <code>markE0TbdrOS</code>.
 %> @f$[3 \times 1 \text{ cell}]@f$
@@ -92,6 +96,7 @@
 function g = computeDerivedGridData(g)
 g.areaE0Tint				= cell(3,1	);
 g.areaE0TbdrL 			= cell(3,1	);
+g.areaE0TbdrRI			= cell(3,1	);
 g.areaE0TbdrOS			= cell(3,1	);
 g.areaNuE0Tint			= cell(3,2	);
 g.areaNuE0TbdrL			= cell(3,2	);
@@ -105,6 +110,7 @@ areaNuE0T						= cell(3,2  );
 for nn = 1 : 3
 	g.areaE0Tint	{nn} = g.areaE0T(:,nn) .* g.markE0Tint	(:,nn);
 	g.areaE0TbdrL {nn} = g.areaE0T(:,nn) .* g.markE0TbdrL (:,nn);
+  g.areaE0TbdrRI{nn} = g.areaE0T(:,nn) .* g.markE0TbdrRI(:,nn);
 	g.areaE0TbdrOS{nn} = g.areaE0T(:,nn) .* g.markE0TbdrOS(:,nn);
 	for m = 1 : 2
     areaNuE0T{nn,m} = g.areaE0T(:,nn) .* g.nuE0T(:,nn,m);

@@ -55,7 +55,7 @@ pd.name = 'bahamas';
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
-pd.configSource = 'ADCIRC';
+pd.configSource = 'debug';
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -65,11 +65,11 @@ pd.configSource = 'ADCIRC';
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-pd.gridSource = 'ADCIRC';
+pd.gridSource = 'square';
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
-pd.p = 0;
+pd.p = 2;
 
 %% Time stepping parameters
 pd.schemeType = 'explicit'; % type of time stepping scheme ('explicit' or 'semi-implicit')
@@ -78,18 +78,20 @@ pd.schemeType = 'explicit'; % type of time stepping scheme ('explicit' or 'semi-
 % Some may be overwritten by fort.15 config files
 pd.typeFlux = 'Lax-Friedrichs'; % Type of interior flux ('Lax-Friedrichs', 'Roe')
 pd.isRiemOS = true; % Riemann solver type on open sea boundary ('Lax-Friedrichs', 'Roe', or 'none')
+pd.isRiemRiv = true; % Riemann solver type on river boundary ('Lax-Friedrichs', 'Roe', or 'none')
 pd.typeBdrL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', or 'riemann')
 pd.averagingType = 'full-harmonic'; % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
-pd.elevTol = 20; % Maximum permissible correction value that can be added to the water level in an element to ensure minTol
+pd.isCoupling = false; % usage of velocity coefficients and flux of first unknown for transport equations
+pd.elevTol = 20;
 
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
 pd.isWaitbar = false; % Use waiting bar
-pd.outputCount = 200; % Number of outputs over total simulation time
+pd.outputCount = 100; % Number of outputs over total simulation time
 pd.outputTypes = 'vtk'; % Output file type
-pd.outputList = { 'u', 'uH', 'v', 'vH', 'xi', 'h', 'zb', 'fc' }; % List of variables to visualize
+pd.outputList = { 'u', 'v', 'xi' }; % List of variables to visualize
 pd.isVisStations = false; % Output stations
 
 %% Simulation scenario specific parameters
@@ -122,8 +124,8 @@ pd.hmax = 2^-6; % Maximum element size of initial grid
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd.tEnd = 0.01; % End time of simulation
-pd.numSteps = 5; % Number of time steps
+pd.tEnd = 100/3142*2*pi; % End time of simulation
+pd.numSteps = 100/3142*3142; % Number of time steps
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
@@ -141,7 +143,7 @@ pd.bottomFrictionCoef = 0;
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) -0.1*(x1==x1);
+pd.zbCont = @(x1,x2) -0.002*(x1==x1);
 pd.fcCont = @(x1,x2) zeros(size(x1));
 
 % Analytical solution
@@ -151,8 +153,8 @@ pd.vCont = @(x1,x2,t) x1 - 0.5;
 
 % Right hand side functions (derived from analytical solution)
 pd.f0Cont = @(x1,x2,t) zeros(size(x1));
-pd.f1Cont = @(x1,x2,t) 0.1*(0.5-x1);
-pd.f2Cont = @(x1,x2,t) 0.1*(0.5-x2);
+pd.f1Cont = @(x1,x2,t) 0.002*(0.5-x1);
+pd.f2Cont = @(x1,x2,t) 0.002*(0.5-x2);
 
 % Boundary conditions
 pd.xiOSCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
@@ -178,12 +180,12 @@ pd.schemeOrder = min(pd.p+1,3);
 pd.gridSource = 'hierarchical';
 pd.isSpherical = false; 
 pd.hmax = 0.3; % Maximum element size of initial grid
-pd.refinement = 0;  % Grid refinement level
+pd.refinement = 6;  % Grid refinement level
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
 pd.tEnd = 1; % End time of simulation
-pd.numSteps = 150; % Number of time steps
+pd.numSteps = 400; % Number of time steps
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
@@ -191,66 +193,104 @@ pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
 pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
-height = 0.05;
-A = 0.1;
-B = 0.1;
-C = 0.1;
+height = 0; % value of each component of bathymatry gradient
+A = 0.01; % TODO height
+B = 0.01;
+C = 0.01;
 pd.gConst = 9.81;
 pd.minTol = 0.001;
 
 pd.isBottomFrictionNonlinear = true; % NOLIBF
 pd.isBottomFrictionVarying = false; % NWP
-pd.bottomFrictionCoef = 1;
+pd.bottomFrictionCoef = 0;
 
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) -height * (2 - x1 - x2);
-pd.fcCont = @(x1,x2) x1;
+pd.zbCont = @(x1,x2) -0.1*(x1==x1); % TODO
+pd.fcCont = @(x1,x2) 0*x1;
+
+% % Analytical solution
+% pd.xiCont = @(x1,x2,t) 0*x1;
+% pd.uCont = @(x1,x2,t) x1.*(x1-1);
+% pd.vCont = @(x1,x2,t) 0*x1;
+% 
+% % Auxiliary functions (derivatives etc.)
+% pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
+% pd.u_tCont = @(x1,x2,t) 0*x1;
+% pd.u_xCont = @(x1,x2,t) 2*x1-1;
+% pd.u_yCont = @(x1,x2,t) 0*x1;
+% pd.v_tCont = @(x1,x2,t) 0*x1;
+% pd.v_xCont = @(x1,x2,t) 0*x1;
+% pd.v_yCont = @(x1,x2,t) 0*x1;
+% pd.h_tCont = @(x1,x2,t) 0*x1;
+% pd.h_xCont = @(x1,x2,t) -height*(x1==x1);
+% pd.h_yCont = @(x1,x2,t) -height*(x1==x1);
 
 % Analytical solution
-pd.xiCont = @(x1,x2,t) C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t))) - height*(2-x1-x2);
-pd.uCont = @(x1,x2,t) A*sin(pi*x1)*cos(2*pi*t);
-pd.vCont = @(x1,x2,t) B*sin(pi*x2)*cos(2*pi*t);
-
+pd.xiCont = @(x1,x2,t) 0*x1;
+pd.uCont = @(x1,x2,t) A*sin(pi*x1);
+pd.vCont = @(x1,x2,t) 0*x1;
+% 
 % Auxiliary functions (derivatives etc.)
 pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
-pd.u_tCont = @(x1,x2,t)   -2*A*pi*sin(pi*x1)*sin(2*pi*t);
-pd.u_xCont = @(x1,x2,t)      A*pi*cos(pi*x1)*cos(2*pi*t);
-pd.v_tCont = @(x1,x2,t)   -2*B*pi*sin(pi*x2)*sin(2*pi*t);
-pd.v_yCont = @(x1,x2,t)      B*pi*cos(pi*x2)*cos(2*pi*t);
-pd.h_tCont = @(x1,x2,t)  0.5*C*pi * ( sin(0.5*pi*(x1-t)) + sin(0.5*pi*(x2-t)) );
-pd.h_xCont = @(x1,x2,t) -0.5*C*pi *   sin(0.5*pi*(x1-t))                       ;
-pd.h_yCont = @(x1,x2,t) -0.5*C*pi *                       sin(0.5*pi*(x2-t))   ;
+% pd.zb_xCont = @(x1,x2) height*(x1==x1); % TODO
+% pd.zb_yCont = @(x1,x2) height*(x1==x1);
+pd.u_tCont = @(x1,x2,t)  0*x1;
+pd.u_xCont = @(x1,x2,t)  A*pi*cos(pi*x1);
+pd.u_yCont = @(x1,x2,t)  0*x1;
+pd.v_tCont = @(x1,x2,t)  0*x1;
+pd.v_xCont = @(x1,x2,t)  0*x1;
+pd.v_yCont = @(x1,x2,t)  0*x1;
+pd.h_tCont = @(x1,x2,t)  0*x1;
+pd.h_xCont = @(x1,x2,t)  0*x1;
+pd.h_yCont = @(x1,x2,t)  0*x1;
+
+% % Analytical solution
+% pd.xiCont = @(x1,x2,t) C*(sin(0.5*pi*(x1-t)) + sin(0.5*pi*(x2-t)));
+% pd.uCont = @(x1,x2,t) A*sin(0.5*pi*(x2-t)).*sin(pi*x1);
+% pd.vCont = @(x1,x2,t) B*sin(0.5*pi*(x1-t)).*sin(pi*x2);
+% % 
+% % Auxiliary functions (derivatives etc.)
+% pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
+% % pd.zb_xCont = @(x1,x2) height*(x1==x1); % TODO
+% % pd.zb_yCont = @(x1,x2) height*(x1==x1);
+% pd.u_tCont = @(x1,x2,t) -0.5*pi*A*cos(0.5*pi*(x2-t)).*sin(pi*x1);
+% pd.u_xCont = @(x1,x2,t)      pi*A*sin(0.5*pi*(x2-t)).*cos(pi*x1);
+% pd.u_yCont = @(x1,x2,t)  0.5*pi*A*cos(0.5*pi*(x2-t)).*sin(pi*x1);
+% pd.v_tCont = @(x1,x2,t) -0.5*pi*B*sin(0.5*pi*(x1-t)).*sin(pi*x2);
+% pd.v_xCont = @(x1,x2,t)  0.5*pi*B*cos(0.5*pi*(x1-t)).*sin(pi*x2);
+% pd.v_yCont = @(x1,x2,t)      pi*B*sin(0.5*pi*(x1-t)).*sin(pi*x2);
+% pd.h_tCont = @(x1,x2,t) -0.5*pi*C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t)));
+% pd.h_xCont = @(x1,x2,t)  0.5*pi*C*cos(0.5*pi*(x1-t)) - height;
+% pd.h_yCont = @(x1,x2,t)  0.5*pi*C*cos(0.5*pi*(x2-t)) - height;
 
 % Right hand side functions (derived from analytical solution)
+% This can be used for any solution, the user just has to specify all
+% necessary auxiliary functions
 pd.f0Cont = @(x1,x2,t) pd.h_tCont(x1,x2,t) + ...
                       (pd.u_xCont(x1,x2,t) + pd.v_yCont(x1,x2,t)) .* pd.hCont(x1,x2,t) + ...
                       pd.uCont(x1,x2,t) .* pd.h_xCont(x1,x2,t) + ...
                       pd.vCont(x1,x2,t) .* pd.h_yCont(x1,x2,t);
-pd.f1Cont = @(x1,x2,t) pd.u_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
-                       pd.uCont(x1,x2,t) .* pd.h_tCont(x1,x2,t) + ...
-                       ( 2 * pd.uCont(x1,x2,t) .* pd.u_xCont(x1,x2,t) + pd.gConst * pd.h_xCont(x1,x2,t) ) .* pd.hCont(x1,x2,t) + ... 
-                       pd.uCont(x1,x2,t) .* pd.uCont(x1,x2,t) .* pd.h_xCont(x1,x2,t) + ...
-                       pd.uCont(x1,x2,t) .* pd.v_yCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ... 
-                       pd.uCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.h_yCont(x1,x2,t) + ...
+pd.f1Cont = @(x1,x2,t) pd.u_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + pd.uCont(x1,x2,t) .* pd.h_tCont(x1,x2,t) + ...
+                       ( 2 * pd.uCont(x1,x2,t) .* pd.u_xCont(x1,x2,t) + pd.gConst * pd.h_xCont(x1,x2,t) + pd.u_yCont(x1,x2,t) .* pd.vCont(x1,x2,t) + pd.uCont(x1,x2,t) .* pd.v_yCont(x1,x2,t) ) .* pd.hCont(x1,x2,t) + ...
+                       pd.uCont(x1,x2,t) .* pd.uCont(x1,x2,t) .* pd.h_xCont(x1,x2,t) + pd.uCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.h_yCont(x1,x2,t) + ...
                        pd.gConst * height * pd.hCont(x1,x2,t) + ...
                        pd.bottomFrictionCoef * sqrt( pd.uCont(x1,x2,t) .* pd.uCont(x1,x2,t) + pd.vCont(x1,x2,t) .* pd.vCont(x1,x2,t) ) .* pd.uCont(x1,x2,t) - ...
                        pd.fcCont(x1,x2) .* pd.vCont(x1,x2,t) .* pd.hCont(x1,x2,t);
-pd.f2Cont = @(x1,x2,t) pd.v_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
-                       pd.vCont(x1,x2,t) .* pd.h_tCont(x1,x2,t) + ...
-                       pd.u_xCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
-                       pd.uCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.h_xCont(x1,x2,t) + ...
-                       2 * pd.vCont(x1,x2,t) .* pd.v_yCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
-                       pd.vCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.h_yCont(x1,x2,t) + ... 
-                       pd.gConst * pd.h_yCont(x1,x2,t) .* pd.hCont(x1,x2,t) + ...
+pd.f2Cont = @(x1,x2,t) pd.v_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + pd.vCont(x1,x2,t) .* pd.h_tCont(x1,x2,t) + ...
+                       ( pd.u_xCont(x1,x2,t) .* pd.vCont(x1,x2,t) + pd.uCont(x1,x2,t) .* pd.v_xCont(x1,x2,t) + 2 * pd.vCont(x1,x2,t) .* pd.v_yCont(x1,x2,t) + pd.gConst * pd.h_yCont(x1,x2,t) ) .* pd.hCont(x1,x2,t) + ...
+                       pd.uCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.h_xCont(x1,x2,t) + pd.vCont(x1,x2,t) .* pd.vCont(x1,x2,t) .* pd.h_yCont(x1,x2,t) + ...
                        pd.gConst * height * pd.hCont(x1,x2,t) + ...
                        pd.bottomFrictionCoef * sqrt( pd.uCont(x1,x2,t) .* pd.uCont(x1,x2,t) + pd.vCont(x1,x2,t) .* pd.vCont(x1,x2,t) ) .* pd.vCont(x1,x2,t) + ...
                        pd.fcCont(x1,x2) .* pd.uCont(x1,x2,t) .* pd.hCont(x1,x2,t);
                      
 % Boundary conditions
 pd.xiOSCont = pd.xiCont;
-pd.isRivCont = false;
+pd.isRivCont = true;
+pd.xiRivCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
+pd.uRivCont = @(x1,x2,t) pd.uCont(x1,x2,t);
+pd.vRivCont = @(x1,x2,t) pd.vCont(x1,x2,t);
 
 % Hot-start output
 pd.isHotStartOutput = false;
@@ -267,7 +307,8 @@ assert(exist(['swe/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe/fort_' 
 assert(exist(['swe/fort_' pd.name '.15'], 'file') == 2, ['Config file "swe/fort_' pd.name '.15" not found!'])
 
 %% Read parameter file
-pd.configADCIRC = readConfigADCIRC(['swe/fort_' pd.name '.15']);
+h = getFunctionHandle('swe/readConfigADCIRC');
+pd.configADCIRC = h(['swe/fort_' pd.name '.15']); % TODO getFunctionHandle oder execin?
 
 %% Map ADCIRC variables to internal names
 % Constants

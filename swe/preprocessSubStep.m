@@ -38,9 +38,11 @@ hQ0E0Text = cellfun(@minus, squeeze(cQ0E0Text(1,:,:)), pd.zbQ0E0Text, 'UniformOu
 hQ0E0TE0T = cellfun(@minus, squeeze(cQ0E0TE0T(1,:,:)), pd.zbQ0E0TE0T, 'UniformOutput', false);
 
 markQ0E0TbdrL = cell(3,1);
+markQ0E0TbdrRI = cell(3,1);
 markQ0E0TbdrOS = cell(3,1);
 for n = 1 : 3
   markQ0E0TbdrL{n} = logical(kron(pd.g.markE0TbdrL(:,n), ones(numQuad1D,1)));
+  markQ0E0TbdrRI{n} = logical(kron(pd.g.markE0TbdrRI(:,n), ones(numQuad1D,1)));
   markQ0E0TbdrOS{n} = logical(kron(pd.g.markE0TbdrOS(:,n), ones(numQuad1D,1)));
 end % for
 
@@ -110,6 +112,7 @@ if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
   vRivQ0E0T = cell(3,1);
 
   if pd.isRivCont
+
     [Q, ~] = quadRule1D(max(2*p,1));
     for n = 1 : 3
       [Q1, Q2] = gammaMap(n, Q);
@@ -143,6 +146,14 @@ gHH = 0.5 * pd.gConst * (cQ0T{1} .* cQ0T{1});
 pd.riemannTerms = sparse(3*K*N, 1);
 pd.nonlinearTerms = [ -pd.globF{1} * (uuH + gHH) - pd.globF{2} * uvH ; ...
                       -pd.globF{1} * uvH - pd.globF{2} * (vvH + gHH) ];
+if pd.isCoupling
+  pd.massFluxQ0E0T = zeros(K, 3, numQuad1D);
+  hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
+  dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
+  pd.u1Disc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+  dataQ0T = (pd.cDisc(:,:,3) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
+  pd.u2Disc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+end % if
                              
 %% Non-linear terms in quadrature points of edges.
 for nn = 1 : 3
@@ -153,7 +164,7 @@ for nn = 1 : 3
     vvH = cQ0E0Text{3,nn,np} .* cQ0E0Text{3,nn,np} ./ hQ0E0Text{nn,np};
     gHH = 0.5 * pd.gConst * (cQ0E0Text{1,nn,np} .* cQ0E0Text{1,nn,np});
     
-    cAvgQ0E0T = computeAveragedVariablesQ0E0Tint(cQ0E0Tint(:,nn), cQ0E0TE0T(:,nn,np), hQ0E0Tint{nn}, hQ0E0TE0T{nn,np}, pd.averagingType);
+    cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Tint',cQ0E0Tint(:,nn), cQ0E0TE0T(:,nn,np), hQ0E0Tint{nn}, hQ0E0TE0T{nn,np}, pd.averagingType);
     
     switch pd.typeFlux
       case 'Lax-Friedrichs'
@@ -161,12 +172,16 @@ for nn = 1 : 3
           [ pd.globRoffdiag{nn,np,1} * (uuH + gHH) + pd.globRoffdiag{nn,np,2} * uvH ; ...
             pd.globRoffdiag{nn,np,1} * uvH + pd.globRoffdiag{nn,np,2} * (vvH + gHH) ];
           
-        lambda = computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+        lambda = execin('swe/computeLaxFriedrichsCoefficient',cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
         pd.riemannTerms = pd.riemannTerms + ...
           [ pd.globV{nn,np} * (lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np})) ; ...
             pd.globV{nn,np} * (lambda .* (cQ0E0Tint{2,nn} - cQ0E0TE0T{2,nn,np})) ; ...
             pd.globV{nn,np} * (lambda .* (cQ0E0Tint{3,nn} - cQ0E0TE0T{3,nn,np})) ];
-
+        if pd.isCoupling
+          pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * permute( reshape( execin('swe/setNaN2Zero', cAvgQ0E0T{2} .* pd.g.nuQ0E0T{nn,1}  ...
+                                                                                                                + cAvgQ0E0T{3} .* pd.g.nuQ0E0T{nn,2} ) ...
+                                                                                  + lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1]);
+        end % if
       case 'Roe'
         error('not implemented')
         
@@ -207,7 +222,7 @@ for nn = 1 : 3
         vHriem = -pd.g.nuE0TsqrDiff{nn} .* cQ0E0Tint{3,nn} - 2 * pd.g.nuE0Tprod{nn} .* cQ0E0Tint{2,nn};
         
         cQ0E0Triem = { [], uHriem, vHriem };
-        cAvgQ0E0T = computeAveragedVariablesQ0E0Tland(cQ0E0Tint(:,nn), cQ0E0Triem, hQ0E0Tint{nn}, [], markQ0E0TbdrL{nn}, pd.averagingType);
+        cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Tland',cQ0E0Tint(:,nn), cQ0E0Triem, hQ0E0Tint{nn}, [], markQ0E0TbdrL{nn}, pd.averagingType);
         
         switch pd.typeFlux
           case 'Lax-Friedrichs'
@@ -215,7 +230,7 @@ for nn = 1 : 3
             uvHriem = uHriem .* vHriem ./ hQ0E0Tint{nn};
             vvHriem = vHriem .* vHriem ./ hQ0E0Tint{nn};
             
-            lambda = computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+            lambda = execin('swe/computeLaxFriedrichsCoefficient',cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
             
             pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
               [ pd.globRL{nn,1} * (uuH + uuHriem + 2 * gHH) + pd.globRL{nn,2} * (uvH + uvHriem) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHriem)); ...
@@ -236,15 +251,44 @@ for nn = 1 : 3
 
   % River boundary contributions
   if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
-    hRiv = xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn};
-    uHRiv = uRivQ0E0T{nn} .* hRiv;
-    vHRiv = vRivQ0E0T{nn} .* hRiv;
-    uvHRiv = uRivQ0E0T{nn} .* vHRiv;
-    gHHRiv = pd.gConst * xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn});
-    
-    pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{nn,1} * uHRiv + pd.globRRI{nn,2} * vHRiv;
-    pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uRivQ0E0T{nn} .* uHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
-    pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vRivQ0E0T{nn} .* vHRiv + gHHRiv);
+    if pd.isRiemRiv
+      switch pd.typeFlux
+        case 'Lax-Friedrichs'
+          hRiv = xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn};
+          uHRiv = uRivQ0E0T{nn} .* hRiv;
+          vHRiv = vRivQ0E0T{nn} .* hRiv;
+          uvHRiv = uRivQ0E0T{nn} .* vHRiv;
+          gHHRiv = pd.gConst * xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn});
+          
+          cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Triv',cQ0E0Tint(:,nn), { xiRivQ0E0T{nn}, uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, markQ0E0TbdrRI{nn}, pd.averagingType);
+          lambda = execin('swe/computeLaxFriedrichsCoefficient',cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+          
+          uuHRiv = uuH + uRivQ0E0T{nn} .* uHRiv;
+          uvHRiv = uvH + uvHRiv;
+          vvHRiv = vvH + vRivQ0E0T{nn} .* vHRiv;
+          gHHRiv = gHH - pd.gConst * cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn} + gHHRiv;
+
+          pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRRI{nn,1} * (cQ0E0Tint{2,nn} + uHRiv) + pd.globRRI{nn,2} * (cQ0E0Tint{3,nn} + vHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn})) );
+          pd.globLRI{2} = pd.globLRI{2} + 0.5 * ( pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHRiv)) );
+          pd.globLRI{3} = pd.globLRI{3} + 0.5 * ( pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHRiv)) );
+        case 'Roe'
+          error('not implemented')
+          
+        otherwise
+          error('Invalid flux type for land boundaries.')
+      end % switch
+
+    else
+      hRiv = xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn};
+      uHRiv = uRivQ0E0T{nn} .* hRiv;
+      vHRiv = vRivQ0E0T{nn} .* hRiv;
+      uvHRiv = uRivQ0E0T{nn} .* vHRiv;
+      gHHRiv = pd.gConst * xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn});
+
+      pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{nn,1} * uHRiv + pd.globRRI{nn,2} * vHRiv;
+      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uRivQ0E0T{nn} .* uHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
+      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vRivQ0E0T{nn} .* vHRiv + gHHRiv);
+    end
   end % if
   
   % Open Sea boundary contributions
@@ -263,11 +307,11 @@ for nn = 1 : 3
         [ pd.globROS{nn,1} * (uuH + uuHOS + gHHOS) + pd.globROS{nn,2} * (uvH + uvHOS) ; ...
           pd.globROS{nn,1} * (uvH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHHOS) ];
       
-      cAvgQ0E0T = computeAveragedVariablesQ0E0Tos(cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
+      cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Tos',cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
         
       switch pd.typeFlux
         case 'Lax-Friedrichs'
-          lambda = computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+          lambda = execin('swe/computeLaxFriedrichsCoefficient',cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
           pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + pd.globVOS{nn} * (lambda .* (hQ0E0Tint{nn} - hOSQ0E0T));
           
         case 'Roe'

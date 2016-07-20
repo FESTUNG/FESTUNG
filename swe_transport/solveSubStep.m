@@ -1,6 +1,4 @@
 function problemData = solveSubStep(problemData, nStep, nSubStep)
-% TODO swe substepping once implemented
-addpath('transport');
-problemData.transportData = solveSubStep(problemData.transportData, nStep, nSubStep);
-rmpath('transport');
+problemData.sweData = problemData.swe_solveSubStep(problemData.sweData, nStep, nSubStep);
+problemData.transportData = problemData.transport_solveSubStep(problemData.transportData, nStep, nSubStep);
 end % function

@@ -1,8 +1,8 @@
 function problemData = configureProblem(problemData)
 
 %% Parameters. 
-problemData.p          = 0; % local polynomial degree % TODO maybe allow different approximation orders for each species
-problemData.numSpecies = 2; % number of species involved
+problemData.p          = 2; % local polynomial degree % TODO maybe allow different approximation orders for each species
+problemData.numSpecies = 3; % number of species involved
 
 if ~isfield(problemData, 'hmax'), problemData.hmax        = 2^-6; end % maximum edge length of triangle
 if ~isfield(problemData, 'ordRK'), problemData.ordRK       = min(problemData.p+1,3); end % order of Runge Kutta time stepper.
@@ -31,23 +31,45 @@ problemData.c0Cont = cell(problemData.numSpecies,1);
 problemData.fCont = cell(problemData.numSpecies,1);
 problemData.cDCont = cell(problemData.numSpecies,1);
 problemData.gNCont = cell(problemData.numSpecies,1);
+problemData.reactions = cell(problemData.numSpecies,1);
+%% NPZ model
+% parameters (Notation as in paper)
+I0 = 1;
+Vm = 1;
+ks = 1;
+Rm = 1;
+ep = 1;
+gamma = 1;
+I = @(t,x1,x2) (x1==x1);
+f = @(t,x1,x2) I(t,x1,x2) /I0; % linear response
+g = @(t,x1,x2,N) Vm ./ (ks + N); % Michaelis-Menten uptake
+h = @(t,x1,x2,P) Rm * P; % linear grazing
+i = @(t,x1,x2,P) ep; % linear death rate
+j = @(t,x1,x2,Z) ep; % linear death rate
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = 0; % slope limiting
-  problemData.typeSlopeLim{species} = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
+  problemData.isSlopeLim{species}  = true; % slope limiting
+  problemData.typeSlopeLim{species} = 'strict'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
   problemData.outputBasename{species}  = ['solution_' num2str(species) '_' problemData.typeSlopeLim{species}]; % Basename of output files
-  problemData.outputTypes{species}     = cellstr(['vtk';'tec']); % solution output file types
+  problemData.outputTypes{species}     = cellstr('vtk'); % solution output file types
   
   %% Parameter check.
   assert(~problemData.isSlopeLim{species} || problemData.p > 0, 'Slope limiting only available for p > 0.')
   %% Coefficients and boundary data (LeVeque's solid body rotation).
-  problemData.c0Cont{species} = @(x1, x2) (-1)^species*((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
-    (-1)^species*(1-G(x1, x2, 0.5, 0.25)) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.0225) + ...
-    (-1)^species*0.25*(1+cos(pi*G(x1, x2, 0.25, 0.5))).*((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.0225);
+  problemData.c0Cont{species} = @(x1, x2) species*((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
+    species*(1-G(x1, x2, 0.5, 0.25)) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.0225) + ...
+    species*0.25*(1+cos(pi*G(x1, x2, 0.25, 0.5))).*((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.0225);
   problemData.fCont{species} = @(t,x1,x2) zeros(size(x1));
   problemData.cDCont{species} = @(t,x1,x2) zeros(size(x1));
   problemData.gNCont{species} = @(t,x1,x2) zeros(size(x1));
 end % for
+%% reaction definition
+problemData.reactions{1} = @(t,x1,x2,c) 0*x1;
+problemData.reactions{2} = @(t,x1,x2,c) 0*x1;
+problemData.reactions{3} = @(t,x1,x2,c) 0*x1;
+% problemData.reactions{1} = @(t,x1,x2,c) f(t,x1,x2) .* g(t,x1,x2,c{3}) .* c{1} - h(t,x1,x2,c{1}) .* c{2} - i(t,x1,x2,c{1}) .* c{1};
+% problemData.reactions{2} = @(t,x1,x2,c) gamma * h(t,x1,x2,c{1}) .* c{2} - j(t,x1,x2,c{2}) .* c{2};
+% problemData.reactions{3} = @(t,x1,x2,c) -f(t,x1,x2) .* g(t,x1,x2,c{3}) .* c{1} + (1-gamma) .* h(t,x1,x2,c{1}) .* c{2} + i(t,x1,x2,c{1}) .* c{1} + j(t,x1,x2,c{2}) .* c{2};
 end % function

@@ -55,7 +55,7 @@ if length(N) == 1
 else
   validateattributes(N, {'numeric'}, {'numel', 3}, mfilename, 'N')
 end % if
-p = (sqrt(8*max(N)+1)-3)/2; qOrd = max(2*p, 1); [~, ~, W] = quadRule2D(qOrd);
+p = (sqrt(8*max(N)+1)-3)/2; qOrd = max(2*p, 1); [~, ~, W] = execin('../quadRule2D',qOrd);
 ret = zeros(N(1),N(2),N(3));
 for i = 1 : N(1)
   for j = 1 : N(2)

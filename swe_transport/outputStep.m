@@ -1,9 +1,5 @@
 function problemData = outputStep(problemData, nStep)
-addpath('swe');
-problemData.sweData = outputStep(problemData.sweData, nStep);
-rmpath('swe');
-addpath('transport');
-problemData.transportData = outputStep(problemData.transportData, nStep);
-rmpath('transport');
+problemData.sweData = problemData.swe_outputStep(problemData.sweData, nStep);
+problemData.transportData = problemData.transport_outputStep(problemData.transportData, nStep);
 end % function
 
