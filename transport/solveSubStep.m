@@ -1,7 +1,11 @@
 function problemData = solveSubStep(problemData, ~, nSubStep)
 K = problemData.K;
 N = problemData.N;
-qOrd2D = max(2* problemData.p,1); [Q1, Q2, W] = quadRule2D(qOrd2D); numQuad2D = length(W);
+p = problemData.p;
+
+qOrd2D = max(2* p,1); 
+[Q1, Q2, W] = quadRule2D(qOrd2D); 
+numQuad2D = length(W);
 
 % Assembly of time-dependent global matrices
 globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, problemData.u1Disc, problemData.u2Disc);
@@ -13,7 +17,7 @@ sysA = -globG{1} - globG{2} + globR;
 for species = 1:problemData.numSpecies
   % L2 projections of algebraic coefficients
   fDisc  = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.fCont{species}(problemData.timeLvls(nSubStep),x1,x2), ...
-                                    2*problemData.p, problemData.hatM, problemData.basesOnQuad);
+                                    2*p, problemData.hatM, problemData.basesOnQuad);
 
   % Assembly of Dirichlet boundary contributions
   globKD = assembleVecEdgePhiIntFuncContVal(problemData.g, problemData.g.markE0TbdrD, ...
@@ -33,7 +37,7 @@ for species = 1:problemData.numSpecies
   sysV = globL - globKD - globKN;
 
   % Computing the discrete time derivative
-  cDiscDot = problemData.globM \ (sysV - sysA * problemData.cDiscRK{nSubStep, species});
+  cDiscDot = problemData.globM \ (sysV - sysA * problemData.cDiscRK{species});
 
   % Apply slope limiting to time derivative
   if problemData.isSlopeLim{species}
@@ -44,13 +48,13 @@ for species = 1:problemData.numSpecies
   end % if
 
   % Compute next step
-  problemData.cDiscRK{nSubStep + 1, species} = problemData.omega(nSubStep) * problemData.cDiscRK{1, species} + (1 - problemData.omega(nSubStep)) * (problemData.cDiscRK{nSubStep, species} + problemData.tau * cDiscDot);
+  problemData.cDiscRK{species} = problemData.omega(nSubStep) * problemData.cDiscRK0{species} + (1 - problemData.omega(nSubStep)) * (problemData.cDiscRK{species} + problemData.tau * cDiscDot);
 
   % Limiting the solution
   if problemData.isSlopeLim{species}
     cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(problemData.timeLvls(nSubStep), x1, x2));
-    problemData.cDiscRK{nSubStep + 1, species} = reshape(applySlopeLimiterDisc(problemData.g, reshape(problemData.cDiscRK{nSubStep + 1, species}, [N K])', problemData.g.markV0TbdrD, ...
-                            cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim{species})', [K*N 1]);
+    problemData.cDiscRK{species} = reshape(applySlopeLimiterDisc(problemData.g, reshape(problemData.cDiscRK{species}, [N K])', problemData.g.markV0TbdrD, ...
+                                   cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim{species})', [K*N 1]);
   end % if
 end % for
 
