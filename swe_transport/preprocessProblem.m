@@ -1,14 +1,12 @@
 function problemData = preprocessProblem(problemData)
-h = getFunctionHandle('swe/preprocessProblem');
-problemData.sweData = h(problemData.sweData);
+problemData.sweData = execin('swe/preprocessProblem', problemData.sweData);
 
 problemData.transportData.g = problemData.sweData.g;
 problemData.transportData.K = problemData.sweData.K;
 problemData.transportData.tau = problemData.sweData.dt;
 problemData.transportData.velN = problemData.sweData.N;
 
-h = getFunctionHandle('transport/preprocessProblem');
-problemData.transportData = h(problemData.transportData);
+problemData.transportData = execin('transport/preprocessProblem', problemData.transportData);
 
 % only created function handles for routines that are called repeatedly
 problemData.swe_preprocessStep = getFunctionHandle('swe/preprocessStep');
