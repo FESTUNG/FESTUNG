@@ -106,7 +106,7 @@ more off % Disable paging of output
 tic % Start time measurement
 diary([problemName '.log']) % Start logging
 %% Add problem to search path
-oldpath = addpath(problemName);
+oldpath = addpath(problemName, pwd);
 %% Execute problem
 try
   %% Pre-process and initialize problem
