@@ -17,8 +17,8 @@ problemData.sweData.cDiscRK = problemData.sweData.cDiscRK0;
 problemData.transportData.timeLvls = problemData.timeLvls;
 problemData.transportData.omega = problemData.omega;
 
-problemData.transportData.cDiscRK = cell(length(problemData.omega)+1, problemData.transportData.numSpecies);
-problemData.transportData.cDiscRK(1,:) = cellfun(@(c) reshape(c.', [K*N,1]), problemData.transportData.cDisc, 'UniformOutput', false);
+problemData.transportData.cDiscRK0 = cellfun(@(c) reshape(c.', [K*N,1]), problemData.transportData.cDisc, 'UniformOutput', false);
+problemData.transportData.cDiscRK = problemData.transportData.cDiscRK0;
 
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);
