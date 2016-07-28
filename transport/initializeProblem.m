@@ -1,5 +1,4 @@
 function problemData = initializeProblem(problemData)
-problemData.isFinished = false;
 %% Initial data.
 problemData.cDisc = cell(problemData.numSpecies,1);
 for species = 1:problemData.numSpecies
@@ -12,14 +11,19 @@ for species = 1:problemData.numSpecies
                                                        problemData.globMDiscTaylor, problemData.basesOnQuad, ...
                                                        problemData.typeSlopeLim{species});
   end % if
+  
+  % Initial error
   fprintf('L2 error w.r.t. the initial condition: %g\n', ...
     computeL2Error(problemData.g, problemData.cDisc{species}, problemData.c0Cont{species}, 2*problemData.p, problemData.basesOnQuad));
-  %% visualization of inital condition.
+  
+  % Visualization of inital condition.
   if problemData.isVisSol{species}
     cLagrange = projectDataDisc2DataLagr(problemData.cDisc{species});
-    visualizeDataLagr(problemData.g, cLagrange, ['u_' num2str(species) '_h'], problemData.outputBasename{species}, 0, problemData.outputTypes{species})
+    visualizeDataLagr(problemData.g, cLagrange, ['output' filesep 'u_' num2str(species) '_h'], problemData.outputBasename{species}, 0, problemData.outputTypes{species})
   end % if
 end % for
+%% Initialize time stepping.
+problemData.isFinished = false;
 fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
   problemData.tEnd, problemData.tau, problemData.numSteps)
 end % function
