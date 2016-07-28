@@ -19,7 +19,7 @@ for species = 1:problemData.numSpecies
   % Visualization of inital condition.
   if problemData.isVisSol{species}
     cLagrange = projectDataDisc2DataLagr(problemData.cDisc{species});
-    visualizeDataLagr(problemData.g, cLagrange, ['output' filesep 'u_' num2str(species) '_h'], problemData.outputBasename{species}, 0, problemData.outputTypes{species})
+    visualizeDataLagr(problemData.g, cLagrange, ['u_' num2str(species) '_h'], problemData.outputBasename{species}, 0, problemData.outputTypes{species})
   end % if
 end % for
 %% Initialize time stepping.
