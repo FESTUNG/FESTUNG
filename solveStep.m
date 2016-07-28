@@ -1,13 +1,14 @@
 function problemData = solveStep(problemData, nStep)
-K = problemData.K;
-N = problemData.N;
+KN = problemData.K * problemData.N;
 
 % Obtain Runge-Kutta rule
 [problemData.timeLvls, problemData.omega] = rungeKuttaSSP(problemData.ordRK, problemData.tau, (nStep - 1) * problemData.tau);
 
-problemData.cDiscRK = cell(length(problemData.omega)+1, problemData.numSpecies);
-problemData.cDiscRK(1,:) = cellfun(@(c) reshape(c.', [K*N,1]), problemData.cDisc, 'UniformOutput', false);
+% Linearize solution vector
+problemData.cDiscRK0 = cellfun(@(c) reshape(c.', [KN,1]), problemData.cDisc, 'UniformOutput', false);
+problemData.cDiscRK = problemData.cDiscRK0;
 
+% Initialize substepping
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);
 end % function
