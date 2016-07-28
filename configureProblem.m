@@ -42,7 +42,7 @@ for species = 1:problemData.numSpecies
   problemData.typeSlopeLim{species} = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
-  problemData.outputBasename{species}  = ['solution_' num2str(species) '_' problemData.typeSlopeLim{species}]; % Basename of output files
+  problemData.outputBasename{species}  = ['output' filesep 'solution_' num2str(species) '_' problemData.typeSlopeLim{species}]; % Basename of output files
   problemData.outputTypes{species}     = cellstr('vtk'); % solution output file types
   
   %% Parameter check.
