@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd.name = 'bahamas'; 
+pd.name = 'debug'; 
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -83,13 +83,13 @@ pd.typeBdrL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', o
 pd.averagingType = 'full-harmonic'; % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
-pd.isCoupling = false; % usage of velocity coefficients and flux of first unknown for transport equations
+pd = setdefault(pd, 'isCoupling', false); % Compute velocity coefficients and flux of first unknown, e.g., for coupled transport problem
 pd.elevTol = 20;
 
 %% Visualization parameters
 pd.isVisGrid = false; % Visualize computational grid
 pd.isWaitbar = false; % Use waiting bar
-pd.outputCount = 100; % Number of outputs over total simulation time
+pd.outputCount = 1; % Number of outputs over total simulation time
 pd.outputTypes = 'vtk'; % Output file type
 pd.outputList = { 'u', 'v', 'xi' }; % List of variables to visualize
 pd.isVisStations = false; % Output stations
@@ -124,8 +124,8 @@ pd.hmax = 2^-6; % Maximum element size of initial grid
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd.tEnd = 100/3142*2*pi; % End time of simulation
-pd.numSteps = 100/3142*3142; % Number of time steps
+pd.numSteps = 100; % Number of time steps
+pd.tEnd = pd.numSteps/3142*2*pi; % End time of simulation
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
