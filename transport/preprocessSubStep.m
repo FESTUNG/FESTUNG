@@ -16,5 +16,5 @@ end % if
 
 % Evaluate cDisc in all quadrature points
 qOrd2D = max(2*p,1);
-problemData.cQ0T = cellfun(@(c) (problemData.basesOnQuad.phi2D{qOrd2D} * reshape(c, N, K)).', problemData.cDiscRK, 'UniformOutput', false);
+problemData.cQ0T = cellfun(@(c) (problemData.basesOnQuad.phi2D{qOrd2D}(:,1:N) * reshape(c, N, K)).', problemData.cDiscRK, 'UniformOutput', false);
 end % function
