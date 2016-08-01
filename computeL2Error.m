@@ -98,13 +98,13 @@ validateattributes(dataDisc, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'da
 
 % Determine quadrature rule and physical coordinates
 qOrd = max(qOrd,1); [Q1, Q2, W] = quadRule2D(qOrd);
-R = length(W);
+R = length(W); N = size(dataDisc,2);
 X1 = kron(g.B(:,1,1), Q1) + kron(g.B(:,1,2), Q2) + kron(g.coordV0T(:,1,1), ones(1,R));
 X2 = kron(g.B(:,2,1), Q1) + kron(g.B(:,2,2), Q2) + kron(g.coordV0T(:,1,2), ones(1,R));
 
 % Evaluate analytical and discrete function
 cExOnQuadPts = funcCont(X1, X2); % [K x R]
-cApprxOnQuadPts = dataDisc * basesOnQuad.phi2D{qOrd}'; % [K x R] = [K x N] * [N x R]
+cApprxOnQuadPts = dataDisc * basesOnQuad.phi2D{qOrd}(:,1:N).'; % [K x R] = [K x N] * [N x R]
 
 % Compute error
 err = sqrt(2 * dot((cApprxOnQuadPts - cExOnQuadPts).^2 * W.', g.areaT)); 

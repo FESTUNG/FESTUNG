@@ -208,10 +208,6 @@ function ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhi
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
-% Determine quadrature rule
-% p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
-% R = length(W);
-
 % Assemble matrices
 ret = sparse(K*N, K*N);
 for nn = 1 : 3
@@ -233,10 +229,6 @@ end % function
 function ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad)
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
-
-% Determine quadrature rule
-% p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
-% R = length(W);
 
 % Assemble matrices
 ret = sparse(K*N, K*N);
