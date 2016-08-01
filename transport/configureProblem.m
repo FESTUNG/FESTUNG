@@ -1,14 +1,13 @@
 function problemData = configureProblem(problemData)
 %% Parameters. 
-problemData.p          = 2; % local polynomial degree (TODO: allow different approximation orders for each species)
-problemData.numSpecies = 1; % number of transported species
-
 % Set default values if they are not yet available in problemData
-problemData = setdefault(problemData, 'hmax'     , 2^-6);  % maximum edge length of triangle
-problemData = setdefault(problemData, 'ordRK'    , min(problemData.p+1,3));  % order of Runge Kutta time stepper
-problemData = setdefault(problemData, 'numSteps' , 314);  % number of time steps
-problemData = setdefault(problemData, 'tEnd'     , (problemData.numSteps/3142)*2*pi);  % end time
-problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
+problemData = setdefault(problemData, 'numSpecies', 1);  % number of transported species
+problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degree (TODO: allow different approximation orders for each species)
+problemData = setdefault(problemData, 'hmax'      , 2^-6);  % maximum edge length of triangle
+problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
+problemData = setdefault(problemData, 'numSteps'  , 314);  % number of time steps
+problemData = setdefault(problemData, 'tEnd'      , (problemData.numSteps/3142)*2*pi);  % end time
+problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
@@ -55,7 +54,8 @@ for species = 1:problemData.numSpecies
   problemData.gNCont{species} = @(t,x1,x2) zeros(size(x1));
 end % for
 
-%% NPZ model
+%% Reaction term definitions.
+% NPZ model
 % parameters (Notation as in paper)
 I0 = 1;
 Vm = 1;
@@ -70,7 +70,6 @@ h = @(t,x1,x2,P) Rm * P; % linear grazing
 i = @(t,x1,x2,P) ep; % linear death rate
 j = @(t,x1,x2,Z) ep; % linear death rate
 
-% reaction definition
 problemData.reactions{1} = @(t,x1,x2,c) 0*x1;
 problemData.reactions{2} = @(t,x1,x2,c) 0*x1;
 problemData.reactions{3} = @(t,x1,x2,c) 0*x1;
