@@ -18,11 +18,13 @@ problemData.g = execin('transport/computeDerivedGridData', problemData.g);      
 %% Extract often used parameters
 K = problemData.K;  % number of triangles
 N = problemData.N;  % number of degrees of freedom
+velN = problemData.velN; % number of degrees of freedom for velocity
 p = problemData.p;  % Approximation order
+velp = (sqrt(8*max(velN)+1)-3)/2;
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', p, N, K)
 %% Lookup table for basis function.
-problemData.basesOnQuad = computeBasesOnQuad(N, struct);
+problemData.basesOnQuad = computeBasesOnQuad(max(N, velN), struct, sort(unique([2*p, 2*p+1, 2*velp, 2*velp+1])));
 if any(cell2mat(problemData.isSlopeLim))
   problemData.basesOnQuad = computeTaylorBasesV0T(problemData.g, N, problemData.basesOnQuad);
 end % if
