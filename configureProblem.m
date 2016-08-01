@@ -49,13 +49,13 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd.name = 'debug'; 
+pd = setdefault(pd, 'name', 'debug'); 
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
-pd.configSource = 'debug';
+pd = setdefault(pd, 'configSource', 'debug');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -65,34 +65,34 @@ pd.configSource = 'debug';
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-pd.gridSource = 'square';
+pd = setdefault(pd, 'gridSource', 'square');
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
-pd.p = 2;
+pd = setdefault(pd, 'p', 1);
 
 %% Time stepping parameters
-pd.schemeType = 'explicit'; % type of time stepping scheme ('explicit' or 'semi-implicit')
+pd = setdefault(pd, 'schemeType', 'explicit'); % type of time stepping scheme ('explicit' or 'semi-implicit')
 
 %% Model parameters
 % Some may be overwritten by fort.15 config files
-pd.typeFlux = 'Lax-Friedrichs'; % Type of interior flux ('Lax-Friedrichs', 'Roe')
-pd.isRiemOS = true; % Riemann solver type on open sea boundary ('Lax-Friedrichs', 'Roe', or 'none')
-pd.isRiemRiv = true; % Riemann solver type on river boundary ('Lax-Friedrichs', 'Roe', or 'none')
-pd.typeBdrL = 'riemann'; % Flux type on land boundary ('reflected', 'natural', or 'riemann')
-pd.averagingType = 'full-harmonic'; % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
-pd.typeSlopeLim = 'linear'; % Slope limiter type ('linear', 'hierarch_vert', 'strict')
-pd.slopeLimList = {}; % Apply slope limiter to specified variables ('h', 'uH', 'vH')
+pd = setdefault(pd, 'typeFlux', 'Lax-Friedrichs'); % Type of interior flux ('Lax-Friedrichs', 'Roe')
+pd = setdefault(pd, 'isRiemOS', true); % Riemann solver type on open sea boundary ('Lax-Friedrichs', 'Roe', or 'none')
+pd = setdefault(pd, 'isRiemRiv', true); % Riemann solver type on river boundary ('Lax-Friedrichs', 'Roe', or 'none')
+pd = setdefault(pd, 'typeBdrL', 'riemann'); % Flux type on land boundary ('reflected', 'natural', or 'riemann')
+pd = setdefault(pd, 'averagingType', 'full-harmonic'); % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
+pd = setdefault(pd, 'typeSlopeLim', 'linear'); % Slope limiter type ('linear', 'hierarch_vert', 'strict')
+pd = setdefault(pd, 'slopeLimList', {}); % Apply slope limiter to specified variables ('h', 'uH', 'vH')
 pd = setdefault(pd, 'isCoupling', false); % Compute velocity coefficients and flux of first unknown, e.g., for coupled transport problem
-pd.elevTol = 20;
+pd = setdefault(pd, 'elevTol', 20);
 
 %% Visualization parameters
-pd.isVisGrid = false; % Visualize computational grid
-pd.isWaitbar = false; % Use waiting bar
-pd.outputCount = 1; % Number of outputs over total simulation time
-pd.outputTypes = 'vtk'; % Output file type
-pd.outputList = { 'u', 'v', 'xi' }; % List of variables to visualize
-pd.isVisStations = false; % Output stations
+pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
+pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
+pd = setdefault(pd, 'outputCount', 1); % Number of outputs over total simulation time
+pd = setdefault(pd, 'outputTypes', 'vtk'); % Output file type
+pd = setdefault(pd, 'outputList', { 'u', 'v', 'xi' }); % List of variables to visualize
+pd = setdefault(pd, 'isVisStations', false); % Output stations
 
 %% Simulation scenario specific parameters
 switch pd.configSource
