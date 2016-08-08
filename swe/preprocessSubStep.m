@@ -148,15 +148,17 @@ pd.nonlinearTerms = [ -pd.globF{1} * (uuH + gHH) - pd.globF{2} * uvH ; ...
                       -pd.globF{1} * uvH - pd.globF{2} * (vvH + gHH) ];
 if pd.isCoupling
   pd.massFluxQ0E0T = zeros(K, 3, numQuad1D);
-  hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
-  dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
-  pd.u1Disc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
-  dataQ0T = (pd.cDisc(:,:,3) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
-  pd.u2Disc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
+  pd.uHDisc = pd.cDisc(:,:,2);
+  pd.vHDisc = pd.cDisc(:,:,3);
 end % if
                              
 %% Non-linear terms in quadrature points of edges.
 for nn = 1 : 3
+  if pd.isCoupling
+    pd.massFluxQ0E0T(:,nn,:) = 0.5 * permute( reshape( ( cQ0E0Tint{2,nn} + sum(cat(2,cQ0E0TE0T{2,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,1} + ...
+                                                       ( cQ0E0Tint{3,nn} + sum(cat(2,cQ0E0TE0T{3,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] );
+  end % if
   % Non-linear terms in exterior quadrature points of edges
   for np = 1 : 3
     uuH = cQ0E0Text{2,nn,np} .* cQ0E0Text{2,nn,np} ./ hQ0E0Text{nn,np};
@@ -179,10 +181,7 @@ for nn = 1 : 3
             pd.globV{nn,np} * (lambda .* (cQ0E0Tint{3,nn} - cQ0E0TE0T{3,nn,np})) ];
           
         if pd.isCoupling
-          % Factor 1/2 of Lax Friedrichs is missing - TODO why?
-          pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + ...
-                   permute( reshape( execin('swe/setNaN2Zero', cAvgQ0E0T{2} .* pd.g.nuQ0E0T{nn,1} + cAvgQ0E0T{3} .* pd.g.nuQ0E0T{nn,2} ) + ...
-                                     lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1]);
+          pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * permute( reshape( lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] );
         end % if
       case 'Roe'
         error('not implemented')
