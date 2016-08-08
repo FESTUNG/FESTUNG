@@ -1,7 +1,7 @@
 function problemData = configureProblem(problemData)
 %% Parameters. 
 % Set default values if they are not yet available in problemData
-problemData = setdefault(problemData, 'numSpecies', 1);  % number of transported species
+problemData = setdefault(problemData, 'numSpecies', 2);  % number of transported species
 problemData = setdefault(problemData, 'p'         , 2);  % local polynomial degree (TODO: allow different approximation orders for each species)
 problemData = setdefault(problemData, 'hmax'      , 2^-6);  % maximum edge length of triangle
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
@@ -38,8 +38,8 @@ problemData.gNCont = cell(problemData.numSpecies,1);
 problemData.reactions = cell(problemData.numSpecies,1);
 
 for species = 1:problemData.numSpecies
-  problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = true; % slope limiting
+  problemData.isVisSol{species} = true; % visualization of solution
+  problemData.isSlopeLim{species} = problemData.p > 0; % slope limiting
   problemData.typeSlopeLim{species} = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
   
