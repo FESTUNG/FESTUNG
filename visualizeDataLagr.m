@@ -15,6 +15,10 @@
 %> Multiple file types can be given at the same time, see the example
 %> below.
 %>
+%> Multiple data sets can be written to a single file. To do so, specify
+%> the different data sets as a cell array. Additionally, multiple data
+%> sets can be grouped into a vector and written as such (VTK only).
+%>
 %> The name of the generated file ist <code>fileName.tLvl.vtu</code> or
 %> <code>fileName.tLvl.plt</code>, respectively, where <code>tLvl</code> stands
 %> for time level.
@@ -48,6 +52,24 @@
 %> @image html  visP2.png  "fDOF6.1.vtu with range [-2, 2]" width=1cm
 %> @endparblock
 %>
+%> @par Example
+%> @parblock
+%> Assume a grid, <code>g</code>, and a cell array with discontinuous data,
+%> <code>cDisc</code>, exist already.
+%>
+%> Then, the following code writes a single output file with a scalar field
+%> for 'h' and a vector field 'velocity' with components 'u' and 'v'.
+%> @code
+%> varName = { 'h', 'u', 'v' }
+%> vecName = struct('velocity', {{'u','v'}})
+%> dataLagr = { projectDataDisc2DataLagr(cDisc{1}), ...
+%>              projectDataDisc2DataLagr(cDisc{2}), ...
+%>              projectDataDisc2DataLagr(cDisc{3}) };
+%> visualizeDataLagr(g, dataLagr, varName, 'solution', 1, {'vtk', 'tec'}), vecName);
+%> end
+%> @endcode
+%> @endparblock
+%>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
@@ -63,7 +85,7 @@
 %> @param  tLvl       The time level
 %> @param  fileTypes  (optional) The output format to be written 
 %>                    (<code>'vtk'</code> (default) or <code>'tec'</code>).
-%> @param  vecNames   (optional) A struct that allows to define vectorial
+%> @param  vecName    (optional) A struct that allows to define vectorial
 %>                    output (for VTK only). Field names provide the vector
 %>                    names and field values are cell arrays with variable
 %>                    names.
@@ -89,10 +111,13 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function visualizeDataLagr(g, dataLagr, varName, fileName, tLvl, fileTypes, vecNames)
+function visualizeDataLagr(g, dataLagr, varName, fileName, tLvl, fileTypes, vecName)
 %% Deduce default arguments
 if nargin < 6 || isempty(fileTypes)
   fileTypes = 'vtk';
+end % if
+if nargin < 7
+  vecName = struct;
 end % if
 if ~iscell(dataLagr)
   dataLagr = { dataLagr };
@@ -118,7 +143,7 @@ end % if
 %% Call correct function for writing file.
 for fileType = fileTypes
   if strcmp(fileType, 'vtk')
-    visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl);
+    visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl, vecName);
   elseif strcmp(fileType, 'tec')
     visualizeDataLagrTec(g, dataLagr, varName, fileName, tLvl);
   else
@@ -128,8 +153,15 @@ end
 end % function
 %
 %> @brief Helper routine to write VTK-files.
-function visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl)
+function visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl, vecName)
 [K, N] = size(dataLagr{1});
+vecNames = fieldnames(vecName);
+isVec = ~isempty(vecNames);
+maskVec = false(size(varName));
+for i = 1 : length(vecNames)
+  maskVec = maskVec | ismember(varName, vecName.(vecNames{i}));
+end % for
+isScalar = ~all(maskVec);
 %% Open file.
 fileName = [fileName, '.', num2str(tLvl), '.vtu'];
 file     = fopen(fileName, 'wt'); % if this file exists, then overwrite
@@ -168,7 +200,13 @@ fprintf(file, '           %d\n', id*ones(K, 1));
 fprintf(file, '        </DataArray>\n');
 fprintf(file, '      </Cells>\n');
 %% Data.
-fprintf(file, '      <PointData Scalars="%s">\n', varName{1});
+if isVec && isScalar
+  fprintf(file, '      <PointData Scalars="%s" Vectors="%s">\n', varName{1}, vecNames{1});
+elseif isScalar
+  fprintf(file, '      <PointData Scalars="%s">\n', varName{1});
+else
+  fprintf(file, '      <PointData Vectors="%s">\n', vecNames{1});
+end %if
 for i = 1 : numel(dataLagr)
   switch N
     case 1 % locally constant
@@ -178,6 +216,15 @@ for i = 1 : numel(dataLagr)
     case 6 % locally quadratic (permutation of local edge indices due to vtk format)
       dataLagr{i} = reshape(dataLagr{i}(:, [1,2,3,6,4,5])', 1, K*N);
   end % switch
+end % for
+for i = 1 : length(vecNames)
+  maskComp = ismember(varName, vecName.(vecNames{i}));
+  numComp = sum(maskComp);
+  fprintf(file, '        <DataArray type="Float32" Name="%s" NumberOfComponents="3" format="ascii">\n', vecNames{i});
+  fprintf(file, '          %.9e %.9e %.9e\n', [cell2mat(reshape(dataLagr(maskComp), [], 1)).', zeros(K*N, 3-numComp)]');
+  fprintf(file, '        </DataArray>\n');
+end % for
+for i = find(~maskVec)
   fprintf(file, '        <DataArray type="Float32" Name="%s" NumberOfComponents="1" format="ascii">\n', varName{i});
   fprintf(file, '          %.9e\n', dataLagr{i});
   fprintf(file, '        </DataArray>\n');

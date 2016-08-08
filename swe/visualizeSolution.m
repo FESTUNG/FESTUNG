@@ -2,6 +2,7 @@ function visualizeSolution(pd, nStep)
 if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
   nOutput = ceil(nStep / pd.outputFrequency);
   varName = {};
+  vecNames = struct;
   dataLagr = {};
   
   %% Depth and elevation
@@ -30,14 +31,16 @@ if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
 
   %% Momentum 
   if any(ismember(pd.outputList, {'uH', 'vH', 'momentum'}))
-    varName = [ varName, {'uH', 'vH'} ];
+    vecNames.momentum = {'uH', 'vH'};
+    varName = [ varName, vecNames.momentum ];    
     dataLagr = [ dataLagr, {projectDataDisc2DataLagr(pd.cDisc(:,:,2)), projectDataDisc2DataLagr(pd.cDisc(:,:,3))} ];
   end % if
   
-  %% Velocity
+  %% Velocity    
   % Evaluate velocity
   if any(ismember(pd.outputList, {'u', 'v', 'velocity'})) || isfield(pd, 'stationVel')
-    varName = [ varName, {'u', 'v'} ];
+    vecNames.velocity = {'u', 'v'};
+    varName = [ varName, vecNames.velocity ];
     dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
     dataDisc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
     dataLagr = [ dataLagr, {projectDataDisc2DataLagr(dataDisc)} ];
@@ -61,10 +64,7 @@ if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
   end % if
   
   %% Write visualization output
-  outputMask = ismember(varName, pd.outputList);
-  if any(outputMask)
-    visualizeDataLagr(pd.g, dataLagr(outputMask), varName(outputMask), ['output/' pd.name], nOutput, pd.outputTypes);
-  end % if
+  visualizeDataLagr(pd.g, dataLagr, varName, ['output' filesep pd.name], nOutput, pd.outputTypes, vecNames);
 end % if
 end % function
 
