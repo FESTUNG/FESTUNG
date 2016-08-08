@@ -3,7 +3,7 @@ function problemData = configureProblem(problemData)
 problemData.hmax        = 2^-6; % maximum edge length of triangle
 problemData.p           = 2; % local polynomial degree
 problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
-problemData.numSteps    = 314; % number of time steps
+problemData.numSteps    = 100; % number of time steps
 problemData.tEnd        = (problemData.numSteps/3142)*2*pi; % end time
 
 problemData.isVisGrid   = false; % visualization of grid
@@ -11,9 +11,9 @@ problemData.isVisSol    = true; % visualization of solution
 problemData.isSlopeLim  = true; % slope limiting
 problemData.typeSlopeLim = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
 
-problemData.outputFrequency = 100; % no visualization of every timestep
+problemData.outputFrequency = 1; % no visualization of every timestep
 problemData.outputBasename  = ['output' filesep 'solution_' problemData.typeSlopeLim]; % Basename of output files
-problemData.outputTypes     = cellstr(['vtk';'tec']); % solution output file types
+problemData.outputTypes     = cellstr('vtk'); % solution output file types
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta must be zero to three.')
