@@ -90,8 +90,8 @@ pd = setdefault(pd, 'elevTol', 20);
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
 pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
 pd = setdefault(pd, 'outputCount', 1); % Number of outputs over total simulation time
-pd = setdefault(pd, 'outputTypes', 'vtk'); % Output file type
-pd = setdefault(pd, 'outputList', { 'u', 'v', 'xi' }); % List of variables to visualize
+pd = setdefault(pd, 'outputTypes', {'vtk', 'tec'}); % Output file type
+pd = setdefault(pd, 'outputList', { 'xi', 'h', 'z_b', 'f_c', 'velocity', 'momentum' }); % List of variables to visualize
 pd = setdefault(pd, 'isVisStations', false); % Output stations
 
 %% Simulation scenario specific parameters
@@ -124,7 +124,7 @@ pd.hmax = 2^-6; % Maximum element size of initial grid
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd.numSteps = 100; % Number of time steps
+pd.numSteps = 300; % Number of time steps
 pd.tEnd = pd.numSteps/3142*2*pi; % End time of simulation
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
