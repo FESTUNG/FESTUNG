@@ -8,7 +8,7 @@ qOrd2D = max(2* p,1);
 numQuad2D = length(W);
 
 % Assembly of time-dependent global matrices
-globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, problemData.u1Disc, problemData.u2Disc);
+globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, problemData.uHDisc, problemData.vHDisc);
 globR = assembleMatEdgePhiPhiValUpwind(problemData.g, problemData.g.markE0Tint, problemData.hatRdiagOnQuad, ...
                                        problemData.hatRoffdiagOnQuad,  problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN);
 % Building the system
@@ -35,9 +35,13 @@ for species = 1:problemData.numSpecies
 
   % right hand side
   sysV = globL - globKD - globKN;
+  
+  % Computing the concentration from the depth-integrated one
+  dataQ0T = (reshape(problemData.cDiscRK{species}, [N K]).' * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.') ./ (problemData.hDisc * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.');
+  concentrationDiscRK = reshape(problemData.swe_projectDataQ0T2DataDisc(dataQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad)', [K*N 1]);
 
   % Computing the discrete time derivative
-  cDiscDot = problemData.globM \ (sysV - sysA * problemData.cDiscRK{species});
+  cDiscDot = problemData.globM \ (sysV - sysA * concentrationDiscRK);
 
   % Apply slope limiting to time derivative
   if problemData.isSlopeLim{species}

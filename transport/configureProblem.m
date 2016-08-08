@@ -20,8 +20,9 @@ G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
 c0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
                     (1-G(x1, x2, 0.5, 0.25)) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.0225) + ...
                     0.25*(1+cos(pi*G(x1, x2, 0.25, 0.5))).*((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.0225);
-problemData = setdefault(problemData, 'u1Cont', @(t,x1,x2) 0.5 - x2);
-problemData = setdefault(problemData, 'u2Cont', @(t,x1,x2) x1 - 0.5);
+problemData = setdefault(problemData, 'hCont', @(t,x1,x2) 0.002*(x1==x1));
+problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* (0.5 - x2));
+problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* (x1 - 0.5));
 
 problemData.isVisSol = cell(problemData.numSpecies,1);
 problemData.isSlopeLim = cell(problemData.numSpecies,1);
