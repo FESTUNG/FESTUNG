@@ -53,12 +53,20 @@
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  dataLagr   The Lagrangian representation of the quantity, as produced
-%>                    by <code>projectDataDisc2DataLagr</code> @f$[K \times N]@f$
+%>                    by <code>projectDataDisc2DataLagr</code> @f$[K \times N]@f$.
+%>                    Can be a cell array with multiple data sets.
 %> @param  varName    The name of the quantity within the output file
+%>                    If multiple data sets are given, this must be a cell
+%>                    array with the same dimension as dataLagr, holding
+%>                    the names of each data set.
 %> @param  fileName   The basename of the output file
 %> @param  tLvl       The time level
 %> @param  fileTypes  (optional) The output format to be written 
 %>                    (<code>'vtk'</code> (default) or <code>'tec'</code>).
+%> @param  vecNames   (optional) A struct that allows to define vectorial
+%>                    output (for VTK only). Field names provide the vector
+%>                    names and field values are cell arrays with variable
+%>                    names.
 %>
 %>
 %> This file is part of FESTUNG
@@ -81,19 +89,27 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function visualizeDataLagr(g, dataLagr, varName, fileName, tLvl, fileTypes)
+function visualizeDataLagr(g, dataLagr, varName, fileName, tLvl, fileTypes, vecNames)
 %% Deduce default arguments
 if nargin < 6 || isempty(fileTypes)
   fileTypes = 'vtk';
-end
+end % if
+if ~iscell(dataLagr)
+  dataLagr = { dataLagr };
+end % if
+if ~iscell(varName)
+  varName = { varName };
+end % if
 if ~iscell(fileTypes)
   fileTypes = cellstr(fileTypes);
-end
+end % if
 if size(fileTypes,1) > size(fileTypes,2)
   fileTypes = transpose(fileTypes);
-end
+end % if
 %% Check function arguments
-assert(size(dataLagr, 1) == g.numT, 'Wrong number of elements in dataLagr')
+assert(isequal(size(dataLagr), size(varName)), 'Number of data sets in dataLagr does not match varName')
+assert(all(cellfun(@(c) size(c, 1), dataLagr) == g.numT), 'Wrong number of elements in dataLagr')
+assert(all(cellfun(@(c) size(c, 2), dataLagr) == size(dataLagr{1}, 2)), 'All data sets in dataLagr must have same approximation order')
 %% Ensure target directory exists
 [dirName,~,~] = fileparts(fileName);
 if ~isempty(dirName) && ~isdir(dirName)
@@ -113,7 +129,7 @@ end % function
 %
 %> @brief Helper routine to write VTK-files.
 function visualizeDataLagrVtk(g, dataLagr, varName, fileName, tLvl)
-[K, N] = size(dataLagr);
+[K, N] = size(dataLagr{1});
 %% Open file.
 fileName = [fileName, '.', num2str(tLvl), '.vtu'];
 file     = fopen(fileName, 'wt'); % if this file exists, then overwrite
@@ -152,18 +168,20 @@ fprintf(file, '           %d\n', id*ones(K, 1));
 fprintf(file, '        </DataArray>\n');
 fprintf(file, '      </Cells>\n');
 %% Data.
-switch N
-  case 1 % locally constant
-    dataLagr = kron(dataLagr, [1;1;1])';
-  case 3 % locally linear
-    dataLagr = reshape(dataLagr', 1, K*N);
-  case 6 % locally quadratic (permutation of local edge indices due to vtk format)
-    dataLagr = reshape(dataLagr(:, [1,2,3,6,4,5])', 1, K*N);
-end % switch
-fprintf(file, '      <PointData Scalars="%s">\n', varName);
-fprintf(file, '        <DataArray type="Float32" Name="%s" NumberOfComponents="1" format="ascii">\n', varName);
-fprintf(file, '          %.9e\n', dataLagr);
-fprintf(file, '        </DataArray>\n');
+fprintf(file, '      <PointData Scalars="%s">\n', varName{1});
+for i = 1 : numel(dataLagr)
+  switch N
+    case 1 % locally constant
+      dataLagr{i} = kron(dataLagr{i}, [1;1;1])';
+    case 3 % locally linear
+      dataLagr{i} = reshape(dataLagr{i}', 1, K*N);
+    case 6 % locally quadratic (permutation of local edge indices due to vtk format)
+      dataLagr{i} = reshape(dataLagr{i}(:, [1,2,3,6,4,5])', 1, K*N);
+  end % switch
+  fprintf(file, '        <DataArray type="Float32" Name="%s" NumberOfComponents="1" format="ascii">\n', varName{i});
+  fprintf(file, '          %.9e\n', dataLagr{i});
+  fprintf(file, '        </DataArray>\n');
+end % for
 fprintf(file, '      </PointData>\n');
 %% Footer.
 fprintf(file, '    </Piece>\n');
@@ -176,13 +194,13 @@ end % function
 %
 %> @brief Helper routine to write Tecplot-files.
 function visualizeDataLagrTec(g, dataLagr, varName, fileName, tLvl)
-[K, N] = size(dataLagr);
+[K, N] = size(dataLagr{1});
 %% Open file.
 fileName = [fileName, '.', num2str(tLvl), '.plt'];
 file     = fopen(fileName, 'wt'); % if this file exists, then overwrite
 %% Header.
 fprintf(file, 'TITLE="FESTUNG output file"\n');
-fprintf(file, 'VARIABLES=X, Y, "%s"\n', varName);
+fprintf(file, ['VARIABLES=X, Y', repmat(', "%s"', 1, numel(varName)), '\n'], varName{:});
 %% Points and cells.
 switch N
   case {1, 3}
@@ -200,14 +218,16 @@ switch N
                             4:6:6*K; 5:6:6*K; 6:6:6*K ], 3, numT);
 end % switch
 %% Data.
-switch N
-  case 1 % locally constant
-    dataLagr = kron(dataLagr, [1;1;1])';
-  case 3 % locally linear
-    dataLagr = reshape(dataLagr', 1, K*N)';
-  case 6 % locally quadratic (permutation of local edge indices due to TP format)
-    dataLagr = reshape(dataLagr(:, [1,2,3,6,4,5])', 1, K*N)';
-end % switch
+for i = 1 : numel(dataLagr)
+  switch N
+    case 1 % locally constant
+      dataLagr{i} = kron(dataLagr{i}, [1;1;1])';
+    case 3 % locally linear
+      dataLagr{i} = reshape(dataLagr{i}', 1, K*N);
+    case 6 % locally quadratic (permutation of local edge indices due to TP format)
+      dataLagr{i} = reshape(dataLagr{i}(:, [1,2,3,6,4,5])', 1, K*N);
+  end % switch
+end % for
 %% Zone header.
 fprintf(file, 'ZONE T="Time=%.3e", ', tLvl);
 fprintf(file, 'N=%d, E=%d, ', length(P1), numT);
@@ -218,7 +238,7 @@ fprintf(file, '%.12e %.12e %.12e %.12e %.12e\n', P1);
 fprintf(file, '\n\n');
 fprintf(file, '%.12e %.12e %.12e %.12e %.12e\n', P2);
 fprintf(file, '\n\n');
-fprintf(file, '%.9e %.9e %.9e %.9e %.9e\n', dataLagr);
+fprintf(file, '%.9e %.9e %.9e %.9e %.9e\n', dataLagr{:});
 fprintf(file, '\n');
 %% Connectivity.
 fprintf(file, '%d %d %d\n', V0T);
