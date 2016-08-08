@@ -221,7 +221,7 @@ for i = 1 : length(vecNames)
   maskComp = ismember(varName, vecName.(vecNames{i}));
   numComp = sum(maskComp);
   fprintf(file, '        <DataArray type="Float32" Name="%s" NumberOfComponents="3" format="ascii">\n', vecNames{i});
-  fprintf(file, '          %.9e %.9e %.9e\n', [cell2mat(reshape(dataLagr(maskComp), [], 1)).', zeros(K*N, 3-numComp)]');
+  fprintf(file, '          %.9e %.9e %.9e\n', [cell2mat(reshape(dataLagr(maskComp), [], 1)).', zeros(length(dataLagr{1}), 3-numComp)]');
   fprintf(file, '        </DataArray>\n');
 end % for
 for i = find(~maskVec)

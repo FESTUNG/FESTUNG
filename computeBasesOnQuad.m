@@ -79,8 +79,6 @@ if nargin < 3
   else
     requiredOrders = 1; 
   end % if
-elseif N == 1
-  requiredOrders = 1;
 end % if
 
 % Initialize global variables
