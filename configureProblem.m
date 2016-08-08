@@ -8,7 +8,7 @@ problemData.sweData.isCoupling = true;
 problemData.sweData.p = p;
 
 problemData.sweData = execin('swe/configureProblem', problemData.sweData);
-% problemData.sweData.schemeOrder = 1;
+problemData.sweData.numSteps = 3142; % Number of time steps
 
 % Configuration for transport solver
 problemData.transportData = struct;
