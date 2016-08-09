@@ -1,4 +1,5 @@
 function problemData = postprocessProblem(problemData)
+problemData.errors = zeros(problemData.numSpecies,1);
 for species = 1:problemData.numSpecies
   %% Visualization
   if problemData.isVisSol{species}
@@ -7,11 +8,11 @@ for species = 1:problemData.numSpecies
                       problemData.numSteps, problemData.outputTypes{species});
   end % if
   %% Error evaluation
-  fprintf('L2 error w.r.t. the initial condition: %g\n', ...
-    computeL2Error(problemData.g, problemData.cDisc{species}, problemData.c0Cont{species}, 2*problemData.p, problemData.basesOnQuad));
-  fprintf('norm(cDisc, 1) = %g\n', norm(problemData.cDisc{species}(:), 1));
-  fprintf('norm(cDisc, 2) = %g\n', norm(problemData.cDisc{species}(:), 2));
-  fprintf('norm(cDisc, inf) = %g\n', norm(problemData.cDisc{species}(:), inf));
+%   fprintf('L2 error w.r.t. the initial condition: %g\n', ...
+  problemData.errors(species) = computeL2Error(problemData.g, problemData.cDisc{species}, @(x1,x2) problemData.solCont{species}(problemData.tEnd,x1,x2), 2*problemData.p, problemData.basesOnQuad);%);
+%   fprintf('norm(cDisc, 1) = %g\n', norm(problemData.cDisc{species}(:), 1));
+%   fprintf('norm(cDisc, 2) = %g\n', norm(problemData.cDisc{species}(:), 2));
+%   fprintf('norm(cDisc, inf) = %g\n', norm(problemData.cDisc{species}(:), inf));
 end % for
 end % function
 
