@@ -1,16 +1,16 @@
 function problemData = postprocessProblem(problemData)
-%% Visualization and error evaluation
-varName = {};
-dataLagr = {};
+problemData.errors = zeros(problemData.numSpecies,1);
 for species = 1:problemData.numSpecies
   if problemData.isVisSol{species}
     varName = [varName, {['u_' num2str(species)]}]; %#ok<AGROW>
     dataLagr = [dataLagr, {projectDataDisc2DataLagr(problemData.cDisc{species})}]; %#ok<AGROW>
   end % if
-  
-  fprintf('Species %d L2 error w.r.t. the initial condition: %g\n', species, ...
-    computeL2Error(problemData.g, problemData.cDisc{species}, problemData.c0Cont{species}, ...
-                   2*problemData.p, problemData.basesOnQuad) );
+  %% Error evaluation
+%   fprintf('L2 error w.r.t. the initial condition: %g\n', ...
+  problemData.errors(species) = computeL2Error(problemData.g, problemData.cDisc{species}, @(x1,x2) problemData.solCont{species}(problemData.tEnd,x1,x2), 2*problemData.p, problemData.basesOnQuad);%);
+%   fprintf('norm(cDisc, 1) = %g\n', norm(problemData.cDisc{species}(:), 1));
+%   fprintf('norm(cDisc, 2) = %g\n', norm(problemData.cDisc{species}(:), 2));
+%   fprintf('norm(cDisc, inf) = %g\n', norm(problemData.cDisc{species}(:), inf));
 end % for
 if ~isempty(dataLagr)
   visualizeDataLagr(problemData.g, dataLagr, varName, problemData.outputBasename, problemData.numSteps, problemData.outputTypes)
