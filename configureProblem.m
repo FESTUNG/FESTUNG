@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'analytical'); 
+pd = setdefault(pd, 'name', 'coupling');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -180,12 +180,12 @@ pd.schemeOrder = min(pd.p+1,3);
 pd.gridSource = 'hierarchical';
 pd.isSpherical = false; 
 pd.hmax = 0.3; % Maximum element size of initial grid
-pd.refinement = 0;  % Grid refinement level
+pd.refinement = 3;  % Grid refinement level
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
 pd.tEnd = 1; % End time of simulation
-pd.numSteps = 150; % Number of time steps
+pd.numSteps = 100; % Number of time steps
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
@@ -194,7 +194,7 @@ pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
 height = 0.025; % value of each component of bathymatry gradient
-A = 0.01; % TODO height
+A = 0.01;
 B = 0.01;
 C = 0.01;
 pd.gConst = 9.81;
