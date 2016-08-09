@@ -115,17 +115,16 @@ pd.isRhsAvail = true;
 pd.isTidalDomain = false;
 pd.isHotstartInput = false;
 pd.isHotstartOutput = false;
-pd.schemeOrder = min(pd.p+1,3);
+pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
 
 % Overwrite grid parameters
 pd.gridSource = 'square';
-pd.isSpherical = false;
-pd.hmax = 2^-6; % Maximum element size of initial grid 
+pd.isSpherical = false;pd = setdefault(pd, 'hmax', 2^-6);
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd.numSteps = 3142; % Number of time steps
-pd.tEnd = pd.numSteps/3142*2*pi; % End time of simulation
+pd = setdefault(pd, 'numSteps', 100);  % number of time steps
+pd = setdefault(pd, 'tEnd', pd.numSteps/3142*2*pi);  % end time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
@@ -174,18 +173,18 @@ pd.isRhsAvail = true;
 pd.isTidalDomain = false;
 pd.isHotstartInput = false;
 pd.isHotstartOutput = false;
-pd.schemeOrder = min(pd.p+1,3);
+pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
 
 % Overwrite grid parameters
 pd.gridSource = 'hierarchical';
 pd.isSpherical = false; 
-pd.hmax = 0.3; % Maximum element size of initial grid
-pd.refinement = 3;  % Grid refinement level
+pd = setdefault(pd, 'refinement', 0);
+pd = setdefault(pd, 'hmax', 0.3);
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd.tEnd = 1; % End time of simulation
-pd.numSteps = 100; % Number of time steps
+pd = setdefault(pd, 'numSteps', 100);  % number of time steps
+pd = setdefault(pd, 'tEnd', 1);  % end time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
@@ -274,19 +273,19 @@ assert(exist(['swe/fort_' pd.name '.15'], 'file') == 2, ['Config file "swe/fort_
 
 %% Read parameter file
 h = getFunctionHandle('swe/readConfigADCIRC');
-pd.configADCIRC = h(['swe/fort_' pd.name '.15']); % TODO getFunctionHandle oder execin?
+pd.configADCIRC = h(['swe/fort_' pd.name '.15']);
 
 %% Map ADCIRC variables to internal names
 % Constants
-pd.schemeOrder = pd.configADCIRC.IRK+1;
+pd = setdefault(pd, 'schemeOrder', pd.configADCIRC.IRK+1);
 pd.minTol = pd.configADCIRC.H0;
 pd.gConst = pd.configADCIRC.G;
 
 % Simulation time
 pd.t0 = pd.configADCIRC.STATIM;
-pd.tEnd = pd.t0 + pd.configADCIRC.RNDAY * 86400;
+pd = setdefault(pd, 'tEnd', pd.t0 + pd.configADCIRC.RNDAY * 86400);
 pd.dt = pd.configADCIRC.DT;
-pd.numSteps = round((pd.tEnd - pd.t0) / pd.dt);
+pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
 
 % Adaptive time stepping
 pd.isAdaptiveTimestep = pd.configADCIRC.NDTVAR == 1;
