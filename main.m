@@ -65,6 +65,8 @@
 %> @param  problemName  The name of the problem to be solved. A folder with
 %>                      matching name must exist and provide all of the 
 %>                      mentioned routines. @f$[\text{string}]@f$
+%>         problemParam (optional) struct that provides values for default
+%>                      parameters
 %>
 %> This file is part of FESTUNG
 %>
@@ -86,7 +88,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function main(problemName)
+function problemData = main(problemName, problemParam)
 %% Check given problem
 validateattributes(problemName, {'char'},{'nonempty'}, mfilename, 'problemName')
 assert(isdir(problemName), 'No directory for specified problem found.')
@@ -111,7 +113,11 @@ oldpath = addpath(problemName, pwd);
 try
   %% Pre-process and initialize problem
   tPreprocess = tic;
-  problemData = struct;
+  if nargin == 1 % TODO parameter check of problemParam
+    problemData = struct;
+  else
+    problemData = problemParam;
+  end % if
   for nFunc = 1 : length(preprocessList)
     problemData = feval(preprocessList{nFunc}, problemData);
   end % for
