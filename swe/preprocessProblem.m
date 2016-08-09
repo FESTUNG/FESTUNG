@@ -68,8 +68,8 @@ switch pd.gridSource
     
   case 'hierarchical'
 %     X1 = [0 1 1 0]; X2 = [0 0 1 1];
-%     pd.g = domainHierarchy(X1, X2, pd.hmax, pd.refinement);
-    pd.g = domainSquare(0.5^pd.refinement);
+%     pd.g = execin('swe/domainHierarchy', X1, X2, pd.hmax, pd.refinement);
+    pd.g = domainSquare(pd.hmax*0.5^pd.refinement);
     
     % Set edge types
     pd.g.idE = zeros(pd.g.numE,1);
