@@ -14,8 +14,9 @@ problemData = setdefault(problemData, 'configSource', 'analytical');
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
 problemData = setdefault(problemData, 'gridSource', 'hierarchical');
-problemData = setdefault(problemData, 'refinement', 0);
-problemData = setdefault(problemData, 'hmax', 0.3);
+problemData = setdefault(problemData, 'refinement', 3);
+problemData = setdefault(problemData, 'hmax', 1);
+% problemData = setdefault(problemData, 'hmax', 0.3);
 
 % Polynomial approximation order
 problemData = setdefault(problemData, 'p', 0);
@@ -30,7 +31,7 @@ switch problemData.configSource
     problemData = setdefault(problemData, 'numSteps', 314);
   case 'analytical'
     problemData = setdefault(problemData, 'tEnd', 1);
-    problemData = setdefault(problemData, 'numSteps', 100*2^problemData.refinement*(problemData.p+1));
+    problemData = setdefault(problemData, 'numSteps', 25*2^problemData.refinement*(problemData.p+1));
   otherwise
     error('Invalid config source.')
 end % switch
@@ -56,6 +57,7 @@ problemData.sweData.hmax = problemData.hmax;
 problemData.sweData.p = problemData.p;
 problemData.sweData.schemeOrder = problemData.ordRK;
 problemData.sweData.tEnd = problemData.tEnd;
+problemData.sweData.numSteps = problemData.numSteps;
 
 problemData.sweData = execin('swe/configureProblem', problemData.sweData);
 
