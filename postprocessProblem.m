@@ -4,7 +4,7 @@ for species = 1:problemData.numSpecies
   %% Visualization
   if problemData.isVisSol{species}
     cLagrange = projectDataDisc2DataLagr(problemData.cDisc{species});
-    visualizeDataLagr(problemData.g, cLagrange, ['u_' num2str(species) '_h'], problemData.outputBasename{species}, ...
+    visualizeDataLagr(problemData.g, cLagrange, ['cH_' num2str(species) '_h'], problemData.outputBasename{species}, ...
                       problemData.numSteps, problemData.outputTypes{species});
   end % if
   %% Error evaluation
