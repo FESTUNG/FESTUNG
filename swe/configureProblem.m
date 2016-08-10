@@ -89,7 +89,6 @@ pd = setdefault(pd, 'elevTol', 20);
 %% Visualization parameters
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
 pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
-pd = setdefault(pd, 'outputCount', 1); % Number of outputs over total simulation time
 pd = setdefault(pd, 'outputTypes', 'vtk'); % Output file type
 pd = setdefault(pd, 'outputList', { 'u', 'v', 'xi' }); % List of variables to visualize
 pd = setdefault(pd, 'isVisStations', false); % Output stations
@@ -125,6 +124,7 @@ pd.isSpherical = false;pd = setdefault(pd, 'hmax', 2^-6);
 pd.t0 = 0; % Start time of simulation
 pd = setdefault(pd, 'numSteps', 100);  % number of time steps
 pd = setdefault(pd, 'tEnd', pd.numSteps/3142*2*pi);  % end time
+pd = setdefault(pd, 'outputCount', 1); % Number of outputs over total simulation time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
@@ -185,6 +185,7 @@ pd = setdefault(pd, 'hmax', 0.3);
 pd.t0 = 0; % Start time of simulation
 pd = setdefault(pd, 'numSteps', 100);  % number of time steps
 pd = setdefault(pd, 'tEnd', 1);  % end time
+pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
@@ -192,7 +193,7 @@ pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
 pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
-height = 0.025; % value of each component of bathymatry gradient
+height = 0; % value of each component of bathymatry gradient
 A = 0.01;
 B = 0.01;
 C = 0.01;
@@ -206,27 +207,46 @@ pd.bottomFrictionCoef = 0;
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) height*(x1+x2) - 0.1;
+pd.zbCont = @(x1,x2) height*(x1+x2) - 1*(x1==x1);
 pd.fcCont = @(x1,x2) 0*x1;
 
 % Analytical solution
-pd.xiCont = @(x1,x2,t) C*(sin(0.5*pi*(x1-t)) + sin(0.5*pi*(x2-t)));
-pd.uCont = @(x1,x2,t) A*sin(0.5*pi*(x2-t)).*sin(pi*x1);
-pd.vCont = @(x1,x2,t) B*sin(0.5*pi*(x1-t)).*sin(pi*x2);
+pd.xiCont = @(x1,x2,t) 0*x1;
+pd.uCont = @(x1,x2,t) 0*x1;
+pd.vCont = @(x1,x2,t) 0*x1;
 
 % Auxiliary functions (derivatives etc.)
 pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
 pd.zb_xCont = @(x1,x2) height*(x1==x1);
 pd.zb_yCont = @(x1,x2) height*(x1==x1);
-pd.u_tCont = @(x1,x2,t) -0.5*pi*A*cos(0.5*pi*(x2-t)).*sin(pi*x1);
-pd.u_xCont = @(x1,x2,t)      pi*A*sin(0.5*pi*(x2-t)).*cos(pi*x1);
-pd.u_yCont = @(x1,x2,t)  0.5*pi*A*cos(0.5*pi*(x2-t)).*sin(pi*x1);
-pd.v_tCont = @(x1,x2,t) -0.5*pi*B*cos(0.5*pi*(x1-t)).*sin(pi*x2);
-pd.v_xCont = @(x1,x2,t)  0.5*pi*B*cos(0.5*pi*(x1-t)).*sin(pi*x2);
-pd.v_yCont = @(x1,x2,t)      pi*B*sin(0.5*pi*(x1-t)).*cos(pi*x2);
-pd.h_tCont = @(x1,x2,t) -0.5*pi*C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t)));
-pd.h_xCont = @(x1,x2,t)  0.5*pi*C*cos(0.5*pi*(x1-t)) - height;
-pd.h_yCont = @(x1,x2,t)  0.5*pi*C*cos(0.5*pi*(x2-t)) - height;
+pd.u_tCont = @(x1,x2,t) 0*x1;
+pd.u_xCont = @(x1,x2,t) 0*x1;
+pd.u_yCont = @(x1,x2,t) 0*x1;
+pd.v_tCont = @(x1,x2,t) 0*x1;
+pd.v_xCont = @(x1,x2,t) 0*x1;
+pd.v_yCont = @(x1,x2,t) 0*x1;
+pd.h_tCont = @(x1,x2,t) 0*x1;
+pd.h_xCont = @(x1,x2,t) 0*x1 - pd.zb_xCont(x1,x2);
+pd.h_yCont = @(x1,x2,t) 0*x1 - pd.zb_yCont(x1,x2);
+
+% % Analytical solution
+% pd.xiCont = @(x1,x2,t) C*(sin(0.5*pi*(x1-t)) + sin(0.5*pi*(x2-t)));
+% pd.uCont = @(x1,x2,t) A*sin(0.5*pi*(x2-t)).*sin(pi*x1);
+% pd.vCont = @(x1,x2,t) B*sin(0.5*pi*(x1-t)).*sin(pi*x2);
+% 
+% % Auxiliary functions (derivatives etc.)
+% pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
+% pd.zb_xCont = @(x1,x2) height*(x1==x1);
+% pd.zb_yCont = @(x1,x2) height*(x1==x1);
+% pd.u_tCont = @(x1,x2,t) -0.5*pi*A*cos(0.5*pi*(x2-t)).*sin(pi*x1);
+% pd.u_xCont = @(x1,x2,t)      pi*A*sin(0.5*pi*(x2-t)).*cos(pi*x1);
+% pd.u_yCont = @(x1,x2,t)  0.5*pi*A*cos(0.5*pi*(x2-t)).*sin(pi*x1);
+% pd.v_tCont = @(x1,x2,t) -0.5*pi*B*cos(0.5*pi*(x1-t)).*sin(pi*x2);
+% pd.v_xCont = @(x1,x2,t)  0.5*pi*B*cos(0.5*pi*(x1-t)).*sin(pi*x2);
+% pd.v_yCont = @(x1,x2,t)      pi*B*sin(0.5*pi*(x1-t)).*cos(pi*x2);
+% pd.h_tCont = @(x1,x2,t) -0.5*pi*C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t)));
+% pd.h_xCont = @(x1,x2,t)  0.5*pi*C*cos(0.5*pi*(x1-t)) - height;
+% pd.h_yCont = @(x1,x2,t)  0.5*pi*C*cos(0.5*pi*(x2-t)) - height;
 
 % Right hand side functions (derived from analytical solution)
 % This can be used for any solution, the user just has to specify all
@@ -286,6 +306,7 @@ pd.t0 = pd.configADCIRC.STATIM;
 pd = setdefault(pd, 'tEnd', pd.t0 + pd.configADCIRC.RNDAY * 86400);
 pd.dt = pd.configADCIRC.DT;
 pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
+pd = setdefault(pd, 'outputCount', 200); % Number of outputs over total simulation time
 
 % Adaptive time stepping
 pd.isAdaptiveTimestep = pd.configADCIRC.NDTVAR == 1;
