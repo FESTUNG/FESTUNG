@@ -20,8 +20,8 @@ for species = 1:problemData.numSpecies
   
   % Visualization of inital condition.
   if problemData.isVisSol{species}
-    varName = [varName, {['u_' num2str(species)]}]; %#ok<AGROW>
-    dataLagr = [dataLagr, {projectDataDisc2DataLagr(problemData.cDisc{species})}]; %#ok<AGROW>
+    cLagrange = projectDataDisc2DataLagr(problemData.cDisc{species});
+    visualizeDataLagr(problemData.g, cLagrange, ['cH_' num2str(species) '_h'], problemData.outputBasename{species}, 0, problemData.outputTypes{species})
   end % if
 end % for    
 visualizeDataLagr(problemData.g, dataLagr, varName, problemData.outputBasename, 0, problemData.outputTypes)

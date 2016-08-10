@@ -2,8 +2,9 @@ function problemData = postprocessProblem(problemData)
 problemData.errors = zeros(problemData.numSpecies,1);
 for species = 1:problemData.numSpecies
   if problemData.isVisSol{species}
-    varName = [varName, {['u_' num2str(species)]}]; %#ok<AGROW>
-    dataLagr = [dataLagr, {projectDataDisc2DataLagr(problemData.cDisc{species})}]; %#ok<AGROW>
+    cLagrange = projectDataDisc2DataLagr(problemData.cDisc{species});
+    visualizeDataLagr(problemData.g, cLagrange, ['cH_' num2str(species) '_h'], problemData.outputBasename{species}, ...
+                      problemData.numSteps, problemData.outputTypes{species});
   end % if
   %% Error evaluation
 %   fprintf('L2 error w.r.t. the initial condition: %g\n', ...

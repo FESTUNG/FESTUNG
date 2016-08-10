@@ -4,8 +4,9 @@ varName = {};
 dataLagr = {};
 for species = 1:problemData.numSpecies
   if problemData.isVisSol{species} && mod(nStep, problemData.outputFrequency{species}) == 0
-    varName = [varName, {['u_' num2str(species)]}]; %#ok<AGROW>
-    dataLagr = [dataLagr, {projectDataDisc2DataLagr(problemData.cDisc{species})}]; %#ok<AGROW>
+    cLagrange = projectDataDisc2DataLagr(problemData.cDisc{species});
+    visualizeDataLagr(problemData.g, cLagrange, ['cH_' num2str(species) '_h'], ...
+                      problemData.outputBasename{species}, nStep, problemData.outputTypes{species});
   end % if
 end % for
 if ~isempty(dataLagr)
