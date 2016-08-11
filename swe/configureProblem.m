@@ -193,7 +193,7 @@ pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
 pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
-height = 0; % value of each component of bathymatry gradient
+height = 0.025; % value of each component of bathymatry gradient
 A = 0.01;
 B = 0.01;
 C = 0.01;
@@ -207,7 +207,7 @@ pd.bottomFrictionCoef = 0;
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) height*(x1+x2) - 1*(x1==x1);
+pd.zbCont = @(x1,x2) height*(x1+x2) - 0.1*(x1==x1);
 pd.fcCont = @(x1,x2) 0*x1;
 
 % Analytical solution

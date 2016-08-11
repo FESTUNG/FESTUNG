@@ -23,7 +23,9 @@ problemData.isVisSol = cell(problemData.numSpecies,1);
 problemData.isSlopeLim = cell(problemData.numSpecies,1);
 problemData.typeSlopeLim = cell(problemData.numSpecies,1);
 problemData.outputFrequency = cell(problemData.numSpecies,1);
-problemData.c0Cont = cell(problemData.numSpecies,1);
+problemData.outputBasename = cell(problemData.numSpecies,1);
+problemData.outputTypes = cell(problemData.numSpecies,1);
+problemData.cH0Cont = cell(problemData.numSpecies,1);
 problemData.fCont = cell(problemData.numSpecies,1);
 problemData.cDCont = cell(problemData.numSpecies,1);
 problemData.gNCont = cell(problemData.numSpecies,1);
@@ -48,15 +50,15 @@ end % function
 %% LeVeque's solid body rotation
 function problemData = configureRotation(problemData)
 
-problemData = setdefault(problemData, 'hCont', @(t,x1,x2) 0.002*(x1==x1));
+problemData = setdefault(problemData, 'hCont', @(x1,x2,t) 0.002*(x1==x1)); % TODO order of arguments
 problemData = setdefault(problemData, 'uCont', @(t,x1,x2) 0.5 - x2);
 problemData = setdefault(problemData, 'vCont', @(t,x1,x2) x1 - 0.5);
-problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.uCont(t,x1,x2));
-problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.vCont(t,x1,x2));
+problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(x1,x2,t) .* problemData.uCont(t,x1,x2));
+problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) problemData.hCont(x1,x2,t) .* problemData.vCont(t,x1,x2));
 
 %% Coefficients and boundary data (LeVeque's solid body rotation).
 G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
-c0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
+cH0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
                     (1-G(x1, x2, 0.5, 0.25)) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.0225) + ...
                     0.25*(1+cos(pi*G(x1, x2, 0.25, 0.5))).*((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.0225);
                   
@@ -69,7 +71,7 @@ for species = 1:problemData.numSpecies
   %% Parameter check.
   assert(~problemData.isSlopeLim{species} || problemData.p > 0, 'Slope limiting only available for p > 0.')
 
-  problemData.c0Cont{species} = @(x1,x2) species * c0Cont(x1, x2);
+  problemData.cH0Cont{species} = @(x1,x2) species * cH0Cont(x1, x2);
   problemData.cDCont{species} = @(t,x1,x2) zeros(size(x1));
   problemData.gNCont{species} = @(t,x1,x2) zeros(size(x1));
 end % for
@@ -92,7 +94,7 @@ B = 0.01;
 C = 0.01;
 height = 0.025;
 
-problemData = setdefault(problemData, 'hCont', @(t,x1,x2) C*(sin(0.5*pi*(x1-t)) + sin(0.5*pi*(x2-t))) - (height*(x1+x2) - 0.1));
+problemData = setdefault(problemData, 'hCont', @(x1,x2,t) C*(sin(0.5*pi*(x1-t)) + sin(0.5*pi*(x2-t))) - (height*(x1+x2) - 0.1));
 problemData = setdefault(problemData, 'h_tCont', @(t,x1,x2) -0.5*pi*C*(cos(0.5*pi*(x1-t)) + cos(0.5*pi*(x2-t))));
 problemData = setdefault(problemData, 'h_xCont', @(t,x1,x2) 0.5*pi*C*cos(0.5*pi*(x1-t)) - height);
 problemData = setdefault(problemData, 'h_yCont', @(t,x1,x2) 0.5*pi*C*cos(0.5*pi*(x2-t)) - height);
@@ -100,20 +102,14 @@ problemData = setdefault(problemData, 'uCont', @(t,x1,x2) A*sin(0.5*pi*(x2-t)).*
 problemData = setdefault(problemData, 'u_xCont', @(t,x1,x2) pi*A*sin(0.5*pi*(x2-t)).*cos(pi*x1));
 problemData = setdefault(problemData, 'vCont', @(t,x1,x2) B*sin(0.5*pi*(x1-t)).*sin(pi*x2));
 problemData = setdefault(problemData, 'v_yCont', @(t,x1,x2) pi*B*sin(0.5*pi*(x1-t)).*cos(pi*x2));
-problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.uCont(t,x1,x2));
-problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.vCont(t,x1,x2));
+problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(x1,x2,t) .* problemData.uCont(t,x1,x2));
+problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) problemData.hCont(x1,x2,t) .* problemData.vCont(t,x1,x2));
 
 % analytical solution
-problemData.solCont = {@(t,x1,x2) 0*x1, @(t,x1,x2) cos(t+x1+x2), @(t,x1,x2) -cos(t+x1+x2)};
-sol_tCont = {@(t,x1,x2) 0*x1, @(t,x1,x2) -sin(t+x1+x2), @(t,x1,x2) sin(t+x1+x2)};
-sol_xCont = {@(t,x1,x2) 0*x1, @(t,x1,x2) -sin(t+x1+x2), @(t,x1,x2) sin(t+x1+x2)};
-sol_yCont = {@(t,x1,x2) 0*x1, @(t,x1,x2) -sin(t+x1+x2), @(t,x1,x2) sin(t+x1+x2)};
-
-% problemData.solCont = {@(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1};
-% sol_tCont = {@(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1};
-% sol_xCont = {@(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1};
-% sol_yCont = {@(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1};
-
+problemData.solCont = {@(t,x1,x2) sin(x1+x2)+1, @(t,x1,x2) cos(x1+x2)+1, @(t,x1,x2) -cos(x1+x2)+1};
+sol_tCont = {@(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1, @(t,x1,x2) 0*x1};
+sol_xCont = {@(t,x1,x2) cos(x1+x2), @(t,x1,x2) -sin(x1+x2), @(t,x1,x2) sin(x1+x2)};
+sol_yCont = {@(t,x1,x2) cos(x1+x2), @(t,x1,x2) -sin(x1+x2), @(t,x1,x2) sin(x1+x2)};
 
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
@@ -127,7 +123,7 @@ for species = 1:problemData.numSpecies
   %% Parameter check.
   assert(~problemData.isSlopeLim{species} || problemData.p > 0, 'Slope limiting only available for p > 0.')
   
-  problemData.c0Cont{species} = @(x1,x2) problemData.solCont{species}(0,x1,x2);
+  problemData.cH0Cont{species} = @(x1,x2) problemData.solCont{species}(0,x1,x2) .* problemData.hCont(x1,x2,0);
   problemData.cDCont{species} = @(t,x1,x2) problemData.solCont{species}(t,x1,x2);
   problemData.gNCont{species} = @(t,x1,x2) 0*x1; % TODO allow to neglect this if no Neumann boundary is used
 end % for
@@ -140,13 +136,13 @@ Vm = 1;
 ks = 1;
 Rm = 1;
 ep = 1;
-gamma = 1;
+gamma = 0.5;
 I = @(t,x1,x2) (x1==x1);
 f = @(t,x1,x2) I(t,x1,x2) /I0; % linear response
 g = @(t,x1,x2,N) Vm ./ (ks + N); % Michaelis-Menten uptake
 h = @(t,x1,x2,P) Rm * P; % linear grazing
 i = @(t,x1,x2,P) ep; % linear death rate
-j = @(t,x1,x2,Z) 0; % linear death rate
+j = @(t,x1,x2,Z) ep; % linear death rate
 
 problemData.reactions{1} = @(t,x1,x2,c,cH) f(t,x1,x2) .* g(t,x1,x2,c{3}) .* cH{1} - h(t,x1,x2,c{1}) .* cH{2} - i(t,x1,x2,c{1}) .* cH{1};
 problemData.reactions{2} = @(t,x1,x2,c,cH) gamma * h(t,x1,x2,c{1}) .* cH{2} - j(t,x1,x2,c{2}) .* cH{2};
@@ -166,9 +162,9 @@ problemData.fCont{3} = @(t,x1,x2) sol_tCont{3}(t,x1,x2) .* problemData.hCont(x1,
   problemData.v_yCont(x1,x2,t) .* problemData.hCont(x1,x2,t) .* problemData.solCont{3}(t,x1,x2) + problemData.vCont(x1,x2,t) .* problemData.h_yCont(x1,x2,t) .* problemData.solCont{3}(t,x1,x2) + problemData.vCont(x1,x2,t) .* problemData.hCont(x1,x2,t) .* sol_yCont{3}(t,x1,x2) - ...
   (-f(t,x1,x2) .* g(t,x1,x2,problemData.solCont{3}(t,x1,x2)) .* problemData.solCont{1}(t,x1,x2) + (1-gamma) .* h(t,x1,x2,problemData.solCont{1}(t,x1,x2)) .* problemData.solCont{2}(t,x1,x2) + i(t,x1,x2,problemData.solCont{1}(t,x1,x2)) .* problemData.solCont{1}(t,x1,x2) + j(t,x1,x2,problemData.solCont{2}(t,x1,x2)) .* problemData.solCont{2}(t,x1,x2)) .* problemData.hCont(x1,x2,t);
 
-% problemData.reactions{1} = @(t,x1,x2,c) 0*x1;
-% problemData.reactions{2} = @(t,x1,x2,c) 0*x1;
-% problemData.reactions{3} = @(t,x1,x2,c) 0*x1;
+% problemData.reactions{1} = @(t,x1,x2,c,cH) 0*x1;
+% problemData.reactions{2} = @(t,x1,x2,c,cH) 0*x1;
+% problemData.reactions{3} = @(t,x1,x2,c,cH) 0*x1;
 
 % problemData.fCont{1} = @(t,x1,x2) 0*x1;
 % problemData.fCont{2} = @(t,x1,x2) 0*x1;
