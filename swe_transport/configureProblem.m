@@ -19,7 +19,7 @@ problemData = setdefault(problemData, 'hmax', 1);
 % problemData = setdefault(problemData, 'hmax', 0.3);
 
 % Polynomial approximation order
-problemData = setdefault(problemData, 'p', 0);
+problemData = setdefault(problemData, 'p', 1);
 
 % Runge-Kutta order
 problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3)); % as of now both models have to use the same RK method

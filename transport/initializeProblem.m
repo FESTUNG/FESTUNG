@@ -2,7 +2,7 @@ function problemData = initializeProblem(problemData)
 %% Initial data.
 problemData.cDisc = cell(problemData.numSpecies,1);
 for species = 1:problemData.numSpecies
-  problemData.cDisc{species} = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont{species}, 2*problemData.p+1, ...
+  problemData.cDisc{species} = projectFuncCont2DataDisc(problemData.g, problemData.cH0Cont{species}, 2*problemData.p+1, ...
                                                         problemData.hatM, problemData.basesOnQuad);
   if problemData.isSlopeLim{species}
     cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(0, x1, x2));
@@ -14,7 +14,7 @@ for species = 1:problemData.numSpecies
   
   % Initial error
   fprintf('L2 error w.r.t. the initial condition: %g\n', ...
-    computeL2Error(problemData.g, problemData.cDisc{species}, problemData.c0Cont{species}, 2*problemData.p, problemData.basesOnQuad));
+    computeL2Error(problemData.g, problemData.cDisc{species}, problemData.cH0Cont{species}, 2*problemData.p, problemData.basesOnQuad));
   
   % Visualization of inital condition.
   if problemData.isVisSol{species}
