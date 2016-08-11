@@ -18,5 +18,10 @@ end % if
 
 % Evaluate cDisc in all quadrature points
 qOrd2D = max(2*p,1);
-problemData.cQ0T = cellfun(@(c) (problemData.basesOnQuad.phi2D{qOrd2D}(:,1:N) * reshape(c, N, K)).', problemData.cDiscRK, 'UniformOutput', false);
+problemData.cHQ0T = cellfun(@(c) (reshape(c, N, K).' * problemData.basesOnQuad.phi2D{qOrd2D}.'), problemData.cDiscRK, 'UniformOutput', false); % K x numQuad2D
+
+% Computing the concentration from the depth-integrated one
+problemData.cQ0T = cellfun(@(c) c ./ (problemData.hDisc * problemData.basesOnQuad.phi2D{qOrd2D}.'), problemData.cHQ0T, 'UniformOutput', false);
+problemData.concentrationDiscRK = cellfun(@(c) problemData.swe_projectDataQ0T2DataDisc(c, 2*problemData.p, problemData.hatM, problemData.basesOnQuad), problemData.cQ0T, 'UniformOutput', false);
+% problemData.cQ0T = cellfun(@(c) (problemData.basesOnQuad.phi2D{qOrd2D}(:,1:N) * reshape(c, N, K)).', problemData.concentrationDiscRK, 'UniformOutput', false); % K x numQuad2D
 end % function

@@ -15,6 +15,7 @@ globR = assembleMatEdgePhiPhiValUpwind(problemData.g, problemData.g.markE0Tint, 
 sysA = -globG{1} - globG{2} + globR;
 
 for species = 1:problemData.numSpecies
+  
   % L2 projections of algebraic coefficients
   fDisc  = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.fCont{species}(problemData.timeLvls(nSubStep),x1,x2), ...
                                     2*p, problemData.hatM, problemData.basesOnQuad);
@@ -31,17 +32,13 @@ for species = 1:problemData.numSpecies
 
   % Assembly of the source contribution
   globL = problemData.globM * reshape(fDisc', K*N, 1) ...
-        + problemData.globT * reshape(problemData.reactions{species}(problemData.timeLvls(nSubStep), problemData.g.mapRef2Phy(1, Q1, Q2), problemData.g.mapRef2Phy(2, Q1, Q2), problemData.cQ0T).', numQuad2D*K, 1);
-
+        + problemData.globT * reshape(problemData.reactions{species}(problemData.timeLvls(nSubStep), problemData.g.mapRef2Phy(1, Q1, Q2), problemData.g.mapRef2Phy(2, Q1, Q2), problemData.cQ0T, problemData.cHQ0T).', numQuad2D*K, 1);
+  
   % right hand side
   sysV = globL - globKD - globKN;
-  
-  % Computing the concentration from the depth-integrated one
-  dataQ0T = (reshape(problemData.cDiscRK{species}, [N K]).' * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.') ./ (problemData.hDisc * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.');
-  concentrationDiscRK = reshape(problemData.swe_projectDataQ0T2DataDisc(dataQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad)', [K*N 1]);
 
   % Computing the discrete time derivative
-  cDiscDot = problemData.globM \ (sysV - sysA * concentrationDiscRK);
+  cDiscDot = problemData.globM \ (sysV - sysA * reshape(problemData.concentrationDiscRK{species}', [K*N 1]));
 
   % Apply slope limiting to time derivative
   if problemData.isSlopeLim{species}
