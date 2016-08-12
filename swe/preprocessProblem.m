@@ -69,14 +69,20 @@ switch pd.gridSource
   case 'hierarchical'
 %     X1 = [0 1 1 0]; X2 = [0 0 1 1];
 %     pd.g = execin('swe/domainHierarchy', X1, X2, pd.hmax, pd.refinement);
-    pd.g = domainSquare(pd.hmax*0.5^pd.refinement);
+%     pd.g = domainSquare(pd.hmax*0.5^pd.refinement);
+%     pd.g = domainPolygon([0 10000 10000 0],[0 0 10000 10000],10000);
+%     for n = 0:pd.refinement
+%        pd.g = refineGrid(pd.g);
+%     end % for
+    X1 = [0 10000 10000 0]; X2 = [0 0 10000 10000];
+    pd.g = execin('swe/domainHierarchy', X1, X2, pd.hmax, pd.refinement);
     
     % Set edge types
     pd.g.idE = zeros(pd.g.numE,1);
-    pd.g.idE(pd.g.baryE(:, 2) == 0) = 3; % south
-    pd.g.idE(pd.g.baryE(:, 1) == 1) = 3; % east
-    pd.g.idE(pd.g.baryE(:, 2) == 1) = 3; % north
-    pd.g.idE(pd.g.baryE(:, 1) == 0) = 3; % west
+    pd.g.idE(pd.g.baryE(:, 2) == min(X2)) = 3; % south
+    pd.g.idE(pd.g.baryE(:, 1) == max(X1)) = 3; % east
+    pd.g.idE(pd.g.baryE(:, 2) == max(X2)) = 3; % north
+    pd.g.idE(pd.g.baryE(:, 1) == min(X1)) = 3; % west
 %     pd.g.idE(pd.g.baryE(:, 2) == 0 & pd.g.baryE(:,1) < 0.5) = 4; % southwest
 %     pd.g.idE(pd.g.baryE(:, 2) == 0 & pd.g.baryE(:,1) > 0.5) = 3; % southeast
 %     pd.g.idE(pd.g.baryE(:, 1) == 1) = 1; % east
