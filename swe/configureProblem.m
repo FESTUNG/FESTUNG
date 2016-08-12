@@ -193,10 +193,11 @@ pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
 pd.isSteadyState = false; % End simulation upon convergence
 
 % Solution parameters
-height = 0.025; % value of each component of bathymatry gradient
+height = 0.00025; % value of each component of bathymatry gradient
+
 A = 0.01;
 B = 0.01;
-C = 0.01;
+C = 0.01; % TODO
 pd.gConst = 9.81;
 pd.minTol = 0.001;
 
@@ -207,27 +208,27 @@ pd.bottomFrictionCoef = 0;
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) height*(x1+x2) - 0.1*(x1==x1);
+pd.zbCont = @(x1,x2) height*(x1+x2) - 10;
 pd.fcCont = @(x1,x2) 0*x1;
 
 % Analytical solution
-pd.xiCont = @(x1,x2,t) 0*x1;
-pd.uCont = @(x1,x2,t) 0*x1;
-pd.vCont = @(x1,x2,t) 0*x1;
+pd.xiCont = @(x1,x2,t) C*(sin(0.0001*(x1-t)) + sin(0.0001*(x2-t)));
+pd.uCont = @(x1,x2,t) A*sin(0.0001*(x1-t));
+pd.vCont = @(x1,x2,t) B*sin(0.0001*(x2-t));
 
 % Auxiliary functions (derivatives etc.)
 pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
 pd.zb_xCont = @(x1,x2) height*(x1==x1);
 pd.zb_yCont = @(x1,x2) height*(x1==x1);
-pd.u_tCont = @(x1,x2,t) 0*x1;
-pd.u_xCont = @(x1,x2,t) 0*x1;
+pd.u_tCont = @(x1,x2,t) -0.0001*A*cos(0.0001*(x1-t));
+pd.u_xCont = @(x1,x2,t) 0.0001*A*cos(0.0001*(x1-t));
 pd.u_yCont = @(x1,x2,t) 0*x1;
-pd.v_tCont = @(x1,x2,t) 0*x1;
+pd.v_tCont = @(x1,x2,t) -0.0001*B*cos(0.0001*(x2-t));
 pd.v_xCont = @(x1,x2,t) 0*x1;
-pd.v_yCont = @(x1,x2,t) 0*x1;
-pd.h_tCont = @(x1,x2,t) 0*x1;
-pd.h_xCont = @(x1,x2,t) 0*x1 - pd.zb_xCont(x1,x2);
-pd.h_yCont = @(x1,x2,t) 0*x1 - pd.zb_yCont(x1,x2);
+pd.v_yCont = @(x1,x2,t) 0.0001*B*cos(0.0001*(x2-t));
+pd.h_tCont = @(x1,x2,t) -0.0001*C*(cos(0.0001*(x1-t)) + cos(0.0001*(x2-t)));
+pd.h_xCont = @(x1,x2,t) 0.0001*C*cos(0.0001*(x1-t)) - pd.zb_xCont(x1,x2);
+pd.h_yCont = @(x1,x2,t) 0.0001*C*cos(0.0001*(x2-t)) - pd.zb_yCont(x1,x2);
 
 % % Analytical solution
 % pd.xiCont = @(x1,x2,t) C*(sin(0.5*pi*(x1-t)) + sin(0.5*pi*(x2-t)));
@@ -235,9 +236,6 @@ pd.h_yCont = @(x1,x2,t) 0*x1 - pd.zb_yCont(x1,x2);
 % pd.vCont = @(x1,x2,t) B*sin(0.5*pi*(x1-t)).*sin(pi*x2);
 % 
 % % Auxiliary functions (derivatives etc.)
-% pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
-% pd.zb_xCont = @(x1,x2) height*(x1==x1);
-% pd.zb_yCont = @(x1,x2) height*(x1==x1);
 % pd.u_tCont = @(x1,x2,t) -0.5*pi*A*cos(0.5*pi*(x2-t)).*sin(pi*x1);
 % pd.u_xCont = @(x1,x2,t)      pi*A*sin(0.5*pi*(x2-t)).*cos(pi*x1);
 % pd.u_yCont = @(x1,x2,t)  0.5*pi*A*cos(0.5*pi*(x2-t)).*sin(pi*x1);

@@ -15,7 +15,6 @@ problemData = setdefault(problemData, 'configSource', 'analytical');
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
 problemData = setdefault(problemData, 'gridSource', 'hierarchical');
 problemData = setdefault(problemData, 'refinement', 3);
-problemData = setdefault(problemData, 'hmax', 1);
 % problemData = setdefault(problemData, 'hmax', 0.3);
 
 % Polynomial approximation order
@@ -27,11 +26,13 @@ problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3)); % as of 
 % Time stepping specification, as of now both models have to use the same number of time steps
 switch problemData.configSource
   case 'rotation'
-    problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/3142)*2*pi);
-    problemData = setdefault(problemData, 'numSteps', 314);
+    problemData = setdefault(problemData, 'hmax', 2^-6);
+    problemData = setdefault(problemData, 'tEnd', (100/3142)*2*pi);
+    problemData = setdefault(problemData, 'numSteps', 100);
   case 'analytical'
-    problemData = setdefault(problemData, 'tEnd', 1);
-    problemData = setdefault(problemData, 'numSteps', 25*2^problemData.refinement*(problemData.p+1));
+    problemData = setdefault(problemData, 'hmax', 1);
+    problemData = setdefault(problemData, 'tEnd', 5000);
+    problemData = setdefault(problemData, 'numSteps', 10*2^problemData.refinement*(problemData.p+1));
   otherwise
     error('Invalid config source.')
 end % switch

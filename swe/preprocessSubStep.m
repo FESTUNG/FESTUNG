@@ -181,7 +181,7 @@ for nn = 1 : 3
             pd.globV{nn,np} * (lambda .* (cQ0E0Tint{3,nn} - cQ0E0TE0T{3,nn,np})) ];
           
         if pd.isCoupling
-          pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * permute( reshape( lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] );
+          pd.massFluxQ0E0T(:,nn,:) = bsxfun(@times, pd.massFluxQ0E0T(:,nn,:) + 0.5 * permute( reshape( lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0Tint(:,nn) );
         end % if
       case 'Roe'
         error('not implemented')
@@ -271,6 +271,10 @@ for nn = 1 : 3
           pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRRI{nn,1} * (cQ0E0Tint{2,nn} + uHRiv) + pd.globRRI{nn,2} * (cQ0E0Tint{3,nn} + vHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn})) );
           pd.globLRI{2} = pd.globLRI{2} + 0.5 * ( pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHRiv)) );
           pd.globLRI{3} = pd.globLRI{3} + 0.5 * ( pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHRiv)) );
+          
+          pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, 0.5 * permute( reshape( ( cQ0E0Tint{2,nn} + uHRiv ) .* pd.g.nuQ0E0T{nn,1} + ( cQ0E0Tint{3,nn} + vHRiv ) .* pd.g.nuQ0E0T{nn,2} ...
+                                                                                                       + lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRI(:,nn) );
+          
         case 'Roe'
           error('not implemented')
           
