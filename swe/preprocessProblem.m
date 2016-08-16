@@ -83,12 +83,6 @@ switch pd.gridSource
     pd.g.idE(pd.g.baryE(:, 1) == max(X1)) = 3; % east
     pd.g.idE(pd.g.baryE(:, 2) == max(X2)) = 3; % north
     pd.g.idE(pd.g.baryE(:, 1) == min(X1)) = 3; % west
-%     pd.g.idE(pd.g.baryE(:, 2) == 0 & pd.g.baryE(:,1) < 0.5) = 4; % southwest
-%     pd.g.idE(pd.g.baryE(:, 2) == 0 & pd.g.baryE(:,1) > 0.5) = 3; % southeast
-%     pd.g.idE(pd.g.baryE(:, 1) == 1) = 1; % east
-%     pd.g.idE(pd.g.baryE(:, 2) == 1) = 2; % north
-%     pd.g.idE(pd.g.baryE(:, 1) == 0 & pd.g.baryE(:,2) < 0.5) = 4; % southwest
-%     pd.g.idE(pd.g.baryE(:, 1) == 0 & pd.g.baryE(:,2) > 0.5) = 3; % southeast
     pd.g.idE0T = pd.g.idE(pd.g.E0T);
     
     % Store edge counts

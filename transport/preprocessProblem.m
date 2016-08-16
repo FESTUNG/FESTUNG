@@ -1,7 +1,15 @@
 function problemData = preprocessProblem(problemData)
 %% Triangulation.
-problemData = setdefault(problemData, 'g', domainSquare(problemData.hmax));
-% problemData = setdefault(problemData, 'g',domainPolygon([0 1 1 0], [0 0 1 1], problemData.hmax)); % ALTERNATIVE
+X1 = [0 10000 10000 0]; X2 = [0 0 10000 10000];
+problemData.g = execin('swe/domainHierarchy', X1, X2, problemData.hmax, problemData.refinement);
+% Set edge types
+problemData.g.idE = zeros(problemData.g.numE,1);
+problemData.g.idE(problemData.g.baryE(:, 2) == min(X2)) = 3; % south
+problemData.g.idE(problemData.g.baryE(:, 1) == max(X1)) = 3; % east
+problemData.g.idE(problemData.g.baryE(:, 2) == max(X2)) = 3; % north
+problemData.g.idE(problemData.g.baryE(:, 1) == min(X1)) = 3; % west
+problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 %% Globally constant parameters.
 problemData = setdefault(problemData, 'K', problemData.g.numT);  % number of triangles
