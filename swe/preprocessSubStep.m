@@ -156,8 +156,8 @@ end % if
 %% Non-linear terms in quadrature points of edges.
 for nn = 1 : 3
   if pd.isCoupling
-    pd.massFluxQ0E0T(:,nn,:) = 0.5 * permute( reshape( ( cQ0E0Tint{2,nn} + sum(cat(2,cQ0E0TE0T{2,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,1} + ...
-                                                       ( cQ0E0Tint{3,nn} + sum(cat(2,cQ0E0TE0T{3,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] );
+    pd.massFluxQ0E0T(:,nn,:) = 0.5 * bsxfun(@times, permute( reshape( ( cQ0E0Tint{2,nn} + sum(cat(2,cQ0E0TE0T{2,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,1} + ...
+                                                                      ( cQ0E0Tint{3,nn} + sum(cat(2,cQ0E0TE0T{3,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0Tint(:,nn) );
   end % if
   % Non-linear terms in exterior quadrature points of edges
   for np = 1 : 3
@@ -181,7 +181,7 @@ for nn = 1 : 3
             pd.globV{nn,np} * (lambda .* (cQ0E0Tint{3,nn} - cQ0E0TE0T{3,nn,np})) ];
           
         if pd.isCoupling
-          pd.massFluxQ0E0T(:,nn,:) = bsxfun(@times, pd.massFluxQ0E0T(:,nn,:) + 0.5 * permute( reshape( lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0Tint(:,nn) );
+          pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * bsxfun(@times, permute( reshape( lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TE0T{nn,np} * ones(K,1) );
         end % if
       case 'Roe'
         error('not implemented')

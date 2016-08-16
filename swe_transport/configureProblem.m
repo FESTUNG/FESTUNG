@@ -17,7 +17,7 @@ problemData = setdefault(problemData, 'gridSource', 'hierarchical');
 problemData = setdefault(problemData, 'refinement', 0);
 
 % Polynomial approximation order
-problemData = setdefault(problemData, 'p', 1);
+problemData = setdefault(problemData, 'p', 0);
 
 % Runge-Kutta order
 problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3)); % as of now both models have to use the same RK method
@@ -69,6 +69,7 @@ switch problemData.configSource
   case 'rotation'
     problemData.transportData.configSource = 'rotation';
     
+    problemData.transportData.hCont = @(t,x1,x2) problemData.sweData.xiCont(x1,x2,t) - problemData.sweData.zbCont(x1,x2);
   case 'analytical'
     problemData.transportData.configSource = 'analytical';
     

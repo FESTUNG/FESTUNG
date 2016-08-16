@@ -1,14 +1,29 @@
 function problemData = preprocessProblem(problemData)
 %% Triangulation.
-X1 = [0 10000 10000 0]; X2 = [0 0 10000 10000];
-problemData.g = execin('swe/domainHierarchy', X1, X2, problemData.hmax, problemData.refinement);
-% Set edge types
-problemData.g.idE = zeros(problemData.g.numE,1);
-problemData.g.idE(problemData.g.baryE(:, 2) == min(X2)) = 3; % south
-problemData.g.idE(problemData.g.baryE(:, 1) == max(X1)) = 3; % east
-problemData.g.idE(problemData.g.baryE(:, 2) == max(X2)) = 3; % north
-problemData.g.idE(problemData.g.baryE(:, 1) == min(X1)) = 3; % west
-problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+switch problemData.gridSource
+  case 'square'
+    problemData = setdefault(problemData, 'g', domainSquare(problemData.hmax));
+    
+    % Set edge types
+    problemData.g.idE = zeros(problemData.g.numE,1);
+    problemData.g.idE(problemData.g.baryE(:, 2) == 0) = 3; % south
+    problemData.g.idE(problemData.g.baryE(:, 1) == 1) = 3; % east
+    problemData.g.idE(problemData.g.baryE(:, 2) == 1) = 3; % north
+    problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 3; % west
+    problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+  case 'hierarchical'
+    problemData = setdefault(problemData, 'g', execin('swe/domainHierarchy', [0 10000 10000 0], [0 0 10000 10000], problemData.hmax, problemData.refinement));
+
+    % Set edge types
+    problemData.g.idE = zeros(problemData.g.numE,1);
+    problemData.g.idE(problemData.g.baryE(:, 2) == 0) = 3; % south
+    problemData.g.idE(problemData.g.baryE(:, 1) == 10000) = 3; % east
+    problemData.g.idE(problemData.g.baryE(:, 2) == 10000) = 3; % north
+    problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 3; % west
+    problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
+  otherwise
+    error('Invalid gridSource given.')
+end % switch
 
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 %% Globally constant parameters.
