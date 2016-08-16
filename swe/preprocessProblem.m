@@ -67,14 +67,7 @@ switch pd.gridSource
     pd.g.numEbdrOS = sum(pd.g.idE == 4);
     
   case 'hierarchical'
-%     X1 = [0 1 1 0]; X2 = [0 0 1 1];
-%     pd.g = execin('swe/domainHierarchy', X1, X2, pd.hmax, pd.refinement);
-%     pd.g = domainSquare(pd.hmax*0.5^pd.refinement);
-%     pd.g = domainPolygon([0 10000 10000 0],[0 0 10000 10000],10000);
-%     for n = 0:pd.refinement
-%        pd.g = refineGrid(pd.g);
-%     end % for
-    X1 = [0 10000 10000 0]; X2 = [0 0 10000 10000];
+    X1 = [0 100 100 0]; X2 = [0 0 100 100];
     pd.g = execin('swe/domainHierarchy', X1, X2, pd.hmax, pd.refinement);
     
     % Set edge types
