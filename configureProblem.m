@@ -179,12 +179,12 @@ pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
 pd.gridSource = 'hierarchical';
 pd.isSpherical = false; 
 pd = setdefault(pd, 'refinement', 0);
-pd = setdefault(pd, 'hmax', 0.3);
+pd = setdefault(pd, 'hmax', 100);
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd = setdefault(pd, 'numSteps', 100);  % number of time steps
-pd = setdefault(pd, 'tEnd', 1);  % end time
+pd = setdefault(pd, 'numSteps', 200);  % number of time steps
+pd = setdefault(pd, 'tEnd', 1000);  % end time
 pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
@@ -192,43 +192,45 @@ pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
 
 pd.isSteadyState = false; % End simulation upon convergence
 
-% Solution parameters
-height = 0.00025; % value of each component of bathymatry gradient
+ds = 0.01; % domainScale
+slope = 0.005;
+depth = 2;
 
-A = 0.00001;
-B = 0.00001;
-C = 0.00001;
+A = 0.1;
+B = 0.1;
+C = 0.01;
+
 pd.gConst = 9.81;
 pd.minTol = 0.001;
 
 pd.isBottomFrictionNonlinear = true; % NOLIBF
 pd.isBottomFrictionVarying = false; % NWP
-pd.bottomFrictionCoef = 0;
+pd.bottomFrictionCoef = 0.0001;
 
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) height*(x1+x2) - 10;
-pd.fcCont = @(x1,x2) 0*x1;
+pd.zbCont = @(x1,x2) slope*(x1+x2) - depth;
+pd.fcCont = @(x1,x2) 0.0001*ds*x1;
 
 % Analytical solution
-pd.xiCont = @(x1,x2,t) C*(sin(0.0001*(x1-t)) + sin(0.0001*(x2-t)));
-pd.uCont = @(x1,x2,t) A*sin(0.0001*(x1-t));
-pd.vCont = @(x1,x2,t) B*sin(0.0001*(x2-t));
+pd.xiCont = @(x1,x2,t) C*(sin(ds*(x1-t)) + sin(ds*(x2-t)));
+pd.uCont = @(x1,x2,t) A*sin(ds*(x1-t));
+pd.vCont = @(x1,x2,t) B*sin(ds*(x2-t));
 
 % Auxiliary functions (derivatives etc.)
 pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
-pd.zb_xCont = @(x1,x2) height*(x1==x1);
-pd.zb_yCont = @(x1,x2) height*(x1==x1);
-pd.u_tCont = @(x1,x2,t) -0.0001*A*cos(0.0001*(x1-t));
-pd.u_xCont = @(x1,x2,t) 0.0001*A*cos(0.0001*(x1-t));
+pd.zb_xCont = @(x1,x2) slope*(x1==x1);
+pd.zb_yCont = @(x1,x2) slope*(x1==x1);
+pd.u_tCont = @(x1,x2,t) -ds*A*cos(ds*(x1-t));
+pd.u_xCont = @(x1,x2,t) ds*A*cos(ds*(x1-t));
 pd.u_yCont = @(x1,x2,t) 0*x1;
-pd.v_tCont = @(x1,x2,t) -0.0001*B*cos(0.0001*(x2-t));
+pd.v_tCont = @(x1,x2,t) -ds*B*cos(ds*(x2-t));
 pd.v_xCont = @(x1,x2,t) 0*x1;
-pd.v_yCont = @(x1,x2,t) 0.0001*B*cos(0.0001*(x2-t));
-pd.h_tCont = @(x1,x2,t) -0.0001*C*(cos(0.0001*(x1-t)) + cos(0.0001*(x2-t)));
-pd.h_xCont = @(x1,x2,t) 0.0001*C*cos(0.0001*(x1-t)) - pd.zb_xCont(x1,x2);
-pd.h_yCont = @(x1,x2,t) 0.0001*C*cos(0.0001*(x2-t)) - pd.zb_yCont(x1,x2);
+pd.v_yCont = @(x1,x2,t) ds*B*cos(ds*(x2-t));
+pd.h_tCont = @(x1,x2,t) -ds*C*(cos(ds*(x1-t)) + cos(ds*(x2-t)));
+pd.h_xCont = @(x1,x2,t) ds*C*cos(ds*(x1-t)) - pd.zb_xCont(x1,x2);
+pd.h_yCont = @(x1,x2,t) ds*C*cos(ds*(x2-t)) - pd.zb_yCont(x1,x2);
 
 % Right hand side functions (derived from analytical solution)
 % This can be used for any solution, the user just has to specify all
@@ -255,9 +257,9 @@ pd.f2Cont = @(x1,x2,t) pd.v_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + pd.vCont(x1,x2
 % Boundary conditions
 pd.xiOSCont = pd.xiCont;
 pd.isRivCont = true;
-pd.xiRivCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
-pd.uRivCont = @(x1,x2,t) pd.uCont(x1,x2,t);
-pd.vRivCont = @(x1,x2,t) pd.vCont(x1,x2,t);
+pd.xiRivCont = pd.xiCont;
+pd.uRivCont = pd.uCont;
+pd.vRivCont = pd.vCont;
 
 % Hot-start output
 pd.isHotStartOutput = false;
