@@ -14,8 +14,7 @@ problemData = setdefault(problemData, 'configSource', 'analytical');
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
 problemData = setdefault(problemData, 'gridSource', 'hierarchical');
-problemData = setdefault(problemData, 'refinement', 3);
-% problemData = setdefault(problemData, 'hmax', 0.3);
+problemData = setdefault(problemData, 'refinement', 0);
 
 % Polynomial approximation order
 problemData = setdefault(problemData, 'p', 1);
@@ -30,9 +29,9 @@ switch problemData.configSource
     problemData = setdefault(problemData, 'tEnd', (100/3142)*2*pi);
     problemData = setdefault(problemData, 'numSteps', 100);
   case 'analytical'
-    problemData = setdefault(problemData, 'hmax', 1);
-    problemData = setdefault(problemData, 'tEnd', 5000);
-    problemData = setdefault(problemData, 'numSteps', 10*2^problemData.refinement*(problemData.p+1));
+    problemData = setdefault(problemData, 'hmax', 10000);
+    problemData = setdefault(problemData, 'tEnd', 1000);
+    problemData = setdefault(problemData, 'numSteps', 200*2^(problemData.refinement+problemData.p));
   otherwise
     error('Invalid config source.')
 end % switch
@@ -74,14 +73,14 @@ switch problemData.configSource
     problemData.transportData.configSource = 'analytical';
     
     % analytical functions from swe necessary for convergence test
-    problemData.transportData.hCont = problemData.sweData.hCont;
-    problemData.transportData.h_tCont = problemData.sweData.h_tCont;
-    problemData.transportData.h_xCont = problemData.sweData.h_xCont;
-    problemData.transportData.h_yCont = problemData.sweData.h_yCont;
-    problemData.transportData.uCont = problemData.sweData.uCont;
-    problemData.transportData.u_xCont = problemData.sweData.u_xCont;
-    problemData.transportData.vCont = problemData.sweData.vCont;
-    problemData.transportData.v_yCont = problemData.sweData.v_yCont;
+    problemData.transportData.hCont = @(t,x1,x2) problemData.sweData.hCont(x1,x2,t);
+    problemData.transportData.h_tCont = @(t,x1,x2) problemData.sweData.h_tCont(x1,x2,t);
+    problemData.transportData.h_xCont = @(t,x1,x2) problemData.sweData.h_xCont(x1,x2,t);
+    problemData.transportData.h_yCont = @(t,x1,x2) problemData.sweData.h_yCont(x1,x2,t);
+    problemData.transportData.uCont = @(t,x1,x2) problemData.sweData.uCont(x1,x2,t);
+    problemData.transportData.u_xCont = @(t,x1,x2) problemData.sweData.u_xCont(x1,x2,t);
+    problemData.transportData.vCont = @(t,x1,x2) problemData.sweData.vCont(x1,x2,t);
+    problemData.transportData.v_yCont = @(t,x1,x2) problemData.sweData.v_yCont(x1,x2,t);
   otherwise
     error('Invalid config source.')
 end % switch
