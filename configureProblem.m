@@ -40,7 +40,7 @@ problemData.reactions = cell(problemData.numSpecies,1);
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species} = true; % visualization of solution
   problemData.isSlopeLim{species} = problemData.p > 0; % slope limiting
-  problemData.typeSlopeLim{species} = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
+  problemData.typeSlopeLim{species} = 'strict'; % Type of slope limiter (linear, hierarch_vert, strict)
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
   
   %% Parameter check.
