@@ -5,6 +5,16 @@ function problemData = configureProblem(problemData)
 % - 'analytical' calls configureAnalyticalTest()
 problemData = setdefault(problemData, 'configSource', 'analytical');
 
+%% What kind of grid to use:
+% - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
+%   open sea boundary in the east (type 4), and land boundary (type 1) on 
+%   all other edges 
+% - 'hierarchical' creates a unit square [0,1]x[0,1] with specified hmax
+%   and performs uniform refinement according to parameter 'refinement'.
+%   Boundary type 4 on east-boundary, 1 on all others.
+problemData = setdefault(problemData, 'gridSource', 'hierarchical');
+problemData = setdefault(problemData, 'refinement', 0);
+
 %% Parameters. 
 % Set default values if they are not yet available in problemData
 problemData = setdefault(problemData, 'p'         , 0);  % local polynomial degree (TODO: allow different approximation orders for each species)
@@ -39,9 +49,9 @@ switch problemData.configSource
     problemData = configureRotation(problemData);
   case 'analytical'
     problemData.isSolutionAvailable = true;
-    problemData = setdefault(problemData, 'hmax'      , 1);  % maximum edge length of triangle
-    problemData = setdefault(problemData, 'numSteps'  , 100);  % number of time steps
-    problemData = setdefault(problemData, 'tEnd'      , 1);  % end time
+    problemData = setdefault(problemData, 'hmax'      , 10000);  % maximum edge length of triangle
+    problemData = setdefault(problemData, 'numSteps'  , 200);  % number of time steps
+    problemData = setdefault(problemData, 'tEnd'      , 1000);  % end time
     problemData = configureAnalyticalTest(problemData);
   otherwise
     error('Invalid config source.')
@@ -55,7 +65,7 @@ end % function
 %% LeVeque's solid body rotation
 function problemData = configureRotation(problemData)
 
-problemData = setdefault(problemData, 'hCont', @(t,x1,x2) x1==x1); % TODO order of arguments
+problemData = setdefault(problemData, 'hCont', @(t,x1,x2) 0.1*(x1==x1));
 problemData = setdefault(problemData, 'uCont', @(t,x1,x2) 0.5 - x2);
 problemData = setdefault(problemData, 'vCont', @(t,x1,x2) x1 - 0.5);
 problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.uCont(t,x1,x2));
