@@ -124,7 +124,7 @@ pd.hmax = 2^-6; % Maximum element size of initial grid
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd.numSteps = 300; % Number of time steps
+pd.numSteps = 3142; % Number of time steps
 pd.tEnd = pd.numSteps/3142*2*pi; % End time of simulation
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
