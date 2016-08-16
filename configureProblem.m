@@ -104,32 +104,35 @@ end % function
 %% Analytical solution
 function problemData = configureAnalyticalTest(problemData)
 
-A = 0.00001;
-B = 0.00001;
-C = 0.00001;
-height = 0.00025;
+ds = 0.01; % domainScale
+slope = 0.005;
+depth = 2;
 
-problemData.zb_xCont = @(x1,x2) height*(x1==x1);
-problemData.zb_yCont = @(x1,x2) height*(x1==x1);
+A = 0.1;
+B = 0.1;
+C = 0.01;
 
-problemData.hCont = @(t,x1,x2) C*(sin(0.0001*(x1-t)) + sin(0.0001*(x2-t))) - height*(x1+x2) + 10;
-problemData.h_tCont = @(t,x1,x2) -0.0001*C*(cos(0.0001*(x1-t)) + cos(0.0001*(x2-t)));
-problemData.h_xCont = @(t,x1,x2) 0.0001*C*cos(0.0001*(x1-t)) - problemData.zb_xCont(x1,x2);
-problemData.h_yCont = @(t,x1,x2) 0.0001*C*cos(0.0001*(x2-t)) - problemData.zb_yCont(x1,x2);
+problemData.zb_xCont = @(x1,x2) slope*(x1==x1);
+problemData.zb_yCont = @(x1,x2) slope*(x1==x1);
 
-problemData.uCont = @(t,x1,x2) A*sin(0.0001*(x1-t));
-problemData.u_xCont = @(t,x1,x2) 0.0001*A*cos(0.0001*(x1-t));
-problemData.vCont = @(t,x1,x2) B*sin(0.0001*(x2-t));
-problemData.v_yCont = @(t,x1,x2) 0.0001*B*cos(0.0001*(x2-t));
+problemData.hCont = @(t,x1,x2) C*(sin(ds*(x1-t)) + sin(ds*(x2-t))) - slope*(x1+x2) + depth;
+problemData.h_tCont = @(t,x1,x2) -ds*C*(cos(ds*(x1-t)) + cos(ds*(x2-t)));
+problemData.h_xCont = @(t,x1,x2) ds*C*cos(ds*(x1-t)) - problemData.zb_xCont(x1,x2);
+problemData.h_yCont = @(t,x1,x2) ds*C*cos(ds*(x2-t)) - problemData.zb_yCont(x1,x2);
+
+problemData.uCont = @(t,x1,x2) A*sin(ds*(x1-t));
+problemData.u_xCont = @(t,x1,x2) ds*A*cos(ds*(x1-t));
+problemData.vCont = @(t,x1,x2) B*sin(ds*(x2-t));
+problemData.v_yCont = @(t,x1,x2) ds*B*cos(ds*(x2-t));
 
 problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.uCont(t,x1,x2));
 problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.vCont(t,x1,x2));
 
 % analytical solution
-problemData.solCont = {@(t,x1,x2) sin(0.0001*(x1+x2-t))+2, @(t,x1,x2) cos(0.0001*(x1+x2-t))+2, @(t,x1,x2) -cos(0.0001*(x1+x2-t))+2};
-sol_tCont = {@(t,x1,x2) -0.0001*cos(0.0001*(x1+x2-t)), @(t,x1,x2) 0.0001*sin(0.0001*(x1+x2-t)), @(t,x1,x2) -0.0001*sin(0.0001*(x1+x2-t))};
-sol_xCont = {@(t,x1,x2) 0.0001*cos(0.0001*(x1+x2-t)), @(t,x1,x2) -0.0001*sin(0.0001*(x1+x2-t)), @(t,x1,x2) 0.0001*sin(0.0001*(x1+x2-t))};
-sol_yCont = {@(t,x1,x2) 0.0001*cos(0.0001*(x1+x2-t)), @(t,x1,x2) -0.0001*sin(0.0001*(x1+x2-t)), @(t,x1,x2) 0.0001*sin(0.0001*(x1+x2-t))};
+problemData.solCont = {@(t,x1,x2) sin(ds*(x1+x2-t))+2, @(t,x1,x2) cos(ds*(x1+x2-t))+2, @(t,x1,x2) -cos(ds*(x1+x2-t))+2};
+sol_tCont = {@(t,x1,x2) -ds*cos(ds*(x1+x2-t)), @(t,x1,x2) ds*sin(ds*(x1+x2-t)), @(t,x1,x2) -ds*sin(ds*(x1+x2-t))};
+sol_xCont = {@(t,x1,x2) ds*cos(ds*(x1+x2-t)), @(t,x1,x2) -ds*sin(ds*(x1+x2-t)), @(t,x1,x2) ds*sin(ds*(x1+x2-t))};
+sol_yCont = {@(t,x1,x2) ds*cos(ds*(x1+x2-t)), @(t,x1,x2) -ds*sin(ds*(x1+x2-t)), @(t,x1,x2) ds*sin(ds*(x1+x2-t))};
 
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
@@ -152,10 +155,10 @@ end % for
 % NPZ model
 % parameters (Notation as in paper)
 I0 = 1;
-Vm = 0.0000001;
+Vm = 0.001;
 ks = 1;
-Rm = 0.0000001;
-ep = 0.0000001;
+Rm = 0.0001;
+ep = 0.0001;
 gamma = 0.5;
 I = @(t,x1,x2) (x1==x1);
 f = @(t,x1,x2) I(t,x1,x2) /I0; % linear response
@@ -168,7 +171,6 @@ problemData.reactions{1} = @(t,x1,x2,c,cH) f(t,x1,x2) .* g(t,x1,x2,c{3}) .* cH{1
 problemData.reactions{2} = @(t,x1,x2,c,cH) gamma * h(t,x1,x2,c{1}) .* cH{2} - j(t,x1,x2,c{2}) .* cH{2};
 problemData.reactions{3} = @(t,x1,x2,c,cH) -f(t,x1,x2) .* g(t,x1,x2,c{3}) .* cH{1} + (1-gamma) .* h(t,x1,x2,c{1}) .* cH{2} + i(t,x1,x2,c{1}) .* cH{1} + j(t,x1,x2,c{2}) .* cH{2};
 
-%% Attention: due to inconsistency the arguments t,x1,x2 appear in different order in swe and transport TODO
 problemData.fCont{1} = @(t,x1,x2) sol_tCont{1}(t,x1,x2) .* problemData.hCont(t,x1,x2) + problemData.solCont{1}(t,x1,x2) .* problemData.h_tCont(t,x1,x2) + ... 
   problemData.u_xCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* problemData.solCont{1}(t,x1,x2) + problemData.uCont(t,x1,x2) .* problemData.h_xCont(t,x1,x2) .* problemData.solCont{1}(t,x1,x2) + problemData.uCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* sol_xCont{1}(t,x1,x2) + ... 
   problemData.v_yCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* problemData.solCont{1}(t,x1,x2) + problemData.vCont(t,x1,x2) .* problemData.h_yCont(t,x1,x2) .* problemData.solCont{1}(t,x1,x2) + problemData.vCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* sol_yCont{1}(t,x1,x2) - ... 
@@ -181,17 +183,5 @@ problemData.fCont{3} = @(t,x1,x2) sol_tCont{3}(t,x1,x2) .* problemData.hCont(t,x
   problemData.u_xCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* problemData.solCont{3}(t,x1,x2) + problemData.uCont(t,x1,x2) .* problemData.h_xCont(t,x1,x2) .* problemData.solCont{3}(t,x1,x2) + problemData.uCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* sol_xCont{3}(t,x1,x2) + ... 
   problemData.v_yCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* problemData.solCont{3}(t,x1,x2) + problemData.vCont(t,x1,x2) .* problemData.h_yCont(t,x1,x2) .* problemData.solCont{3}(t,x1,x2) + problemData.vCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* sol_yCont{3}(t,x1,x2) - ... 
   (-f(t,x1,x2) .* g(t,x1,x2,problemData.solCont{3}(t,x1,x2)) .* problemData.solCont{1}(t,x1,x2) + (1-gamma) .* h(t,x1,x2,problemData.solCont{1}(t,x1,x2)) .* problemData.solCont{2}(t,x1,x2) + i(t,x1,x2,problemData.solCont{1}(t,x1,x2)) .* problemData.solCont{1}(t,x1,x2) + j(t,x1,x2,problemData.solCont{2}(t,x1,x2)) .* problemData.solCont{2}(t,x1,x2)) .* problemData.hCont(t,x1,x2);
-
-% problemData.reactions{1} = @(t,x1,x2,c,cH) 0*x1;
-% problemData.reactions{2} = @(t,x1,x2,c,cH) 0*x1;
-% problemData.reactions{3} = @(t,x1,x2,c,cH) 0*x1;
- 
-% problemData.fCont{1} = @(t,x1,x2) sol_tCont{1}(t,x1,x2) .* problemData.hCont(t,x1,x2) + problemData.solCont{1}(t,x1,x2) .* problemData.h_tCont(t,x1,x2);
-% problemData.fCont{2} = @(t,x1,x2) sol_tCont{2}(t,x1,x2) .* problemData.hCont(t,x1,x2) + problemData.solCont{2}(t,x1,x2) .* problemData.h_tCont(t,x1,x2);
-% problemData.fCont{3} = @(t,x1,x2) sol_tCont{3}(t,x1,x2) .* problemData.hCont(t,x1,x2) + problemData.solCont{3}(t,x1,x2) .* problemData.h_tCont(t,x1,x2);
-
-% problemData.fCont{1} = @(t,x1,x2) 0*x1;
-% problemData.fCont{2} = @(t,x1,x2) 0*x1;
-% problemData.fCont{3} = @(t,x1,x2) 0*x1;
 
 end % function
