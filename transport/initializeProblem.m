@@ -2,7 +2,7 @@ function problemData = initializeProblem(problemData)
 %% Initial data.
 problemData.cDisc = cell(problemData.numSpecies,1);
 
-hDisc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(x1,x2,0), 2*problemData.p+1,problemData.hatM, problemData.basesOnQuad);
+hDisc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(0,x1,x2), 2*problemData.p+1,problemData.hatM, problemData.basesOnQuad);
 hQ0T = (hDisc * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.');
 
 for species = 1:problemData.numSpecies
