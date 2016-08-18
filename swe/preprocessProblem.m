@@ -104,7 +104,7 @@ switch pd.gridSource
 
     % Spatial variation of coriolis parameter
     if pd.configADCIRC.NCOR == 1 
-      pd.fcCont = @(x1,x2) evaluateFuncFromVertexValues(pd.g, 2.0 * 7.29212e-5 * sin(coordSph(:,2)), x1,x2);
+      pd.fcCont = @(x1,x2) h(pd.g, 2.0 * 7.29212e-5 * sin(coordSph(:,2)), x1,x2);
     else
       pd.fcCont = @(x1,x2) pd.configADCIRC.CORI * ones(size(x1));
     end % if

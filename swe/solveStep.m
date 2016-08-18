@@ -8,9 +8,9 @@
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %>
-%> The main loop repeatedly executes four steps until the number of
-%> iterations provided by configureProblem in the parameter
-%> <code>numSteps</code> is reached. These four steps are:
+%> The main loop repeatedly executes four steps until a certain
+%> criterion, such as reaching the end of the simulation time or
+%> steady state. These four steps are:
 %>
 %>  1. preprocessStep()
 %>  2. solveStep()
@@ -33,6 +33,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>                      Modified 08/17/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock

@@ -1,4 +1,60 @@
-function visualizeSolution(pd, nStep)
+% Auxiliary function for visualization of 2D Shallow-Water Equations output.
+
+%===============================================================================
+%> @file visualizeSolution.m
+%>
+%> @brief Auxiliary function for visualization of 2D Shallow-Water Equations 
+%>        output.
+%===============================================================================
+%>
+%> @brief Auxiliary function for visualization of 2D Shallow-Water Equations 
+%>        output.
+%>
+%> This routine visualizes the discrete solutions of the Shallow-Water Equations
+%> at the current time step. The total height of water can be computed from the 
+%> difference of the free surface elevation and the bathymetry. It can be then
+%> used to compute approximations of the velocities from the computed momenta
+%> via the routine projectDataQ0T2DataDisc, which requires the values of the
+%> quotients of momenta and height in the quadrature points of adequate order in
+%> each element. 
+%> By this means it is possible to visualize height, free surface elevation, as
+%> well as momentum and velocity components for each spatial dimension.
+%> Furthermore, this routine is responsible for station output, i.e. writing the
+%> values of the free surface elevation as well as both velocity components 
+%> evaluated at the physical coordinates of each station into a respective field.
+%>
+%> @param  pd           A struct with problem parameters, precomputed
+%>                      fields, and solution data structures, as provided 
+%>                      by configureProblem() and preprocessProblem(). 
+%>                      @f$[\text{struct}]@f$
+%> @param  nStep        The current iteration number of the main loop. 
+%>
+%> @retval problemData  The input struct enriched with post-processed data
+%>                      for this loop iteration. @f$[\text{struct}]@f$
+%>
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>                      Modified 08/17/16 by Hennes Hajduk
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%
+function pd = visualizeSolution(pd, nStep)
 if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
   nOutput = ceil(nStep / pd.outputFrequency);
 
