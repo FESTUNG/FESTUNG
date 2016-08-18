@@ -1,3 +1,57 @@
+% Uses the evaluation of the unknowns of the 2D Shallow-Water Equations to 
+% compute their harmonic averages of Roe-Pike type for interior edges.
+%
+%===============================================================================
+%> @file computeAveragedVariablesQ0E0Tint.m
+%>
+%> @brief Uses the evaluation of the unknowns of the 2D Shallow-Water Equations 
+%>        to compute their harmonic averages of Roe-Pike type for interior edges
+%>        (see @ref ROE1985 for details)
+%===============================================================================
+%>
+%> @brief Uses the evaluation of the unknowns of the 2D Shallow-Water Equations 
+%>        to compute their harmonic averages of Roe-Pike type for interior edges
+%>        (see @ref ROE1985 for details)
+%>
+%> This routine uses the limits of the height and momenta on both sides of the
+%> edges to compute a stable avarage, later to be used for flux approximation.
+%> There are different types of averages available:
+%> full-harmonic uses the Roe-Pike approach on both the normal component of the
+%> velocity and the root of the graviational constant times the height.
+%> semi-harmonic uses this approach on the normal component of the
+%> velocity and takes the mean of the height for the rest.
+%> mean uses mean values everywhere.
+%>
+%> @param g           The lists describing the geometric and topological 
+%>                    properties of a triangulation (see 
+%>                    <code>generateGridData()</code>) 
+%> @param coord1      List of physical x1-coordinates of stations.
+%> @param coord2      List of physical x1-coordinates of stations
+%>
+%> @retval ret        Cell that for each element stores the triangles and the 
+%>                    barycentric coordinates of the corresponding station.
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>                      Modified 08/18/16 by Hennes Hajduk
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%>
 function ret = coord2triangle(g, coord1, coord2)
 numCoord = length(coord1);
 % Compute barycentric coordinates for each cartesian coordinate pair

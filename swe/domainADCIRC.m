@@ -1,3 +1,72 @@
+% Reads grid and boundary parameters from fort.14- and fort.17-files and creates
+% a grid as well as fields that store model parameter data.
+
+%===============================================================================
+%> @file swe/domainADCIRC.m
+%>
+%> @brief Reads grid and boundary parameters from fort.14- and fort.17-files and
+%>        creates a grid as well as fields that store model parameter data.
+%===============================================================================
+%>
+%> @brief Reads grid and boundary parameters from fort.14- and fort.17-files and
+%>        creates a grid as well as fields that store model parameter data.
+%>
+%> This function reads in the coordinates, connectivity and values for the depth
+%> in each vertex of a grid from the fort.14-file, see
+%> <http://www.unc.edu/ims/adcirc/documentv47/fort_14.html>. This is used to 
+%> construct a grid. 
+%> Edge information along with Dirichlet-type boundary conditions is read in 
+%> from the fort.17-file, see
+%> <TODO: no html online>. 
+%> Since the grids in FESTUNG need to fulfill certain local indexing 
+%> properties, such as that local edges of arbitrary index must be opposing 
+%> local vertices of the same index, some of the information provided must be 
+%> altered.
+%>
+%> @param  grid_file    The name of the fort.14-file.
+%> @param  conn_file    The name of the fort.17-file.
+%> @param  numForcingOS The number of forcing terms on the open sea boundary as
+%>                      provided by the fort.15-parameter NBFR.
+%> @param  isSpherical  <code>logical</code> scalar as provided by the fort.15-
+%>                      parameter ICS that indicates if CPP projection is used 
+%>                      to include curvature of the physical domain or if it is
+%>                      approximately flat.
+%> @param  projCenter   Projection center for CPP projection as provided by the 
+%>                      fort.15-parameters SLAM0, SFEA0 in case curvature is 
+%>                      considered. @f$[1 \times 2]@f$
+%>
+%> @retval g            The lists describing the geometric and topological 
+%>                      properties of a triangulation.
+%> @retval  depth       Positive values of the depth in each vertex of the grid.
+%>                      @f$[numV \times 1]@f$
+%> @retval  forcingOS   Amplitude and phase (in degrees) of each harmonic 
+%>                      forcing function at each open sea boundary edge.
+%>                      @f$[numForcingOS \times numEbdrOS \times 2]@f$
+%> @retval  flowRateRiv Free surface elevation, normal and tangential velocity
+%>                      components of river boundary conditions for each river 
+%>                      edge. @f$[numEbdRiv \times 3]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>                      Modified 08/17/16 by Hennes Hajduk
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%
 function [g, depth, forcingOS, flowRateRiv] = domainADCIRC(grid_file, conn_file, numForcingOS, isSpherical, projCenter)
 % Set default values for input parameters
 switch nargin
