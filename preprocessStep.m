@@ -17,9 +17,7 @@
 %>  3. postprocessStep()
 %>  4. outputStep()
 %> 
-%> This routine is executed first in each loop iteration and is intended to
-%> execute preprocessing operations, e.g., evaluate boundary conditions or
-%> right hand side values, assemble time-dependent matrix blocks, etc.
+%> This routine is executed first in each loop iteration.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled

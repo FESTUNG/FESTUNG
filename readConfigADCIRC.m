@@ -1,3 +1,41 @@
+% Reads model and simualtion parameters from a fort.15-file.
+
+%===============================================================================
+%> @file swe/readConfigADCIRC.m
+%>
+%> @brief Reads model and simualtion parameters from a fort.15-file.
+%===============================================================================
+%>
+%> @brief Reads model and simualtion parameters from a fort.15-file.
+%>
+%> This function reads in the values of all parameter that are defined in the 
+%> ADCIRC Model Parameter and Periodic Boundary Condition File, see
+%> <http://www.unc.edu/ims/adcirc/documentv47/fort_15.html>.
+%>
+%> @param  filename   The name of the fort.15-file.
+%> @retval  config    A struct containing all parameters from the fort.15-file.
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>                      Modified 08/17/16 by Hennes Hajduk
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%
 function config = readConfigADCIRC(filename)
 %% Open file for reading
 assert(exist(filename, 'file') == 2, ['Config file "' filename '" does not exist!'])

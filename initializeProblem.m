@@ -90,7 +90,7 @@ end % for
 pd.cDisc(:,:,1) = pd.swe_correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr + pd.minTol, pd.elevTol);
 
 %% Visualize initial solution.
-pd.swe_visualizeSolution(pd, 0);
+pd = pd.swe_visualizeSolution(pd, 0);
 
 %% Initialize waitbar.
 if pd.isWaitbar
