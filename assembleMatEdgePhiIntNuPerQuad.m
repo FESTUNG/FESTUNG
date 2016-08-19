@@ -11,7 +11,8 @@
 %>        quadrature weight.
 %===============================================================================
 %>
-%> @brief Assembles six matrices containing evaluations of one basis function in 
+%> @brief Assembles matrices @f$\mathsf{{Q}}^{m,n}_\mathrm{L}, m\in\{1,2\}, 
+%>        n\in\{1,2,3\}@f$ containing evaluations of one basis function in 
 %>        quadrature points for each of the three local edges of each element 
 %>        multiplied with a component of the edge normal and the corresponding 
 %>        quadrature weight.
@@ -52,7 +53,7 @@
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
 %> <code>gammaMap()</code> and \hat{q}^r, \hat{w}^r are the quadrature points 
-%> and weights of edge @f$n@f$ of the reference element.
+%> and weights of edge of the interval @f$[0,1]@f$.
 %>
 %> It is essentially the same as the diagonal part of
 %> <code>assembleMatEdgePhiNuPerQuad()</code>.

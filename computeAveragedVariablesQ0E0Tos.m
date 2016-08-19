@@ -15,39 +15,55 @@
 %>
 %> This routine uses the limits of the height and momenta on both sides of the
 %> edges to compute a stable avarage, later to be used for flux approximation.
+%> Let @f$\mathbf{c} = \begin{bmatrix} c^1 \\ c^2 \\ c^3 \end{bmatrix} =
+%> \begin{bmatrix} h \\ uH \\ vH \end{bmatrix}@f$
+%> be the vector of primary unknowns of the 2D Shallow-Water Equations and
+%> @f$\mathbf{c}_- = \begin{bmatrix} c^1_- \\ c^2_- \\ c^3_- \end{bmatrix} =
+%> \begin{bmatrix} h_- \\ uH_- \\ vH_- \end{bmatrix}@f$, 
+%> @f$\mathbf{c}_+ = \begin{bmatrix} c^1_+ \\ c^2_+ \\ c^3_+ \end{bmatrix} =
+%> \begin{bmatrix} h_+ \\ uH_+ \\ vH_+ \end{bmatrix}@f$
+%> the limits of @f$\mathbf{c}@f$ from each side of an edge of the grid.
+%> The harmonic average as defined in @ref ROE1985 is
+%> @f$\hat{\mathbf{c}} = \frac{h_-^{\frac{1}{2}} \mathbf{c}_- + h_+^{\frac{1}{2}} \mathbf{c}_+}{h_-^{\frac{1}{2}} + h_+^{\frac{1}{2}}}.@f$
+%> 
+%> To obtain harmonic averages  of the velocities one has to compute
+%> @f$\frac{h_-^{\frac{1}{2}} \frac{\mathbf{c}^{2,3}_-}{h_-} + h_+^{\frac{1}{2}} \frac{\mathbf{c}^{2,3}_+}{h_+}}{h_-^{\frac{1}{2}} + h_+^{\frac{1}{2}}} = 
+%> \frac{h_-^{\frac{-1}{2}} \mathbf{c}^{2,3}_- + h_+^{\frac{-1}{2}} \mathbf{c}^{2,3}_+}{h_-^{\frac{1}{2}} + h_+^{\frac{1}{2}}} =
+%> \frac{\frac{ h_+^{\frac{1}{2}} \mathbf{c}^{2,3}_- + h_-^{\frac{1}{2}} \mathbf{c}^{2,3}_+ }{ h_-^{\frac{1}{2}} h_+^{\frac{1}{2}} } }{h_-^{\frac{1}{2}} + h_+^{\frac{1}{2}}} =
+%> \frac{h_+^{\frac{1}{2}} \mathbf{c}^{2,3}_- + h_-^{\frac{1}{2}} \mathbf{c}^{2,3}_+ }{h_- h_+^{\frac{1}{2}} + h_-^{\frac{1}{2}}h_+}.@f$
+%>
 %> There are different types of averages available:
-%> full-harmonic uses the Roe-Pike approach on both the normal component of the
-%> velocity and the root of the graviational constant times the height.
-%> semi-harmonic uses this approach on the normal component of the
-%> velocity and takes the mean of the height for the rest.
-%> mean uses mean values everywhere.
-%> This routine makes use of the model formulation for open sea boundary edges
-%> where momenta limits are equal.
+%> full-harmonic uses the Roe-Pike approach to compute averaged velocities and 
+%> the height average.
+%> semi-harmonic uses this approach to compute averaged velocities and takes the
+%> mean of the height for the rest.
+%> mean uses mean values for the velocities and height.
 %>
 %> @param cQ0E0Tint      The values of each unknown of the system evaluated in
 %>                       each quadrature point of each local edge of a 
-%>                       particular local index. @f${3 \times 1}@f$
+%>                       particular local index. @f$[3 \times 1 \text{ cell}]@f$
 %> @param cQ0E0Text      The values of the boundary conditions for the 
 %>                       free surface elevation and the momenta in
 %>                       each quadrature point of each local edge of a 
-%>                       particular local index. @f${3 \times 1}@f$
+%>                       particular local index. @f$[3 \times 1 \text{ cell}]@f$
 %> @param hQ0E0Tint      The values of the height evaluated in
 %>                       each quadrature point of each local edge of a 
-%>                       particular local index. @f$[K*numQuad1D \times 1]@f$
+%>                       particular local index. @f$[KR \times 1]@f$ (R is the 
+%>                       number of quadrature points and weights.)
 %> @param hQ0E0Text      The values of the height as prescribed by the 
 %>                       difference of the boundary condition for the free 
 %>                       surface elevation and the bathymetry.
-%>                       @f$[K*numQuad1D \times 1]@f$
+%>                        @f$[KR \times 1]@f$
 %> @param markQ0E0Tbdr   <code>logical</code> arrays that mark each triangles
 %>                       (boundary) edges of a particular local index on which 
 %>                       each quadrature point should be incorporated. 
-%>                       @f$[K*numQuad1D \times 1]@f$
+%>                        @f$[KR \times 1]@f$
 %> @param averagingType  Type of avaraging as described above.
 %>
 %> @retval cRoePikeQ0E0T Cell containing the values of the avarages of the 
 %>                       height and both velocity components for each quadrature
 %>                       point of the edges with the same local index as the 
-%>                       input parameters. @f${3 \times 1}@f$
+%>                       input parameters. @f$[3 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
