@@ -54,8 +54,10 @@
 %> with @f$\hat{\mathsf{H}} \in \mathbb{R}^{N \times R \times 2}@f$ defined as
 %> @f[
 %>  [\hat{\mathsf{H}}]_{i,r,m} = \partial_{\hat{x}^m} 
-%>    \hat{\varphi}_i (\hat{q_r}) \hat(w_r)\,.
+%>    \hat{\varphi}_i (\hat{q}^r) \hat{w}^r\,.
 %> @f]
+%> where \hat{q}^r, \hat{w}^r are the 
+%> quadrature points and weights of the reference element.
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
