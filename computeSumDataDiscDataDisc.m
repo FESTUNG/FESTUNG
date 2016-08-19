@@ -11,7 +11,7 @@
 %>        order.
 %>
 %> This routine prolongs both data sets to the be of the same order and computes
-%> thier sum.
+%> their sum.
 %>
 %> @param dataDisc1   A representation of the discrete function, e.g., as 
 %>                    computed by <code>projectFuncCont2DataDisc()</code>

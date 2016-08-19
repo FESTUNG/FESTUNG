@@ -1,38 +1,39 @@
-% Assembles nine matrices containing evaluations of one basis function in 
-% quadrature points for each of the three local edges of each element as well as
-% each combination of local edge indices of neighbouring elements multiplied
-% with the corresponding quadrature weight.
+% Assembles nine matrices containing evaluations of one basis function 
+% in quadrature points multiplied with the corresponding quadrature 
+% weight for each of the three local edges of each element which has a 
+% neighbouring element to the local edge of the appropriate edge index.
 
 %===============================================================================
 %> @file assembleMatEdgePhiPerQuad.m
 %>
 %> @brief Assembles nine matrices containing evaluations of one basis function 
-%>        in quadrature points for each of the three local edges of each element
-%>        as well as each combination of local edge indices of neighbouring 
-%>        elements multiplied with the corresponding quadrature weight.
+%>        in quadrature points multiplied with the corresponding quadrature 
+%>        weight for each of the three local edges of each element which has a 
+%>        neighbouring element to the local edge of the appropriate edge index.
 %===============================================================================
 %>
-%> @brief Assembles nine matrices containing evaluations of one basis function 
-%>        in quadrature points for each of the three local edges of each element
-%>        as well as each combination of local edge indices of neighbouring 
-%>        elements multiplied with the corresponding quadrature weight.
+%> @brief Assembles matrices @f$\mathsf{{Q}}^{n^-,n^+},
+%>        n^-,n^+\in\{1,2,3\}@f$ containing evaluations of one basis function 
+%>        in quadrature points multiplied with the corresponding quadrature 
+%>        weight for each of the three local edges of each element which has a 
+%>        neighbouring element to the local edge of the appropriate edge index.
 %>
-%> The matrix @f$\mathsf{{Q}}^m_{n^-n^+} \in \mathbb{R}^{KN\times KR}@f$ (R is the 
+%> The matrix @f$\mathsf{{Q}}^{n^-,n^+} \in \mathbb{R}^{KN\times KR}@f$ (R is the 
 %> number of quadrature points and weights.) is block diagonal and defined as 
 %> @f[
-%> [\mathsf{{Q}}^m_{n^-n^+}]_{(k-1)N+i,(k-1)R+r} = \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_{\Omega}}
-%> \varphi_{ki}(q^r_{kn}) w^r_{kn} \,.
+%> [\mathsf{{Q}}^{n^-n^+}]_{(k^--1)N+i,(k^--1)R+r} = \frac{1}{2} \left( \sum_{k^+=1}^K \delta_{E_{k^-n^-} = E_{k^+n^+}} \right)
+%> \varphi_{k^-i}(q^r_{k^-n^-}) w^r_{k^-n^-} \,.
 %> @f]
-%> with q^r_{kn}, w^r_{kn} the quadrature points and weights of edge n of element k.
+%> with @f$q^r_{k^-n^-}, w^r_{k^-n^-}@f$ the quadrature points and weights of edge @f$n^-@f$ of element @f$k^-@f$.
 %>
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathsf{{Q}}_{n^-n^+} =
-%>   \\begin{bmatrix}
-%>     sum_{k=1}^K 0&\delta_{E_{1n^-} = E_{kn^+}} \\
+%> \mathsf{{Q}}^{n^-n^+} = \frac{1}{2}
+%>   \begin{bmatrix}
+%>     \sum_{k^+=1}^K \delta_{E_{1n^-} = E_{k^+n^+}} \\
 %>     \vdots \\
-%>     sum_{k=1}^K 0&\delta_{E_{Kn^-} = E_{kn^+}}
+%>     \sum_{k^+=1}^K \delta_{E_{Kn^-} = E_{k^+n^+}}
 %>   \end{bmatrix} \circ \begin{bmatrix}
 %>     | E_{1n} | &   & \\
 %>     & ~\ddots~ & \\
@@ -40,7 +41,7 @@
 %>   \end{bmatrix} 
 %>  \otimes [\hat{\mathsf{{S}}}]_{:,:,n}\;,
 %> @f]
-%> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{N}}@f$ denotes the Kronecker 
+%> where @f$\delta_{E_{k^-n^-} = E_{k^+n^+}}@f$ denotes the Kronecker 
 %> delta, @f$\circ@f$ denotes the Hadamard product, and @f$\otimes@f$ denotes 
 %> the Kronecker product.
 %>
@@ -52,8 +53,8 @@
 %>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(\hat{q}^r) \hat{w}^r\,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
-%> <code>gammaMap()</code> and \hat{q}^r, \hat{w}^r are the 
-%> quadrature points and weights of edge @f$n@f$ of the reference element.
+%> <code>gammaMap()</code> and @f$\hat{q}^r, \hat{w}^r@f$ are the 
+%> quadrature points and weights of the interval @f$[0,1]@f$.
 %>
 %> @param g           The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
@@ -84,7 +85,7 @@
 %> You should have received a copy of the GNU General Public License
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
-%
+%>
 function ret = assembleMatEdgePhiPerQuad(g, refEdgePhiIntPerQuad)
 K = g.numT;
 ret = cell(3,3);

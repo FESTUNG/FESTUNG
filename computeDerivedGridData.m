@@ -1,7 +1,7 @@
 % Computes various additional fields needed throughout the Shallow-Water
 % problem presented in ... . These fields only contain
 % information based on the underlying grid and are therefore constant in
-% time but used in every step. They are saved as part of the grid.
+% time but used in every step. They are stored as part of the grid.
 
 %===============================================================================
 %> @file computeDerivedGridData.m
@@ -9,16 +9,20 @@
 %> @brief Computes various additional fields needed throughout the Shallow-Water
 %>				problem presented in ... . These fields only contain
 %>				information based on the underlying grid and are therefore constant in
-%>				time but used in every step. They are saved as part of the grid.
+%>				time but used in every step. They are stored as part of the grid.
 %===============================================================================
 %>
 %> @brief Computes various additional fields needed throughout the Shallow-Water
 %>				problem presented in ... . These fields only contain
 %>				information based on the underlying grid and are therefore constant in
-%>				time but used in every step. They are saved as part of the grid.
+%>				time but used in every step. They are stored as part of the grid.
 %>
 %> g.areaE0Tint provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, and <code>markE0Tint</code>.
+%> @f$[3 \times 1 \text{ cell}]@f$
+%>
+%> g.areaE0TbdrL provides the elementwise products of the vectors 
+%> <code>g.areaE0T</code>, and <code>markE0TbdrL</code>.
 %> @f$[3 \times 1 \text{ cell}]@f$
 %>
 %> g.areaE0TbdrRI provides the elementwise products of the vectors 
@@ -37,6 +41,14 @@
 %> <code>g.areaE0T</code>, <code>g.nuE0T</code> and <code>markE0TbdrL</code>.
 %> @f$[3 \times 2 \text{ cell}]@f$
 %>
+%> g.areaNuE0TbdrRA provides the elementwise products of the vectors 
+%> <code>g.areaE0T</code>, <code>g.nuE0T</code> and <code>markE0TbdrRA</code>.
+%> @f$[3 \times 2 \text{ cell}]@f$
+%>
+%> g.areaNuE0TbdrRI provides the elementwise products of the vectors 
+%> <code>g.areaE0T</code>, <code>g.nuE0T</code> and <code>markE0TbdrRI</code>.
+%> @f$[3 \times 2 \text{ cell}]@f$
+%>
 %> g.areaNuE0TbdrOS provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, <code>g.nuE0T</code> and <code>markE0TbdrOS</code>.
 %> @f$[3 \times 2 \text{ cell}]@f$
@@ -47,35 +59,25 @@
 %> @f$[3 \times 3 \text{ cell}]@f$
 %>
 %> g.areaMarkE0TE0T provides the elementwise products of each column of the
-%> matrices <code>g.markE0TE0T</code> with the vectors <code>g.areaE0T</code>.
-%> @f$[3 \times 3 \text{ cell}]@f$
+%> matrices <code>g.markE0TE0T</code> with the vectors that make up the 
+%> three columns of <code>g.areaE0T</code>. @f$[3 \times 3 \text{ cell}]@f$
 %>
 %> g.areaNuMarkE0TE0T provides the elementwise products of each column of the
 %> matrices <code>g.markE0TE0T</code> with the vectors of the elementwise product
-%> of <code>g.areaE0T</code>, and <code>g.nuE0T</code>.
-%> @f$[3 \times 3 \times 2 \text{ cell}]@f$
+%> of the columns of <code>g.areaE0T</code>, and <code>g.nuE0T</code> for each 
+%> normal component. @f$[3 \times 3 \times 2 \text{ cell}]@f$
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0Tint <code>logical</code> arrays that mark each triangles
-%>                    (interior) edges on which the matrix blocks should be
-%>                    assembled @f$[K \times 3]@f$
-%> @param  markE0TbdrL <code>logical</code> arrays that mark each triangles
-%>                    (land boundary) edges on which the vector entries should be
-%>                    assembled @f$[K \times 3]@f$
-%> @param  markE0TbdrOS <code>logical</code> arrays that mark each triangles
-%>                    (open sea boundary) edges on which the vector entries should be
-%>                    assembled @f$[K \times 3]@f$
 %> @retval g          The lists describing the geometric and topological 
-%>                    properties of a triangulation (see 
-%>                    <code>generateGridData()</code>) 
-%>                    @f$[1 \times 1 \text{ struct}]@f$
+%>                    properties of a triangulation enriched with the 
+%>                    precomputed fields.
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2016 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock

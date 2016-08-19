@@ -12,7 +12,7 @@
 %>				reference triangle and multiplies with the according quadrature weight.
 %>
 %> It computes a multidimensional array @f$\hat{\mathsf{R}}^\mathrm{diag} 
-%>    \in \mathbb{R}^\mathrm{diag}^{N\times R\times 3}@f$, which is
+%>    \in \mathbb{R}^{N\times R\times 3}@f$, which is
 %> defined by
 %> @f[
 %> \left[\hat{\mathsf{R}}^\mathrm{diag}\right]_{i,r,n} \;:=\;
