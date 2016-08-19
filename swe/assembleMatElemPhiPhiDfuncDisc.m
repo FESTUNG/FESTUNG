@@ -1,12 +1,12 @@
 % Assembles two matrices, each containing integrals of products of two basis 
 % functions with a (spatial) derivative of a discontinuous coefficient function.
-
+%
 %===============================================================================
 %> @file assembleMatElemPhiPhiDfuncDisc.m
 %>
-%> @brief % Assembles two matrices, each containing integrals of products of 
-%>          two basis functions with a (spatial) derivative of a 
-%>          discontinuous coefficient function.
+%> @brief Assembles two matrices, each containing integrals of products of 
+%>        two basis functions with a (spatial) derivative of a 
+%>        discontinuous coefficient function.
 %===============================================================================
 %>
 %> @brief Assembles matrices @f$\mathsf{G}^m, m \in \{1,2\}@f$
@@ -16,10 +16,10 @@
 %> The matrices @f$\mathsf{G}^m \in \mathbb{R}^{KN\times KN}@f$ are block
 %> diagonal and defined component-wise by
 %> @f[
-%>   [\mathsf{G}^m]_{(k-1)N+i,(k-1)N+j} = \sum_{l=1}^N {zb}_{kl} \int_{T_k} 
+%>   [\mathsf{G}^m]_{(k-1)N+i,(k-1)N+j} = \sum_{l=1}^{N_{z_b}} {zb}_{kl} \int_{T_k} 
 %>     \varphi_{ki}\partial_{x^m}\varphi_{kl}\varphi_{kj}\mathrm{d}\mathbf{x}\,.
 %> @f]
-%> All other entries are zero.
+%> where @f$N_{z_b}@f$ is the number of local degrees of freedom of the space in which @f$z_b@f$ is projected. All other entries are zero.
 %> For the implementation, the element integrals are backtransformed to the
 %> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
 %> mapping @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$
@@ -44,28 +44,28 @@
 %> @f]
 %> This allows to write
 %> @f[
-%>   \int_{T_k} \varphi_{ki} \partial_{x^1} \varphi_{kl} \varphi_{kj} =
+%>   \int_{T_k} \varphi_{ki} \partial_{x^1} \varphi_{kl} \varphi_{kj} \mathrm{d}\mathbf{x} =
 %>   B_k^{22}[\hat{\mathsf{G}}]_{i,j,l,1}-B_k^{21}[\hat{\mathsf{G}}]_{i,j,l,2}
 %>   \text{ and }
-%>   \int_{T_k} \varphi_{ki} \partial_{x^2} \varphi_{kl} \varphi_{kj} =
+%>   \int_{T_k} \varphi_{ki} \partial_{x^2} \varphi_{kl} \varphi_{kj} = \mathrm{d}\mathbf{x} 
 %>   -B_k^{12}[\hat{\mathsf{G}}]_{i,j,l,1}+B_k^{11}[\hat{\mathsf{G}}]_{i,j,l,2}\,,
 %> @f]
 %> with @f$\hat{\mathsf{G}} \in \mathbb{R}^{N\times N\times N\times 2}@f$
 %> given as 
 %> @f[
 %>  [\hat{\mathsf{G}}]_{i,j,l,m} = \int_{\hat{T}} 
-%>    \hat{\varphi}_i \partial_{\hat{x}^m}\hat{\varphi}_l \hat{\varphi}_j \,.
+%>    \hat{\varphi}_i \partial_{\hat{x}^m}\hat{\varphi}_l \hat{\varphi}_j \mathrm{d}\mathbf{\hat{x}}\,.
 %> @f]
 %> Now we can build local matrices
 %> @f$\mathsf{G}_{T_k}^m \in \mathbb{R}^{N\times N}@f$ as
 %> @f[
-%>  \mathsf{G}_{T_k}^1 = \sum_{l=1}^{N_\mathrm{data}} {zb}_{kl} \left(
+%>  \mathsf{G}_{T_k}^1 = \sum_{l=1}^{N_{z_b}} {zb}_{kl} \left(
 %>    B_k^{22}[\hat{\mathsf{G}}]_{:,:,l,1} 
 %>    - B_k^{21}[\hat{\mathsf{G}}]_{:,:,l,2} \right)
 %> @f]
 %> and
 %> @f[
-%>  \mathsf{G}_{T_k}^2 = \sum_{l=1}^{N_\mathrm{data}} {zb}_{kl} \left(
+%>  \mathsf{G}_{T_k}^2 = \sum_{l=1}^{N_{z_b}} {zb}_{kl} \left(
 %>    -B_k^{12}[\hat{\mathsf{G}}]_{:,:,l,1} 
 %>    + B_k^{11}[\hat{\mathsf{G}}]_{:,:,l,2} \right) \,.
 %> @f]
@@ -79,10 +79,10 @@
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param refElemDphiPhiPhi Local matrix @f$\hat{\mathsf{G}}@f$ as provided
 %>                    by <code>integrateRefElemDphiPhiPhi()</code>.
-%>                    @f$[N \times N \times N_\mathrm{data} \times 2]@f$
+%>                    @f$[N \times N \times {N_{z_b}} \times 2]@f$
 %> @param dataDisc    A representation of the discrete function ,e.g., as 
 %>                    computed by <code>projectFuncCont2DataDisc()</code>
-%>                    @f$[K \times N_\mathrm{data}]@f$
+%>                    @f$[K \times {N_{z_b}}]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
@@ -104,7 +104,7 @@
 %> You should have received a copy of the GNU General Public License
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
-%
+%>
 function ret = assembleMatElemPhiPhiDfuncDisc(g, refElemPhiPhiDphi, dataDisc)
 [K, dataN] = size(dataDisc);
 N = size(refElemPhiPhiDphi,1);
