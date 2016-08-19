@@ -64,7 +64,6 @@
 function cEval = evaluateFuncFromVertexValues(g, vertexValues, X1, X2)
 
 lenX = size(X1,2);
-vertexValues = vertexValues(:);
 FinvX1 = 0.5 ./ (g.areaT * ones(1,lenX)) .* ( bsxfun(@times, g.B(:,2,2), X1) - bsxfun(@times, g.B(:,1,2), X2) - (g.B(:,2,2).*g.coordV0T(:,1,1) - g.B(:,1,2).*g.coordV0T(:,1,2) ) * ones(1,lenX) );
 FinvX2 = 0.5 ./ (g.areaT * ones(1,lenX)) .* (-bsxfun(@times, g.B(:,2,1), X1) + bsxfun(@times, g.B(:,1,1), X2) + (g.B(:,2,1).*g.coordV0T(:,1,1) - g.B(:,1,1).*g.coordV0T(:,1,2) ) * ones(1,lenX) );
 cEval  = bsxfun(@times, vertexValues(g.V0T(:,1)), 1 - FinvX1 - FinvX2) ...
