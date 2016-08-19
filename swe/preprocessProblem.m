@@ -373,8 +373,8 @@ end % switch
 % Boundary edge matrices
 globQOS = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrOS);
 globQRA = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrRA);
-globOL = execin('swe/assembleMatEdgePhiIntPhiIntFuncDiscNu',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrL);
-globORA = execin('swe/assembleMatEdgePhiIntPhiIntFuncDiscNu',pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrRA);
+globOL = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrL);
+globORA = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrRA);
 
 % Derived system matrices
 pd.sysW = blkdiag(pd.globM, pd.globM, pd.globM);

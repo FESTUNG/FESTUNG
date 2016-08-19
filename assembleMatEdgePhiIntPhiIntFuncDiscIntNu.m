@@ -20,18 +20,18 @@
 %> @f[
 %> [\mathsf{{R}}^m_\mathrm{D}]_{(k-1)N+i,(k-1)N+j} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
-%>  \nu_{kn}^m \sum_{l=1}^N D_{kl}(t) 
+%>  \nu_{kn}^m \sum_{l=1}^{N_D} D_{kl}(t) 
 %>  \int_{E_kn} \varphi_{ki}\varphi_{kl}\varphi_{kj} \,,
 %> @f]
 %> with @f$\nu_{kn}@f$ the @f$m@f$-th component (@f$m\in\{1,2\}@f$) of the unit
 %> normal and @f$D_{kl}(t)@f$ the coefficients of the discrete representation
 %> of a function 
-%> @f$ d_h(t, \mathbf{x}) = \sum_{l=1}^N D_{kl}(t) \varphi_{kl}(\mathbf{x}) @f$
-%> on a triangle @f$T_k@f$.
+%> @f$ d_h(t, \mathbf{x}) = \sum_{l=1}^{N_D} D_{kl}(t) \varphi_{kl}(\mathbf{x}) @f$
+%> on a triangle @f$T_k@f$, where @f$N_D@f$ is the number of local degrees of freedom of the space in which @f$d_h(t,.)@f$ is projected.
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathsf{{R}}^m_\mathrm{D} = \sum_{n=1}^3 \sum_{l=1}^N
+%> \mathsf{{R}}^m_\mathrm{D} = \sum_{n=1}^3 \sum_{l=1}^{N_D}
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{D}} &   & \\
 %>     & ~\ddots~ & \\
@@ -48,7 +48,7 @@
 %> the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathsf{{R}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times N\times3}@f$
+%> @f$\hat{\mathsf{{R}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times N_D\times3}@f$
 %> are given by
 %> @f[
 %> [\hat{\mathsf{{R}}}^\mathrm{diag}]_{i,j,l,n} =
@@ -106,12 +106,13 @@
 %
 function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(g, markE0Tbdr, refEdgePhiIntPhiIntPhiInt, dataDisc, areaNuE0Tbdr)
 % Extract dimensions
-[K, N] = size(dataDisc);  
+dataN = size(dataDisc, 2);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Check function arguments that are directly used
-validateattributes(dataDisc, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc');
-validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
-validateattributes(refEdgePhiIntPhiIntPhiInt, {'numeric'}, {'size', [N N N 3]}, mfilename, 'refEdgePhiIntPhiIntPhiInt');
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc');
+validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
+validateattributes(refEdgePhiIntPhiIntPhiInt, {'numeric'}, {'size', [N N dataN 3]}, mfilename, 'refEdgePhiIntPhiIntPhiInt');
 
 if nargin > 4
   ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu_withAreaNuE0Tbdr(refEdgePhiIntPhiIntPhiInt, dataDisc, areaNuE0Tbdr);
@@ -128,14 +129,15 @@ end % function
 %
 function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu_withAreaNuE0Tbdr(refEdgePhiIntPhiIntPhiInt, dataDisc, areaNuE0Tbdr)
 % Extract dimensions
-[K, N] = size(dataDisc);  
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Assemble matrices
 ret = cell(2,1); 
 ret{1} = sparse(K*N, K*N); 
 ret{2} = sparse(K*N, K*N);
 for n = 1 : 3
-  for l = 1 : N
+  for l = 1 : dataN
     ret{1} = ret{1} + kron(spdiags(areaNuE0Tbdr{n,1}.*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
     ret{2} = ret{2} + kron(spdiags(areaNuE0Tbdr{n,2}.*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
   end % for
@@ -149,14 +151,15 @@ end % function
 %
 function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu_withAreaNuE0T(g, markE0Tbdr, refEdgePhiIntPhiIntPhiInt, dataDisc)
 % Extract dimensions
-[K, N] = size(dataDisc);  
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Assemble matrices
 ret = cell(2,1); 
 ret{1} = sparse(K*N, K*N); 
 ret{2} = sparse(K*N, K*N);
 for n = 1 : 3
-  for l = 1 : N
+  for l = 1 : dataN
     ret{1} = ret{1} + kron(spdiags(markE0Tbdr(:,n).*g.areaNuE0T{n,1}.*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
     ret{2} = ret{2} + kron(spdiags(markE0Tbdr(:,n).*g.areaNuE0T{n,2}.*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
   end % for
@@ -170,7 +173,8 @@ end % function
 %
 function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntNu_noAreaNuE0T(g, markE0Tbdr, refEdgePhiIntPhiIntPhiInt, dataDisc)
 % Extract dimensions
-[K, N] = size(dataDisc);  
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Assemble matrices
 ret = cell(2,1); 
@@ -178,7 +182,7 @@ ret{1} = sparse(K*N, K*N);
 ret{2} = sparse(K*N, K*N);
 for n = 1 : 3
   RDkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
-  for l = 1 : N
+  for l = 1 : dataN
     ret{1} = ret{1} + kron(spdiags(RDkn.*g.nuE0T(:,n,1).*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
     ret{2} = ret{2} + kron(spdiags(RDkn.*g.nuE0T(:,n,2).*dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,n));
   end % for
