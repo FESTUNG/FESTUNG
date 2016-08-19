@@ -14,21 +14,21 @@
 %>        in quadrature points for each of the three local edges of each element
 %>        multiplied with the corresponding quadrature weight.
 %>
-%> The matrix @f$\mathsf{{Q}_n \in \mathbb{R}^{KN\times KR}@f$ (R is the 
+%> The matrix @f$\mathsf{{Q}}^n_\mathrm{L} \in \mathbb{R}^{KN\times KR}@f$ (R is the 
 %> number of quadrature points and weights.) is block diagonal and defined as 
 %> @f[
-%> [\mathsf{{Q}}_n]_{(k-1)N+i,(k-1)R+j} = \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_N}
+%> [\mathsf{{Q}}^n_\mathrm{L}]_{(k-1)N+i,(k-1)R+r} = \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_\mathrm{L}}
 %>  \varphi_{ki}(q^r_{kn}) w^r_{kn} \,.
 %> @f]
-%> with q^r_{kn}, w^r_{kn} the quadrature points and weights of edge n of element k.
+%> with @f$q^r_{kn},~w^r_{kn}@f$ the quadrature points and weights of edge @f$n@f$ of element @f$k@f$.
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathsf{{Q}}^m_n = 
+%> \mathsf{{Q}}^n_\mathrm{L} = 
 %>   \begin{bmatrix}
-%>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{N}} &   & \\
+%>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{L}} &   & \\
 %>     & ~\ddots~ & \\
-%>     &          & \delta_{E_{Kn}\in\mathcal{E}_\mathrm{N}}
+%>     &          & \delta_{E_{Kn}\in\mathcal{E}_\mathrm{L}}
 %>   \end{bmatrix} \circ \begin{bmatrix}
 %>     | E_{1n} | &   & \\
 %>     & ~\ddots~ & \\
@@ -36,22 +36,23 @@
 %>   \end{bmatrix} 
 %>  \otimes [\hat{\mathsf{{S}}}]_{:,:,n}\;,
 %> @f]
-%> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{N}}@f$ denotes the Kronecker 
+%> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{L}}@f$ denotes the Kronecker 
 %> delta, @f$\circ@f$ denotes the Hadamard product, and @f$\otimes@f$ denotes 
 %> the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathsf{{S}}}\in\mathbb{Q}^{N\times R \times 3}@f$
+%> @f$\hat{\mathsf{{S}}}\in\mathbb{R}^{N\times R \times 3}@f$
 %> are given by
 %> @f[
 %> [\hat{\mathsf{{S}}}]_{i,r,n} =
-%>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(q_r) w_r\,,
+%>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(\hat{q}^r) \hat{w}^r\,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
 %> <code>gammaMap()</code>.
 %>
 %> It is essentially the same as the diagonal part of
-%> <code>assembleMatEdgePhiNuPerQuad()</code>.
+%> <code>assembleMatEdgePhiNuPerQuad()</code> and \hat{q}^r, \hat{w}^r are the 
+%> quadrature points and weights of edge @f$n@f$ of the reference element.
 %>
 %> @param g           The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
