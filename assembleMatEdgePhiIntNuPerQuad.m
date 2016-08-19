@@ -16,22 +16,22 @@
 %>        multiplied with a component of the edge normal and the corresponding 
 %>        quadrature weight.
 %>
-%> The matrix @f$\mathsf{{Q}^m_n \in \mathbb{R}^{KN\times KR}@f$ (R is the 
+%> The matrix @f$\mathsf{{Q}}^{m,n}_\mathrm{L} \in \mathbb{R}^{KN\times KR}@f$ (R is the 
 %> number of quadrature points and weights.) is block diagonal and defined as 
 %> @f[
-%> [\mathsf{{Q}}^m_n]_{(k-1)N+i,(k-1)R+j} = \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_N}
-%>  \nu_{kn}^m \varphi_{ki}(q^r_{kn}) w^r_{kn} \,.
+%> [\mathsf{{Q}}^{m,n}_\mathrm{L}]_{(k-1)N+i,(k-1)R+r} = \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_L}
+%>  \nu_{kn}^m \varphi_{ki}(q_{kn}^r) w_{kn}^r \,.
 %> @f]
 %> with @f$\nu_{kn}^m@f$ the @f$m@f$-th component (@f$m\in\{1,2\}@f$) of the edge
-%> normal and q^r_{kn}, w^r_{kn} the quadrature points and weights of edge n of element k.
+%> normal and @f$q^r_{kn},~w^r_{kn}@f$ the quadrature points and weights of edge @f$n@f$ of element @f$k@f$.
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathsf{{Q}}^m_n = 
+%> \mathsf{{Q}}^{m,n}_\mathrm{L} = 
 %>   \begin{bmatrix}
-%>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{N}} &   & \\
+%>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{L}} &   & \\
 %>     & ~\ddots~ & \\
-%>     &          & \delta_{E_{Kn}\in\mathcal{E}_\mathrm{N}}
+%>     &          & \delta_{E_{Kn}\in\mathcal{E}_\mathrm{L}}
 %>   \end{bmatrix} \circ \begin{bmatrix}
 %>     \nu^m_{1n} | E_{1n} | &   & \\
 %>     & ~\ddots~ & \\
@@ -39,39 +39,40 @@
 %>   \end{bmatrix} 
 %>  \otimes [\hat{\mathsf{{S}}}]_{:,:,n}\;,
 %> @f]
-%> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{N}}@f$ denotes the Kronecker 
+%> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{L}}@f$ denotes the Kronecker 
 %> delta, @f$\circ@f$ denotes the Hadamard product, and @f$\otimes@f$ denotes 
 %> the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathsf{{S}}}\in\mathbb{Q}^{N\times R \times 3}@f$
+%> @f$\hat{\mathsf{{S}}}\in\mathbb{R}^{N\times R \times 3}@f$
 %> are given by
 %> @f[
 %> [\hat{\mathsf{{S}}}]_{i,r,n} =
-%>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(q_r) w_r\,,
+%>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(\hat{q}^r) \hat{w}^r \,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
-%> <code>gammaMap()</code>.
+%> <code>gammaMap()</code> and \hat{q}^r, \hat{w}^r are the quadrature points 
+%> and weights of edge @f$n@f$ of the reference element.
 %>
 %> It is essentially the same as the diagonal part of
 %> <code>assembleMatEdgePhiNuPerQuad()</code>.
 %>
-%> @param g           The lists describing the geometric and topological 
-%>                    properties of a triangulation (see 
-%>                    <code>generateGridData()</code>) 
-%>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param markE0Tbdr  <code>logical</code> arrays that mark each triangles
-%>                    (boundary) edges on which the matrix blocks should be
-%>                    assembled @f$[K \times 3]@f$
+%> @param g                     The lists describing the geometric and topological 
+%>                              properties of a triangulation (see 
+%>                              <code>generateGridData()</code>) 
+%>                              @f$[1 \times 1 \text{ struct}]@f$
+%> @param markE0Tbdr            <code>logical</code> arrays that mark each triangles
+%>                              (boundary) edges on which the matrix blocks should be
+%>                              assembled @f$[K \times 3]@f$
 %> @param refEdgePhiIntPerQuad  Local matrix 
-%>                    @f$\hat{\mathsf{S}}@f$ as provided
-%>                    by <code>integrateRefEdgePhiIntPerQuad()</code>.
-%>                    @f$[N \times R \times  3]@f$
-%> @param areaNuE0Tbdr (optional) argument to provide precomputed values
-%>                    for the products of <code>markE0Tbdr</code>,
-%>                    <code>g.areaE0T</code>, and <code>g.nuE0T</code>
-%>                    @f$[3 \times 2 \text{ cell}]@f$
-%> @retval ret        The assembled matrices @f$[3 \times 2 \text{ cell}]@f$
+%>                              @f$\hat{\mathsf{S}}@f$ as provided
+%>                              by <code>integrateRefEdgePhiIntPerQuad()</code>.
+%>                              @f$[N \times R \times  3]@f$
+%> @param areaNuE0Tbdr          (optional) argument to provide precomputed values
+%>                              for the products of <code>markE0Tbdr</code>,
+%>                              <code>g.areaE0T</code>, and <code>g.nuE0T</code>
+%>                              @f$[3 \times 2 \text{ cell}]@f$
+%> @retval ret                  The assembled matrices @f$[3 \times 2 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>

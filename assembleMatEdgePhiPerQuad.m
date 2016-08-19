@@ -17,7 +17,7 @@
 %>        as well as each combination of local edge indices of neighbouring 
 %>        elements multiplied with the corresponding quadrature weight.
 %>
-%> The matrix @f$\mathsf{{Q}^m_{n^-n^+} \in \mathbb{R}^{KN\times KR}@f$ (R is the 
+%> The matrix @f$\mathsf{{Q}}^m_{n^-n^+} \in \mathbb{R}^{KN\times KR}@f$ (R is the 
 %> number of quadrature points and weights.) is block diagonal and defined as 
 %> @f[
 %> [\mathsf{{Q}}^m_{n^-n^+}]_{(k-1)N+i,(k-1)R+r} = \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_{\Omega}}
@@ -49,10 +49,11 @@
 %> are given by
 %> @f[
 %> [\hat{\mathsf{{S}}}]_{i,r,n} =
-%>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(q_r) w_r\,,
+%>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(\hat{q}^r) \hat{w}^r\,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
-%> <code>gammaMap()</code>. 
+%> <code>gammaMap()</code> and \hat{q}^r, \hat{w}^r are the 
+%> quadrature points and weights of edge @f$n@f$ of the reference element.
 %>
 %> @param g           The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
