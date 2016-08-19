@@ -49,9 +49,9 @@ switch problemData.configSource
     problemData = configureRotation(problemData);
   case 'analytical'
     problemData.isSolutionAvailable = true;
-    problemData = setdefault(problemData, 'hmax'      , 10000);  % maximum edge length of triangle
+    problemData = setdefault(problemData, 'hmax'      , 200);  % maximum edge length of triangle
     problemData = setdefault(problemData, 'numSteps'  , 200);  % number of time steps
-    problemData = setdefault(problemData, 'tEnd'      , 1000);  % end time
+    problemData = setdefault(problemData, 'tEnd'      , 500);  % end time
     problemData = configureAnalyticalTest(problemData);
   otherwise
     error('Invalid config source.')
