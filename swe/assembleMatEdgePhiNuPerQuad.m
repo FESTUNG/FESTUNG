@@ -19,14 +19,14 @@
 %>        elements multiplied with a component of the edge normal and the 
 %>        corresponding quadrature weight.
 %>
-%> The matrix @f$\mathsf{{Q}^m_n \in \mathbb{R}^{KN\times KR}@f$ (R is the 
+%> The matrix @f$\mathsf{{Q}}^m_n \in \mathbb{R}^{KN\times KR}@f$ (R is the 
 %> number of quadrature points and weights.) is block diagonal and defined as 
 %> @f[
 %> [\mathsf{{Q}}^m_n]_{(k-1)N+i,(k-1)R+r} = \frac{1}{2} \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_N}
 %>  \nu_{kn}^m \varphi_{ki}(q^r_{kn}) w^r_{kn} \,.
 %> @f]
 %>
-%> and the off-diagonal blocks in @f$\mathsf{{Q}^m_{n^-n^+} \in \mathbb{R}^{KN\times KR}@f$ are defined as
+%> and the off-diagonal blocks in @f$\mathsf{{Q}}^m_{n^-n^+} \in \mathbb{R}^{KN\times KR}@f$ are defined as
 %> @f[
 %> [\mathsf{{Q}}^m_{n^-n^+}]_{(k^--1)N+i,(k^+-1)R+r} =
 %>   \frac{1}{2} \nu^m_{k^-n^-} 
@@ -76,10 +76,11 @@
 %> are given by
 %> @f[
 %> [\hat{\mathsf{{S}}}]_{i,r,n} =
-%>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(q_r) w_r\,,
+%>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(\hat{q}^r) \hat{w}^r\,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
-%> <code>gammaMap()</code>. 
+%> <code>gammaMap()</code> and \hat{q}^r, \hat{w}^r are the 
+%> quadrature points and weights of edge @f$n@f$ of the reference element.
 %>
 %> @param g           The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
