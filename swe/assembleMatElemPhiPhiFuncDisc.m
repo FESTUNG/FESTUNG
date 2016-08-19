@@ -14,10 +14,10 @@
 %> The matrix @f$\mathsf{D} \in \mathbb{R}^{KN\times KN}@f$ is block
 %> diagonal and defined component-wise by
 %> @f[
-%>   [\mathsf{D}]_{(k-1)N+i,(k-1)N+j} = \sum_{l=1}^{N_\mathrm{data}} {fc}_{kl}
+%>   [\mathsf{D}]_{(k-1)N+i,(k-1)N+j} = \sum_{l=1}^{N_{f_c}} {f_c}_{kl}
 %>      \int_{T_k} \varphi_{ki}\varphi_{kl}\varphi_{kj}\mathrm{d}\mathbf{x}\,.
 %> @f]
-%> All other entries are zero.
+%> where @f$N_{f_c}@f$ is the number of local degrees of freedom of the space in which @f$f_c@f$ is projected. All other entries are zero.
 %> For the implementation, the element integrals are backtransformed to the
 %> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
 %> mapping @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$
@@ -37,7 +37,7 @@
 %>      \varphi_{ki} \varphi_{kj} \varphi_{kl} \mathrm{d} \mathbf{x} \,,
 %> @f]
 %> and rewrite the global matrix as 
-%> @f$\mathsf{D} = \mathrm{diag}(\mathsf{D}_{T_1}, \ldots, \mathsf{D}_{T_K})@f$.
+%> @f$\mathsf{D} = \sum_{l=1}^{N_{f_c}} \mathrm{diag}({f_c}_{1l}[\mathsf{D}_{T_1}]_{:,:,l}, \ldots, {f_c}_{1l} [\mathsf{D}_{T_K}]_{:,:,l})@f$.
 %> In this implementation, the element integrals are backtransformed to the
 %> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
 %> mapping @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$
@@ -53,13 +53,8 @@
 %> This allows to rewrite the local matrices as 
 %> @f$\mathsf{D}_{T_k} = 2|T_k| \hat{\mathsf{D}}@f$ with
 %> @f[
-%>  \hat{\mathsf{D}} = \begin{bmatrix} \sum_{l=1}^{N_\mathrm{data}} 
-%>    \hat{\varphi}_l \hat{\varphi}_1 \hat{\varphi}_1 & \dots & 
-%>    \hat{\varphi}_l \hat{\varphi}_1 \hat{\varphi}_N \\
-%>    \vdots & \ddots & \vdots \\
-%>    \hat{\varphi}_l \hat{\varphi}_N \hat{\varphi}_1 & 
-%>    \dots & \hat{\varphi}_l \hat{\varphi}_N \hat{\varphi}_N
-%>  \end{bmatrix} \in \mathbb{R}^{N\times N}\,.
+%>  [\hat{\mathsf{D}}]_{i,j,l} = \int_{\hat{T}} 
+%>    \hat{\varphi}_i \hat{\varphi}_j \hat{\varphi}_l \mathrm{d}\mathbf{\hat{x}}\,.
 %> @f]
 %>
 %> @param  g          The lists describing the geometric and topological 
@@ -68,15 +63,15 @@
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param refElemPhiPhiPhi Local matrix @f$\hat{\mathsf{D}}@f$ as provided
 %>                    by <code>integrateRefElemPhiPhiPhi()</code>.
-%>                    @f$[N \times N \times {N_\mathrm{data}}]@f$
+%>                    @f$[N \times N \times N_{f_c}]@f$
 %> @param dataDisc    A representation of the discrete function ,e.g., as 
 %>                    computed by <code>projectFuncCont2DataDisc()</code>
-%>                    @f$[K \times {N_\mathrm{data}}]@f$
+%>                    @f$[K \times N_{f_c}]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2016 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock

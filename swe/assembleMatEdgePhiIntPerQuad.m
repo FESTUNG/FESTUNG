@@ -10,7 +10,8 @@
 %>        multiplied with the corresponding quadrature weight.
 %===============================================================================
 %>
-%> @brief Assembles three matrices containing evaluations of one basis function 
+%> @brief Assembles matrices @f$\mathsf{{Q}}^{n}_\mathrm{L},
+%>        n\in\{1,2,3\}@f$ containing evaluations of one basis function 
 %>        in quadrature points for each of the three local edges of each element
 %>        multiplied with the corresponding quadrature weight.
 %>
@@ -52,7 +53,7 @@
 %>
 %> It is essentially the same as the diagonal part of
 %> <code>assembleMatEdgePhiNuPerQuad()</code> and \hat{q}^r, \hat{w}^r are the 
-%> quadrature points and weights of edge @f$n@f$ of the reference element.
+%> quadrature points and weights of the interval @f$[0,1]@f$.
 %>
 %> @param g           The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 

@@ -179,7 +179,7 @@ pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
 pd.gridSource = 'hierarchical';
 pd.isSpherical = false; 
 pd = setdefault(pd, 'refinement', 0);
-pd = setdefault(pd, 'hmax', 100);
+pd = setdefault(pd, 'hmax', 200);
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation

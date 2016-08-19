@@ -13,36 +13,45 @@
 %>        corresponding quadrature weight.
 %===============================================================================
 %>
-%> @brief Assembles 24 matrices containing evaluations of one basis function in 
-%>        quadrature points for each of the three local edges of each element as
-%>        well as each combination of local edge indices of neighbouring 
-%>        elements multiplied with a component of the edge normal and the 
-%>        corresponding quadrature weight.
+%> @brief Assembles matrices @f$\mathsf{{Q}}^{m,n}, m\in\{1,2\}, 
+%>        n\in\{1,2,3\}@f$ containing evaluations of one basis function in 
+%>        quadrature points for each of the three local edges of each element 
+%>        multiplied with a component of the edge normal and the 
+%>        corresponding quadrature weight
+%>        as well as matrices @f$\mathsf{{Q}}^{m,n^-,n^+}, m\in\{1,2\}, 
+%>        n^-,n^+\in\{1,2,3\}@f$ containing the same values but only 
+%>        corresponding to triangles that share one edge of the appropriate 
+%>        indices.
 %>
-%> The matrix @f$\mathsf{{Q}}^m_n \in \mathbb{R}^{KN\times KR}@f$ (R is the 
+%> The matrix @f$\mathsf{{Q}}^{m,n} \in \mathbb{R}^{KN\times KR}@f$ (R is the 
 %> number of quadrature points and weights.) is block diagonal and defined as 
 %> @f[
-%> [\mathsf{{Q}}^m_n]_{(k-1)N+i,(k-1)R+r} = \frac{1}{2} \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_N}
+%> [\mathsf{{Q}}^{m,n}]_{(k-1)N+i,(k-1)R+r} = \frac{1}{2} \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_{\Omega}}
 %>  \nu_{kn}^m \varphi_{ki}(q^r_{kn}) w^r_{kn} \,.
 %> @f]
-%>
-%> and the off-diagonal blocks in @f$\mathsf{{Q}}^m_{n^-n^+} \in \mathbb{R}^{KN\times KR}@f$ are defined as
+%> where @f$\nu_{kn}^m@f$ the @f$m@f$-th component (@f$m\in\{1,2\}@f$) of the edge
+%> normal and @f$q^r_{kn}, w^r_{kn}@f$ the quadrature points and weights of edge @f$n@f$ of element @f$k@f$.
+%> The matrix @f$\mathsf{{Q}}^{m,n^-,n^+} \in \mathbb{R}^{KN\times KR}@f$ is defined as
 %> @f[
-%> [\mathsf{{Q}}^m_{n^-n^+}]_{(k^--1)N+i,(k^+-1)R+r} =
+%> [\mathsf{{Q}}^{m,n^-,n^+}]_{(k^--1)N+i,(k^+-1)R+r} =
 %>   \frac{1}{2} \nu^m_{k^-n^-} 
 %>   \varphi_{k^-i}(q^r_{k^-n^-}) w^r_{k^-n^-} \,.
 %> @f]
-%> with @f$\nu_{kn}^m@f$ the @f$m@f$-th component (@f$m\in\{1,2\}@f$) of the edge
-%> normal and q^r_{kn}, w^r_{kn} the quadrature points and weights of edge n of element k.
-%>
+%> where @f$\nu_{k^-n^-}^m@f$ the @f$m@f$-th component (@f$m\in\{1,2\}@f$) of the edge
+%> normal and @f$q^r_{k^-n^-}, w^r_{k^-n^-}@f$ the quadrature points and weights of edge @f$n^-@f$ of element @f$k^-@f$.
+%> Entries in off-diagonal blocks are only non-zero for pairs of triangles
+%> @f$T_{k^-}, T_{k^+}@f$ with @f$\partial T_{k^-} \cap T_{k^+} \ne\emptyset@f$.
+%> Note that the local edge index @f$n^-@f$ is given implicitly, since 
+%> @f$\partial T_{k^-} \cap T_{k^+} \ne\emptyset@f$ consist of exactly one
+%> edge @f$E_{k^-n^-} = E_{k^+n^+}@f$.
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathsf{{Q}}^m_n = \frac{1}{2}
+%> \mathsf{{Q}}^{m,n} = \frac{1}{2}
 %>   \begin{bmatrix}
-%>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{N}} &   & \\
+%>     \delta_{E_{1n}\in\mathcal{E}_{\Omega}} &   & \\
 %>     & ~\ddots~ & \\
-%>     &          & \delta_{E_{Kn}\in\mathcal{E}_\mathrm{N}}
+%>     &          & \delta_{E_{Kn}\in\mathcal{E}_{\Omega}}
 %>   \end{bmatrix} \circ \begin{bmatrix}
 %>     \nu^m_{1n} | E_{1n} | &   & \\
 %>     & ~\ddots~ & \\
@@ -52,10 +61,10 @@
 %> @f]
 %> and
 %> @f[
-%> \mathsf{{R}}^{m,\mathrm{offdiag}} = \frac{1}{2} 
+%> \mathsf{{Q}}^{m,n^-,n^+} = \frac{1}{2} 
 %>   \sum_{n^-=1}^3\sum_{n^+=1}^3
 %>   \begin{bmatrix}
-%>     0&\delta_{E_{1n^-} = E_{1n^+}}&\dots&\dots&\delta_{E_{1n^-}=E_{Kn^+}} \\
+%>     0&\delta_{E_{1n^-} = E_{2n^+}}&\dots&\dots&\delta_{E_{1n^-}=E_{Kn^+}} \\
 %>     \delta_{E_{2n^-} = E_{1n^+}}&0&\ddots& &\vdots \\
 %>     \vdots & \ddots & \ddots & \ddots & \vdots \\
 %>     \vdots & & \ddots & 0 & \delta_{E_{(K-1)n^-}=E_{Kn^+}} \\
@@ -65,9 +74,9 @@
 %>     \vdots & & \vdots \\
 %>     \nu_{Kn^-}^m |E_{Kn^-}| & \dots & \nu_{Kn^-}^m |E_{Kn^-}|
 %>   \end{bmatrix} \otimes 
-%> [\hat{\mathsf{{S}}}^\mathrm{offdiag}]_{:,:,n^-}\;,
+%> [\hat{\mathsf{{S}}}]_{:,:,n^-}\;,
 %> @f]
-%> where @f$\delta_{E_{kn}\in\mathcal{E}_\mathrm{N}}@f$ denotes the Kronecker 
+%> where @f$\delta_{E_{kn}\in\mathcal{E}_{\Omega}}@f$ denotes the Kronecker 
 %> delta, @f$\circ@f$ denotes the Hadamard product, and @f$\otimes@f$ denotes 
 %> the Kronecker product.
 %>
@@ -79,8 +88,8 @@
 %>   \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(\hat{q}^r) \hat{w}^r\,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
-%> <code>gammaMap()</code> and \hat{q}^r, \hat{w}^r are the 
-%> quadrature points and weights of edge @f$n@f$ of the reference element.
+%> <code>gammaMap()</code> and @f$\hat{q}^r, \hat{w}^r@f$ are the 
+%> quadrature points and weights of the interval @f$[0,1]@f$.
 %>
 %> @param g           The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 

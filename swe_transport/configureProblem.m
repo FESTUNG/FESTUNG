@@ -29,8 +29,8 @@ switch problemData.configSource
     problemData = setdefault(problemData, 'tEnd', (100/3142)*2*pi);
     problemData = setdefault(problemData, 'numSteps', 100);
   case 'analytical'
-    problemData = setdefault(problemData, 'hmax', 10000);
-    problemData = setdefault(problemData, 'tEnd', 1000);
+    problemData = setdefault(problemData, 'hmax', 200);
+    problemData = setdefault(problemData, 'tEnd', 500);
     problemData = setdefault(problemData, 'numSteps', 200*2^(problemData.refinement+problemData.p));
   otherwise
     error('Invalid config source.')

@@ -10,17 +10,18 @@
 %>        the corresponding quadrature weight.
 %===============================================================================
 %>
-%> @brief Assembles two matrices, each containing evaluations of a (spatial) 
-%>        derivative of one basis function in quadrature points multiplied with
-%>        the corresponding quadrature weight.
+%> @brief Assembles matrices @f$\mathsf{H}^m, m\in\{1,2\}@f$, each containing
+%>        evaluations of a (spatial) derivative of one basis function in 
+%>        quadrature points multiplied with the corresponding quadrature weight.
 %>
 %> The matrices @f$\mathsf{H}^m \in \mathbb{R}^{KN\times KR}@f$ (R is the 
 %> number of quadrature points and weights.) are block
 %> diagonal and defined component-wise by
 %> @f[
 %>   [\mathsf{H}^m]_{(k-1)N+i,(k-1)N+j} = 
-%>      \partial_{x^m} \varphi_{ki}(q_k^r) w_r  \,.
+%>      \partial_{x^m} \varphi_{ki}(q_k^r) w_k^r  \,.
 %> @f]
+%> with @f$q^r_{k}, w^r_k@f$ the quadrature points and weights of element @f$k@f$.
 %> All other entries are zero.
 %> For the implementation, the element integrals are backtransformed to the
 %> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
@@ -56,8 +57,8 @@
 %>  [\hat{\mathsf{H}}]_{i,r,m} = \partial_{\hat{x}^m} 
 %>    \hat{\varphi}_i (\hat{q}^r) \hat{w}^r\,.
 %> @f]
-%> where \hat{q}^r, \hat{w}^r are the 
-%> quadrature points and weights of the reference element.
+%> where @f$\hat{q}^r, \hat{w}^r@f$ are the 
+%> quadrature points and weights of the reference element @f$\hat{T}@f$.
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
