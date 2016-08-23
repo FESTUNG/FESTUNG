@@ -11,22 +11,22 @@
 %> @brief Evaluates a basis function in all quadrature points of all edges of the 
 %>				reference triangle and multiplies with the according quadrature weight.
 %>
-%> It computes a multidimensional array @f$\hat{\mathsf{R}}^\mathrm{diag} 
+%> It computes a multidimensional array @f$\hat{\mathsf{Q}}
 %>    \in \mathbb{R}^{N\times R\times 3}@f$, which is
 %> defined by
 %> @f[
-%> \left[\hat{\mathsf{R}}^\mathrm{diag}\right]_{i,r,n} \;:=\;
-%> \hat{\varphi}_i\circ\hat{\mathbf{\gamma}}_n(q_r)\, w_r
+%> \left[\hat{\mathsf{Q}}\right]_{i,r,n} \;:=\;
+%> \hat{\varphi}_i\circ\hat{\mathbf{\gamma}}_n(\hat{q}^r)\, \hat{w}^r
 %> @f]
 %> with the mapping @f$\hat{\mathbf{\gamma}}_n@f$ defined in 
-%> <code>gammaMap()</code> and the quadrature points @f$q_r@f$ given by
-%> <code>quadRule1D()</code>
+%> <code>gammaMap()</code> and the quadrature points and weights @f$\hat{q}^r,
+%> \hat{w}^r@f$ of which there are @fR@f given by <code>quadRule1D()</code>
 %>
 %> @param  N    The local number of degrees of freedom
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D.
-%> @retval ret  The computed array @f$[N\times \times R 3]@f$
+%> @retval ret  The computed array @f$[N\times R\times 3]@f$
 %>
 %> This file is part of FESTUNG
 %>

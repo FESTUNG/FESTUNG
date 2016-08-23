@@ -15,14 +15,14 @@
 %> @f$\hat{\mathsf{D}}\in\mathbb{R}^{N\times N\times N}@f$
 %> defined by
 %> @f[
-%> [\hat{\mathsf{M}}]_{i,j,l} =
-%>   \int_{\hat{T}} \hat{\varphi}_i \hat{\varphi}_j hat{\varphi}_l \mathrm{d}\hat{\mathbf{x}} \,.
+%> [\hat{\mathsf{D}}]_{i,j,l} =
+%>   \int_{\hat{T}} \hat{\varphi}_i \hat{\varphi}_j \hat{\varphi}_l \mathrm{d}\hat{\mathbf{x}} \,.
 %> @f]
 %>
-%> @param  N    The local number of degrees of freedom, either as a scalar
-%>              for all three basis functions, or as a vector with three
-%>              entries, specifying the number of degrees of freedom for
-%>              each basis function.
+%> @param  N            The local number of degrees of freedom, either as a 
+%>                      scalar for all three basis functions, or as a vector 
+%>                      with three entries, specifying the number of degrees of 
+%>                      freedom for each basis function.
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi2D.
@@ -30,7 +30,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2016 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock

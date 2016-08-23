@@ -11,17 +11,16 @@
 %> @brief Evaluates a basis function in all quadrature points of the reference 
 %>				triangle and multiplies with the associated quadrature weight.
 %>
-%> It computes a multidimensional array @f$\hat{\mathsf{P}}
+%> It computes a matrix @f$\hat{\mathsf{P}}
 %>    \in \mathbb{R}^{N \times R}@f$, which is defined by
 %> @f[
 %> \left[\hat{\mathsf{P}}\right]_{i,r} \;:=\;
-%> \hat{\varphi}_i\circ\hat{\mathbf{\gamma}}_{n^-}(q_r) w_r\,
+%> \hat{\varphi}_i(\hat{q}_r) \hat{w}_r\,
 %> @f]
-%> with the mapping @f$\hat{\mathbf{\gamma}}_n@f$ defined in 
-%> <code>gammaMap()</code>, and the quadrature points @f$q_r@f$ and weights
-%> @f$w_r@f$ of which there are @fR@f given by <code>quadRule2D()</code>
+%> with the quadrature points and weights @f$\hat{q}_r, \hat{w}_r@f$
+%> of which there are @fR@f given by <code>quadRule2D()</code>
 %>
-%> @param  N    The local number of degrees of freedom
+%> @param  N            The local number of degrees of freedom
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi2D.
