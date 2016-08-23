@@ -12,7 +12,7 @@
 %>        element do not fall below a certain threshold.
 %>
 %> This routine computes the vertex values of a discrete function and changes 
-%> them to a treshold value where they are below that treshold.
+%> them to a treshold value for every vertex where they are below that treshold.
 %>
 %> @param dataDisc     A representation of the discrete function, e.g., as 
 %>                     computed by <code>projectFuncCont2DataDisc()</code>.

@@ -20,18 +20,17 @@
 %> @f[
 %> [\hat{\mathsf{{R}}}^\mathrm{offdiag}]_{i,j,l,n^-,n^+} =
 %>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_{n^-}(s) 
+%>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_{n^-}(s)
 %>   \hat{\varphi}_l\circ \hat{\mathbf{\vartheta}}_{n^-n^+} \circ
-%>   \hat{\mathbf{\gamma}}_{n^-}(s)
-%>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_{n^-}(s) \mathrm{d}s \,,
+%>   \hat{\mathbf{\gamma}}_{n^-}(s) \mathrm{d}s \,,
 %> @f]
 %> with the mapping @f$\hat{\mathbf{\gamma}}_n@f$ defined in 
 %> <code>gammaMap()</code> and the mapping 
 %> @f$\hat{\mathbf{\vartheta}}_{n^-n^+}@f$ as described in <code>theta()</code>.
 %>
-%> @param  N    The local number of degrees of freedom, either as a scalar
-%>              for all three basis functions, or as a vector with three
-%>              entries, specifying the number of degrees of freedom for
-%>              each basis function.
+%> @param  N            The local number of degrees of freedom, either as a 
+%>                      scalar for all three basis functions, or as a vector 
+%>                      with three entries, specifying the number of degrees of %>                      freedom for each basis function.
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D and thetaPhi1D.
@@ -39,7 +38,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2016 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock

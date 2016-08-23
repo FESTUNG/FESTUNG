@@ -18,12 +18,12 @@
 %>    \in \mathbb{F}^{N\times R\times 2}@f$, which is defined by
 %> @f[
 %> \left[\hat{\mathsf{F}}\right]_{i,r,m} \;:=\;
-%> \partial_{\hat{x}^m} \hat{\varphi}_i (\hat{q_r})\, (\hat{q_r})\, w_r
+%> \partial_{\hat{x}^m} \hat{\varphi}_i (\hat{q}_r)\, \hat{w}_r
 %> @f]
-%> with the quadrature points @f$q_r@f$ given by
-%> <code>quadRule2D()</code>
+%> with the quadrature points and weights @f$\hat{q}_r,\hat{w}_r@f$ 
+%> of which there are @fR@f given by <code>quadRule2D()</code>.
 %>
-%> @param  N    The local number of degrees of freedom
+%> @param  N            The local number of degrees of freedom
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least gradPhi2D.
