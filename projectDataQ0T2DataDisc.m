@@ -12,17 +12,18 @@
 %>				in the physical quadrature points of a grid by
 %>        performing the @f$L^2@f$-projection.
 %>
-%> The DG/modal basis representation of a function evaluated in the
-%> physical quadrature points of a grid @f$d(t)@f$,
+%> The DG/modal basis representation of a function @f$d(t,\mathbf{x})@f$
 %> is given as
 %> @f[
 %>   d_h(t, \mathbf{x}) = \sum_{j=1}^N D_{kj}(t) \varphi_{kj}(\mathbf{x}) \,,
 %> @f]
-%> such that @f$d_h(t) \in \mathbb{P}_d (\mathcal{T}_h)@f$ is an adequate
-%> approximation of @f$d(t)@f$.
+%> such that @f$d_h(t,\mathbf{x}) \in \mathbb{P}_d (\mathcal{T}_h)@f$ is an 
+%> adequate approximation of @f$d(t,\mathbf{x})@f$.\n
+%> In this case we do not know an analytical espression for @f$d(t)@f$, but its
+%> values in appropriate quadrature points.
 %>
-%> To produce @f$d_h(t)@f$ we use the @f$L^2@f$-projection defined locally for
-%> @f$T_k \in \mathcal{T}_h@f$ by
+%> To produce @f$d_h(t,\mathbf{x})@f$ we use the @f$L^2@f$-projection defined
+%> locally for @f$T_k \in \mathcal{T}_h@f$ by
 %> @f[
 %>  \forall w_h \in \mathbb{P}_d(T_k), \quad
 %>  \int_{T_k} w_h d_h(t) = \int_{T_k} w_h d(t) \,.
@@ -57,7 +58,8 @@
 %> @f]
 %> with local mass matrix on the reference triangle 
 %> @f$\hat{M} \in \mathbb{R}^{N\times N}@f$ as defined in
-%> <code>integrateRefElemPhiPhi</code>.
+%> <code>integrateRefElemPhiPhi</code>.\n
+%> Since the right hand side is approximated by quadrature, we have all we need.
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 

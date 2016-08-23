@@ -11,17 +11,19 @@
 %>        output.
 %>
 %> This routine visualizes the discrete solutions of the Shallow-Water Equations
-%> at the current time step. The total height of water can be computed from the 
+%> at the current time step.\n
+%> The total height of water can be computed from the 
 %> difference of the free surface elevation and the bathymetry. It can be then
 %> used to compute approximations of the velocities from the computed momenta
-%> via the routine projectDataQ0T2DataDisc, which requires the values of the
-%> quotients of momenta and height in the quadrature points of adequate order in
-%> each element. 
+%> via the routine <code>projectDataQ0T2DataDisc()</code>, which requires the 
+%> values of the quotients of momenta and height in the quadrature points of 
+%> adequate order in each element.\n
 %> By this means it is possible to visualize height, free surface elevation, as
-%> well as momentum and velocity components for each spatial dimension.
+%> well as momentum and velocity components for each spatial dimension.\n
 %> Furthermore, this routine is responsible for station output, i.e. writing the
 %> values of the free surface elevation as well as both velocity components 
-%> evaluated at the physical coordinates of each station into a respective field.
+%> evaluated at the physical coordinates of each station into a respective
+%> field.
 %>
 %> @param  pd           A struct with problem parameters, precomputed
 %>                      fields, and solution data structures, as provided 
@@ -29,14 +31,14 @@
 %>                      @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
-%> @retval problemData  The input struct enriched with post-processed data
+%> @retval pd           The input struct enriched with post-processed data
 %>                      for this loop iteration. @f$[\text{struct}]@f$
 %>
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
-%>                      Modified 08/17/16 by Hennes Hajduk
+%>                      Modified 08/23/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock

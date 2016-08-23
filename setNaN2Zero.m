@@ -20,14 +20,9 @@
 %> zero, MATLAB returns NaN as the product of zero and NaN. Thus, this routine
 %> is necessary to modify data that possibly includes NaN entries.
 
-%> @param  pd           A struct with problem parameters, precomputed
-%>                      fields, and solution data structures, as provided 
-%>                      by configureProblem() and preprocessProblem(). 
-%>                      @f$[\text{struct}]@f$
-%> @param  nStep        The current iteration number of the main loop. 
+%> @param  input        Double-valued tensor of arbitary order.
 %>
-%> @retval problemData  The input struct enriched with post-processed data
-%>                      for this loop iteration. @f$[\text{struct}]@f$
+%> @retval ret          The same tensor with zeros instead of NaN's.
 %>
 %>
 %> This file is part of FESTUNG
