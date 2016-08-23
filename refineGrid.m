@@ -1,15 +1,15 @@
-% Routine that uses edge bisection of triangles to refine any grid structure as
+% Routine that uses edge bisection of triangles to refine any triangular grid as
 % given by any of the grid generating routines in FESTUNG.
 
 %===============================================================================
 %> @file refineGrid.m
 %>
-%> @brief Routine that uses edge bisection of triangles to refine any grid 
-%>        structure as given by any of the grid generating routines in FESTUNG.
+%> @brief Routine that uses edge bisection of triangles to refine any triangular  
+%>        grid as as given by any of the grid generating routines in FESTUNG.
 %===============================================================================
 %>
-%> @brief Routine that uses edge bisection of triangles to refine any grid 
-%>        structure as given by any of the grid generating routines in FESTUNG.
+%> @brief Routine that uses edge bisection of triangles to refine any triangular 
+%>        grid as given by any of the grid generating routines in FESTUNG.
 %>
 %> @param  g            A struct with all numerical and logical fields or cells
 %>                      identifying the mesh of a compuational domain that are
@@ -26,8 +26,7 @@
 %>
 %> @copyright 2014-2016 Hennes Hajduk, Balthasar Reuter, Florian Frank, 
 %>                      Vadym Aizinger
-%>                      
-%> 
+%>                       
 %> @par License
 %> @parblock
 %> This program is free software: you can redistribute it and/or modify

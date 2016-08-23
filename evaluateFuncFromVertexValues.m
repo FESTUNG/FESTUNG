@@ -16,7 +16,7 @@
 %>
 %> This routine evaluates any piecewise linear and globally continuous function,
 %> which is defined implicitly on a triangular grid by its values in each grid 
-%> point.
+%> point.\n\n
 %> Note that due to the backtransformation to the reference element and repeated
 %> use of multiplications with bsxfun this method can be quite time consuming 
 %> and is meant to be used during preprocessing only.
