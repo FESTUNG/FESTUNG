@@ -1,6 +1,6 @@
 % First step of the three-part algorithm in the iterateSubSteps loop of each
 % step in the main loop.
-
+%
 %===============================================================================
 %> @file template/preprocessSubStep.m
 %>
@@ -23,7 +23,7 @@
 %> to execute preprocessing operations, e.g., evaluate boundary conditions or
 %> right hand side values, assemble time-dependent matrix blocks, etc.
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
+%> @param  pd           A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
 %>                      with initial data or the solution from the previous
 %>                      loop iteration), as provided by configureProblem()  
@@ -31,7 +31,7 @@
 %> @param  nSubStep     The current iteration number of the iterateSubSteps 
 %>                      loop. 
 %>
-%> @retval problemData  The input struct enriched with preprocessed data
+%> @retval pd           The input struct enriched with preprocessed data
 %>                      for this loop iteration. @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
