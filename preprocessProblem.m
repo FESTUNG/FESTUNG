@@ -482,9 +482,9 @@ end % if
 % Assemble Newtonian tide potential matrix
 if pd.isTidalDomain
   if pd.p == 0
-    refElemPhiPhiConstPhiLeastLin = integrateRefElemPhiPhiPhi([N max(N,3) 1], basesOnQuadLin);
+    refElemPhiPhiConstPhiLeastLin = execin('swe/integrateRefElemPhiPhiPhi', [N 3 1], basesOnQuadLin);
   else
-    refElemPhiPhiConstPhiLeastLin = integrateRefElemPhiPhiPhi([N max(N,3) 1], pd.basesOnQuad);
+    refElemPhiPhiConstPhiLeastLin = execin('swe/integrateRefElemPhiPhiPhi', [N N 1], pd.basesOnQuad);
   end % if
   for n = 1 : size(pd.forcingTidal, 3)
     for i = 1 : 2
