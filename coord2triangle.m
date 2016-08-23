@@ -1,40 +1,35 @@
-% Uses the evaluation of the unknowns of the 2D Shallow-Water Equations to 
-% compute their harmonic averages of Roe-Pike type for interior edges.
+% Computes the barycentic coordinates of a number of points and uses them to
+% find the triangles that contain these points.
 %
 %===============================================================================
-%> @file computeAveragedVariablesQ0E0Tint.m
+%> @file coord2triangle.m
 %>
-%> @brief Uses the evaluation of the unknowns of the 2D Shallow-Water Equations 
-%>        to compute their harmonic averages of Roe-Pike type for interior edges
-%>        (see @ref ROE1985 for details)
+%> @brief Computes the barycentic coordinates of a number of points and uses 
+%>        them to find the triangles that contain these points.
 %===============================================================================
 %>
-%> @brief Uses the evaluation of the unknowns of the 2D Shallow-Water Equations 
-%>        to compute their harmonic averages of Roe-Pike type for interior edges
-%>        (see @ref ROE1985 for details)
+%> @brief Computes the barycentic coordinates of a number of points and uses 
+%>        them to find the triangles that contain these points.
 %>
-%> This routine uses the limits of the height and momenta on both sides of the
-%> edges to compute a stable avarage, later to be used for flux approximation.
-%> There are different types of averages available:
-%> full-harmonic uses the Roe-Pike approach on both the normal component of the
-%> velocity and the root of the graviational constant times the height.
-%> semi-harmonic uses this approach on the normal component of the
-%> velocity and takes the mean of the height for the rest.
-%> mean uses mean values everywhere.
+%> Computes the barycentric coordinates of each point with respect to every 
+%> triangle, and includes the triangles for which the barycentric coordinates 
+%> are contained in the interval [0,1]. Since the points might be located on 
+%> triangle edges or even vertices it may be that a point is located in more 
+%> than one triangle.
 %>
 %> @param g           The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
-%> @param coord1      List of physical x1-coordinates of stations.
-%> @param coord2      List of physical x1-coordinates of stations
+%> @param coord1      List of physical x1-coordinates of points.
+%> @param coord2      List of physical x2-coordinates of points.
 %>
 %> @retval ret        Cell that for each element stores the triangles and the 
-%>                    barycentric coordinates of the corresponding station.
+%>                    barycentric coordinates of the corresponding point.
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
-%>                      Modified 08/18/16 by Hennes Hajduk
+%>                      Modified 08/23/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock
