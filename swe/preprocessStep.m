@@ -49,5 +49,5 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function pd = preprocessStep(pd, nStep)
+function problemData = preprocessStep(problemData, nStep)
 end % function
