@@ -14,10 +14,32 @@
 %> This function reads in the coordinates, connectivity and values for the depth
 %> in each vertex of a grid from the fort.14-file, see
 %> <http://www.unc.edu/ims/adcirc/documentv47/fort_14.html>. This is used to 
-%> construct a grid. 
+%> construct a grid, which is usually used for a Shallow-Water type problem.\n
 %> Edge information along with Dirichlet-type boundary conditions is read in 
-%> from the fort.17-file, see
-%> <TODO: no html online>. 
+%> from the fort.17-file. \n\n
+%> Short overview of fort.17 files: \n
+%> The first number is the total number of edges @f$numE@f$.\n
+%> Then for the next @f$numE@f$ lines, i.e. for every edge the indices of the 
+%> vertices at the end of the edge as well as the two elements that are 
+%> separeted by this edge are given. For bounadry edges the second element index
+%> must be zero.\n
+%> Then for every element the three global edge indices are given in counter-
+%> clockwise direction. \n
+%> Next is the number of interior edges.\n
+%> Then for every interior edge the global edge number is given.\n
+%> Next is the number of land edges.\n
+%> Then for every land edge the global edge number is given.\n
+%> Next is the number of radiation edges.\n
+%> Then for every radiation edge the global edge number is given.\n
+%> Next is the number of river edges.\n
+%> Then for every river edge the global edge number, the value of the free 
+%> surface elevation and the normal and tangential velocities on this edge 
+%> are given.\n
+%> Next is the number of open sea edges.\n
+%> Then for every open sea edge the global edge number is given.\n
+%> For all frequencies and all open sea bounadry edges the amplitude and phase
+%> in degrees are given.\n\n
+%>
 %> Since the grids in FESTUNG need to fulfill certain local indexing 
 %> properties, such as that local edges of arbitrary index must be opposing 
 %> local vertices of the same index, some of the information provided must be 
@@ -49,7 +71,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
-%>                      Modified 08/17/16 by Hennes Hajduk
+%>                      Modified 08/23/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock
