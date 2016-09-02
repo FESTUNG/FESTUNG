@@ -51,7 +51,7 @@ function problemData = configureProblem(problemData)
 %% Configuration to use: 
 % - 'rotation' calls configureRotation()
 % - 'analytical' calls configureAnalyticalTest()
-problemData = setdefault(problemData, 'configSource', 'analytical');
+problemData = setdefault(problemData, 'configSource', 'rotation');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -61,11 +61,11 @@ problemData = setdefault(problemData, 'configSource', 'analytical');
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-problemData = setdefault(problemData, 'gridSource', 'hierarchical');
+problemData = setdefault(problemData, 'gridSource', 'square');
 problemData = setdefault(problemData, 'refinement', 0);
 
 % Polynomial approximation order
-problemData = setdefault(problemData, 'p', 0);
+problemData = setdefault(problemData, 'p', 1);
 
 % Runge-Kutta order
 problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3)); % as of now both models have to use the same RK method
