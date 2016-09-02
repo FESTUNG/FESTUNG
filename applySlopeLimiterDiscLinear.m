@@ -79,10 +79,16 @@
 %>                    specified by <code>markV0TbdrD</code>. @f$[K \times 3]@f$
 %> @retval dataTaylorLim   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}^\mathrm{Taylor}c_h@f$. @f$[K \times N]@f$
+%> @retval  minMaxV0T  Two matrices with minimum or maximum centroid values,
+%>                     respectively, of the patch of elements surrounding each
+%>                     vertex of each element as computed by 
+%>                     <code>computeMinMaxV0TElementPatch()</code>
+%>                     @f$[2 \times 1 \mathrm{cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>                      Modified 09/02/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock
@@ -100,7 +106,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataDiscLim = applySlopeLimiterDiscLinear(g, dataDisc, markV0TbdrD, dataV0T)
+function [dataDiscLim, minMaxV0T] = applySlopeLimiterDiscLinear(g, dataDisc, markV0TbdrD, dataV0T)
 % Check function arguments that are directly used
 validateattributes(dataDisc, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataDisc');
 assert(size(dataDisc, 2) >= 3, 'Number of local degrees of freedom in dataDisc does not correspond to p>=1')
@@ -109,7 +115,7 @@ assert(size(dataDisc, 2) >= 3, 'Number of local degrees of freedom in dataDisc d
 valV0T = projectDataDisc2DataLagr(dataDisc(:, 1:3));
 
 % Compute limiter parameter for each vertex
-alphaE = computeVertexBasedLimiter(g, dataDisc(:, 1) * phi(1, 1/3, 1/3), valV0T, markV0TbdrD, dataV0T);
+[alphaE, minMaxV0T] = computeVertexBasedLimiter(g, dataDisc(:, 1) * phi(1, 1/3, 1/3), valV0T, markV0TbdrD, dataV0T);
 
 % Apply limiter to first order terms, set all higher order terms to zero in
 % the case of limiting

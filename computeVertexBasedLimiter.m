@@ -46,10 +46,18 @@
 %>                     minimum/maximum @f$[K \times 3]@f$
 %> @param  dataV0T     A list of values to be included in the determination
 %>                     of minimum/maximum. @f$[K\times 3]@f$
+%> @retval  alphaE     The correction factors for all elements. 
+%>                     @f$[K\times 3]@f$
+%> @retval  minMaxV0T  Two matrices with minimum or maximum centroid values,
+%>                     respectively, of the patch of elements surrounding each
+%>                     vertex of each element as computed by 
+%>                     <code>computeMinMaxV0TElementPatch()</code>
+%>                     @f$[2 \times 1 \mathrm{cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>                      Modified 09/02/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock
@@ -67,7 +75,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function alphaE = computeVertexBasedLimiter(g, valCentroid, valV0T, markV0TbdrD, dataV0T)
+function [alphaE, minMaxV0T] = computeVertexBasedLimiter(g, valCentroid, valV0T, markV0TbdrD, dataV0T)
 % Check function arguments that are directly used
 validateattributes(valCentroid, {'numeric'}, {'size', [g.numT 1]}, mfilename, 'valCentroid');
 validateattributes(dataV0T, {'numeric'}, {'size', [g.numT 3]}, mfilename, 'dataV0T');
