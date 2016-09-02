@@ -139,6 +139,8 @@
 %> Contributions from an inflow boundary must be treated separately, e.g.,
 %> by <code>assembleVecEdgePhiIntFuncContVal()</code>.
 %>
+%> @param  elem       The elements of the grid for which the computation is
+%>                    done.
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
@@ -168,7 +170,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
-%>                      Modified by Hennes Hajduk 2016-06-14
+%>                      Modified 09/02/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock
@@ -186,25 +188,26 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgePhiPhiValUpwind(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr)
+function ret = assembleMatEdgePhiPhiValUpwind(elem, g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr)
 % Extract dimensions
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
 % Check function arguments that are directly used
+validateattributes(elem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
 validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
 validateattributes(valOnQuad, {'numeric'}, {'size', [K 3 NaN]});
 validateattributes(refEdgePhiIntPhiIntOnQuad, {'numeric'}, {'size', [N N 3 R]});
 validateattributes(refEdgePhiIntPhiExtOnQuad, {'numeric'}, {'size', [N N 3 3 R]});
 
 if nargin > 5
-  ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr);
+  ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(elem, g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad(elem,:,:), areaE0Tbdr);
 else
-  ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad);
+  ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(elem, g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad);
 end % for
 end % function
 
-function ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr)
+function ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(elem, g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr)
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
@@ -213,27 +216,27 @@ ret = sparse(K*N, K*N);
 for nn = 1 : 3
   % Diagonal blocks
   for r = 1 : R
-    ret = ret + kron(spdiags(areaE0Tbdr{nn} .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
+    ret = ret + kron(spdiags(areaE0Tbdr{nn}(elem) .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
   end
   % Off-diagonal blocks
   for np = 1 : 3
     RknTimesVal = sparse(K*N, N);
     for r = 1 : R
-      RknTimesVal = RknTimesVal + kron(areaE0Tbdr{nn} .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
+      RknTimesVal = RknTimesVal + kron(areaE0Tbdr{nn}(elem) .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
     end
-    ret = ret + kronVec(g.markE0TE0T{nn, np}, RknTimesVal);
+    ret = ret + kronVec(g.markE0TE0T{nn, np}(elem,elem), RknTimesVal);
   end % for
 end % for
 end % function
 
-function ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad)
+function ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(elem, g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad)
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
 % Assemble matrices
 ret = sparse(K*N, K*N);
 for nn = 1 : 3
-  Rkn = markE0Tbdr(:,nn) .* g.areaE0T(:, nn);
+  Rkn = markE0Tbdr(elem,nn) .* g.areaE0T(elem, nn);
   % Diagonal blocks
   for r = 1 : R
     ret = ret + kron(spdiags(Rkn .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
@@ -244,7 +247,7 @@ for nn = 1 : 3
     for r = 1 : R
       RknTimesVal = RknTimesVal + kron(Rkn .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
     end
-    ret = ret + kronVec(g.markE0TE0T{nn, np}, RknTimesVal);
+    ret = ret + kronVec(g.markE0TE0T{nn, np}(elem,elem), RknTimesVal);
   end % for
 end % for
 end % function
