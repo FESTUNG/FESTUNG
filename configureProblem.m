@@ -68,10 +68,12 @@ problemData = setdefault(problemData, 'refinement', 0);
 problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degree (TODO: allow different approximation orders for each species)
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
-
+problemData = setdefault(problemData, 'isMask'    , true);  % computation only where species is not constant
+problemData.maskTol = 1.0e-8;
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta must be zero to three.')
+assert(problemData.p > 0 || ~problemData.isMask, 'Computation for just a selection of elements requires slope limiting which in turn needs polynomial order larger than zero.')
 
 switch problemData.configSource
   case 'rotation'

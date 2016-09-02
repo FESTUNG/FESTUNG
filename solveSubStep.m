@@ -64,9 +64,11 @@ qOrd2D = max(2* p,1);
 [Q1, Q2, W] = quadRule2D(qOrd2D); 
 numQuad2D = length(W);
 
+mask = logical(problemData.mask * ones(problemData.numSpecies,1));
+
 % Assembly of time-dependent global matrices
-globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, problemData.uHDisc, problemData.vHDisc);
-globR = assembleMatEdgePhiPhiValUpwind(problemData.g, problemData.g.markE0Tint, problemData.hatRdiagOnQuad, ...
+globG = assembleMatElemDphiPhiFuncDiscVec(mask, problemData.g, problemData.hatG, problemData.uHDisc, problemData.vHDisc);
+globR = assembleMatEdgePhiPhiValUpwind(mask, problemData.g, problemData.g.markE0Tint, problemData.hatRdiagOnQuad, ...
                                        problemData.hatRoffdiagOnQuad,  problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN);
 % Building the system
 sysA = -globG{1} - globG{2} + globR;
@@ -94,8 +96,10 @@ for species = 1:problemData.numSpecies
   % right hand side
   sysV = globL - globKD - globKN;
 
+  advectiveTerm = zeros(K*N,1);
+  advectiveTerm(logical(kron(mask,ones(N,1)))) = sysA * reshape(problemData.concentrationDiscRK{species}(mask,:)', [sum(mask)*N 1]);
   % Computing the discrete time derivative
-  cDiscDot = problemData.globM \ (sysV - sysA * reshape(problemData.concentrationDiscRK{species}', [K*N 1]));
+  cDiscDot = problemData.globM \ (sysV - advectiveTerm);
 
   % Apply slope limiting to time derivative
   if problemData.isSlopeLim{species}
@@ -111,8 +115,12 @@ for species = 1:problemData.numSpecies
   % Limiting the solution
   if problemData.isSlopeLim{species}
     cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(problemData.timeLvls(nSubStep), x1, x2));
-    problemData.cDiscRK{species} = reshape(applySlopeLimiterDisc(problemData.g, reshape(problemData.cDiscRK{species}, [N K])', problemData.g.markV0TbdrD, ...
-                                   cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim{species})', [K*N 1]);
+    [cDiscRK, minMaxV0T] = applySlopeLimiterDisc(problemData.g, reshape(problemData.cDiscRK{species}, [N K])', problemData.g.markV0TbdrD, ...
+                                                 cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim{species});
+    problemData.cDiscRK{species} = reshape(cDiscRK', [K*N 1]);
+    if problemData.isMask
+      problemData.mask(:,species) = (max(minMaxV0T{2},[],2) - min(minMaxV0T{1},[],2)) >= problemData.maskTol;
+    end % if
   end % if
 end % for
 
