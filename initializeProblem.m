@@ -54,6 +54,8 @@ else
   problemData.mask = true(problemData.K, problemData.numSpecies);
 end % if
 
+problemData.numOperations = 0;
+
 hDisc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(0,x1,x2), 2*problemData.p+1,problemData.hatM, problemData.basesOnQuad);
 hQ0T = (hDisc * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.');
 
@@ -68,6 +70,7 @@ for species = 1:problemData.numSpecies
                                                                     problemData.typeSlopeLim{species});
     if problemData.isMask
       problemData.mask(:,species) = (max(minMaxV0T{2},[],2) - min(minMaxV0T{1},[],2)) >= problemData.maskTol;
+      
     end % if
   end % if
   

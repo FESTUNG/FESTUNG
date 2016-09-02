@@ -57,5 +57,11 @@ if problemData.isSolutionAvailable
     problemData.errors(species,2) = computeL2Error(problemData.g, dataDisc, @(x1,x2) problemData.solCont{species}(problemData.tEnd,x1,x2), 2*problemData.p, problemData.basesOnQuad);
   end % for
 end % if
+
+fprintf([ '%d operations were needed for solving the transport model on %d triangles, %d time substeps and %d species.\n' ...
+          'This corresponds to %3.1f %% of the full number of operations.\n'], ...
+          problemData.numOperations, problemData.g.numT, problemData.numSteps * problemData.ordRK, problemData.numSpecies, ...
+          problemData.numOperations / (problemData.g.numT*problemData.numSteps*problemData.ordRK*problemData.numSpecies) * 100);
+
 end % function
 

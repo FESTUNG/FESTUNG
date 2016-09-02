@@ -69,7 +69,8 @@ problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degr
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
 problemData = setdefault(problemData, 'isMask'    , true);  % computation only where species is not constant
-problemData.maskTol = 1.0e-8;
+problemData = setdefault(problemData, 'maskTol'   , 1.0e-12);  % maximal tolerance of slope for which species are considered constant
+
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta must be zero to three.')
@@ -136,7 +137,7 @@ cH0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
   problemData.isSlopeLim{species}  = true; % slope limiting
-  problemData.typeSlopeLim{species} = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
+  problemData.typeSlopeLim{species} = 'linear'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
   problemData.outputBasename{species}  = ['output' filesep 'solution_' num2str(species) '_' problemData.typeSlopeLim{species}]; % Basename of output files
