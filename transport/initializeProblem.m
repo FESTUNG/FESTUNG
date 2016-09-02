@@ -48,6 +48,12 @@ function problemData = initializeProblem(problemData)
 %% Initial data.
 problemData.cDisc = cell(problemData.numSpecies,1);
 
+if problemData.isMask
+  problemData.mask = false(problemData.K, problemData.numSpecies);
+else
+  problemData.mask = true(problemData.K, problemData.numSpecies);
+end % if
+
 hDisc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(0,x1,x2), 2*problemData.p+1,problemData.hatM, problemData.basesOnQuad);
 hQ0T = (hDisc * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.');
 
@@ -56,10 +62,13 @@ for species = 1:problemData.numSpecies
                                                         problemData.hatM, problemData.basesOnQuad);
   if problemData.isSlopeLim{species}
     cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(0, x1, x2));
-    problemData.cDisc{species} = applySlopeLimiterDisc(problemData.g, problemData.cDisc{species}, ...
-                                                       problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
-                                                       problemData.globMDiscTaylor, problemData.basesOnQuad, ...
-                                                       problemData.typeSlopeLim{species});
+    [problemData.cDisc{species}, minMaxV0T] = applySlopeLimiterDisc(problemData.g, problemData.cDisc{species}, ...
+                                                                    problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
+                                                                    problemData.globMDiscTaylor, problemData.basesOnQuad, ...
+                                                                    problemData.typeSlopeLim{species});
+    if problemData.isMask
+      problemData.mask(:,species) = (max(minMaxV0T{2},[],2) - min(minMaxV0T{1},[],2)) >= problemData.maskTol;
+    end % if
   end % if
   
   % Initial error TODO maybe for non-integrated concentrations too?

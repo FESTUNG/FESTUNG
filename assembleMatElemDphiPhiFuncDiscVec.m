@@ -75,6 +75,8 @@
 %> \mathrm{diag}(\mathsf{G}_{T_1}^m,\ldots,\mathsf{G}_{T_K}^m)@f$
 %> we can vectorize the assembly using the Kronecker product.
 %>
+%> @param  elem       The elements of the grid for which the computation is
+%>                    done.
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
@@ -92,6 +94,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>                      Modified 09/02/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock
@@ -109,21 +112,24 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatElemDphiPhiFuncDiscVec(g, refElemDphiPhiPhi, dataDisc1, dataDisc2)
+function ret = assembleMatElemDphiPhiFuncDiscVec(elem, g, refElemDphiPhiPhi, dataDisc1, dataDisc2)
 [K, dataN] = size(dataDisc1);
 N = size(refElemDphiPhiPhi,1);
 
+Ke = sum(elem);
+
 % Check function arguments that are directly used
+validateattributes(elem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
 validateattributes(dataDisc1, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc1');
 validateattributes(dataDisc2, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc2');
 validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N dataN 2]}, mfilename, 'refElemDphiPhiPhi');
 
 % Assemble matrices
-ret = cell(2, 1);  ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);
+ret = cell(2, 1);  ret{1} = sparse(Ke*N, Ke*N);  ret{2} = sparse(Ke*N, Ke*N);
 for l = 1 : dataN
-  ret{1} = ret{1} + kron(spdiags(dataDisc1(:,l) .* g.B(:,2,2), 0,K,K), refElemDphiPhiPhi(:,:,l,1)) ...
-                  - kron(spdiags(dataDisc1(:,l) .* g.B(:,2,1), 0,K,K), refElemDphiPhiPhi(:,:,l,2));
-  ret{2} = ret{2} - kron(spdiags(dataDisc2(:,l) .* g.B(:,1,2), 0,K,K), refElemDphiPhiPhi(:,:,l,1)) ...
-                  + kron(spdiags(dataDisc2(:,l) .* g.B(:,1,1), 0,K,K), refElemDphiPhiPhi(:,:,l,2));
+  ret{1} = ret{1} + kron(spdiags(dataDisc1(elem,l) .* g.B(elem,2,2), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,1)) ...
+                  - kron(spdiags(dataDisc1(elem,l) .* g.B(elem,2,1), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,2));
+  ret{2} = ret{2} - kron(spdiags(dataDisc2(elem,l) .* g.B(elem,1,2), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,1)) ...
+                  + kron(spdiags(dataDisc2(elem,l) .* g.B(elem,1,1), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,2));
 end % for
 end % function
