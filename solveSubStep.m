@@ -96,8 +96,9 @@ for species = 1:problemData.numSpecies
   % right hand side
   sysV = globL - globKD - globKN;
 
+  numElem = sum(mask);
   advectiveTerm = zeros(K*N,1);
-  advectiveTerm(logical(kron(mask,ones(N,1)))) = sysA * reshape(problemData.concentrationDiscRK{species}(mask,:)', [sum(mask)*N 1]);
+  advectiveTerm(logical(kron(mask,ones(N,1)))) = sysA * reshape(problemData.concentrationDiscRK{species}(mask,:)', [numElem*N 1]);
   % Computing the discrete time derivative
   cDiscDot = problemData.globM \ (sysV - advectiveTerm);
 
@@ -122,6 +123,7 @@ for species = 1:problemData.numSpecies
       problemData.mask(:,species) = (max(minMaxV0T{2},[],2) - min(minMaxV0T{1},[],2)) >= problemData.maskTol;
     end % if
   end % if
+  problemData.numOperations = problemData.numOperations + numElem;
 end % for
 
 end % function
