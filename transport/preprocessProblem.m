@@ -101,7 +101,7 @@ if any(cell2mat(problemData.isSlopeLim))
   problemData.basesOnQuad = computeTaylorBasesV0T(problemData.g, N, problemData.basesOnQuad);
 end % if
 %% Computation of matrices on the reference triangle.
-problemData.hatM              = integrateRefElemPhiPhi(N, problemData.basesOnQuad);
+problemData.hatM              = eye(N);
 problemData.hatG              = integrateRefElemDphiPhiPhi([N, N, problemData.velN], problemData.basesOnQuad);
 problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(N, problemData.basesOnQuad);
 problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(N, problemData.basesOnQuad);
