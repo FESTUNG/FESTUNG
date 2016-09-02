@@ -51,7 +51,7 @@ function problemData = configureProblem(problemData)
 %% Configuration to use: 
 % - 'rotation' calls configureRotation()
 % - 'analytical' calls configureAnalyticalTest()
-problemData = setdefault(problemData, 'configSource', 'analytical');
+problemData = setdefault(problemData, 'configSource', 'rotation');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -60,12 +60,12 @@ problemData = setdefault(problemData, 'configSource', 'analytical');
 % - 'hierarchical' creates a unit square [0,1]x[0,1] with specified hmax
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
-problemData = setdefault(problemData, 'gridSource', 'hierarchical');
+problemData = setdefault(problemData, 'gridSource', 'square');
 problemData = setdefault(problemData, 'refinement', 0);
 
 %% Parameters. 
 % Set default values if they are not yet available in problemData
-problemData = setdefault(problemData, 'p'         , 0);  % local polynomial degree (TODO: allow different approximation orders for each species)
+problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degree (TODO: allow different approximation orders for each species)
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
 
@@ -73,8 +73,14 @@ problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of 
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta must be zero to three.')
 
-problemData = setdefault(problemData, 'numSpecies', 3);  % number of transported species
-
+switch problemData.configSource
+  case 'rotation'
+    problemData = setdefault(problemData, 'numSpecies', 1);  % number of transported species
+  case 'analytical'
+    problemData = setdefault(problemData, 'numSpecies', 3);  % number of transported species
+  otherwise
+    error('Invalid config source.')
+end % switch
 problemData.isVisSol = cell(problemData.numSpecies,1);
 problemData.isSlopeLim = cell(problemData.numSpecies,1);
 problemData.typeSlopeLim = cell(problemData.numSpecies,1);
@@ -127,7 +133,7 @@ cH0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x
                   
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = false; % slope limiting
+  problemData.isSlopeLim{species}  = true; % slope limiting
   problemData.typeSlopeLim{species} = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
