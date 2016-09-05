@@ -57,6 +57,7 @@ switch pd.gridSource
     pd.g.idE(pd.g.baryE(:, 1) == 1) = 3; % east
     pd.g.idE(pd.g.baryE(:, 2) == 1) = 3; % north
     pd.g.idE(pd.g.baryE(:, 1) == 0) = 3; % west
+    
     pd.g.idE0T = pd.g.idE(pd.g.E0T);
     
     % Store edge counts
@@ -274,7 +275,7 @@ pd.sysMinValueCorrection = [ phi(1,0,0) phi(1,1,0) phi(1,0,1) ; ...
                              phi(3,0,0) phi(3,1,0) phi(3,0,1) ];
 
 %% Computation of matrices on the reference triangle.
-pd.refElemPhiPhi = integrateRefElemPhiPhi(N, pd.basesOnQuad);
+pd.refElemPhiPhi = eye(N); %integrateRefElemPhiPhi(N, pd.basesOnQuad);
 refElemPhiPhiPhi = execin('swe/integrateRefElemPhiPhiPhi',N, pd.basesOnQuad);
 refElemDphiPhi = integrateRefElemDphiPhi(N, pd.basesOnQuad);
 
