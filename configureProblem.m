@@ -51,7 +51,8 @@ function problemData = configureProblem(problemData)
 %% Configuration to use: 
 % - 'rotation' calls configureRotation()
 % - 'analytical' calls configureAnalyticalTest()
-problemData = setdefault(problemData, 'configSource', 'rotation');
+% - 'biological' calls configureBiological()
+problemData = setdefault(problemData, 'configSource', 'biological');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -69,7 +70,7 @@ problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degr
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
 problemData = setdefault(problemData, 'isMask'    , true);  % computation only where species is not constant
-problemData = setdefault(problemData, 'maskTol'   , 1.0e-12);  % maximal tolerance of slope for which species are considered constant
+problemData = setdefault(problemData, 'maskTol'   , 1.0e-5);  % maximal tolerance of slope for which species are considered constant
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
@@ -80,6 +81,8 @@ switch problemData.configSource
   case 'rotation'
     problemData = setdefault(problemData, 'numSpecies', 1);  % number of transported species
   case 'analytical'
+    problemData = setdefault(problemData, 'numSpecies', 3);  % number of transported species
+  case 'biological'
     problemData = setdefault(problemData, 'numSpecies', 3);  % number of transported species
   otherwise
     error('Invalid config source.')
@@ -110,6 +113,12 @@ switch problemData.configSource
     problemData = setdefault(problemData, 'numSteps'  , 200);  % number of time steps
     problemData = setdefault(problemData, 'tEnd'      , 500);  % end time
     problemData = configureAnalyticalTest(problemData);
+  case 'biological'
+    problemData.isSolutionAvailable = false;
+    problemData = setdefault(problemData, 'hmax'      , 2^-5);  % maximum edge length of triangle
+    problemData = setdefault(problemData, 'numSteps'  , 750);  % number of time steps
+    problemData = setdefault(problemData, 'tEnd'      , (problemData.numSteps/3142)*2*pi);  % end time
+    problemData = configureBiological(problemData);
   otherwise
     error('Invalid config source.')
 end % switch
@@ -243,5 +252,67 @@ problemData.fCont{3} = @(t,x1,x2) sol_tCont{3}(t,x1,x2) .* problemData.hCont(t,x
   problemData.u_xCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* problemData.solCont{3}(t,x1,x2) + problemData.uCont(t,x1,x2) .* problemData.h_xCont(t,x1,x2) .* problemData.solCont{3}(t,x1,x2) + problemData.uCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* sol_xCont{3}(t,x1,x2) + ... 
   problemData.v_yCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* problemData.solCont{3}(t,x1,x2) + problemData.vCont(t,x1,x2) .* problemData.h_yCont(t,x1,x2) .* problemData.solCont{3}(t,x1,x2) + problemData.vCont(t,x1,x2) .* problemData.hCont(t,x1,x2) .* sol_yCont{3}(t,x1,x2) - ... 
   (-f(t,x1,x2) .* g(t,x1,x2,problemData.solCont{3}(t,x1,x2)) .* problemData.solCont{1}(t,x1,x2) + (1-gamma) .* h(t,x1,x2,problemData.solCont{1}(t,x1,x2)) .* problemData.solCont{2}(t,x1,x2) + i(t,x1,x2,problemData.solCont{1}(t,x1,x2)) .* problemData.solCont{1}(t,x1,x2) + j(t,x1,x2,problemData.solCont{2}(t,x1,x2)) .* problemData.solCont{2}(t,x1,x2)) .* problemData.hCont(t,x1,x2);
+
+end % function
+
+%% Biological application
+%% LeVeque's solid body rotation
+function problemData = configureBiological(problemData)
+
+problemData = setdefault(problemData, 'hCont', @(t,x1,x2) 0.1*(x1==x1));
+problemData = setdefault(problemData, 'uCont', @(t,x1,x2) 0.5 - x2);
+problemData = setdefault(problemData, 'vCont', @(t,x1,x2) x1 - 0.5);
+problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.uCont(t,x1,x2));
+problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.vCont(t,x1,x2));
+
+%% Coefficients and boundary data (LeVeque's solid body rotation).
+G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
+problemData.cH0Cont = { @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
+                                  (1-G(x1, x2, 0.5, 0.25)) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.0225) + ...
+                                  0.25*(1+cos(pi*G(x1, x2, 0.25, 0.5))).*((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.0225);
+                        @(x1, x2) 2*((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 > 0.475 & x1 < 0.525 & x2 < 0.85)) + ...
+                                  ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.035) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 > 0.0225) + ...
+                                  ((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.02); 
+                        @(x1, x2) -cos(2*pi*(x1-0.5)) .* sin(2*pi*x2) .* (x1<0.5 & x2 > 0.5)};
+                  
+for species = 1:problemData.numSpecies
+  problemData.isVisSol{species}    = true; % visualization of solution
+  problemData.isSlopeLim{species}  = true; % slope limiting
+  problemData.typeSlopeLim{species} = 'linear'; % Type of slope limiter (linear, hierarch_vert, strict)
+  
+  problemData.outputFrequency{species} = 100; % no visualization of every timestep
+  problemData.outputBasename{species}  = ['output' filesep 'solution_' num2str(species) '_' problemData.typeSlopeLim{species}]; % Basename of output files
+  problemData.outputTypes{species}     = cellstr('vtk'); % solution output file types
+  
+  %% Parameter check.
+  assert(~problemData.isSlopeLim{species} || problemData.p > 0, 'Slope limiting only available for p > 0.')
+
+  problemData.cDCont{species} = @(t,x1,x2) zeros(size(x1));
+  problemData.gNCont{species} = @(t,x1,x2) zeros(size(x1));
+end % for
+
+%% Reaction term definitions.
+% NPZ model
+% parameters (Notation as in paper)
+I0 = 1;
+Vm = 0.01;
+ks = 1;
+Rm = 0.1;
+ep = 0.001;
+gamma = 0.5;
+I = @(t,x1,x2) (x1==x1);
+f = @(t,x1,x2) I(t,x1,x2) /I0; % linear response
+g = @(t,x1,x2,N) Vm ./ (ks + N); % Michaelis-Menten uptake
+h = @(t,x1,x2,P) Rm * P; % linear grazing
+i = @(t,x1,x2,P) ep; % linear death rate
+j = @(t,x1,x2,Z) ep; % linear death rate
+
+problemData.reactions{1} = @(t,x1,x2,c,cH) f(t,x1,x2) .* g(t,x1,x2,c{3}) .* cH{1} - h(t,x1,x2,c{1}) .* cH{2} - i(t,x1,x2,c{1}) .* cH{1};
+problemData.reactions{2} = @(t,x1,x2,c,cH) gamma * h(t,x1,x2,c{1}) .* cH{2} - j(t,x1,x2,c{2}) .* cH{2};
+problemData.reactions{3} = @(t,x1,x2,c,cH) -f(t,x1,x2) .* g(t,x1,x2,c{3}) .* cH{1} + (1-gamma) .* h(t,x1,x2,c{1}) .* cH{2} + i(t,x1,x2,c{1}) .* cH{1} + j(t,x1,x2,c{2}) .* cH{2};
+
+problemData.fCont{1} = @(t,x1,x2) 0*x1;
+problemData.fCont{2} = @(t,x1,x2) 0*x1;
+problemData.fCont{3} = @(t,x1,x2) 0*x1;
 
 end % function
