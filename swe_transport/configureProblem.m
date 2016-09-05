@@ -51,7 +51,7 @@ function problemData = configureProblem(problemData)
 %% Configuration to use: 
 % - 'rotation' calls configureRotation()
 % - 'analytical' calls configureAnalyticalTest()
-problemData = setdefault(problemData, 'configSource', 'rotation');
+problemData = setdefault(problemData, 'configSource', 'biological');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -76,6 +76,11 @@ switch problemData.configSource
     problemData = setdefault(problemData, 'hmax', 2^-6);
     problemData = setdefault(problemData, 'numSteps', 100);
     problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/3142)*2*pi);
+  case 'biological'
+    problemData.isSolutionAvailable = false;
+    problemData = setdefault(problemData, 'hmax'      , 2^-6);  % maximum edge length of triangle
+    problemData = setdefault(problemData, 'numSteps'  , 3142);  % number of time steps
+    problemData = setdefault(problemData, 'tEnd'      , (problemData.numSteps/3142)*2*pi);  % end time
   case 'analytical'
     problemData = setdefault(problemData, 'hmax', 200);
     problemData = setdefault(problemData, 'tEnd', 500);
@@ -90,6 +95,8 @@ problemData.sweData = struct;
 % Specification of configuration type for shallow water model
 switch problemData.configSource
   case 'rotation'
+    problemData.sweData.configSource = 'debug';
+  case 'biological'
     problemData.sweData.configSource = 'debug';
   case 'analytical'
     problemData.sweData.configSource = 'analytical';
@@ -116,7 +123,9 @@ problemData.transportData = struct;
 switch problemData.configSource
   case 'rotation'
     problemData.transportData.configSource = 'rotation';
-    
+    problemData.transportData.hCont = @(t,x1,x2) problemData.sweData.xiCont(x1,x2,t) - problemData.sweData.zbCont(x1,x2);
+  case 'biological'
+    problemData.transportData.configSource = 'biological';
     problemData.transportData.hCont = @(t,x1,x2) problemData.sweData.xiCont(x1,x2,t) - problemData.sweData.zbCont(x1,x2);
   case 'analytical'
     problemData.transportData.configSource = 'analytical';
