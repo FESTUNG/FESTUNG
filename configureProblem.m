@@ -55,7 +55,7 @@ pd = setdefault(pd, 'name', 'coupling');
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
-pd = setdefault(pd, 'configSource', 'analytical');
+pd = setdefault(pd, 'configSource', 'debug');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -65,7 +65,7 @@ pd = setdefault(pd, 'configSource', 'analytical');
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-pd = setdefault(pd, 'gridSource', 'hierarchical');
+pd = setdefault(pd, 'gridSource', 'square');
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
@@ -118,7 +118,8 @@ pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
 
 % Overwrite grid parameters
 pd.gridSource = 'square';
-pd.isSpherical = false;pd = setdefault(pd, 'hmax', 2^-6);
+pd.isSpherical = false;
+pd = setdefault(pd, 'hmax', 2^-6);
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
@@ -142,7 +143,7 @@ pd.bottomFrictionCoef = 0;
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) -0.1*(x1==x1);
+pd.zbCont = @(x1,x2) -0.002*(x1==x1);
 pd.fcCont = @(x1,x2) zeros(size(x1));
 
 % Analytical solution
@@ -152,8 +153,8 @@ pd.vCont = @(x1,x2,t) x1 - 0.5;
 
 % Right hand side functions (derived from analytical solution)
 pd.f0Cont = @(x1,x2,t) zeros(size(x1));
-pd.f1Cont = @(x1,x2,t) 0.1*(0.5-x1);
-pd.f2Cont = @(x1,x2,t) 0.1*(0.5-x2);
+pd.f1Cont = @(x1,x2,t) 0.002*(0.5-x1);
+pd.f2Cont = @(x1,x2,t) 0.002*(0.5-x2);
 
 % Boundary conditions
 pd.xiOSCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
@@ -162,8 +163,6 @@ pd.xiRivCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
 pd.uRivCont = @(x1,x2,t) pd.uCont(x1,x2,t);
 pd.vRivCont = @(x1,x2,t) pd.vCont(x1,x2,t);
 
-% Hot-start output
-pd.isHotStartOutput = false;
 end % function
 
 %% Analytical solution
@@ -261,8 +260,6 @@ pd.xiRivCont = pd.xiCont;
 pd.uRivCont = pd.uCont;
 pd.vRivCont = pd.vCont;
 
-% Hot-start output
-pd.isHotStartOutput = false;
 end % function
 
 %% ADCIRC
