@@ -63,6 +63,10 @@ for species = 1:problemData.numSpecies
     cLagrange = projectDataDisc2DataLagr(dataDisc);
     visualizeDataLagr(problemData.g, cLagrange, ['c_' num2str(species) '_h'], ...
                       problemData.outputBasename{species}, ceil(nStep / problemData.outputFrequency{species}), problemData.outputTypes{species});
+    if problemData.isMask
+      visualizeDataLagr(problemData.g, problemData.mask(:,species), ['mask_' num2str(species)], ...
+                        [problemData.outputBasename{species} '_mask'], ceil(nStep / problemData.outputFrequency{species}), problemData.outputTypes{species});
+    end % if
   end % if
 end % for
 end % function

@@ -123,7 +123,7 @@ pd = setdefault(pd, 'hmax', 2^-6);
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd = setdefault(pd, 'numSteps', 100);  % number of time steps
+pd = setdefault(pd, 'numSteps', 3142);  % number of time steps
 pd = setdefault(pd, 'tEnd', pd.numSteps/3142*2*pi);  % end time
 pd = setdefault(pd, 'outputCount', 1); % Number of outputs over total simulation time
 
