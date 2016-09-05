@@ -74,8 +74,8 @@ problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3)); % as of 
 switch problemData.configSource
   case 'rotation'
     problemData = setdefault(problemData, 'hmax', 2^-6);
-    problemData = setdefault(problemData, 'tEnd', (100/3142)*2*pi);
     problemData = setdefault(problemData, 'numSteps', 100);
+    problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/3142)*2*pi);
   case 'analytical'
     problemData = setdefault(problemData, 'hmax', 200);
     problemData = setdefault(problemData, 'tEnd', 500);
