@@ -75,8 +75,6 @@
 %> \mathrm{diag}(\mathsf{G}_{T_1}^m,\ldots,\mathsf{G}_{T_K}^m)@f$
 %> we can vectorize the assembly using the Kronecker product.
 %>
-%> @param  elem       The elements of the grid for which the computation is
-%>                    done.
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
@@ -89,6 +87,9 @@
 %>                    <code>projectFuncCont2DataDisc()</code> @f$[K \times N]@f$
 %> @param dataDisc2   A representation of the second component of the
 %>                    discrete function. @f$[K \times N]@f$
+%> @param  elem       (optional) <code>logical</code> arrays to provide the 
+%>                    elements of the grid for which the computation is done.
+%>                    @f$[K \times 3]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
@@ -112,17 +113,21 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatElemDphiPhiFuncDiscVec(elem, g, refElemDphiPhiPhi, dataDisc1, dataDisc2)
+function ret = assembleMatElemDphiPhiFuncDiscVec(g, refElemDphiPhiPhi, dataDisc1, dataDisc2, elem)
 [K, dataN] = size(dataDisc1);
 N = size(refElemDphiPhiPhi,1);
 
-Ke = sum(elem);
+if nargin == 4
+  elem = true(K,1);
+end % if
 
 % Check function arguments that are directly used
-validateattributes(elem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
 validateattributes(dataDisc1, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc1');
 validateattributes(dataDisc2, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc2');
 validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N dataN 2]}, mfilename, 'refElemDphiPhiPhi');
+validateattributes(elem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
+
+Ke = sum(elem);
 
 % Assemble matrices
 ret = cell(2, 1);  ret{1} = sparse(Ke*N, Ke*N);  ret{2} = sparse(Ke*N, Ke*N);
