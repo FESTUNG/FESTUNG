@@ -307,22 +307,22 @@ for nn = 1 : 3
 
   % River boundary contributions
   if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
+    
+    hRiv = xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn};
+    uHRiv = uRivQ0E0T{nn} .* hRiv;
+    vHRiv = vRivQ0E0T{nn} .* hRiv;
+    
     if pd.isRiemRiv
       switch pd.typeFlux
         case 'Lax-Friedrichs'
-          hRiv = xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn};
-          uHRiv = uRivQ0E0T{nn} .* hRiv;
-          vHRiv = vRivQ0E0T{nn} .* hRiv;
-          uvHRiv = uRivQ0E0T{nn} .* vHRiv;
-          gHHRiv = pd.gConst * xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn});
           
           cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Triv', cQ0E0Tint(:,nn), { xiRivQ0E0T{nn}, uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, markQ0E0TbdrRI{nn}, pd.averagingType);
           lambda = execin('swe/computeLaxFriedrichsCoefficient', cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
           
           uuHRiv = uuH + uRivQ0E0T{nn} .* uHRiv;
-          uvHRiv = uvH + uvHRiv;
+          uvHRiv = uvH + uRivQ0E0T{nn} .* vHRiv;
           vvHRiv = vvH + vRivQ0E0T{nn} .* vHRiv;
-          gHHRiv = gHH - pd.gConst * cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn} + gHHRiv;
+          gHHRiv = gHH - pd.gConst * (cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn} + xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn}));
 
           pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRRI{nn,1} * (cQ0E0Tint{2,nn} + uHRiv) + pd.globRRI{nn,2} * (cQ0E0Tint{3,nn} + vHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn})) );
           pd.globLRI{2} = pd.globLRI{2} + 0.5 * ( pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHRiv)) );
@@ -337,20 +337,23 @@ for nn = 1 : 3
           error('not implemented')
           
         otherwise
-          error('Invalid flux type for land boundaries.')
+          error('Invalid flux type for river boundaries.')
       end % switch
 
     else
-      hRiv = xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn};
-      uHRiv = uRivQ0E0T{nn} .* hRiv;
-      vHRiv = vRivQ0E0T{nn} .* hRiv;
+      uuHRiv = uRivQ0E0T{nn} .* uHRiv;
       uvHRiv = uRivQ0E0T{nn} .* vHRiv;
+      vvHRiv = vRivQ0E0T{nn} .* vHRiv;
       gHHRiv = pd.gConst * xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn});
 
       pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{nn,1} * uHRiv + pd.globRRI{nn,2} * vHRiv;
-      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uRivQ0E0T{nn} .* uHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
-      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vRivQ0E0T{nn} .* vHRiv + gHHRiv);
-    end
+      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
+      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv);
+      
+      if pd.isCoupling
+        pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( uHRiv .* pd.g.nuQ0E0T{nn,1} + vHRiv .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRI(:,nn) );
+      end % if
+    end % if
   end % if
   
   % Open Sea boundary contributions
