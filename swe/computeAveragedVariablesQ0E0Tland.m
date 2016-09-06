@@ -84,6 +84,11 @@
 %> @endparblock
 %>
 function cRoePikeQ0E0T = computeAveragedVariablesQ0E0Tland(cQ0E0Tint, cQ0E0Text, hQ0E0Tint, hQ0E0Text, markQ0E0Tbdr, averagingType)
+
+validateattributes(cQ0E0Tint, {'cell'}, {'size', [3 1]}, mfilename, 'cQ0E0Tint');
+validateattributes(cQ0E0Text, {'cell'}, {'size', [1 3]}, mfilename, 'cQ0E0Text');
+validateattributes(markQ0E0Tbdr, {'logical'}, {'size', [NaN 1]}, mfilename, 'markQ0E0Tbdr');
+
 hIntExtInv = 0.5 ./ hQ0E0Tint(markQ0E0Tbdr);
 cRoePikeQ0E0T = { zeros(size(hQ0E0Tint)); zeros(size(hQ0E0Tint)); zeros(size(hQ0E0Tint)) };
 cRoePikeQ0E0T{1}(markQ0E0Tbdr) = hQ0E0Tint(markQ0E0Tbdr);

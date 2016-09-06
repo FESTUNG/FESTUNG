@@ -93,7 +93,13 @@
 %> @endparblock
 %
 function ret = assembleMatEdgePhiIntPerQuad(g, markE0Tbdr, refEdgePhiIntPerQuad, areaE0Tbdr)
+
 K = g.numT;
+
+% Check function arguments that are directly used
+validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
+validateattributes(refEdgePhiIntPerQuad, {'numeric'}, {'size', [NaN NaN 3]}, mfilename, 'refEdgePhiIntPerQuad');
+
 ret = cell(3,1);
 for n = 1 : 3
   if nargin > 3

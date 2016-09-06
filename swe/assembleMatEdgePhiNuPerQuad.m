@@ -126,7 +126,13 @@
 %> @endparblock
 %
 function [retDiag, retOffdiag] = assembleMatEdgePhiNuPerQuad(g, markE0Tint, refEdgePhiIntPerQuad)
+
 K = g.numT;
+
+% Check function arguments that are directly used
+validateattributes(markE0Tint, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tint');
+validateattributes(refEdgePhiIntPerQuad, {'numeric'}, {'size', [NaN NaN 3]}, mfilename, 'refEdgePhiIntPerQuad');
+
 retDiag = cell(3,2); retOffdiag = cell(3,3,2);
 for nn = 1 : 3
 	for np = 1 : 3

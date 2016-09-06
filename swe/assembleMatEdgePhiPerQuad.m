@@ -87,6 +87,10 @@
 %> @endparblock
 %>
 function ret = assembleMatEdgePhiPerQuad(g, refEdgePhiIntPerQuad)
+
+% Check function arguments that are directly used
+validateattributes(refEdgePhiIntPerQuad, {'numeric'}, {'size', [NaN NaN 3]}, mfilename, 'refEdgePhiIntPerQuad');
+
 K = g.numT;
 ret = cell(3,3);
 for nn = 1 : 3
