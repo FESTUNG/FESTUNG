@@ -139,8 +139,6 @@
 %> Contributions from an inflow boundary must be treated separately, e.g.,
 %> by <code>assembleVecEdgePhiIntFuncContVal()</code>.
 %>
-%> @param  elem       The elements of the grid for which the computation is
-%>                    done.
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
@@ -165,6 +163,9 @@
 %>                    for the products of <code>markE0Tbdr</code>, and
 %>                    <code>g.areaE0T</code>
 %>                    @f$[3 \times 1 \text{ cell}]@f$
+%> @param  elem       (optional) <code>logical</code> arrays to provide the 
+%>                    elements of the grid for which the computation is done.
+%>                    @f$[K \times 3]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
@@ -188,26 +189,30 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgePhiPhiValUpwind(elem, g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr)
+function ret = assembleMatEdgePhiPhiValUpwind(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr, elem)
 % Extract dimensions
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
+if nargin < 7
+  elem = true(K,1);
+end % if
+
 % Check function arguments that are directly used
-validateattributes(elem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
 validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
 validateattributes(valOnQuad, {'numeric'}, {'size', [K 3 NaN]});
 validateattributes(refEdgePhiIntPhiIntOnQuad, {'numeric'}, {'size', [N N 3 R]});
 validateattributes(refEdgePhiIntPhiExtOnQuad, {'numeric'}, {'size', [N N 3 3 R]});
+validateattributes(elem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
 
-if nargin > 5
-  ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(elem, g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad(elem,:,:), areaE0Tbdr);
+if nargin > 5 && ~isequal(areaE0Tbdr, [])
+  ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad(elem,:,:), areaE0Tbdr, elem);
 else
-  ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(elem, g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad);
+  ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, elem);
 end % for
 end % function
 
-function ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(elem, g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr)
+function ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr, elem)
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
@@ -229,7 +234,7 @@ for nn = 1 : 3
 end % for
 end % function
 
-function ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(elem, g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad)
+function ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, elem)
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
