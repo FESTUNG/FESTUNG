@@ -48,6 +48,7 @@
 %> @endparblock
 %>
 function ret = coord2triangle(g, coord1, coord2)
+assert(isequal(size(coord1), size(coord2)), 'X1 and X2 must be of same size.')
 numCoord = length(coord1);
 % Compute barycentric coordinates for each cartesian coordinate pair
 coordBary = zeros(numCoord, g.numT, 3);

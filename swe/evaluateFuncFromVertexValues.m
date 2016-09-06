@@ -63,6 +63,13 @@
 %>
 function cEval = evaluateFuncFromVertexValues(g, vertexValues, X1, X2)
 
+% Check function arguments that are directly used
+validateattributes(vertexValues, {'numeric'}, {'size', [g.numV 1]}, mfilename, 'vertexValues');
+validateattributes(X1, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'X1');
+validateattributes(X2, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'X2');
+
+assert(size(X1,2) == size(X2,2), 'X1 and X2 must be of same size.');
+
 lenX = size(X1,2);
 FinvX1 = 0.5 ./ (g.areaT * ones(1,lenX)) .* ( bsxfun(@times, g.B(:,2,2), X1) - bsxfun(@times, g.B(:,1,2), X2) - (g.B(:,2,2).*g.coordV0T(:,1,1) - g.B(:,1,2).*g.coordV0T(:,1,2) ) * ones(1,lenX) );
 FinvX2 = 0.5 ./ (g.areaT * ones(1,lenX)) .* (-bsxfun(@times, g.B(:,2,1), X1) + bsxfun(@times, g.B(:,1,1), X2) + (g.B(:,2,1).*g.coordV0T(:,1,1) - g.B(:,1,1).*g.coordV0T(:,1,2) ) * ones(1,lenX) );

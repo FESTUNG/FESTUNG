@@ -83,6 +83,12 @@
 %> @endparblock
 %>
 function cRoePikeQ0E0T = computeAveragedVariablesQ0E0Tint(cQ0E0Tint, cQ0E0Text, hQ0E0Tint, hQ0E0Text, averagingType)
+
+validateattributes(cQ0E0Tint, {'cell'}, {'size', [3 1]}, mfilename, 'cQ0E0Tint');
+validateattributes(cQ0E0Text, {'cell'}, {'size', [3 1]}, mfilename, 'cQ0E0Text');
+
+assert(isequal(size(hQ0E0Tint), size(hQ0E0Text)), 'The number of values in limits from both sides must be the same.');
+
 cRoePikeQ0E0T = cell(3,1);
 
 switch averagingType
