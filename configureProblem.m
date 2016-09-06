@@ -125,7 +125,7 @@ pd = setdefault(pd, 'hmax', 2^-6);
 pd.t0 = 0; % Start time of simulation
 pd = setdefault(pd, 'numSteps', 3142);  % number of time steps
 pd = setdefault(pd, 'tEnd', pd.numSteps/3142*2*pi);  % end time
-pd = setdefault(pd, 'outputCount', 1); % Number of outputs over total simulation time
+pd = setdefault(pd, 'outputCount', 31); % Number of outputs over total simulation time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;

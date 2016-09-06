@@ -43,6 +43,7 @@
 %> @endparblock
 %
 function dt = selectTimeStepSWE(dx, dy, avgDepth, gConst, dt, nStep)
+% TODO validate attributes
 etal2 = 5; % TODO
  uul2 = 5; % TODO
  vvl2 = 5; % TODO

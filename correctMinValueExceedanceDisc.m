@@ -59,6 +59,11 @@ if nargin < 5
 	corrTol = Inf;
 end % if
 
+validateattributes(corrSys, {'numeric'}, {'size', [3 3]}, mfilename, 'corrSys');
+assert(isscalar(nStep) && round(nStep) == nStep && nStep >= 0, 'Time step number has to be non-negative scalar integer.')
+assert(isequal(size(dataDisc), size(minTol)) || isscalar(minTol), 'Threshold has to be specified globally or for every local vertex seperatly.')
+assert(isscalar(corrTol) && corrTol > 0, 'Globally tolerated truncation above threshold must be a positive scalar.')
+
 dataV0T = projectDataDisc2DataLagr(dataDisc, 1);
 corr = max(minTol - dataV0T, 0);
 maxCorr = max(corr(:));
