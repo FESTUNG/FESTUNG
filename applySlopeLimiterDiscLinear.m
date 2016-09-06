@@ -1,6 +1,6 @@
 % Applies the linear vertex based slope limiter to a discrete 
 % function given in modal DG basis.
-%
+
 %===============================================================================
 %> @file applySlopeLimiterDiscLinear.m
 %>
@@ -69,7 +69,7 @@
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  dataTaylor The representation matrix of the unlimited function 
+%> @param  dataDisc   The representation matrix of the unlimited function 
 %>                    @f$c_h@f$. @f$[K \times N]@f$
 %> @param  markV0TbdrD <code>logical</code> arrays that mark each triangles
 %>                    (Dirichlet boundary) vertices on which additional

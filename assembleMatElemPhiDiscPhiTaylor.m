@@ -40,6 +40,9 @@
 %>             properties of a triangulation (see <code>generateGridData()</code>) 
 %>             @f$[1 \times 1 \text{ struct}]@f$
 %> @param  N   The local number of degrees of freedom
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi2D.
 %> @retval ret The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG

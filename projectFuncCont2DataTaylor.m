@@ -1,5 +1,5 @@
 % Compute the Taylor basis representation of an algebraic function.
-%
+
 %===============================================================================
 %> @file projectFuncCont2DataTaylor.m
 %>

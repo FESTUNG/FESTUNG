@@ -5,7 +5,8 @@
 //! B. Reuter, V. Aizinger, M. Wieland, F. Frank, P. Knabner [2016]: 
 //! &ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part II: Advection operator and slope limiting&rdquo;.
-//! Submitted to Computers & Mathematics with Applications.
+//! In: Computers & Mathematics with Applications. In Press.
+//! <code>doi:10.1016/j.camwa.2016.08.006</code>.
 //!
 //! @section FRAK2015 [FRAK2015]
 //! F. Frank, B. Reuter, V. Aizinger, P. Knabner [2015]: 

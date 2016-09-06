@@ -38,7 +38,7 @@
 %> @param  problemData  A struct that is passed to and returned from every
 %>                      routine in all routines, which allows to store problem 
 %>                      data or computed values.
-%>         nStep        The index number of the current time step.
+%> @param  nStep        The index number of the current time step.
 %>
 %> This file is part of FESTUNG
 %>

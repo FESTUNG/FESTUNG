@@ -1,25 +1,24 @@
-% First step of the four-part algorithm in the main loop.
+% Second step of the three-part substepping algorithm.
 
 %===============================================================================
-%> @file template/preprocessStep.m
+%> @file template/solveSubStep.m
 %>
-%> @brief First step of the four-part algorithm in the main loop.
+%> @brief Second step of the three-part substepping algorithm.
 %===============================================================================
 %>
-%> @brief First step of the four-part algorithm in the main loop.
+%> @brief Second step of the three-part substepping algorithm.
 %>
-%> The main loop repeatedly executes four steps until the parameter
-%> <code>problemData.isFinished</code> becomes <code>true</code>.
-%> These four steps are:
+%> The routine iterateSubSteps() repeatedly executes three steps until the 
+%> parameter <code>problemData.isSubSteppingFinished</code> becomes 
+%> <code>true</code>.
+%> These three steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. preprocessSubStep()
+%>  2. solveSubStep()
+%>  3. postprocessSubStep()
 %> 
-%> This routine is executed first in each loop iteration and is intended to
-%> execute preprocessing operations, e.g., evaluate boundary conditions or
-%> right hand side values, assemble time-dependent matrix blocks, etc.
+%> This routine is executed second in each loop iteration and is intended to
+%> produce the solution at the next substep.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
@@ -27,8 +26,9 @@
 %>                      loop iteration), as provided by configureProblem()  
 %>                      and preprocessProblem(). @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
+%> @param  nSubStep     The current iteration number of the substepping.
 %>
-%> @retval problemData  The input struct enriched with preprocessed data
+%> @retval problemData  The input struct enriched with solution data
 %>                      for this loop iteration. @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
@@ -51,6 +51,6 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
-% First step in each loop iteration.
+function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSD>
+% Second step in each substepping loop iteration.
 end % function
