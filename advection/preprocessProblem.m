@@ -1,19 +1,22 @@
 function problemData = preprocessProblem(problemData)
 %% Triangulation.
-problemData.g = domainSquare(problemData.hmax); 
-% Alternative: problemData.g = domainPolygon([0 1 1 0], [0 0 1 1], problemData.hmax);
+problemData.g = problemData.generateGridData(problemData.hmax);
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 %% Globally constant parameters.
 problemData.K           = problemData.g.numT;  % number of triangles
 problemData.N           = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
 problemData.tau         = problemData.tEnd / problemData.numSteps;  % time step size
 
-problemData.g.markE0Tint  = problemData.g.idE0T == 0;        % [K x 3] mark local edges that are interior
-problemData.g.markE0TbdrN = zeros(problemData.g.numT,3);     % [K x 3] mark local edges on the Neumann boundary
-problemData.g.markE0TbdrD = ~(problemData.g.markE0Tint | problemData.g.markE0TbdrN); % [K x 3] mark local edges on the Dirichlet boundary
-problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...  % [K x 3] mark local vertices on the Dirichlet boundary
-                            problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD),:)); 
-problemData.g = computeDerivedGridData(problemData.g);       % Precompute some repeatedly evaluated fields
+% [K x 3] arrays that mark local edges (E0T) or vertices (V0T) that are 
+% interior or have a certain boundary type.
+problemData.g.markE0Tint  = problemData.generateMarkE0Tint(problemData.g);
+problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
+problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
+problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...
+                            problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD), :)); 
+
+% Precompute some repeatedly evaluated fields                          
+problemData.g = computeDerivedGridData(problemData.g);       
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.

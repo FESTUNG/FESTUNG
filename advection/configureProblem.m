@@ -11,7 +11,7 @@ problemData.isVisSol    = true; % visualization of solution
 problemData.isSlopeLim  = true; % slope limiting
 problemData.typeSlopeLim = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
 
-problemData.outputFrequency = 1; % no visualization of every timestep
+problemData.outputFrequency = 100; % no visualization of every timestep
 problemData.outputBasename  = ['output' filesep 'solution_' problemData.typeSlopeLim]; % Basename of output files
 problemData.outputTypes     = cellstr('vtk'); % solution output file types
 %% Parameter check.
@@ -30,4 +30,16 @@ problemData.u1Cont = @(t,x1,x2) 0.5 - x2;
 problemData.u2Cont = @(t,x1,x2) x1 - 0.5;
 problemData.cDCont = @(t,x1,x2) zeros(size(x1));
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
+%% Domain and triangulation configuration.
+% Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
+if license('checkout','PDE_Toolbox')
+  problemData.generateGridData = @(hmax) domainPolygon([0 1 1 0], [0 0 1 1], hmax);
+else
+  fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
+  problemData.generateGridData = @domainSquare;
+end % if
+% Specify edge ids of boundary conditions
+problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
+problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
+problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 end % function
