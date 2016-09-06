@@ -10,6 +10,6 @@ fprintf('L2 error w.r.t. the initial condition: %g\n', ...
 %% visualization of inital condition.
 if problemData.isVisSol
   cLagrange = projectDataDisc2DataLagr(cDisc);
-  visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
+  visualizeDataLagr(problemData.g, cLagrange, 'c_h', problemData.outputBasename, 0, problemData.outputTypes)
 end % if
 end % function
