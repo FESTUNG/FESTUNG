@@ -11,9 +11,6 @@ problemData.tau = problemData.tEnd / problemData. numSteps;  % time step size
 problemData.g.markE0Tint  = problemData.generateMarkE0Tint(problemData.g);
 problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
 problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
-% problemData.g.markE0Tint = problemData.g.idE0T == 0; % [K x 3] mark local edges that are interior
-% problemData.g.markE0TbdrN = problemData.g.idE0T == 1 | problemData.g.idE0T == 3; % [K x 3] mark local edges on the Neumann boundary
-% problemData.g.markE0TbdrD = ~(problemData.g.markE0Tint | problemData.g.markE0TbdrN); % [K x 3] mark local edges on the Dirichlet boundary
 problemData.g = computeDerivedGridData(problemData.g);
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
