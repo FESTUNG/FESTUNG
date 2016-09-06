@@ -70,7 +70,7 @@ problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degr
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
 problemData = setdefault(problemData, 'isMask'    , true);  % computation only where species is not constant
-problemData = setdefault(problemData, 'maskTol'   , 1.0e-5);  % maximal tolerance of slope for which species are considered constant
+problemData = setdefault(problemData, 'maskTol'   , 1.0e-8);  % maximal tolerance of slope for which species are considered constant
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
@@ -270,7 +270,7 @@ problemData.cH0Cont = { @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x
                         @(x1, x2) 2*((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 > 0.475 & x1 < 0.525 & x2 < 0.85)) + ...
                                   ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.035) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 > 0.0225) + ...
                                   ((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.02); 
-                        @(x1, x2) -cos(2*pi*(x1-0.5)) .* sin(2*pi*x2) .* (x1<0.5 & x2 > 0.5)};
+                        @(x1, x2) -cos(2*pi*(x1-0.5)) .* sin(2*pi*x2) .* (x1 > 0.25 & x1 < 0.75 & x2 > 0.5)};
                   
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
@@ -292,7 +292,7 @@ end % for
 % NPZ model
 % parameters (Notation as in paper)
 I0 = 1;
-Vm = 0.01;
+Vm = 0.001;
 ks = 1;
 Rm = 0.1;
 ep = 0.001;
