@@ -12,8 +12,8 @@ problemData.isSlopeLim  = true; % slope limiting
 problemData.typeSlopeLim = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
 
 problemData.outputFrequency = 100; % no visualization of every timestep
-problemData.outputBasename  = ['output' filesep 'solution_' problemData.typeSlopeLim]; % Basename of output files
-problemData.outputTypes     = cellstr('vtk'); % solution output file types
+problemData.outputBasename  = ['output' filesep 'solution_advection_' problemData.typeSlopeLim]; % Basename of output files
+problemData.outputTypes     = {'vtk'}; % solution output file types
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta must be zero to three.')
