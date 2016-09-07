@@ -213,7 +213,8 @@ end % if
 for nn = 1 : 3
   if pd.isCoupling
     pd.massFluxQ0E0T(:,nn,:) = 0.5 * bsxfun(@times, permute( reshape( ( cQ0E0Tint{2,nn} + sum(cat(2,cQ0E0TE0T{2,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,1} + ...
-                                                                      ( cQ0E0Tint{3,nn} + sum(cat(2,cQ0E0TE0T{3,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0Tint(:,nn) );
+                                                                      ( cQ0E0Tint{3,nn} + sum(cat(2,cQ0E0TE0T{3,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0Tint(:,nn) ) ...
+                               + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRA(:,nn) );
   end % if
   % Non-linear terms in exterior quadrature points of edges
   for np = 1 : 3
@@ -262,6 +263,9 @@ for nn = 1 : 3
     switch pd.typeBdrL
       case 'natural'
         pd.nonlinearTerms = pd.nonlinearTerms + [ pd.globRL{nn,1}; pd.globRL{nn,2} ] * gHH;
+        
+        % for coupled problems massFluxQ0E0T is zero on land boundary edges
+        % with natural discretization
 
       case 'reflected'
         uHL = pd.g.nuE0Tsqr{nn,2} .* cQ0E0Tint{2,nn} - pd.g.nuE0Tprod{nn} .* cQ0E0Tint{3,nn};
@@ -273,6 +277,9 @@ for nn = 1 : 3
         pd.nonlinearTerms = pd.nonlinearTerms + ...
           [ pd.globRL{nn,1} * (uuHL + gHH) + pd.globRL{nn,2} * uvHL ; ...
             pd.globRL{nn,1} * uvHL + pd.globRL{nn,2} * (vvHL + gHH) ];
+        
+        % for coupled problems massFluxQ0E0T is zero on land boundary edges
+        % with reflected discretization
 
       case 'riemann'
         uHriem = pd.g.nuE0TsqrDiff{nn} .* cQ0E0Tint{2,nn} - 2 * pd.g.nuE0Tprod{nn} .* cQ0E0Tint{3,nn};
@@ -292,7 +299,10 @@ for nn = 1 : 3
             pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
               [ pd.globRL{nn,1} * (uuH + uuHriem + 2 * gHH) + pd.globRL{nn,2} * (uvH + uvHriem) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHriem)); ...
                 pd.globRL{nn,1} * (uvH + uvHriem) + pd.globRL{nn,2} * (vvH + vvHriem + 2 * gHH) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHriem)) ];
-                      
+            
+            % for coupled problems massFluxQ0E0T is zero on land boundary edges
+            % with Lax-Friedrichs-flux discretization
+            
           case 'Roe'
             error('not implemented')
                                           
@@ -350,8 +360,8 @@ for nn = 1 : 3
       pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv;
       pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv);
       
-      if pd.isCoupling
-        pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( uHRiv .* pd.g.nuQ0E0T{nn,1} + vHRiv .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRI(:,nn) );
+      if pd.isCoupling % squeeze needed since river boundary flux is sparse
+        pd.massFluxQ0E0T(:,nn,:) = squeeze(pd.massFluxQ0E0T(:,nn,:)) + bsxfun(@times, reshape( uHRiv .* pd.g.nuQ0E0T{nn,1} + vHRiv .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K] ).', pd.g.markE0TbdrRI(:,nn) );
       end % if
     end % if
   end % if
@@ -373,11 +383,16 @@ for nn = 1 : 3
           pd.globROS{nn,1} * (uvH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHHOS) ];
       
       cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Tos', cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
-        
+      
       switch pd.typeFlux
         case 'Lax-Friedrichs'
           lambda = execin('swe/computeLaxFriedrichsCoefficient', cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
           pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + pd.globVOS{nn} * (lambda .* (hQ0E0Tint{nn} - hOSQ0E0T));
+          
+          if pd.isCoupling
+            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2} ...
+                                                                                                   + 0.5 * lambda .* (hQ0E0Tint{nn} - hOSQ0E0T), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrOS(:,nn) );
+          end % if
           
         case 'Roe'
           error('not implemented')
@@ -389,6 +404,10 @@ for nn = 1 : 3
       pd.nonlinearTerms = pd.nonlinearTerms + ...
         [ pd.globROS{nn,1} * (uuHOS + gHHOS) + pd.globROS{nn,2} * uvHOS ; ...
           pd.globROS{nn,1} * uvHOS + pd.globROS{nn,2} * (vvHOS + gHHOS) ];
+      
+      if pd.isCoupling
+        pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrOS(:,nn) );
+      end % if
     end % if
   end % if
 end % for
