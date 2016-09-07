@@ -1,13 +1,12 @@
 function problemData = preprocessProblem(problemData)
 
 %% Triangulation.
-intBound      = problemData.heightDarcy*ones(problemData.NX+1,1);
-problemData.g = generateGridData(width, problemData.NX, problemData.NZdarcy, 1, intBound, intBound+1);
+problemData.g = problemData.generateGrid(problemData.numElem(1), problemData.numElem(2));
 
 %% Globally constant parameters.
-problemData.NT = problemData.g.numTsub;  % number of triangles
-problemData.N = (problemData.p + 1)^2;  % number of local DOFs
-problemData.tau = problemData.tEnd / problemData. numSteps;  % time step size
+% problemData.NT = problemData.g.numTsub;  % number of triangles
+problemData.N = (problemData.p + 1).^2;  % number of local DOFs
+problemData.tau = (problemData.tEnd - problemData.t0) / problemData.numSteps;  % time step size
 
 %% Additional mesh data
 problemData.g.markE0Tint = problemData.g.idE0T(1:problemData.NT,:) == 0; % [K x 3] mark local edges that are interior
