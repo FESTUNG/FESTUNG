@@ -68,8 +68,8 @@ problemData.tEnd        = 1; % end time
 
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution
-problemData.isSlopeLim  = false; % slope limiting
-problemData.typeSlopeLim = ''; % Type of slope limiter (linear, hierarch_vert, strict)
+problemData.isSlopeLim  = true; % slope limiting
+problemData.typeSlopeLim = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
 
 problemData.outputFrequency = 32; % no visualization of every timestep
 problemData.outputBasename  = ['output' filesep 'solution_advection_' problemData.typeSlopeLim]; % Basename of output files
@@ -83,9 +83,9 @@ assert(~problemData.isSlopeLim || problemData.p > 0, 'Slope limiting only availa
 %% Coefficients and boundary data
 problemData.c0Cont = @(x1, x2)  sin(x1+x2)+1;
 problemData.fCont = @(t,x1,x2) zeros(size(x1));
-problemData.u1Cont = @(t,x1,x2) x1==x1;
-problemData.u2Cont = @(t,x1,x2) 0*x1;
-problemData.cDCont = @(t,x1,x2) sin(x1+x2-t)+1;
+problemData.u1Cont = @(t,x1,x2) 0.5 - x2;
+problemData.u2Cont = @(t,x1,x2) x1 - 0.5;
+problemData.cDCont = @(t,x1,x2) zeros(size(x1));
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
