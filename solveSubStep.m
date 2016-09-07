@@ -67,9 +67,9 @@ numQuad2D = length(W);
 mask = logical(problemData.mask * ones(problemData.numSpecies,1));
 
 % Assembly of time-dependent global matrices
-globG = assembleMatElemDphiPhiFuncDiscVec(mask, problemData.g, problemData.hatG, problemData.uHDisc, problemData.vHDisc);
-globR = assembleMatEdgePhiPhiValUpwind(mask, problemData.g, problemData.g.markE0Tint, problemData.hatRdiagOnQuad, ...
-                                       problemData.hatRoffdiagOnQuad,  problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN);
+globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, problemData.uHDisc, problemData.vHDisc, mask);
+globR = assembleMatEdgePhiPhiValUpwind(problemData.g, problemData.g.markE0Tint, problemData.hatRdiagOnQuad, ...
+                                       problemData.hatRoffdiagOnQuad,  problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN, mask);
 % Building the system
 sysA = -globG{1} - globG{2} + globR;
 
