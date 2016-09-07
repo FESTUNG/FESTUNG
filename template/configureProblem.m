@@ -14,11 +14,14 @@
 %> This routine is called before any other function for the problem.
 %> It should define all problem parameters.
 %>
-%> The struct must provide a positive numeric parameter <code>numSteps</code>
-%> that specifies the number of iterative steps (e.g., number of time
-%> steps) which are to be executed in the main part of the solution
-%> algorithm.
-%> For stationary problems set this to 1.
+%> The only requirement for this struct is to provide a boolean parameter 
+%> <code>problemData.isFinished</code> that specifies whether the 
+%> iterative solver has finished (i.e., the parameters value is 
+%> <code>true</code>).
+%> Typically, this parameter is introduced in initializeProblem() and
+%> updated in postprocessStep() according to the progress of the solver.
+%>
+%> See main() for more details about the solver structure.
 %>
 %> @param  problemData  A (probably) empty struct with problem parameters.
 %>                      @f$[\text{struct}]@f$
@@ -48,5 +51,4 @@
 %
 function problemData = configureProblem(problemData)
 % Specify problem parameters here
-problemData.numSteps = 1; % Number of loop iterations
 end % function

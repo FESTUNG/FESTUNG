@@ -1,5 +1,5 @@
 % Compute the DG/modal basis representation of an algebraic function.
-%
+
 %===============================================================================
 %> @file projectFuncCont2DataDisc.m
 %>
@@ -65,6 +65,9 @@
 %> @param refElemPhiPhi Local matrix @f$\hat{\mathsf{M}}@f$ as provided
 %>                    by <code>integrateRefElemPhiPhi()</code>.
 %>                    @f$[N \times N]@f$
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi2D.
 %> @retval The representation matrix of the DG/modal basis representation.
 %>         @f$[K \times N]@f$
 %>

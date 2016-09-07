@@ -8,9 +8,9 @@
 %>
 %> @brief Third step of the four-part algorithm in the main loop.
 %>
-%> The main loop repeatedly executes four steps until the number of
-%> iterations provided by configureProblem in the parameter
-%> <code>numSteps</code> is reached. These four steps are:
+%> The main loop repeatedly executes four steps until the parameter
+%> <code>problemData.isFinished</code> becomes <code>true</code>.
+%> These four steps are:
 %>
 %>  1. preprocessStep()
 %>  2. solveStep()
@@ -49,7 +49,8 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = postprocessStep(problemData, nStep)
+function problemData = postprocessStep(problemData, nStep) %#ok<INUSD>
 % Third step in each loop iteration.
+problemData.isFinished = true;
 end
 

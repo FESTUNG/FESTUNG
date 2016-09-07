@@ -24,7 +24,9 @@ velp = (sqrt(8*max(velN)+1)-3)/2;
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', p, N, K)
 %% Lookup table for basis function.
-problemData.basesOnQuad = computeBasesOnQuad(max(N, velN), struct, sort(unique([2*p, 2*p+1, 2*velp, 2*velp+1])));
+requiredOrders = unique([2*p, 2*p+1, 2*velp, 2*velp+1]);
+requiredOrders = requiredOrders(requiredOrders>0);
+problemData.basesOnQuad = computeBasesOnQuad(max(N, velN), struct, sort(requiredOrders));
 if any(cell2mat(problemData.isSlopeLim))
   problemData.basesOnQuad = computeTaylorBasesV0T(problemData.g, N, problemData.basesOnQuad);
 end % if
@@ -42,4 +44,6 @@ if any(cell2mat(problemData.isSlopeLim))
   problemData.globMDiscTaylor = assembleMatElemPhiDiscPhiTaylor(problemData.g, N, problemData.basesOnQuad);
   problemData.globMCorr = spdiags(1./diag(globMTaylor), 0, K*N, K*N) * globMTaylor;
 end % if
+%% Function handle
+problemData.swe_projectDataQ0T2DataDisc = getFunctionHandle('swe/projectDataQ0T2DataDisc');
 end % function

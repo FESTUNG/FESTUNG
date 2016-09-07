@@ -8,9 +8,9 @@
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %>
-%> The main loop repeatedly executes four steps until the number of
-%> iterations provided by configureProblem in the parameter
-%> <code>numSteps</code> is reached. These four steps are:
+%> The main loop repeatedly executes four steps until the parameter
+%> <code>problemData.isFinished</code> becomes <code>true</code>.
+%> These four steps are:
 %>
 %>  1. preprocessStep()
 %>  2. solveStep()
@@ -53,4 +53,9 @@
 function problemData = solveStep(problemData, nStep)
 % Second step in each loop iteration. Should compute the next step of the
 % solution.
+
+% The solveStep can consist of substeps (e.g., in a Runge-Kutta method),
+% for which iterateSubSteps() can be used.
+problemData.isSubSteppingFinished = false;
+problemData = iterateSubSteps(problemData, nStep);
 end % function

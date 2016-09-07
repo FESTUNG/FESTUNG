@@ -342,12 +342,18 @@ if ~isempty(pd.slopeLimList)
 end % if
 
 % Visualization of coefficients
-if any(ismember(pd.outputList, 'fc'))
-  dataLagr = projectDataDisc2DataLagr(fcDisc);
-  visualizeDataLagr(pd.g, dataLagr, 'f_c', ['output/' pd.name '_f_c'], 0, pd.outputTypes);
+varName = {};
+dataLagr = {};
+if ismember('f_c', pd.outputList)
+  varName = [ varName, {'f_c'} ];
+  dataLagr = [ dataLagr, {projectDataDisc2DataLagr(fcDisc)} ];
 end % if
-if any(ismember(pd.outputList, 'zb'))
-  visualizeDataLagr(pd.g, pd.zbLagr, 'z_b', ['output/' pd.name '_z_b'], 0, pd.outputTypes);
+if ismember('z_b', pd.outputList)
+  varName = [ varName, {'z_b'} ];
+  dataLagr = [ dataLagr, {pd.zbLagr} ];
+end % if
+if ~isempty(varName)
+  visualizeDataLagr(pd.g, dataLagr, varName, ['output' filesep pd.name '_coef'], 0, pd.outputTypes);
 end % if
 
 %% Assembly of time-independent global matrices corresponding to linear contributions.

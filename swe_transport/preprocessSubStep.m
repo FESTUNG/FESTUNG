@@ -3,8 +3,9 @@ problemData.sweData = problemData.swe_preprocessSubStep(problemData.sweData, nSt
 
 % use velocities of swe for transport problem
 problemData.transportData.vNormalOnQuadEdge = problemData.sweData.massFluxQ0E0T;
-problemData.transportData.u1Disc = problemData.sweData.u1Disc;
-problemData.transportData.u2Disc = problemData.sweData.u2Disc;
+problemData.transportData.hDisc = problemData.sweData.hDisc;
+problemData.transportData.uHDisc = problemData.sweData.uHDisc;
+problemData.transportData.vHDisc = problemData.sweData.vHDisc;
 
 problemData.transportData = problemData.transport_preprocessSubStep(problemData.transportData, nStep, nSubStep);
 end % function

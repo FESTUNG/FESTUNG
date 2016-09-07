@@ -4,7 +4,7 @@
 % time but used in every step. They are saved as part of the grid.
 
 %===============================================================================
-%> @file computeDerivedGridData.m
+%> @file advection/computeDerivedGridData.m
 %>
 %> @brief Computes various additional fields needed throughout the advection
 %>        problem presented in @ref RAWFK2016 . These fields only contain

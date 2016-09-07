@@ -8,7 +8,6 @@ problemData.sweData.isCoupling = true;
 problemData.sweData.p = p;
 
 problemData.sweData = execin('swe/configureProblem', problemData.sweData);
-% problemData.sweData.schemeOrder = 1;
 
 % Configuration for transport solver
 problemData.transportData = struct;

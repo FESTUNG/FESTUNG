@@ -4,7 +4,7 @@
 % saved as part of the grid.
 
 %===============================================================================
-%> @file computeDerivedGridData.m
+%> @file diffusion/computeDerivedGridData.m
 %>
 %> @brief Computes various additional fields needed throughout the diffusion
 %>        problem presented in @ref FRAK2015 . These fields only contain
@@ -46,15 +46,6 @@
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0Tint <code>logical</code> arrays that mark each triangles
-%>                    (interior) edges on which the matrix blocks should be
-%>                    assembled @f$[K \times 3]@f$
-%> @param  markE0TbdrD <code>logical</code> arrays that mark each triangles
-%>                    (Dirichlet boundary) edges on which the vector entries should be
-%>                    assembled @f$[K \times 3]@f$
-%> @param  markE0TbdrN <code>logical</code> arrays that mark each triangles
-%>                    (Neumann boundary) edges on which the vector entries should be
-%>                    assembled @f$[K \times 3]@f$
 %> @retval g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 

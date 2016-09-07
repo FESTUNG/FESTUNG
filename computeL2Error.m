@@ -69,6 +69,9 @@
 %> @param  funcCont   A function handle for the continuous solution
 %> @param  qOrd       The order of the quadrature rule provided by 
 %>                    <code>quadRule2D()</code>
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi2D.
 %> @retval ret The discretization error @f$[\text{scalar}]@f$
 %>
 %> This file is part of FESTUNG
