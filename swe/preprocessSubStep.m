@@ -237,7 +237,7 @@ for nn = 1 : 3
             pd.globV{nn,np} * (lambda .* (cQ0E0Tint{3,nn} - cQ0E0TE0T{3,nn,np})) ];
 
         if pd.isCoupling
-          pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * bsxfun(@times, permute( reshape( lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TE0T{nn,np} * ones(K,1) );
+          pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * bsxfun(@times, permute( reshape( lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0T{nn,np} );
         end % if
       case 'Roe'
         error('not implemented')

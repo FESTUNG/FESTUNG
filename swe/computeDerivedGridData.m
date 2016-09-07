@@ -53,6 +53,10 @@
 %> <code>g.areaE0T</code>, <code>g.nuE0T</code> and <code>markE0TbdrOS</code>.
 %> @f$[3 \times 2 \text{ cell}]@f$
 %>
+%> g.markE0T provides the vector equal to <code>g.markE0TE0T</code> 
+%> summed over each row.
+%> @f$[3 \times 3 \text{ cell}]@f$
+%>
 %> g.areaMarkE0T provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, and the vector equal to <code>g.markE0TE0T</code> 
 %> summed over each row.
@@ -123,7 +127,8 @@ for nn = 1 : 3
 		g.areaNuE0TbdrOS{nn,m} = areaNuE0T{nn,m} .* g.markE0TbdrOS(:,nn);
 	end % for
 	for np = 1 : 3
-		g.areaMarkE0T		{nn,np} = g.areaE0T(:,nn) .* (g.markE0TE0T{nn,np} * ones(g.numT,1));
+    g.markE0T		    {nn,np} = g.markE0TE0T{nn,np} * ones(g.numT,1);
+		g.areaMarkE0T		{nn,np} = g.areaE0T(:,nn) .* g.markE0T{nn,np};
 		g.areaMarkE0TE0T{nn,np} = bsxfun( @times, g.markE0TE0T{nn, np}, g.areaE0T(:,nn) );
 		for m = 1 : 2
 			g.areaNuMarkE0TE0T{nn,np,m} = bsxfun(@times, g.markE0TE0T{nn, np}, areaNuE0T{nn,m});
