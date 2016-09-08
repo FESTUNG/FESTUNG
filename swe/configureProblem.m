@@ -49,13 +49,14 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'coupling');
+pd = setdefault(pd, 'name', 'bahamas');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
-pd = setdefault(pd, 'configSource', 'debug');
+% - 'manual' calls configureManualADCIRC()
+pd = setdefault(pd, 'configSource', 'manual');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -65,11 +66,11 @@ pd = setdefault(pd, 'configSource', 'debug');
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-pd = setdefault(pd, 'gridSource', 'square');
+pd = setdefault(pd, 'gridSource', 'ADCIRC');
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
-pd = setdefault(pd, 'p', 1);
+pd = setdefault(pd, 'p', 0);
 
 %% Time stepping parameters
 pd = setdefault(pd, 'schemeType', 'explicit'); % type of time stepping scheme ('explicit' or 'semi-implicit')
@@ -101,6 +102,8 @@ switch pd.configSource
     pd = configureAnalyticalTest(pd);
   case 'ADCIRC'
     pd = configureADCIRC(pd);
+  case 'manual'
+    pd = configureManualADCIRC(pd);
   otherwise
     error('Invalid config source.')
 end % switch
@@ -287,7 +290,7 @@ pd.t0 = pd.configADCIRC.STATIM;
 pd = setdefault(pd, 'tEnd', pd.t0 + pd.configADCIRC.RNDAY * 86400);
 pd.dt = pd.configADCIRC.DT;
 pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
-pd = setdefault(pd, 'outputCount', 200); % Number of outputs over total simulation time
+pd = setdefault(pd, 'outputCount', 72); % Number of outputs over total simulation time
 
 % Adaptive time stepping
 pd.isAdaptiveTimestep = pd.configADCIRC.NDTVAR == 1;
@@ -336,4 +339,117 @@ pd.hotstartInput = pd.configADCIRC.OUTP;
 
 pd.isHotstartOutput = pd.configADCIRC.NHSTAR == 1;
 pd.hotstartOutputFrequency = pd.configADCIRC.NHSINC;
+end % function
+
+function pd = configureManualADCIRC(pd)
+
+% Verify input files exist
+assert(exist(['swe/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.14" not found!'])
+assert(exist(['swe/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.17" not found!'])
+
+% Overwrite grid config source
+pd.gridSource = 'ADCIRC';
+
+switch pd.name
+  case 'bahamas'
+    pd.isSolutionAvail = false;
+    pd.isRhsAvail = false;
+
+    pd.isTidalDomain = false;
+    pd.isHotstartInput = false;
+    pd.isHotstartOutput = false;
+    pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
+
+    % Overwrite grid parameters
+    pd.isSpherical = false;
+    pd.configADCIRC.SLAM0 = 0;
+    pd.configADCIRC.SFEA0 = 0;
+
+    % Overwrite time-stepping parameters
+    pd = setdefault(pd, 't0', 0); % Start time of simulation
+    pd = setdefault(pd, 'tEnd', 1036800);  % end time
+    pd = setdefault(pd, 'dt', 30); % Time step size
+    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
+    pd = setdefault(pd, 'outputCount', 240); % Number of outputs over total simulation time
+
+    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
+
+    pd.isSteadyState = false; % End simulation upon convergence
+
+    % Solution parameters
+    pd.gConst = 9.81;
+    pd.minTol = 0.001;
+
+    pd.isBottomFrictionNonlinear = true; % NOLIBF
+    pd.isBottomFrictionVarying = false; % NWP
+    pd.bottomFrictionCoef = 0.0090;
+
+    % Coriolis coefficient
+    pd.configADCIRC.NCOR = 0;
+    pd.configADCIRC.CORI = 3.19e-5;
+
+    % Boundary conditions
+    pd.xiOSCont = @(x1,x2,t)  ( 0.075 * cos(0.000067597751162*t - pi/180*194.806 ) ...
+                              + 0.095 * cos(0.000072921165921*t - pi/180*206.265 ) ...
+                              + 0.10  * cos(0.000137879713787*t - pi/180*340.0   ) ...
+                              + 0.395 * cos(0.000140518917083*t - pi/180*  0.0   ) ...
+                              + 0.06  * cos(0.000145444119418*t - pi/180*42.97180) ) * (x1==x1);
+
+    pd.configADCIRC.NBFR = 0;
+
+    pd.isRivCont = false;
+  case 'test2'
+    pd.isSolutionAvail = false;
+    pd.isRhsAvail = false;
+    pd.isTidalDomain = false;
+    
+    pd.isHotstartInput = true;
+    pd.hotstartInput = [pd.name '_initialCondition.mat'];
+    pd.isHotstartOutput = false;
+    
+    pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
+    
+    % Overwrite grid parameters
+    pd.isSpherical = false;
+    pd.configADCIRC.SLAM0 = 0;
+    pd.configADCIRC.SFEA0 = 0;
+    
+    % Overwrite time-stepping parameters
+    pd = setdefault(pd, 't0', 0); % Start time of simulation
+    pd = setdefault(pd, 'tEnd', 259.2);  % end time
+    pd = setdefault(pd, 'dt', 0.2); % Time step size
+    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
+    pd = setdefault(pd, 'outputCount', 72); % Number of outputs over total simulation time
+    
+    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
+    
+    % Steady state simulation
+    pd.isSteadyState = true;
+    pd.convergenceCriterion = 0.0031;
+    
+    % Solution parameters
+    pd.gConst = 0.16;
+    pd.minTol = 0.05;
+    
+    pd.isBottomFrictionNonlinear = false; % NOLIBF
+    pd.isBottomFrictionVarying = false; % NWP
+    pd.bottomFrictionCoef = 0.0;
+    
+    % Ramping function
+    pd.isRamp = false;
+    
+    % Coriolis coefficient
+    pd.configADCIRC.NCOR = 0;
+    pd.configADCIRC.CORI = 0.0;
+    
+    pd.configADCIRC.NBFR = 0;
+    
+    pd.isRivCont = true;
+    pd.xiRivCont = @(x1,x2,t) 0*x1;
+    pd.uRivCont = @(x1,x2,t) x1==x1;
+    pd.vRivCont = @(x1,x2,t) 0*x1;
+  otherwise
+    error('Invalid model.')
+end % switch
+
 end % function
