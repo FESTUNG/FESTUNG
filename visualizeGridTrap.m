@@ -48,7 +48,7 @@ function visualizeGridTrap(g)
 figure('Color', [1, 1, 1]); % white background
 hold('on'),  axis('off')
 daspect([1, 1, 1]) % adjust aspect ration, requires Octave >= 3.8
-textarray = @(x1,x2,s) arrayfun(@(a,b,c) text(a,b,int2str(c),'Color','blue'), x1, x2, s);
+textarray = @(x1,x2,s,col) arrayfun(@(a,b,c) text(a,b,int2str(c),'Color',col), x1, x2, s);
 %% Trapezoidal boundaries.
 X1 = reshape(g.coordV(:,1), [], g.numElem(2) + 1).';
 X2 = reshape(g.coordV(:,2), [], g.numElem(2) + 1).';
@@ -58,22 +58,22 @@ w = [4/9, 4/9, 1/18, 1/18; 1/18, 1/18, 4/9, 4/9; ...
      1/18, 4/9, 4/9, 1/18; 4/9, 1/18, 1/18, 4/9].';
 for kE = 1 : 4
   textarray(reshape(g.coordV(g.V0T,1),g.numT,4)*w(:,kE), ...
-            reshape(g.coordV(g.V0T,2),g.numT,4)*w(:,kE), kE*ones(g.numT, 1))
+            reshape(g.coordV(g.V0T,2),g.numT,4)*w(:,kE), kE*ones(g.numT, 1), 'blue')
 end % for
 %% Global vertex numbers.
-textarray(g.coordV(:,1), g.coordV(:,2), (1:g.numV)');
+textarray(g.coordV(:,1), g.coordV(:,2), (1:g.numV)', 'green');
 %% Local vertex numbers.
 w = ones(4) / 18 + eye(4) * (5/6 - 1/18);
 for kE = 1 : 4
   textarray(reshape(g.coordV(g.V0T,1),g.numT,4)*w(:,kE), ...
-            reshape(g.coordV(g.V0T,2),g.numT,4)*w(:,kE), kE*ones(g.numT, 1))
+            reshape(g.coordV(g.V0T,2),g.numT,4)*w(:,kE), kE*ones(g.numT, 1), 'blue')
 end % for
 %% Global edge numbers.
-textarray(g.baryE(:,1), g.baryE(:,2), (1:g.numE)');
+textarray(g.baryE(:,1), g.baryE(:,2), (1:g.numE)', 'green');
 %% Element numbers.
-textarray(g.baryT(:,1), g.baryT(:,2), (1:g.numT)');
+textarray(g.baryT(:,1), g.baryT(:,2), (1:g.numT)', 'green');
 %% Edge IDs.
 markEbdr = g.idE ~= 0; % mark boundary edges
 textarray(g.baryE(markEbdr,1) + g.nuE(markEbdr,1).*g.areaE(markEbdr)/8, ...
-  g.baryE(markEbdr,2) + g.nuE(markEbdr,2).*g.areaE(markEbdr)/8, g.idE(markEbdr))
+  g.baryE(markEbdr,2) + g.nuE(markEbdr,2).*g.areaE(markEbdr)/8, g.idE(markEbdr), 'red')
 end % function
