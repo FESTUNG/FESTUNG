@@ -23,24 +23,25 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 S_0    = 1;
 paramD = 0.01;
 % Diffusion matrix
-problemData.K11 = @(t,x1,x2) x1-x1 + exp(x2/5) / S_0;
-problemData.K12 = @(t,x1,x2) x1-x1 + 0.5 / S_0;
-problemData.K21 = @(t,x1,x2) x2-x2 + 1/3 / S_0;
-problemData.K22 = @(t,x1,x2) x2-x2 + exp(x1/5) / S_0;
+problemData.KCont = cell(2,2);
+problemData.KCont{1,1} = @(t,x1,x2) x1-x1 + exp(x2/5) / S_0;
+problemData.KCont{1,2} = @(t,x1,x2) x1-x1 + 0.5 / S_0;
+problemData.KCont{2,1} = @(t,x1,x2) x2-x2 + 1/3 / S_0;
+problemData.KCont{2,2} = @(t,x1,x2) x2-x2 + exp(x1/5) / S_0;
 % Analytical solution
 problemData.hCont = @(t,x1,x2) sin(paramD * (t+x1)) .* sin(paramD * (t+x2));
 problemData.q1Cont = @(t,x1,x2) -paramD * cos(paramD * (t+x1)) .* sin(paramD * (t+x2));
 problemData.q2Cont = @(t,x1,x2) -paramD * sin(paramD * (t+x1)) .* cos(paramD * (t+x2));
 % Boundary conditions
-problemData.gNCont = @(t,x1,x2) (2 * (x1 > 1) - 1) .* ( problemData.q1Cont(t,x1,x2) .* problemData.K11(t,x1,x2) ...
-                       + problemData.q2Cont(t,x1,x2) .* problemData.K12(t,x1,x2) );        % Neumann boundary condition
+problemData.gNCont = @(t,x1,x2) (2 * (x1 > 1) - 1) .* ( problemData.q1Cont(t,x1,x2) .* problemData.KCont{1,1}(t,x1,x2) ...
+                       + problemData.q2Cont(t,x1,x2) .* problemData.KCont{1,2}(t,x1,x2) );        % Neumann boundary condition
 problemData.hDCont = problemData.hCont; % Dirichlet boundary condition
 % Analytical right hand side
-problemData.f = @(t,x1,x2) ( ...
-                paramD^2 * problemData.hCont(t,x1,x2) .* ( problemData.K11(t,x1,x2) + problemData.K22(t,x1,x2) ) - ...
-                paramD^2 * cos(paramD * (t+x1)) .* cos(paramD * (t+x2)) + ...
-                paramD * cos(paramD * (t+x1)) .* sin(paramD * (t+x2)) + ...
-                paramD * sin(paramD * (t+x1)) .* cos(paramD * (t+x2)) ) / S_0;
+problemData.fCont = @(t,x1,x2) ( ...
+                    paramD^2 * problemData.hCont(t,x1,x2) .* ( problemData.KCont{1,1}(t,x1,x2) + problemData.KCont{2,2}(t,x1,x2) ) - ...
+                    paramD^2 * cos(paramD * (t+x1)) .* cos(paramD * (t+x2)) + ...
+                    paramD * cos(paramD * (t+x1)) .* sin(paramD * (t+x2)) + ...
+                    paramD * sin(paramD * (t+x1)) .* cos(paramD * (t+x2)) ) / S_0;
 
 %% Domain and triangulation.
 problemData.generateGrid = @(numElem) domainRectTrap([0, domainWidth], [0, domainHeight], numElem);
