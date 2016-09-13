@@ -8,6 +8,7 @@ end
 
 %% Compute characteristic numbers
 NZ       = NZsupra + NZsub;
+g.numElem = [NX, NZ];
 g.NX     = NX;
 g.NZsupra = NZsupra;
 g.numV   = (NX+1) * (NZ + 1);
@@ -54,6 +55,7 @@ idE(g.numT+1:g.numT+NX,:) = 4;
 idE(g.numT + NX * (NZsub + 1) + 1 : NX :  g.numT + NX * (NZ + 1) , 1) = 5;
 idE(g.numT + NX +1 : NX :  g.numT + NX * (NZsub + 1) , 1) = 6;
 g.idE0T = idE(g.E0T);
+g.idE = idE;
 %% Create table of coordinates of vertices of Trapezodials
 g.coordV0T = zeros( g.numT , 4 , 2 );
 for i = 1 : 4
@@ -78,6 +80,8 @@ g.ACBDsub = g.ACBD(1:g.numTsub);    g.ACBDsupra = g.ACBD(g.numTsub+1:g.numT);
 g.NuLengthE0T = zeros( g.numT , 4 , 2);
 NuLengthE = ( g.coordV( g.V0E(:,2) , : ) - g.coordV( g.V0E(:,1) , : ) ) ...
     * [0, -1; 1, 0];
+g.areaE = (g.coordV(g.V0E(:, 2), :) - g.coordV(g.V0E(:, 1), :));
+g.nuE = NuLengthE ./ g.areaE;
 g.NuLengthE0T(:,1,:) = NuLengthE( g.E0T(:, 1), : );
 g.NuLengthE0T(:,2,:) = - NuLengthE( g.E0T(:, 2), : );
 g.NuLengthE0T(:,3,:) = NuLengthE( g.E0T(:, 3), : );
@@ -116,10 +120,10 @@ g.areaTsub = g.areaT(1:g.numTsub);
 g.areaTsupra = g.areaT(g.numTsub + 1 : g.numT);
 %% Generate Vector of Barycenters of Edges of Tapezoids
 g.baryE0T = zeros( g.numT , 2 );
-baryE = 0.5 * (g.coordV(g.V0E(:, 1), :) + g.coordV(g.V0E(:, 2), :));
+g.baryE = 0.5 * (g.coordV(g.V0E(:, 1), :) + g.coordV(g.V0E(:, 2), :));
 for i = 1 : 4
-    g.baryE0T(:, i, 1) = baryE(g.E0T(:,i), 1)';
-    g.baryE0T(:, i, 2) = baryE(g.E0T(:,i), 2)';
+    g.baryE0T(:, i, 1) = g.baryE(g.E0T(:,i), 1)';
+    g.baryE0T(:, i, 2) = g.baryE(g.E0T(:,i), 2)';
 end  % for
 g.baryE0Tsub = g.baryE0T(1:g.numTsub,:,:);
 g.baryE0Tsupra = g.baryE0T(g.numTsub+1:g.numT,:,:);
