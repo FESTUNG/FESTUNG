@@ -75,7 +75,7 @@ textarray(g.baryT(:,1), g.baryT(:,2), (1:g.numT)', 'green');
 %% Edge IDs.
 markE0Tbdr = g.idE0T ~= 0;
 [r, c] = find(markE0Tbdr);
-ind1 = sub2ind([g.numT, 4, 2], r, c, ones(size(r)));
+ind1 = sub2ind([g.numT, 4, 2], r, c, 1 * ones(size(r)));
 ind2 = sub2ind([g.numT, 4, 2], r, c, 2 * ones(size(r)));
 textarray(g.baryE0T(ind1) + g.nuE0T(ind1).*g.areaE0T(markE0Tbdr)/8, ...
           g.baryE0T(ind2) + g.nuE0T(ind2).*g.areaE0T(markE0Tbdr)/8, ...

@@ -1,7 +1,8 @@
 function problemData = preprocessProblem(problemData)
 
 %% Triangulation.
-problemData.g = problemData.generateGrid(problemData.numElem(1), problemData.numElem(2));
+problemData.g = problemData.generateGrid(problemData.numElem);
+if problemData.isVisGrid, visualizeGridTrap(problemData.g); end
 
 %% Globally constant parameters.
 problemData.N = (problemData.p + 1)^2;  % number of local DOFs
@@ -18,8 +19,8 @@ fprintf('Computing with polynomial order %d (%d local DOFs) on %d trapezoidals.\
 %% Lookup table for basis function.
 problemData.basesOnQuad = computeBasesOnQuadTrap(problemData.p, problemData.qOrd);
 
-%% Computation of matrices on the reference triangle.
-hatM = integrateRefElemTrapPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad);
+%% Computation of matrices on the reference element.
+problemData.hatM = integrateRefElemTrapPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad);
 problemData.hatG = integrateRefElemTrapDphiPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad);
 hatH = integrateRefElemTrapDphiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad);
 problemData.hatRdiag = integrateRefEdgeTrapPhiIntPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
@@ -28,7 +29,7 @@ hatSdiag = integrateRefEdgeTrapPhiIntPhiInt(problemData.N, problemData.qOrd, pro
 hatSoffdiag = integrateRefEdgeTrapPhiIntPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
 
 %% Assembly of time-independent global matrices.
-problemData.globM = assembleMatElemTrapPhiPhi(problemData.g, hatM);
+problemData.globM = assembleMatElemTrapPhiPhi(problemData.g, problemData.hatM);
 problemData.globH = assembleMatElemTrapDphiPhi(problemData.g, hatH);
 problemData.globQ = assembleMatEdgeTrapPhiPhiNu(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag);
 problemData.globQN = assembleMatEdgeTrapPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrN, hatSdiag);
@@ -37,5 +38,4 @@ problemData.globSD = problemData.eta * assembleMatEdgeTrapPhiIntPhiInt(problemDa
 
 problemData.sysW = [ sparse(2 * problemData.g.numT * problemData.N, 3 * problemData.g.numT * problemData.N) ; ...
                      sparse(problemData.g.numT * problemData.N, 2 * problemData.g.numT * problemData.N), problemData.globM ];
-                 
 end % function
