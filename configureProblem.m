@@ -3,7 +3,7 @@ function problemData = configureProblem(problemData)
 %% Parameters.
 domainWidth = 100;  % width of computational domain
 domainHeight = 2;  % height of computational domain
-problemData.numElem = [16, 16];  % number of elements per direction
+problemData.numElem = [2, 2];  % number of elements per direction
 problemData.p = 1; % local polynomial degree
 problemData.qOrd = 4; % order of quadrature formula
 problemData.t0 = 0; % start time

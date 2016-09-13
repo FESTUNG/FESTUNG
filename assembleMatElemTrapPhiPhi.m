@@ -1,4 +1,4 @@
-function globM = assembleMatElemTrapPhiPhi(g, hatM)
-globM = kron(spdiags(g.deltaJ0T{1}, 0, g.numT, g.numT), hatM{1}) + ...
-        kron(spdiags(g.deltaJ0T{2}, 0, g.numT, g.numT), hatM{2});
+function globM = assembleMatElemTrapPhiPhi(g, refElemPhiPhi)
+globM = kron(spdiags(g.detJ0T{1}, 0, g.numT, g.numT), refElemPhiPhi{1}) + ...
+        kron(spdiags(g.detJ0T{2}, 0, g.numT, g.numT), refElemPhiPhi{2});
 end  % function
