@@ -93,7 +93,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -241,9 +241,10 @@ end % function
 %
 %> @brief Helper routine to write Tecplot-files.
 function visualizeDataLagrTec(g, dataLagr, varName, fileName, tLvl)
+error('not yet implemented')
 [K, N] = size(dataLagr{1});
 %% Open file.
-fileName = [fileName, '.', num2str(tLvl), '.plt'];
+fileName = [fileName, '.', num2str(tLvl), '.dat'];
 file     = fopen(fileName, 'wt'); % if this file exists, then overwrite
 %% Header.
 fprintf(file, 'TITLE="FESTUNG output file"\n');
