@@ -10,5 +10,6 @@ fExOnQuadPts = funcCont(X1, X2);
 fApprxOnQuadPts = dataDisc * basesOnQuad.phi2D(:,1:N).'; % [K x R] = [K x N] * [N x R]
 
 % Compute error
-err = sqrt(2 * dot((fApprxOnQuadPts - fExOnQuadPts).^2 * W.', g.areaT)); 
+err = sqrt(dot((fApprxOnQuadPts - fExOnQuadPts).^2 * W.', g.areaT));
 end  % function
+
