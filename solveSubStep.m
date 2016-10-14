@@ -63,7 +63,7 @@ dt = problemData.dt;
 % Compute height from potentially different approximation orders:
 % zbDiscLin is always linear (N=3) while cDisc(:,:,1) can be of any
 % approximation order
-hDisc = reshape(execin('swe/computeSumDataDiscDataDisc', problemData.cDisc(:,:,1), -problemData.zbDiscLin).', [], 1);
+hDisc = reshape(computeOpDataDiscDataDisc(@minus, problemData.cDisc(:,:,1), problemData.zbDiscLin).', [], 1);
 
 % Build right hand side vector
 sysV = cell2mat(problemData.globL) - cell2mat(problemData.globLRI) - ...
