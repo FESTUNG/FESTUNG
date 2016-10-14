@@ -504,7 +504,6 @@ end % if
 
 %% Function handles
 pd.swe_correctMinValueExceedanceDisc = getFunctionHandle('swe/correctMinValueExceedanceDisc');
-pd.swe_projectDataQ0T2DataDisc = getFunctionHandle('swe/projectDataQ0T2DataDisc');
 pd.swe_visualizeSolution = getFunctionHandle('swe/visualizeSolution');
 pd.projectDataDisc2DataLagr = getFunctionHandle('./projectDataDisc2DataLagr');
 pd.computeAveragedVariablesQ0E0Tint = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tint');
