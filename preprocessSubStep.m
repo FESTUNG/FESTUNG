@@ -1,8 +1,8 @@
 % First step of the three-part algorithm in the iterateSubSteps loop of each
 % step in the main loop.
-%
+
 %===============================================================================
-%> @file template/preprocessSubStep.m
+%> @file transport/preprocessSubStep.m
 %>
 %> @brief First step of the three-part algorithm in the iterateSubSteps loop of 
 %>        each step in the main loop.
