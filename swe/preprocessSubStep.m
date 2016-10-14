@@ -1,6 +1,6 @@
 % First step of the three-part algorithm in the iterateSubSteps loop of each
 % step in the main loop.
-%
+
 %===============================================================================
 %> @file template/preprocessSubStep.m
 %>
@@ -223,7 +223,7 @@ for nn = 1 : 3
     vvH = cQ0E0Text{3,nn,np} .* cQ0E0Text{3,nn,np} ./ hQ0E0Text{nn,np};
     gHH = 0.5 * pd.gConst * (cQ0E0Text{1,nn,np} .* cQ0E0Text{1,nn,np});
     
-    cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Tint', cQ0E0Tint(:,nn), cQ0E0TE0T(:,nn,np), hQ0E0Tint{nn}, hQ0E0TE0T{nn,np}, pd.averagingType);
+    cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Tint(cQ0E0Tint(:,nn), cQ0E0TE0T(:,nn,np), hQ0E0Tint{nn}, hQ0E0TE0T{nn,np}, pd.averagingType);
     
     switch pd.typeFlux
       case 'Lax-Friedrichs'
@@ -231,7 +231,7 @@ for nn = 1 : 3
           [ pd.globRoffdiag{nn,np,1} * (uuH + gHH) + pd.globRoffdiag{nn,np,2} * uvH ; ...
             pd.globRoffdiag{nn,np,1} * uvH + pd.globRoffdiag{nn,np,2} * (vvH + gHH) ];
           
-        lambda = execin('swe/computeLaxFriedrichsCoefficient', cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+        lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
         pd.riemannTerms = pd.riemannTerms + ...
           [ pd.globV{nn,np} * (lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np})) ; ...
             pd.globV{nn,np} * (lambda .* (cQ0E0Tint{2,nn} - cQ0E0TE0T{2,nn,np})) ; ...
@@ -290,7 +290,7 @@ for nn = 1 : 3
         vHriem = -pd.g.nuE0TsqrDiff{nn} .* cQ0E0Tint{3,nn} - 2 * pd.g.nuE0Tprod{nn} .* cQ0E0Tint{2,nn};
         
         cQ0E0Triem = { [], uHriem, vHriem };
-        cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Tland', cQ0E0Tint(:,nn), cQ0E0Triem, hQ0E0Tint{nn}, [], markQ0E0TbdrL{nn}, pd.averagingType);
+        cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Tland(cQ0E0Tint(:,nn), cQ0E0Triem, hQ0E0Tint{nn}, [], markQ0E0TbdrL{nn}, pd.averagingType);
         
         switch pd.typeFlux
           case 'Lax-Friedrichs'
@@ -298,7 +298,7 @@ for nn = 1 : 3
             uvHriem = uHriem .* vHriem ./ hQ0E0Tint{nn};
             vvHriem = vHriem .* vHriem ./ hQ0E0Tint{nn};
             
-            lambda = execin('swe/computeLaxFriedrichsCoefficient', cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+            lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
             
             pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
               [ pd.globRL{nn,1} * (uuH + uuHriem + 2 * gHH) + pd.globRL{nn,2} * (uvH + uvHriem) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHriem)); ...
@@ -330,8 +330,8 @@ for nn = 1 : 3
       switch pd.typeFlux
         case 'Lax-Friedrichs'
           
-          cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Triv', cQ0E0Tint(:,nn), { xiRivQ0E0T{nn}, uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, markQ0E0TbdrRI{nn}, pd.averagingType);
-          lambda = execin('swe/computeLaxFriedrichsCoefficient', cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+          cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Triv(cQ0E0Tint(:,nn), { xiRivQ0E0T{nn}, uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, markQ0E0TbdrRI{nn}, pd.averagingType);
+          lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
           
           uuHRiv = uuH + uRivQ0E0T{nn} .* uHRiv;
           uvHRiv = uvH + uRivQ0E0T{nn} .* vHRiv;
@@ -386,11 +386,11 @@ for nn = 1 : 3
         [ pd.globROS{nn,1} * (uuH + uuHOS + gHHOS) + pd.globROS{nn,2} * (uvH + uvHOS) ; ...
           pd.globROS{nn,1} * (uvH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHHOS) ];
       
-      cAvgQ0E0T = execin('swe/computeAveragedVariablesQ0E0Tos', cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
+      cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Tos(cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
       
       switch pd.typeFlux
         case 'Lax-Friedrichs'
-          lambda = execin('swe/computeLaxFriedrichsCoefficient', cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
+          lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
           pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + pd.globVOS{nn} * (lambda .* (hQ0E0Tint{nn} - hOSQ0E0T));
           
           if pd.isCoupling
