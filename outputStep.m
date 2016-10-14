@@ -1,7 +1,7 @@
 % Last step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file template/outputStep.m
+%> @file transport/outputStep.m
 %>
 %> @brief Last step of the four-part algorithm in the main loop.
 %===============================================================================
