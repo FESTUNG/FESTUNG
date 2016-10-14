@@ -1,18 +1,20 @@
 % Computes the sum of two discrete data sets that may be of different order.
-%
+
 %===============================================================================
-%> @file computeSumDataDiscDataDisc.m
+%> @file computeOpDataDiscDataDisc.m
 %>
-%> @brief Computes the sum of two discrete data sets that may be of different 
-%>        order.
+%> @brief Computes a given operation on two discrete data sets that may be of  
+%>        different order.
 %===============================================================================
 %>
-%> @brief Computes the sum of two discrete data sets that may be of different 
-%>        order.
+%> @brief Computes a given operation on two discrete data sets that may be of  
+%>        different order.
 %>
-%> This routine prolongs both data sets to the be of the same order and computes
-%> their sum.
+%> This routine prolongs both data sets to the be of the same order and
+%> performs a given operation on them.
 %>
+%> @param op          A function handle that expects two arguments, e.g.,
+%>                    <code>plus()</code>.
 %> @param dataDisc1   A representation of the discrete function, e.g., as 
 %>                    computed by <code>projectFuncCont2DataDisc()</code>
 %> @param dataDisc2   A representation of the discrete function, e.g., as 
@@ -42,12 +44,12 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %>
-function ret = computeSumDataDiscDataDisc(dataDisc1, dataDisc2)
+function ret = computeOpDataDiscDataDisc(op, dataDisc1, dataDisc2)
 [K, N1] = size(dataDisc1);
 [~, N2] = size(dataDisc2);
 
 validateattributes(dataDisc1, {'numeric'}, {'size', [K NaN]}, mfilename, 'dataDisc1')
 validateattributes(dataDisc2, {'numeric'}, {'size', [K NaN]}, mfilename, 'dataDisc2')
 
-ret = [dataDisc1, zeros(K,N2-N1)] + [dataDisc2, zeros(K,N1-N2)];
+ret = op([dataDisc1, zeros(K,N2-N1)], [dataDisc2, zeros(K,N1-N2)]);
 end % function
