@@ -507,4 +507,9 @@ pd.swe_correctMinValueExceedanceDisc = getFunctionHandle('swe/correctMinValueExc
 pd.swe_projectDataQ0T2DataDisc = getFunctionHandle('swe/projectDataQ0T2DataDisc');
 pd.swe_visualizeSolution = getFunctionHandle('swe/visualizeSolution');
 pd.projectDataDisc2DataLagr = getFunctionHandle('./projectDataDisc2DataLagr');
+pd.computeAveragedVariablesQ0E0Tint = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tint');
+pd.computeAveragedVariablesQ0E0Tland = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tland');
+pd.computeAveragedVariablesQ0E0Triv = getFunctionHandle('swe/computeAveragedVariablesQ0E0Triv');
+pd.computeAveragedVariablesQ0E0Tos = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tos');
+pd.computeLaxFriedrichsCoefficient = getFunctionHandle('swe/computeLaxFriedrichsCoefficient');
 end % function
