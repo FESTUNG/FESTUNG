@@ -100,12 +100,42 @@ if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
     vecNames.velocity = {'u', 'v'};
     varName = [ varName, vecNames.velocity ];
     dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
-    dataDisc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
-    dataLagr = [ dataLagr, {projectDataDisc2DataLagr(dataDisc)} ];
-    
+    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    dataLagr = projectDataDisc2DataLagr(dataDisc);
+  end % if
+
+  % Visualize x-velocity (u)
+  if any(ismember(pd.outputList, 'u'))
+    visualizeDataLagr(pd.g, dataLagr, 'u_h', ['output/' pd.name '_u'], nOutput, pd.outputTypes);
+  end % if
+
+  % Save x-velocity station values
+  if isfield(pd, 'stationVel')
+    for n = 1 : length(pd.stationVel)
+      dataStationV0T = dataLagr(pd.stationVel{n}(:,1),:); % Extract values in vertices of relevant triangles
+      pd.dataVel{n,1} = [ pd.dataVel{n,1} ; ...     % Append mean of barycentric weighted values
+                          mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
+    end % for
+  end % if
+
+  %% Momentum and velocity (second component)
+
+  % Visualize primary variable vH
+  if any(ismember(pd.outputList, 'vH'))
+    dataLagr = projectDataDisc2DataLagr(pd.cDisc(:,:,3));
+    visualizeDataLagr(pd.g, dataLagr, 'vH_h', ['output/' pd.name '_vH'], nOutput, pd.outputTypes);
+  end % if
+
+  % Evaluate y-velocity (v)
+  if any(ismember(pd.outputList, 'v')) || isfield(pd, 'stationVel')
     dataQ0T = (pd.cDisc(:,:,3) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
-    dataDisc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
-    dataLagr = [ dataLagr, {projectDataDisc2DataLagr(dataDisc)} ];
+    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    dataLagr = projectDataDisc2DataLagr(dataDisc);
+  end % if
+
+  % Visualize y-velocity (v)
+  if any(ismember(pd.outputList, 'v'))
+    visualizeDataLagr(pd.g, dataLagr, 'v_h', ['output/' pd.name '_v'], nOutput, pd.outputTypes);
   end % if
 
   % Save velocity station values

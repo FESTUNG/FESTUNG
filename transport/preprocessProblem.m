@@ -114,6 +114,4 @@ if any(cell2mat(problemData.isSlopeLim))
   problemData.globMDiscTaylor = assembleMatElemPhiDiscPhiTaylor(problemData.g, N, problemData.basesOnQuad);
   problemData.globMCorr = spdiags(1./diag(globMTaylor), 0, K*N, K*N) * globMTaylor;
 end % if
-%% Function handle
-problemData.swe_projectDataQ0T2DataDisc = getFunctionHandle('swe/projectDataQ0T2DataDisc');
 end % function
