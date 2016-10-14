@@ -72,7 +72,7 @@ function lambda = computeLaxFriedrichsCoefficient(cQ0E0T, nuQ0E0T, gConst)
 validateattributes(cQ0E0T, {'cell'}, {'size', [3 1]}, mfilename, 'cQ0E0T');
 validateattributes(nuQ0E0T, {'cell'}, {'size', [1 2]}, mfilename, 'nuQ0E0T');
 
-assert(isscalar(gConst) && gConst >= 0, 'Gravitational constant has to be a non-negative scalar.')
+assert(isscalar(gConst) && gConst > 0, 'Gravitational constant has to be a non-negative scalar.')
 
 lambda = setNaN2Zero(abs(cQ0E0T{2} .* nuQ0E0T{1} + cQ0E0T{3} .* nuQ0E0T{2})) + sqrt(gConst * cQ0E0T{1});
 end % function
