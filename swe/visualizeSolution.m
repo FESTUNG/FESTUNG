@@ -99,7 +99,7 @@ if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
   % Evaluate x-velocity (u)
   if any(ismember(pd.outputList, 'u')) || isfield(pd, 'stationVel')
     dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
-    dataDisc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
     dataLagr = projectDataDisc2DataLagr(dataDisc);
   end % if
 
@@ -128,7 +128,7 @@ if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
   % Evaluate y-velocity (v)
   if any(ismember(pd.outputList, 'v')) || isfield(pd, 'stationVel')
     dataQ0T = (pd.cDisc(:,:,3) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
-    dataDisc = pd.swe_projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
     dataLagr = projectDataDisc2DataLagr(dataDisc);
   end % if
 
