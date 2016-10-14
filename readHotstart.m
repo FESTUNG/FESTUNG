@@ -1,7 +1,7 @@
 % Reads data from an existing hotstart file.
 
 %===============================================================================
-%> @file swe/readHotstart.m
+%> @file readHotstart.m
 %>
 %> @brief Reads data from an existing hotstart file.
 %===============================================================================

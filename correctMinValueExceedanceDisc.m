@@ -1,6 +1,6 @@
 % Modifies a discrete function such that its vertex values in each element do 
 % not fall below a certain threshold.
-%
+
 %===============================================================================
 %> @file correctMinValueExceedanceDisc.m
 %>
