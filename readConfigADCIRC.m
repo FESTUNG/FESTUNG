@@ -114,6 +114,10 @@ config.REFTIM = param(dataCountr);
 dataCountr = dataCountr+1;
 assert(isscalar(config.REFTIM), 'Reference time has to be a real number.');
 
+if config.REFTIM ~= 0
+  warning('Parameter REFTIM is not incorporated in FESTUNG. Possible discrepancies in forcings might occur.');
+end % if
+
 % Simulation length in days
 config.RNDAY = param(dataCountr);
 dataCountr = dataCountr+1;
@@ -322,7 +326,7 @@ config.NHSTAR = param(dataCountr);
 dataCountr = dataCountr+1;
 assert(ismember(config.NHSTAR, [0 1]), 'Switch for hot-start output must be one or zero.');
 config.NHSINC = param(dataCountr);
-assert(config.NHSINC && config.NHSINC >= 1 && round(config.NHSINC) == config.NHSINC, 'Hot-start output not specified correctly.');
+assert(config.NHSINC >= 1 && round(config.NHSINC) == config.NHSINC, 'Hot-start output not specified correctly.');
 
 %% Close file
 fclose(fileID);

@@ -209,9 +209,6 @@ idxEbdrOS = data(offset+2 : 2 : offset+2*numEbdrOS);
 if numEbdrOS > 0
   validateattributes(idxEbdrOS, {'numeric'}, {'size', [numEbdrOS 1], '>', 0, '<=', numE}, mfilename, 'idxEbdrOS');
 end % if
-if numEbdrOS ~= 0 && numForcingOS == 0
-  warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
-end % if
 offset = offset + 1 + 2 * numEbdrOS;
 
 % Open sea boundary forcings

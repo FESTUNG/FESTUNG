@@ -90,7 +90,7 @@
 %> @endparblock
 %
 function ret = assembleMatElemPhiPhiFuncDisc(g, refElemPhiPhiPhi, dataDisc)
-[K, dataN] = size(dataDisc); 
+[K, dataN] = size(dataDisc);
 [N1, N2, ~] = size(refElemPhiPhiPhi);
 
 % Check function arguments that are directly used
