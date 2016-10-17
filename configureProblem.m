@@ -334,8 +334,7 @@ function problemData = configureADCIRC(problemData)
 [g, depth] = execin('../swe/domainADCIRC', ['swe/fort_' problemData.name '.14'], ['swe/fort_' problemData.name '.17'], ...
                                      0, false, [0 0]); % manuell, TODO allgemein
 problemData.isHotstart = true;
-hotstartData = execin('../swe/readHotstart', '../output/galv_1.mat');
-% problemData.xiDisc = hotstartData.cDisc(:,:,1);
+hotstartData = readHotstart('../output/galv_1.mat');
 
 zbCont = @(x1,x2) execin('../swe/evaluateFuncFromVertexValues', g, -depth, x1, x2);
 
