@@ -55,11 +55,12 @@ function problemData = solveStep(problemData, nStep)
 
 % Obtain Runge-Kutta rule % TODO: change to allow changes in time increment
 [problemData.timeLvls, problemData.omega] = rungeKuttaSSP(problemData.sweData.schemeOrder, problemData.sweData.dt, ...
-                                                          (nStep - 1) * problemData.sweData.dt);
+                                                          problemData.sweData.t);
 
-% Initialize time stepping for SWE problem
+% Initialize time stepping
 K = problemData.sweData.K;
 N = problemData.sweData.N;
+p = (sqrt(8*N+1)-3)/2;
 
 problemData.sweData.tLvls = problemData.timeLvls;
 problemData.sweData.omega = problemData.omega;
@@ -69,12 +70,10 @@ problemData.sweData.cDiscRK0 = [ reshape(problemData.sweData.cDisc(:,:,1).', K*N
                                  reshape(problemData.sweData.cDisc(:,:,3).', K*N, 1) ];
 problemData.sweData.cDiscRK = problemData.sweData.cDiscRK0;
 
-% Initialize time stepping for transport problem
-K = problemData.transportData.K;
-N = problemData.transportData.N;
-
 problemData.transportData.timeLvls = problemData.timeLvls;
 problemData.transportData.omega = problemData.omega;
+
+problemData.transportData.hQ0T = (reshape(problemData.sweData.cDiscRK0(1:K*N), [N K])' -problemData.sweData.zbDisc) * problemData.sweData.basesOnQuad.phi2D{max(2*p,1)}.';
 
 problemData.transportData.cDiscRK0 = cellfun(@(c) reshape(c.', [K*N,1]), problemData.transportData.cDisc, 'UniformOutput', false);
 problemData.transportData.cDiscRK = problemData.transportData.cDiscRK0;

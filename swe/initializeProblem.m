@@ -70,9 +70,9 @@ elseif pd.isSolutionAvail
   vH0Cont = @(x1,x2) h0Cont(x1,x2) .* pd.vCont(x1,x2,pd.t0);
   
   pd.cDisc = zeros(K,N,3);
-  pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g, xi0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
-  pd.cDisc(:,:,2) = projectFuncCont2DataDisc(pd.g, uH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
-  pd.cDisc(:,:,3) = projectFuncCont2DataDisc(pd.g, vH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g, xi0Cont, 2*p+1, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc(:,:,2) = projectFuncCont2DataDisc(pd.g, uH0Cont, 2*p+1, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc(:,:,3) = projectFuncCont2DataDisc(pd.g, vH0Cont, 2*p+1, pd.refElemPhiPhi, pd.basesOnQuad);
 else
   pd.cDisc = zeros(K,N,3);
 end % if
@@ -87,7 +87,7 @@ for i = 1 : length(pd.slopeLimList)
   end % switch
 end % for
 
-pd.cDisc(:,:,1) = pd.swe_correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr + pd.minTol, pd.elevTol);
+pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr + pd.minTol, pd.elevTol);
 
 %% Visualize initial solution.
 pd = pd.swe_visualizeSolution(pd, 0);

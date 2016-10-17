@@ -51,7 +51,8 @@ function problemData = configureProblem(problemData)
 %% Configuration to use: 
 % - 'rotation' calls configureRotation()
 % - 'analytical' calls configureAnalyticalTest()
-problemData = setdefault(problemData, 'configSource', 'biological');
+% - 'ADCIRC' reads 'swe/fort_<name>.15'
+problemData = setdefault(problemData, 'configSource', 'ADCIRC');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -61,7 +62,7 @@ problemData = setdefault(problemData, 'configSource', 'biological');
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-problemData = setdefault(problemData, 'gridSource', 'square');
+problemData = setdefault(problemData, 'gridSource', 'ADCIRC');
 problemData = setdefault(problemData, 'refinement', 0);
 
 % Polynomial approximation order
@@ -85,6 +86,13 @@ switch problemData.configSource
     problemData = setdefault(problemData, 'hmax', 200);
     problemData = setdefault(problemData, 'tEnd', 500);
     problemData = setdefault(problemData, 'numSteps', 200*2^(problemData.refinement+problemData.p));
+  case 'ADCIRC'
+    problemData.isSolutionAvailable = false;
+    problemData.name = 'galv';
+    % TODO these should be unused
+    problemData = setdefault(problemData, 'hmax', 1);
+    problemData = setdefault(problemData, 'tEnd', 1296000);
+    problemData = setdefault(problemData, 'numSteps', 259200);
   otherwise
     error('Invalid config source.')
 end % switch
@@ -100,6 +108,9 @@ switch problemData.configSource
     problemData.sweData.configSource = 'debug';
   case 'analytical'
     problemData.sweData.configSource = 'analytical';
+  case 'ADCIRC'
+    problemData.sweData.configSource = 'ADCIRC';
+    problemData.sweData.name = problemData.name;
   otherwise
     error('Invalid config source.')
 end % switch
@@ -115,6 +126,8 @@ problemData.sweData.tEnd = problemData.tEnd;
 problemData.sweData.numSteps = problemData.numSteps;
 
 problemData.sweData = execin('swe/configureProblem', problemData.sweData);
+
+problemData.ordRK = problemData.sweData.schemeOrder; % in case ADCIRC scheme order is used
 
 % Configuration for transport solver
 problemData.transportData = struct;
@@ -139,6 +152,9 @@ switch problemData.configSource
     problemData.transportData.u_xCont = @(t,x1,x2) problemData.sweData.u_xCont(x1,x2,t);
     problemData.transportData.vCont = @(t,x1,x2) problemData.sweData.vCont(x1,x2,t);
     problemData.transportData.v_yCont = @(t,x1,x2) problemData.sweData.v_yCont(x1,x2,t);
+  case 'ADCIRC'
+    problemData.transportData.configSource = 'ADCIRC';
+    problemData.transportData.name = problemData.name;
   otherwise
     error('Invalid config source.')
 end % switch
