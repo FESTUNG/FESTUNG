@@ -132,7 +132,7 @@ end % if
 %% Compute water height on Open Sea boundaries.
 xiOSQ0E0Tint = cell(3,1);
 if pd.g.numEbdrOS > 0
-  if isfield(pd, 'xiOSCont')
+  if pd.isOSCont
     % Analytical function for open sea elevation given
     [Q, ~] = quadRule1D(max(2*p,1));
     for n = 1 : 3
@@ -150,7 +150,11 @@ if pd.g.numEbdrOS > 0
     for n = 1 : numFrequency
       xiOS = xiOS + pd.xiFreqOS{1,n}(tRhs) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(tRhs) * pd.xiAmpOS{2,n};
     end % for
-    xiOS = pd.ramp(tRhs/86400) * kron(xiOS, ones(numQuad1D, 1));
+    if pd.isRamp
+      xiOS = pd.ramp(tRhs/86400) * kron(xiOS, ones(numQuad1D, 1));
+    else
+      xiOS = kron(xiOS, ones(numQuad1D, 1));
+    end % if
     for n = 1 : 3
       xiOSQ0E0Tint{n} = xiOS;
     end % for
@@ -160,7 +164,7 @@ if pd.g.numEbdrOS > 0
 end % if
 
 %% Compute river boundary values.
-if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
+if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont || pd.isRiemRiv)
   pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
   
   xiRivQ0E0T = cell(3,1);
@@ -168,7 +172,6 @@ if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
   vRivQ0E0T = cell(3,1);
 
   if pd.isRivCont
-
     [Q, ~] = quadRule1D(max(2*p,1));
     for n = 1 : 3
       [Q1, Q2] = gammaMap(n, Q);
@@ -204,7 +207,6 @@ pd.nonlinearTerms = [ -pd.globF{1} * (uuH + gHH) - pd.globF{2} * uvH ; ...
                       -pd.globF{1} * uvH - pd.globF{2} * (vvH + gHH) ];
 if pd.isCoupling
   pd.massFluxQ0E0T = zeros(K, 3, numQuad1D);
-  pd.hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
   pd.uHDisc = pd.cDisc(:,:,2);
   pd.vHDisc = pd.cDisc(:,:,3);
 end % if
@@ -327,24 +329,27 @@ for nn = 1 : 3
     vHRiv = vRivQ0E0T{nn} .* hRiv;
     
     if pd.isRiemRiv
+      cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Triv(cQ0E0Tint(:,nn), { xiRivQ0E0T{nn}, uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, markQ0E0TbdrRI{nn}, pd.averagingType);
       switch pd.typeFlux
         case 'Lax-Friedrichs'
-          
-          cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Triv(cQ0E0Tint(:,nn), { xiRivQ0E0T{nn}, uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, markQ0E0TbdrRI{nn}, pd.averagingType);
           lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
           
           uuHRiv = uuH + uRivQ0E0T{nn} .* uHRiv;
           uvHRiv = uvH + uRivQ0E0T{nn} .* vHRiv;
           vvHRiv = vvH + vRivQ0E0T{nn} .* vHRiv;
           gHHRiv = gHH - pd.gConst * (cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn} + xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn}));
+          
+          uRiv = cQ0E0Tint{2,nn} + uHRiv;
+          vRiv = cQ0E0Tint{3,nn} + vHRiv;
+          jump = lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn});
 
-          pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRRI{nn,1} * (cQ0E0Tint{2,nn} + uHRiv) + pd.globRRI{nn,2} * (cQ0E0Tint{3,nn} + vHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn})) );
+          pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRRI{nn,1} * uRiv + pd.globRRI{nn,2} * vRiv + pd.globVRI{nn} * jump );
           pd.globLRI{2} = pd.globLRI{2} + 0.5 * ( pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHRiv)) );
           pd.globLRI{3} = pd.globLRI{3} + 0.5 * ( pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHRiv)) );
           
           if pd.isCoupling
-            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, 0.5 * permute( reshape( ( cQ0E0Tint{2,nn} + uHRiv ) .* pd.g.nuQ0E0T{nn,1} + ( cQ0E0Tint{3,nn} + vHRiv ) .* pd.g.nuQ0E0T{nn,2} ...
-                                                                                                        + lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRI(:,nn) );
+            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, 0.5 * permute( reshape( uRiv .* pd.g.nuQ0E0T{nn,1} + vRiv .* pd.g.nuQ0E0T{nn,2} ...
+                                                                                                        + jump, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRI(:,nn) );
           end % if
           
         case 'Roe'
@@ -380,18 +385,17 @@ for nn = 1 : 3
     gHHOS = pd.gConst * xiOSQ0E0Tint{nn} .* (0.5 * xiOSQ0E0Tint{nn} - pd.zbQ0E0Tint{nn});
     
     if pd.isRiemOS
-      gHHOS = gHH + gHHOS - pd.gConst * cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn};
-      
-      pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
-        [ pd.globROS{nn,1} * (uuH + uuHOS + gHHOS) + pd.globROS{nn,2} * (uvH + uvHOS) ; ...
-          pd.globROS{nn,1} * (uvH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHHOS) ];
-      
       cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Tos(cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
       
       switch pd.typeFlux
         case 'Lax-Friedrichs'
+          gHHOS = gHH + gHHOS - pd.gConst * cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn};
+      
+          pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * [ pd.globROS{nn,1} * (uuH + uuHOS + gHHOS) + pd.globROS{nn,2} * (uvH + uvHOS); ...
+                                                          pd.globROS{nn,1} * (uvH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gHHOS) ];
+          
           lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
-          pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + pd.globVOS{nn} * (lambda .* (hQ0E0Tint{nn} - hOSQ0E0T));
+          pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + 0.5 * pd.globVOS{nn} * (lambda .* (hQ0E0Tint{nn} - hOSQ0E0T));
           
           if pd.isCoupling
             pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2} ...
@@ -402,7 +406,7 @@ for nn = 1 : 3
           error('not implemented')
           
         otherwise
-          error('Invalid flux type for land boundaries.')
+          error('Invalid flux type for open sea boundaries.')
       end % switch
     else
       pd.nonlinearTerms = pd.nonlinearTerms + ...
@@ -415,4 +419,9 @@ for nn = 1 : 3
     end % if
   end % if
 end % for
+
+if pd.isCoupling && (~pd.isRamp && ~pd.isRivCont && ~pd.isRiemRiv)
+  pd.massFluxQ0E0T = pd.massFluxQ0E0T + pd.massFluxQ0E0TRiv;
+end % if
+
 end % function

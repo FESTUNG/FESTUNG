@@ -74,13 +74,13 @@ sysV = cell2mat(problemData.globL) - cell2mat(problemData.globLRI) - ...
 switch problemData.schemeType
   case 'explicit'
     sysA = [ sparse(K*N,K*max(N,3)); problemData.tidalTerms{1}; problemData.tidalTerms{2} ];
-    cDiscDot = problemData.sysW \ (sysV - problemData.linearTerms * problemData.cDiscRK + sysA * hDisc );
+    cDiscDot = problemData.sysW \ (sysV - problemData.linearTerms * problemData.cDiscRK + sysA * hDisc);
     problemData.cDiscRK = problemData.omega(nSubStep) * problemData.cDiscRK0 + (1 - problemData.omega(nSubStep)) * (problemData.cDiscRK + dt * cDiscDot);
 
   case 'semi-implicit'
     sysA = [ sparse(K*N,3*K*N); problemData.tidalTerms{1}, sparse(K*N,2*K*N); problemData.tidalTerms{2}, sparse(K*N,2*K*N) ];
     problemData.cDiscRK = (problemData.sysW + dt * (problemData.linearTerms - sysA)) \ (problemData.sysW * problemData.cDiscRK + dt * sysV);
-          
+
   otherwise
     error('Invalid time-stepping scheme')
 end % switch

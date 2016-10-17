@@ -67,7 +67,7 @@ problemData.cDisc(:,:,3) = reshape(problemData.cDiscRK(2*K*N + 1 : 3*K*N), N, K)
 % TODO: slope limiting here
 
 % Ensure water height doesn't fall below threshold
-problemData.cDisc(:,:,1) = problemData.swe_correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.zbLagr + problemData.minTol, problemData.elevTol);
+problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.zbLagr + problemData.minTol, problemData.elevTol);
 problemData.cDiscRK(1 : problemData.K*problemData.N) = reshape(problemData.cDisc(:,:,1).', problemData.N * problemData.K, 1);
 
 problemData.isSubSteppingFinished = nSubStep >= length(problemData.tLvls);

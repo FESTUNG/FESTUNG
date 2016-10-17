@@ -70,7 +70,7 @@ switch problemData.schemeType
   otherwise
     error('Invalid time stepping scheme')
 end % switch
-    
+
 % Initialize solution vectors for RK steps
 problemData.cDiscRK0 = [ reshape(problemData.cDisc(:,:,1).', K*N, 1) ; ...
                 reshape(problemData.cDisc(:,:,2).', K*N, 1) ; ...

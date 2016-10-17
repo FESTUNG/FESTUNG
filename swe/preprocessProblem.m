@@ -67,6 +67,14 @@ switch pd.gridSource
     pd.g.numEbdrRI = sum(pd.g.idE == 3);
     pd.g.numEbdrOS = sum(pd.g.idE == 4);
     
+    if pd.g.numEbdrOS ~= 0 && pd.isOSCont == 0
+      warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
+    end % if
+    
+    if pd.g.numEbdrRI ~= 0 && pd.isRivCont == 0
+      warning('River boundary given but no boundary forcings. Program will use zero boundary condition.')
+    end % if
+    
   case 'hierarchical'
     X1 = [0 100 100 0]; X2 = [0 0 100 100];
     pd.g = execin('swe/domainHierarchy', X1, X2, pd.hmax, pd.refinement);
@@ -85,6 +93,14 @@ switch pd.gridSource
     pd.g.numEbdrRA = sum(pd.g.idE == 2);
     pd.g.numEbdrRI = sum(pd.g.idE == 3);
     pd.g.numEbdrOS = sum(pd.g.idE == 4);
+    
+    if pd.g.numEbdrOS ~= 0 && pd.isOSCont == 0
+      warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
+    end % if
+    
+    if pd.g.numEbdrRI ~= 0 && pd.isRivCont == 0
+      warning('River boundary given but no boundary forcings. Program will use zero boundary condition.')
+    end % if
     
   case 'ADCIRC'
     projCenter = [pd.configADCIRC.SLAM0, pd.configADCIRC.SFEA0];
@@ -153,22 +169,28 @@ switch pd.gridSource
     end % if
     
     % Tidal forcing on open sea boundaries
-    numFrequency = pd.configADCIRC.NBFR;
-    pd.xiFreqOS = cell(2,numFrequency);
-    pd.xiAmpOS = cell(2,numFrequency);
-    markTbdrOS = pd.g.T0E(pd.g.idE == 4, 1);
-    for n = 1 : numFrequency
-      pd.xiFreqOS{1,n} = @(t) cos(pd.configADCIRC.AMIG(n)*t);
-      pd.xiFreqOS{2,n} = @(t) -sin(pd.configADCIRC.AMIG(n)*t);
-      
-      pd.xiAmpOS{1,n} = sparse(pd.g.numT,1);
-      pd.xiAmpOS{1,n}(markTbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
-                                             cos( pi/180 * (pd.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
-      
-      pd.xiAmpOS{2,n} = sparse(pd.g.numT,1);
-      pd.xiAmpOS{2,n}(markTbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
-                                             sin( pi/180 * (pd.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
-    end % for
+    if ~pd.isOSCont
+      numFrequency = pd.configADCIRC.NBFR;
+      pd.xiFreqOS = cell(2,numFrequency);
+      pd.xiAmpOS = cell(2,numFrequency);
+      markTbdrOS = pd.g.T0E(pd.g.idE == 4, 1);
+      for n = 1 : numFrequency
+        pd.xiFreqOS{1,n} = @(t) cos(pd.configADCIRC.AMIG(n)*t);
+        pd.xiFreqOS{2,n} = @(t) -sin(pd.configADCIRC.AMIG(n)*t);
+
+        pd.xiAmpOS{1,n} = sparse(pd.g.numT,1);
+        pd.xiAmpOS{1,n}(markTbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+                                               cos( pi/180 * (pd.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
+
+        pd.xiAmpOS{2,n} = sparse(pd.g.numT,1);
+        pd.xiAmpOS{2,n}(markTbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+                                               sin( pi/180 * (pd.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
+      end % for
+
+      if pd.g.numEbdrOS ~= 0 && numFrequency == 0
+        warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
+      end % if
+    end % if
     
     % River inflow
     markEbdrRiv = pd.g.idE == 3;
@@ -211,6 +233,7 @@ switch pd.gridSource
     error('Invalid gridSource given.')
 end % switch
 
+if pd.isVisGrid,  visualizeGrid(pd.g);  end
 %% Globally constant parameters
 pd.outputFrequency = max(floor(pd.numSteps / pd.outputCount), 1);
 pd.K = pd.g.numT; % number of triangles
@@ -300,13 +323,13 @@ end % if
 refEdgePhiIntPhiInt = integrateRefEdgePhiIntPhiInt(N, pd.basesOnQuad);
 refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, pd.basesOnQuad);
 
-refElemDphiPerQuad = execin('swe/integrateRefElemDphiPerQuad',N, pd.basesOnQuad);
-refEdgePhiIntPerQuad = execin('swe/integrateRefEdgePhiIntPerQuad',N, pd.basesOnQuad);
+refElemDphiPerQuad = execin('swe/integrateRefElemDphiPerQuad', N, pd.basesOnQuad);
+refEdgePhiIntPerQuad = execin('swe/integrateRefEdgePhiIntPerQuad', N, pd.basesOnQuad);
 
 %% L2 projections of time-independent algebraic coefficients.
-fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
-pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
-pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 3, refElemPhiLinPhiLin, basesOnQuadLin);
+pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 3, refElemPhiLinPhiLin, basesOnQuadLin);
+pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p+1, pd.refElemPhiPhi, pd.basesOnQuad);
 pd.zbLagr = projectDataDisc2DataLagr(pd.zbDiscLin);
 
 % Evaluate zb in each element's quadrature point
@@ -363,7 +386,6 @@ switch pd.typeFlux
   case 'Lax-Friedrichs'
     globQ = assembleMatEdgePhiPhiNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, pd.g.areaNuE0Tint);
     globO = assembleMatEdgePhiPhiFuncDiscIntNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiIntPhiLin, refEdgePhiIntPhiExtPhiLin, pd.zbDiscLin, pd.g.areaNuE0Tint);
-    
   case 'Roe'
     error('not implemented')
     
@@ -374,12 +396,12 @@ end % switch
 % Boundary edge matrices
 globQOS = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrOS);
 globQRA = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrRA);
-globOL = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrL);
+globOL  = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrL);
 globORA = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrRA);
 
 % Derived system matrices
 pd.sysW = blkdiag(pd.globM, pd.globM, pd.globM);
-pd.linearTerms = [ sparse(K*N,K*N), globQ{1} + globQOS{1} + globQRA{1} - globH{1},  globQ{2} + globQOS{2} + globQRA{2} - globH{2}; ...
+pd.linearTerms = [ sparse(K*N,K*N), globQ{1} + globQOS{1} + globQRA{1} - globH{1}, globQ{2} + globQOS{2} + globQRA{2} - globH{2}; ...
                    pd.gConst * (globG{1} + globU{1} - globO{1} - globOL{1} - globORA{1}), sparse(K*N,K*N), -globD; ...
                    pd.gConst * (globG{2} + globU{2} - globO{2} - globOL{2} - globORA{2}), globD, sparse(K*N,K*N) ];
 
@@ -427,16 +449,9 @@ end % if
 % Boundary matrices
 if pd.g.numEbdrL > 0 % Land boundaries
   pd.globRL = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrL);
-  switch pd.typeBdrL
-    case 'reflected'
-      error('not implemented')
-    case 'natural'
-      error('not implemented')
-    case 'riemann'
+  if strcmp(pd.typeBdrL, 'riemann')
       pd.globVL = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaE0TbdrL);
-    otherwise
-      error('Unknown flux type for land boundaries')
-  end % switch
+  end % if
 end % if
 
 if pd.g.numEbdrRA > 0 % Radiation boundaries
@@ -458,16 +473,27 @@ if pd.g.numEbdrRI > 0 % River boundaries
     pd.globVRI = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaE0TbdrRI);
   end % if
   
-  if ~pd.isRamp && ~pd.isRivCont
+  if ~pd.isRamp && ~pd.isRivCont && ~pd.isRiemRiv
+    if pd.isCoupling
+      pd.massFluxQ0E0TRiv = zeros(K,3,numQuad1D);
+    end % if
     for n = 1 : 3
       hRiv = pd.xiRivQ0E0T(:,n) - pd.zbQ0E0Tint{n};
       uHRiv = pd.uRivQ0E0T(:,n) .* hRiv;
       vHRiv = pd.vRivQ0E0T(:,n) .* hRiv;
-      uvHRiv = uHRiv .* pd.vRivQ0E0T(:,n);
+      
+      uuHRiv = pd.uRivQ0E0T(:,n) .* uHRiv;
+      uvHRiv = pd.uRivQ0E0T(:,n) .* vHRiv;
+      vvHRiv = pd.vRivQ0E0T(:,n) .* vHRiv;
       gHHRiv = pd.gConst * pd.xiRivQ0E0T(:,n) .* ( 0.5 * pd.xiRivQ0E0T(:,n) - pd.zbQ0E0Tint{n} );
+      
       pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{n,1} * uHRiv + pd.globRRI{n,2} * vHRiv;
-      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{n,1} * (pd.uRivQ0E0T(:,n) .* uHRiv + gHHRiv) + pd.globRRI{n,2} * uvHRiv;
-      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{n,1} * uvHRiv + pd.globRRI{n,2} * (pd.vRivQ0E0T(:,n) .* vHRiv + gHHRiv);
+      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{n,1} * (uuHRiv + gHHRiv) + pd.globRRI{n,2} * uvHRiv;
+      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{n,1} * uvHRiv + pd.globRRI{n,2} * (vvHRiv + gHHRiv);
+      
+      if pd.isCoupling
+        pd.massFluxQ0E0TRiv(:,n,:) = bsxfun(@times, reshape( uHRiv .* pd.g.nuQ0E0T{n,1} + vHRiv .* pd.g.nuQ0E0T{n,2}, [numQuad1D, K] ).', pd.g.markE0TbdrRI(:,n) );
+      end % if
     end % for
   end % if
 end % if
@@ -503,9 +529,8 @@ if pd.isAdaptiveTimestep
 end % if
 
 %% Function handles
-pd.swe_correctMinValueExceedanceDisc = getFunctionHandle('swe/correctMinValueExceedanceDisc');
 pd.swe_visualizeSolution = getFunctionHandle('swe/visualizeSolution');
-pd.projectDataDisc2DataLagr = getFunctionHandle('./projectDataDisc2DataLagr');
+pd.projectDataDisc2DataLagr = getFunctionHandle('./projectDataDisc2DataLagr'); % TODO needed?
 pd.computeAveragedVariablesQ0E0Tint = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tint');
 pd.computeAveragedVariablesQ0E0Tland = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tland');
 pd.computeAveragedVariablesQ0E0Triv = getFunctionHandle('swe/computeAveragedVariablesQ0E0Triv');
