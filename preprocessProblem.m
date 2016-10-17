@@ -505,6 +505,10 @@ if pd.g.numEbdrOS > 0 % Open sea boundaries
   end % if
 end % if
 
+if pd.isRamp && (pd.isRivCont || pd.isOSCont)
+  error('Ramping is not supported for algebraic boundary conditions.');
+end % 
+
 %% Assembly of rhs terms.
 % Assemble Newtonian tide potential matrix
 if pd.isTidalDomain
@@ -530,7 +534,6 @@ end % if
 
 %% Function handles
 pd.swe_visualizeSolution = getFunctionHandle('swe/visualizeSolution');
-pd.projectDataDisc2DataLagr = getFunctionHandle('./projectDataDisc2DataLagr'); % TODO needed?
 pd.computeAveragedVariablesQ0E0Tint = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tint');
 pd.computeAveragedVariablesQ0E0Tland = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tland');
 pd.computeAveragedVariablesQ0E0Triv = getFunctionHandle('swe/computeAveragedVariablesQ0E0Triv');
