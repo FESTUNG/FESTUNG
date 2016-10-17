@@ -49,14 +49,14 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'bahamas');
+pd = setdefault(pd, 'name', 'galv');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
 % - 'manual' calls configureManualADCIRC()
-pd = setdefault(pd, 'configSource', 'manual');
+pd = setdefault(pd, 'configSource', 'ADCIRC');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -70,7 +70,7 @@ pd = setdefault(pd, 'gridSource', 'ADCIRC');
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
-pd = setdefault(pd, 'p', 0);
+pd = setdefault(pd, 'p', 1);
 
 %% Time stepping parameters
 pd = setdefault(pd, 'schemeType', 'explicit'); % type of time stepping scheme ('explicit' or 'semi-implicit')
@@ -160,6 +160,7 @@ pd.f1Cont = @(x1,x2,t) 0.002*(0.5-x1);
 pd.f2Cont = @(x1,x2,t) 0.002*(0.5-x2);
 
 % Boundary conditions
+pd.isOSCont = false;
 pd.xiOSCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
 pd.isRivCont = true;
 pd.xiRivCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
@@ -257,6 +258,7 @@ pd.f2Cont = @(x1,x2,t) pd.v_tCont(x1,x2,t) .* pd.hCont(x1,x2,t) + pd.vCont(x1,x2
                        pd.fcCont(x1,x2) .* pd.uCont(x1,x2,t) .* pd.hCont(x1,x2,t);
                      
 % Boundary conditions
+pd.isOSCont = false;
 pd.xiOSCont = pd.xiCont;
 pd.isRivCont = true;
 pd.xiRivCont = pd.xiCont;
@@ -276,21 +278,27 @@ assert(exist(['swe/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe/fort_' 
 assert(exist(['swe/fort_' pd.name '.15'], 'file') == 2, ['Config file "swe/fort_' pd.name '.15" not found!'])
 
 %% Read parameter file
-h = getFunctionHandle('swe/readConfigADCIRC');
-pd.configADCIRC = h(['swe/fort_' pd.name '.15']);
-
+if pd.isCoupling % TODO Unterscheidung vermeiden
+  pd.configADCIRC = readConfigADCIRC(['swe/fort_' pd.name '.15']);
+else
+  h = getFunctionHandle('swe/readConfigADCIRC');
+  pd.configADCIRC = h(['swe/fort_' pd.name '.15']);
+end % if
 %% Map ADCIRC variables to internal names
 % Constants
-pd = setdefault(pd, 'schemeOrder', pd.configADCIRC.IRK+1);
+if ~pd.isCoupling % TODO
+  pd.p = pd.configADCIRC.IRK;
+end % if
+pd.schemeOrder = pd.configADCIRC.IRK+1;
 pd.minTol = pd.configADCIRC.H0;
 pd.gConst = pd.configADCIRC.G;
 
 % Simulation time
-pd.t0 = pd.configADCIRC.STATIM;
-pd = setdefault(pd, 'tEnd', pd.t0 + pd.configADCIRC.RNDAY * 86400);
+pd.t0 = pd.configADCIRC.STATIM * 86400;
+pd.tEnd = pd.t0 + pd.configADCIRC.RNDAY * 86400;
 pd.dt = pd.configADCIRC.DT;
-pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
-pd = setdefault(pd, 'outputCount', 72); % Number of outputs over total simulation time
+pd.numSteps = round((pd.tEnd - pd.t0) / pd.dt);
+pd = setdefault(pd, 'outputCount', 300); % Number of outputs over total simulation time
 
 % Adaptive time stepping
 pd.isAdaptiveTimestep = pd.configADCIRC.NDTVAR == 1;
@@ -331,6 +339,7 @@ end % switch
 pd.isTidalDomain = pd.configADCIRC.NTIP == 1;
 
 % Boundary conditions
+pd.isOSCont = false;
 pd.isRivCont = false;
 
 % Hot-start input and output
@@ -389,6 +398,7 @@ switch pd.name
     pd.configADCIRC.CORI = 3.19e-5;
 
     % Boundary conditions
+    pd.isOSCont = true;
     pd.xiOSCont = @(x1,x2,t)  ( 0.075 * cos(0.000067597751162*t - pi/180*194.806 ) ...
                               + 0.095 * cos(0.000072921165921*t - pi/180*206.265 ) ...
                               + 0.10  * cos(0.000137879713787*t - pi/180*340.0   ) ...
@@ -443,6 +453,7 @@ switch pd.name
     pd.configADCIRC.CORI = 0.0;
     
     pd.configADCIRC.NBFR = 0;
+    pd.isOSCont = false;
     
     pd.isRivCont = true;
     pd.xiRivCont = @(x1,x2,t) 0*x1;
