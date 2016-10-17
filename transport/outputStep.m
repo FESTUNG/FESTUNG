@@ -63,7 +63,7 @@ for species = 1:problemData.numSpecies
     end % if
   end % if
 end % for
-if ~isempty(dataLagr)
-  visualizeDataLagr(problemData.g, dataLagr, varName, problemData.outputBasename, nStep, problemData.outputTypes)
-end % if
+% if ~isempty(dataLagr)
+%   visualizeDataLagr(problemData.g, dataLagr, varName, problemData.outputBasename, nStep, problemData.outputTypes)
+% end % if
 end % function

@@ -363,8 +363,8 @@ switch pd.name
   case 'bahamas'
     pd.isSolutionAvail = false;
     pd.isRhsAvail = false;
-
     pd.isTidalDomain = false;
+    
     pd.isHotstartInput = false;
     pd.isHotstartOutput = false;
     pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
@@ -392,6 +392,9 @@ switch pd.name
     pd.isBottomFrictionNonlinear = true; % NOLIBF
     pd.isBottomFrictionVarying = false; % NWP
     pd.bottomFrictionCoef = 0.0090;
+    
+    % Ramping function
+    pd.isRamp = false;
 
     % Coriolis coefficient
     pd.configADCIRC.NCOR = 0;
