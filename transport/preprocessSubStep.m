@@ -60,7 +60,9 @@ N = problemData.N;
 p = problemData.p;
 
 % Project velocity to DG space, if not given
-if ~all(isfield(problemData, {'uHDisc', 'vHDisc', 'vNormalOnQuadEdge'})) % TODO evtl Fehler falls manche dieser Felder bekannt sind
+if ~all(isfield(problemData, {'hQ0T', 'uHDisc', 'vHDisc', 'vNormalOnQuadEdge'})) % TODO evtl Fehler falls manche dieser Felder bekannt sind!!!
+  problemData.hQ0T = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(problemData.timeLvls(nSubStep),x1,x2), ...
+                                                2*p, problemData.hatM, problemData.basesOnQuad) * problemData.basesOnQuad.phi2D{max(2*p,1)}.';
   problemData.uHDisc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.uHCont(problemData.timeLvls(nSubStep),x1,x2), ...
                                                 2*p, problemData.hatM, problemData.basesOnQuad);
   problemData.vHDisc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.vHCont(problemData.timeLvls(nSubStep),x1,x2), ...
