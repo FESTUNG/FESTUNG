@@ -65,12 +65,12 @@ problemData = setdefault(problemData, 'configSource', 'ADCIRC');
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-problemData = setdefault(problemData, 'gridSource', 'square');
+problemData = setdefault(problemData, 'gridSource', 'ADCIRC');
 problemData = setdefault(problemData, 'refinement', 0);
 
 %% Parameters. 
 % Set default values if they are not yet available in problemData
-problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degree (TODO: allow different approximation orders for each species)
+problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degree
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
 problemData = setdefault(problemData, 'maskTol'   , 1.0e-8);  % maximal tolerance of slope for which species are considered constant
@@ -92,7 +92,7 @@ switch problemData.configSource
     error('Invalid config source.')
 end % switch
 
-problemData = setdefault(problemData, 'isMask', true(problemData.numSpecies,1));  % computation only where species is not constant
+problemData = setdefault(problemData, 'isMask', false(problemData.numSpecies,1));  % computation only where species is not constant
 problemData.maskType = 'vertex-based';
 
 problemData.isVisSol = cell(problemData.numSpecies,1);
@@ -129,6 +129,10 @@ switch problemData.configSource
     problemData = configureBiological(problemData);
   case 'ADCIRC'
     problemData.isSolutionAvailable = false;
+    problemData = setdefault(problemData, 'hmax'      , 1);  % maximum edge length of triangle
+    problemData = setdefault(problemData, 'numSteps'  , 172800);  % number of time steps
+    problemData = setdefault(problemData, 'tEnd'      , 864000);  % end time
+    problemData.isSolutionAvailable = false;
     problemData = configureADCIRC(problemData);
   otherwise
     error('Invalid config source.')
@@ -156,7 +160,7 @@ cH0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x
                   
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = true; % slope limiting
+  problemData.isSlopeLim{species}  = false; % slope limiting
   problemData.typeSlopeLim{species} = 'linear'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
@@ -288,7 +292,7 @@ problemData.cH0Cont = { @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x
 
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = true; % slope limiting
+  problemData.isSlopeLim{species}  = false; % slope limiting
   problemData.typeSlopeLim{species} = 'linear'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
@@ -331,16 +335,27 @@ end % function
 %% Coupling to ADCIRC grid
 function problemData = configureADCIRC(problemData)
 
-[g, depth] = execin('../swe/domainADCIRC', ['swe/fort_' problemData.name '.14'], ['swe/fort_' problemData.name '.17'], ...
-                                     0, false, [0 0]); % manuell, TODO allgemein
-problemData.isHotstart = true;
-hotstartData = readHotstart('../output/galv_1.mat');
+problemData = setdefault(problemData, 'name', 'galv');
+numForcings = 0; % since this information is unnecessary at this point, it will not be computed
+isSpherical = 0;
+projCenter = [0 0];
 
-zbCont = @(x1,x2) execin('../swe/evaluateFuncFromVertexValues', g, -depth, x1, x2);
+problemData = setdefault(problemData, 'hCont', @(t,x1,x2) x1==x1);
+problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) 0*x1);
+problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) 0*x1);
+
+problemData = setdefault(problemData, 'domainADCIRC', getFunctionHandle('swe/domainADCIRC'));
+
+[problemData.g, depth] = problemData.domainADCIRC(['swe/fort_' problemData.name '.14'], ['swe/fort_' problemData.name '.17'], numForcings, isSpherical, projCenter);
+
+problemData.isHotstart = true;
+hotstartData = readHotstart('output/galv_1.mat');
+
+zbCont = @(x1,x2) execin('swe/evaluateFuncFromVertexValues', problemData.g, -depth, x1, x2);
 
 N = nchoosek(problemData.p+2, problemData.p);
 % TODO because of zb this will not be consistent to swe
-problemData.h0Disc = hotstartData.cDisc(:,:,1) - projectFuncCont2DataDisc(g, zbCont, 2*problemData.p+1, eye(N), computeBasesOnQuad(N, struct));
+problemData.h0Disc = hotstartData.cDisc(:,:,1) - projectFuncCont2DataDisc(problemData.g, zbCont, 2*problemData.p+1, eye(N), computeBasesOnQuad(N, struct));
 
 problemData.xiOSCont = @(t,x1,x2) ( cos(0.000067597751162*t) * 0.075 * cos(-194.806 * pi/180) ...
                                   - sin(0.000067597751162*t) * 0.075 * sin(-194.806 * pi/180) ...
@@ -365,7 +380,7 @@ problemData.outputBasename = {['output' filesep 'phyto'], ['output' filesep 'zoo
 
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = true; % slope limiting
+  problemData.isSlopeLim{species}  = false; % slope limiting
   problemData.typeSlopeLim{species} = 'linear'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 864; % no visualization of every timestep
