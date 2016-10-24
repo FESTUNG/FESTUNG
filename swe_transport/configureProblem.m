@@ -155,6 +155,7 @@ switch problemData.configSource
   case 'ADCIRC'
     problemData.transportData.configSource = 'ADCIRC';
     problemData.transportData.name = problemData.name;
+    problemData.transportData.domainADCIRC = getFunctionHandle('swe/domainADCIRC');
   otherwise
     error('Invalid config source.')
 end % switch
@@ -170,5 +171,6 @@ problemData.transportData.numSteps = problemData.numSteps;
 
 problemData.transportData.isVisGrid = false; % visualization of grid
 
-problemData.transportData = execin('transport/configureProblem', problemData.transportData);
+h = getFunctionHandle('transport/configureProblem');
+problemData.transportData = h(problemData.transportData);
 end % function
