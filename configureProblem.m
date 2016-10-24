@@ -186,8 +186,8 @@ pd = setdefault(pd, 'hmax', 200);
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd = setdefault(pd, 'numSteps', 200);  % number of time steps
-pd = setdefault(pd, 'tEnd', 1000);  % end time
+pd = setdefault(pd, 'numSteps', 200*2^(pd.refinement+pd.p));  % number of time steps
+pd = setdefault(pd, 'tEnd', 500);  % end time
 pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
