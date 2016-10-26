@@ -92,7 +92,7 @@ switch problemData.configSource
     error('Invalid config source.')
 end % switch
 
-problemData = setdefault(problemData, 'isMask', false(problemData.numSpecies,1));  % computation only where species is not constant
+problemData = setdefault(problemData, 'isMask', true(problemData.numSpecies,1));  % computation only where species is not constant
 problemData.maskType = 'vertex-based';
 
 problemData.isVisSol = cell(problemData.numSpecies,1);
@@ -160,7 +160,7 @@ cH0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x
                   
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = false; % slope limiting
+  problemData.isSlopeLim{species}  = true; % slope limiting
   problemData.typeSlopeLim{species} = 'linear'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
@@ -220,7 +220,7 @@ sol_yCont = {@(t,x1,x2) ds*cos(ds*(x1+x2-t)), @(t,x1,x2) -ds*sin(ds*(x1+x2-t)), 
 
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = false; % slope limiting
+  problemData.isSlopeLim{species}  = true; % slope limiting
   problemData.typeSlopeLim{species} = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = problemData.numSteps/10; % no visualization of every timestep
@@ -292,7 +292,7 @@ problemData.cH0Cont = { @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x
 
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = false; % slope limiting
+  problemData.isSlopeLim{species}  = true; % slope limiting
   problemData.typeSlopeLim{species} = 'linear'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
@@ -380,7 +380,7 @@ problemData.outputBasename = {['output' filesep 'phyto'], ['output' filesep 'zoo
 
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = false; % slope limiting
+  problemData.isSlopeLim{species}  = true; % slope limiting
   problemData.typeSlopeLim{species} = 'linear'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 864; % no visualization of every timestep
