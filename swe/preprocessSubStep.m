@@ -322,7 +322,7 @@ for nn = 1 : 3
   end % if
 
   % River boundary contributions
-  if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont)
+  if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont || pd.isRiemRiv)
     
     hRiv = xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn};
     uHRiv = uRivQ0E0T{nn} .* hRiv;
