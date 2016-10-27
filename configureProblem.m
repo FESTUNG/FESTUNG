@@ -298,7 +298,7 @@ pd.t0 = pd.configADCIRC.STATIM * 86400;
 pd.tEnd = pd.t0 + pd.configADCIRC.RNDAY * 86400;
 pd.dt = pd.configADCIRC.DT;
 pd.numSteps = round((pd.tEnd - pd.t0) / pd.dt);
-pd = setdefault(pd, 'outputCount', 300); % Number of outputs over total simulation time
+pd = setdefault(pd, 'outputCount', 180); % Number of outputs over total simulation time
 
 % Adaptive time stepping
 pd.isAdaptiveTimestep = pd.configADCIRC.NDTVAR == 1;
