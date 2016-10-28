@@ -44,22 +44,25 @@
 %> @endparblock
 %
 function problemData = postprocessProblem(problemData)
-problemData.errors = zeros(problemData.numSpecies,2);
+p = problemData.p;
+qOrd2D = max(2*p,1);
 
 if problemData.isSolutionAvailable
-  for species = 1:problemData.numSpecies
+  problemData.errors = zeros(problemData.numSpecies,2);
+  for species = 1 : problemData.numSpecies
     %% Error evaluation
-    problemData.errors(species,1) = computeL2Error(problemData.g, problemData.cDisc{species}, @(x1,x2) problemData.solCont{species}(problemData.tEnd,x1,x2) .* problemData.hCont(problemData.tEnd,x1,x2), 2*problemData.p, problemData.basesOnQuad);
-    dataQ0T = (problemData.cDisc{species} * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.') ./ problemData.hQ0T;
-    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad);
-    problemData.errors(species,2) = computeL2Error(problemData.g, dataDisc, @(x1,x2) problemData.solCont{species}(problemData.tEnd,x1,x2), 2*problemData.p, problemData.basesOnQuad);
+    problemData.errors(species,1) = computeL2Error(problemData.g, problemData.cDisc{species}, @(x1,x2) problemData.solCont{species}(problemData.t,x1,x2) .* problemData.hCont(problemData.t,x1,x2), 2*p, problemData.basesOnQuad);
+    dataQ0T = (problemData.cDisc{species} * problemData.basesOnQuad.phi2D{qOrd2D}.') ./ problemData.hQ0T;
+    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.hatM, problemData.basesOnQuad);
+    problemData.errors(species,2) = computeL2Error(problemData.g, dataDisc, @(x1,x2) problemData.solCont{species}(problemData.t,x1,x2), 2*p, problemData.basesOnQuad);
   end % for
 end % if
 
-fprintf([ '%d operations were needed for solving the transport model on %d triangles, %d time steps and %d species.\n' ...
-          'This corresponds to %3.1f %% of the full number of operations.\n'], ...
-          problemData.numOperations, problemData.g.numT, problemData.numSteps, problemData.numSpecies, ...
-          problemData.numOperations / (problemData.g.numT*problemData.numSteps*problemData.numSpecies) * 100);
-
+if ~isequal(problemData.isMask, zeros(problemData.numSpecies, 1))
+  fprintf([ '%d operations were needed for solving the transport model on %d triangles, %d time steps and %d species.\n' ...
+            'This corresponds to %3.1f %% of the full number of operations.\n'], ...
+            problemData.numOperations, problemData.g.numT, problemData.numSteps, problemData.numSpecies, ...
+            problemData.numOperations / (problemData.g.numT*problemData.numSteps*problemData.numSpecies) * 100);
+end % if
 end % function
 

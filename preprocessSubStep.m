@@ -60,7 +60,7 @@ N = problemData.N;
 p = problemData.p;
 
 % Project velocity to DG space, if not given
-if ~all(isfield(problemData, {'hQ0T', 'uHDisc', 'vHDisc', 'vNormalOnQuadEdge'})) % TODO evtl Fehler falls manche dieser Felder bekannt sind!!!
+if ~all(isfield(problemData, {'hQ0T', 'uHDisc', 'vHDisc', 'vNormalOnQuadEdge'}))
   problemData.hQ0T = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(problemData.timeLvls(nSubStep),x1,x2), ...
                                                 2*p, problemData.hatM, problemData.basesOnQuad) * problemData.basesOnQuad.phi2D{max(2*p,1)}.';
   problemData.uHDisc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.uHCont(problemData.timeLvls(nSubStep),x1,x2), ...
@@ -74,7 +74,7 @@ end % if
 
 % Evaluate cDisc in all quadrature points
 qOrd2D = max(2*p,1);
-problemData.cHQ0T = cellfun(@(c) (reshape(c, N, K).' * problemData.basesOnQuad.phi2D{qOrd2D}.'), problemData.cDiscRK, 'UniformOutput', false); % K x numQuad2D
+problemData.cHQ0T = cellfun(@(c) (reshape(c, N, K).' * problemData.basesOnQuad.phi2D{qOrd2D}.'), problemData.cDiscRK, 'UniformOutput', false);
 
 % Computing the concentration from the depth-integrated one
 problemData.cQ0T = cellfun(@(c) c ./ problemData.hQ0T, problemData.cHQ0T, 'UniformOutput', false);

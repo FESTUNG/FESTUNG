@@ -50,13 +50,13 @@ problemData.cDisc = cell(problemData.numSpecies,1);
 
 problemData.numOperations = 0;
 
-if ~isfield(problemData, 'h0Disc')
+if ~isfield(problemData, 'h0Disc') % TODO
   problemData.h0Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(0,x1,x2), 2*problemData.p+1,problemData.hatM, problemData.basesOnQuad);
 end % if
 hQ0T = problemData.h0Disc * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.';
 
 for species = 1:problemData.numSpecies
-  if ~isfield(problemData, 'cH0Disc')
+  if ~isfield(problemData, 'cH0Disc') % TODO
     problemData.cDisc{species} = projectFuncCont2DataDisc(problemData.g, problemData.cH0Cont{species}, 2*problemData.p+1, ...
                                                           problemData.hatM, problemData.basesOnQuad);
   else
@@ -65,15 +65,18 @@ for species = 1:problemData.numSpecies
   
   if problemData.isVisSol{species} || problemData.isSlopeLim{species}
     
+    % Compute the concentration
     dataQ0T = (problemData.cDisc{species} * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.') ./ hQ0T;
     dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad);
   
+    % Limiting the concentration
     if problemData.isSlopeLim{species}
 
       cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(0, x1, x2));
       [dataDisc, minMaxV0T] = applySlopeLimiterDisc(problemData.g, dataDisc, problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
                                                     problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim{species});
       
+      % Compute the integrated concentration
       dataDiscQ0T = dataDisc * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.';
       problemData.cDisc{species} = projectDataQ0T2DataDisc(dataDiscQ0T .* hQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad);
       
@@ -96,8 +99,14 @@ for species = 1:problemData.numSpecies
                         problemData.outputBasename{species}, 0, problemData.outputTypes{species});
 
       if problemData.isMask(species)
+        if isequal(problemData.mask(:,species), [1; zeros(problemData.K-1,1)]) % TODO due to the workaround
+          problemData.mask(1,species) = 0;
+        end % if
         visualizeDataLagr(problemData.g, problemData.mask(:,species), ['mask_' num2str(species)], ...
                           [problemData.outputBasename{species} '_mask'], 0, problemData.outputTypes{species});
+        if isequal(problemData.mask(:,species), zeros(problemData.K,1)) % TODO due to the workaround
+          problemData.mask(1,species) = 1;
+        end % if
       end % if
     end % if
   else
@@ -106,6 +115,5 @@ for species = 1:problemData.numSpecies
 end % for
 %% Initialize time stepping.
 problemData.isFinished = false;
-fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
-  problemData.tEnd, problemData.tau, problemData.numSteps)
+fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', problemData.tEnd, problemData.tau, problemData.numSteps)
 end % function

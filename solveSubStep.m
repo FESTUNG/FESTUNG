@@ -60,7 +60,7 @@ K = problemData.K;
 N = problemData.N;
 p = problemData.p;
 
-qOrd2D = max(2* p,1); 
+qOrd2D = max(2*p,1);
 [Q1, Q2, W] = quadRule2D(qOrd2D); 
 numQuad2D = length(W);
 
@@ -68,14 +68,14 @@ for species = 1:problemData.numSpecies
   
   % Assembly of time-dependent global matrices
   globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, problemData.uHDisc, problemData.vHDisc, problemData.mask(:,species));
-  globR = assembleMatEdgePhiPhiValUpwind(problemData.g, ~problemData.g.markE0TbdrN, problemData.hatRdiagOnQuad, ...
-                                         problemData.hatRoffdiagOnQuad, problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN, problemData.mask(:,species));
+  globR = assembleMatEdgePhiPhiValUpwind(problemData.g, ~problemData.g.markE0TbdrN, problemData.hatRdiagOnQuad, problemData.hatRoffdiagOnQuad, ...
+                                         problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN, problemData.mask(:,species));
   % Building the system
   sysA = -globG{1} - globG{2} + globR;
   
   % L2 projections of algebraic coefficients
-  fDisc  = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.fCont{species}(problemData.timeLvls(nSubStep),x1,x2), ...
-                                    2*p, problemData.hatM, problemData.basesOnQuad);
+  fDisc  = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.fCont{species}(problemData.timeLvls(nSubStep),x1,x2), 2*p, ...
+                                    problemData.hatM, problemData.basesOnQuad);
 
   % Assembly of Dirichlet boundary contributions
   globKD = assembleVecEdgePhiIntFuncContVal(problemData.g, problemData.g.markE0TbdrD, ...
@@ -83,52 +83,63 @@ for species = 1:problemData.numSpecies
                                             problemData.vNormalOnQuadEdge, N, problemData.basesOnQuad, problemData.g.areaE0TbdrD);
 
   % Assembly of Neumann boundary contributions
-  gNUpwind = @(x1,x2) (problemData.gNCont{species}(problemData.timeLvls(nSubStep),x1,x2) <= 0) .* problemData.gNCont{species}(problemData.timeLvls(nSubStep),x1,x2);
-  globKN = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrN, ...
-            gNUpwind, N, problemData.basesOnQuad);
+  gNUpwind = @(x1,x2) (problemData.gNCont{species}(problemData.timeLvls(nSubStep), x1, x2) <= 0) .* ...
+                      problemData.gNCont{species}(problemData.timeLvls(nSubStep), x1, x2);
+  globKN = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrN, gNUpwind, N, problemData.basesOnQuad);
 
   % Assembly of the source contribution
   globL = problemData.globM * reshape(fDisc', K*N, 1) ...
-        + problemData.globT * reshape(problemData.reactions{species}(problemData.timeLvls(nSubStep), problemData.g.mapRef2Phy(1, Q1, Q2), problemData.g.mapRef2Phy(2, Q1, Q2), problemData.cQ0T, problemData.cHQ0T).', numQuad2D*K, 1);
+        + problemData.globT * reshape(problemData.reactions{species}(problemData.timeLvls(nSubStep), problemData.g.mapRef2Phy(1, Q1, Q2), ...
+                                        problemData.g.mapRef2Phy(2, Q1, Q2), problemData.cQ0T, problemData.cHQ0T).', numQuad2D*K, 1);
   
   % right hand side
   sysV = globL - globKD - globKN;
 
+  % TODO optimiziation possible
   numElem = sum(problemData.mask(:,species));
   advectiveTerm = zeros(K*N,1);
-  advectiveTerm(logical(kron(problemData.mask(:,species),ones(N,1)))) = sysA * reshape(problemData.concentrationDiscRK{species}(problemData.mask(:,species),:)', [numElem*N 1]);
+  indx = logical(kron(problemData.mask(:,species),ones(N,1)));
+  advectiveTerm(indx) = sysA * reshape(problemData.concentrationDiscRK{species}(problemData.mask(:,species),:)', [numElem*N 1]);
+  
   % Computing the discrete time derivative
   cDiscDot = problemData.globM \ (sysV - advectiveTerm);
 
   % Apply slope limiting to time derivative
-  if problemData.isSlopeLim{species} && false % limiting discrete time derivative of species instead of integrated one does not work
-    cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot, [N K])', problemData.globM, problemData.globMDiscTaylor);
-    cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim{species});
-    cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
-    cDiscDot = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
+  if problemData.isSlopeLim{species} % limiting discrete time derivative of a concentration instead of an integrated concentration does not work
+%     cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot, [N K])', problemData.globM, problemData.globMDiscTaylor);
+%     cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, ...
+%                                                 problemData.typeSlopeLim{species});
+%     cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
+%     cDiscDot = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
   end % if
 
   % Compute next step
-  problemData.cDiscRK{species} = problemData.omega(nSubStep) * problemData.cDiscRK0{species} + (1 - problemData.omega(nSubStep)) * (problemData.cDiscRK{species} + problemData.tau * cDiscDot);
+  problemData.cDiscRK{species} = problemData.omega(nSubStep) * problemData.cDiscRK0{species} + (1 - problemData.omega(nSubStep)) * ...
+                                  (problemData.cDiscRK{species} + problemData.tau * cDiscDot);
 
+  % Compute the concentration
   dataQ0T = (reshape(problemData.cDiscRK{species}, [N K]).' * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.') ./ problemData.hQ0T;
   problemData.concentrationDiscRK{species} = projectDataQ0T2DataDisc(dataQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad);
   
-  % Limiting the solution
+  % Limiting the concentration
   if problemData.isSlopeLim{species}
 
     cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(problemData.timeLvls(nSubStep), x1, x2));
-    [problemData.concentrationDiscRK{species}, minMaxV0T] = applySlopeLimiterDisc(problemData.g, problemData.concentrationDiscRK{species}, problemData.g.markV0TbdrD, ...
-                                                                                  cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim{species});
+    [problemData.concentrationDiscRK{species}, minMaxV0T] = applySlopeLimiterDisc(problemData.g, problemData.concentrationDiscRK{species}, ...
+                                                                                  problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
+                                                                                  problemData.globMDiscTaylor, problemData.basesOnQuad, ...
+                                                                                  problemData.typeSlopeLim{species});
     
+    % Compute the integrated concentration
     dataDiscQ0T = problemData.concentrationDiscRK{species} * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.';
     problemData.cDiscRK{species} = projectDataQ0T2DataDisc(dataDiscQ0T .* problemData.hQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad);
     problemData.cDiscRK{species} = reshape(problemData.cDiscRK{species}', [K*N 1]);
     
+    % TODO it is possible to call this part after iterateSubSteps
     if problemData.isMask(species) && nSubStep == problemData.ordRK % update only after all RK steps for consitency
       problemData.mask(:,species) = computeMask(minMaxV0T, problemData.maskTol, problemData.maskType);
       
-      if isequal(problemData.mask(:,species), zeros(K,1)) % possible workaround
+      if isequal(problemData.mask(:,species), zeros(K,1)) % TODO: possible workaround
         problemData.mask(1,species) = true;
       end % if
     end % if
