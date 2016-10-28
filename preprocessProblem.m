@@ -49,9 +49,7 @@ function problemData = preprocessProblem(problemData)
 h = getFunctionHandle('swe/preprocessProblem');
 problemData.sweData = h(problemData.sweData);
 
-problemData.transportData.K = problemData.sweData.K;
-problemData.transportData.tau = problemData.sweData.dt;
-problemData.transportData.velN = problemData.sweData.N;
+problemData.transportData.velN = problemData.sweData.N; % the code requires to solve both problems in the same order
 
 h = getFunctionHandle('transport/preprocessProblem');
 problemData.transportData = h(problemData.transportData);
