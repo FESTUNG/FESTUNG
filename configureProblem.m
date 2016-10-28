@@ -108,6 +108,9 @@ switch pd.configSource
     error('Invalid config source.')
 end % switch
 
+if pd.isHotstartInput && pd.isRamp
+  warning('Ramp function should probably not be used in case of Hotstart input.');
+end % if
 end % function
 
 %% Debugging
@@ -278,12 +281,9 @@ assert(exist(['swe/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe/fort_' 
 assert(exist(['swe/fort_' pd.name '.15'], 'file') == 2, ['Config file "swe/fort_' pd.name '.15" not found!'])
 
 %% Read parameter file
-if pd.isCoupling % TODO Unterscheidung vermeiden
-  pd.configADCIRC = readConfigADCIRC(['swe/fort_' pd.name '.15']);
-else
-  h = getFunctionHandle('swe/readConfigADCIRC');
-  pd.configADCIRC = h(['swe/fort_' pd.name '.15']);
-end % if
+h = getFunctionHandle('swe/readConfigADCIRC');
+pd.configADCIRC = h(['swe/fort_' pd.name '.15']);
+
 %% Map ADCIRC variables to internal names
 % Constants
 if ~pd.isCoupling % TODO
