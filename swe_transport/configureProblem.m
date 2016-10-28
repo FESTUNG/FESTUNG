@@ -125,7 +125,8 @@ problemData.sweData.schemeOrder = problemData.ordRK;
 problemData.sweData.tEnd = problemData.tEnd;
 problemData.sweData.numSteps = problemData.numSteps;
 
-problemData.sweData = execin('swe/configureProblem', problemData.sweData);
+h = getFunctionHandle('swe/configureProblem');
+problemData.sweData = h(problemData.sweData);
 
 problemData.ordRK = problemData.sweData.schemeOrder; % in case ADCIRC scheme order is used
 
