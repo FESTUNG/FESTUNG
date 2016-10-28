@@ -59,9 +59,10 @@
 function problemData = solveSubStep(problemData, nStep, nSubStep)
 K = problemData.sweData.K;
 N = problemData.transportData.N;
-p = (sqrt(8*N+1)-3)/2;
+p = problemData.transportData.p;
+qOrd2D = max(2*p,1);
 
 problemData.sweData = problemData.swe_solveSubStep(problemData.sweData, nStep, nSubStep);
-problemData.transportData.hQ0T = ( reshape(problemData.sweData.cDiscRK(1:K*N), [N K])' - problemData.sweData.zbDisc ) * problemData.sweData.basesOnQuad.phi2D{max(2*p,1)}.';
+problemData.transportData.hQ0T = (reshape(problemData.sweData.cDiscRK(1:K*N), [N K])' - problemData.sweData.zbDisc) * problemData.sweData.basesOnQuad.phi2D{qOrd2D}.';
 problemData.transportData = problemData.transport_solveSubStep(problemData.transportData, nStep, nSubStep);
 end % function
