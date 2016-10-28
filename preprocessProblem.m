@@ -77,8 +77,8 @@ end % switch
 
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 %% Globally constant parameters.
-problemData = setdefault(problemData, 'K', problemData.g.numT);  % number of triangles
-problemData = setdefault(problemData, 'tau', problemData.tEnd / problemData.numSteps); % time step size
+problemData.K = problemData.g.numT;  % number of triangles
+problemData.tau = problemData.tEnd / problemData.numSteps; % time step size
 problemData.N = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
 problemData = setdefault(problemData, 'velN', problemData.N); % number of local DOFs for velocity
 
