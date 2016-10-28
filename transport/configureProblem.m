@@ -92,7 +92,7 @@ switch problemData.configSource
     error('Invalid config source.')
 end % switch
 
-problemData = setdefault(problemData, 'isMask', true(problemData.numSpecies,1));  % computation only where species is not constant
+problemData = setdefault(problemData, 'isMask', true(problemData.numSpecies, 1));  % computation only where species is not constant
 problemData.maskType = 'vertex-based';
 
 problemData.isVisSol = cell(problemData.numSpecies,1);
