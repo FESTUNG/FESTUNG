@@ -104,13 +104,12 @@ switch pd.gridSource
     
   case 'ADCIRC'
     projCenter = [pd.configADCIRC.SLAM0, pd.configADCIRC.SFEA0];
-    h = getFunctionHandle('swe/domainADCIRC');
-    [ pd.g, depth, forcingOS, flowRateRiv ] = h(['swe/fort_' pd.name '.14'], ['swe/fort_' pd.name '.17'], ...
-                                                 pd.configADCIRC.NBFR, pd.isSpherical, projCenter); % TODO getFunctionHandle oder execin?
+    [ pd.g, depth, forcingOS, flowRateRiv ] = execin('swe/domainADCIRC', ['swe/fort_' pd.name '.14'], ['swe/fort_' pd.name '.17'], ...
+                                                                          pd.configADCIRC.NBFR, pd.isSpherical, projCenter);
     
     % Bathymetry
     h = getFunctionHandle('swe/evaluateFuncFromVertexValues');
-    pd.zbCont = @(x1,x2) h(pd.g, -depth, x1,x2); % TODO getFunctionHandle oder execin?
+    pd.zbCont = @(x1,x2) h(pd.g, -depth, x1,x2);
     
     assert(max( max( abs(depth(pd.g.V0T) + pd.zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2))) ) ) < 1.e-5, ...
            'Bathymetry incorrectly constructed!');
@@ -492,7 +491,7 @@ if pd.g.numEbdrRI > 0 % River boundaries
       pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{n,1} * uvHRiv + pd.globRRI{n,2} * (vvHRiv + gHHRiv);
       
       if pd.isCoupling
-        pd.massFluxQ0E0TRiv(:,n,:) = bsxfun(@times, reshape( uHRiv .* pd.g.nuQ0E0T{n,1} + vHRiv .* pd.g.nuQ0E0T{n,2}, [numQuad1D, K] ).', pd.g.markE0TbdrRI(:,n) );
+        pd.massFluxQ0E0TRiv(:,n,:) = bsxfun(@times, reshape(uHRiv.*pd.g.nuQ0E0T{n,1}+vHRiv.*pd.g.nuQ0E0T{n,2}, [numQuad1D, K])', pd.g.markE0TbdrRI(:,n));
       end % if
     end % for
   end % if

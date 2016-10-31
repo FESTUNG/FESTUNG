@@ -215,8 +215,10 @@ end % if
 for nn = 1 : 3
   if pd.isCoupling
     pd.massFluxQ0E0T(:,nn,:) = 0.5 * bsxfun(@times, permute( reshape( ( cQ0E0Tint{2,nn} + sum(cat(2,cQ0E0TE0T{2,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,1} + ...
-                                                                      ( cQ0E0Tint{3,nn} + sum(cat(2,cQ0E0TE0T{3,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0Tint(:,nn) ) ...
-                               + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRA(:,nn) );
+                                                                      ( cQ0E0Tint{3,nn} + sum(cat(2,cQ0E0TE0T{3,nn,:}),2) ) .* pd.g.nuQ0E0T{nn,2}, ...
+                                                                      [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0Tint(:,nn) ) ...
+                               + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2}, ...
+                                                                  [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRA(:,nn) );
   end % if
   % Non-linear terms in exterior quadrature points of edges
   for np = 1 : 3
@@ -241,9 +243,11 @@ for nn = 1 : 3
 
         if pd.isCoupling
           if isfield(pd.g, 'markE0T')
-            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * bsxfun(@times, permute( reshape( lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0T{nn,np} );
+            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * bsxfun(@times, permute( reshape( lambda .* (cQ0E0Tint{1,nn} ...
+                                                                          - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0T{nn,np} );
           else
-            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * bsxfun(@times, permute( reshape( lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TE0T{nn,np} * ones(K,1) );
+            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + 0.5 * bsxfun(@times, permute( reshape( lambda .* (cQ0E0Tint{1,nn} ...
+                                                            - cQ0E0TE0T{1,nn,np}), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TE0T{nn,np} * ones(K,1) );
           end % if
         end % if
       case 'Roe'
@@ -303,8 +307,8 @@ for nn = 1 : 3
             lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
             
             pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * ...
-              [ pd.globRL{nn,1} * (uuH + uuHriem + 2 * gHH) + pd.globRL{nn,2} * (uvH + uvHriem) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHriem)); ...
-                pd.globRL{nn,1} * (uvH + uvHriem) + pd.globRL{nn,2} * (vvH + vvHriem + 2 * gHH) + pd.globVL{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHriem)) ];
+              [ pd.globRL{nn,1} * (uuH + uuHriem + 2 * gHH) + pd.globRL{nn,2} * (uvH + uvHriem) + pd.globVL{nn} * (lambda.*(cQ0E0Tint{2,nn}-uHriem)); ...
+                pd.globRL{nn,1} * (uvH + uvHriem) + pd.globRL{nn,2} * (vvH + vvHriem + 2 * gHH) + pd.globVL{nn} * (lambda.*(cQ0E0Tint{3,nn}-vHriem)) ];
             
             % for coupled problems massFluxQ0E0T is zero on land boundary edges
             % with Lax-Friedrichs-flux discretization
@@ -329,7 +333,7 @@ for nn = 1 : 3
     vHRiv = vRivQ0E0T{nn} .* hRiv;
     
     if pd.isRiemRiv
-      cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Triv(cQ0E0Tint(:,nn), { xiRivQ0E0T{nn}, uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, markQ0E0TbdrRI{nn}, pd.averagingType);
+      cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Triv(cQ0E0Tint(:,nn), { [], uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, markQ0E0TbdrRI{nn}, pd.averagingType);
       switch pd.typeFlux
         case 'Lax-Friedrichs'
           lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
@@ -344,12 +348,14 @@ for nn = 1 : 3
           jump = lambda .* (cQ0E0Tint{1,nn} - xiRivQ0E0T{nn});
 
           pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRRI{nn,1} * uRiv + pd.globRRI{nn,2} * vRiv + pd.globVRI{nn} * jump );
-          pd.globLRI{2} = pd.globLRI{2} + 0.5 * ( pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHRiv)) );
-          pd.globLRI{3} = pd.globLRI{3} + 0.5 * ( pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv) + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHRiv)) );
+          pd.globLRI{2} = pd.globLRI{2} + 0.5 * ( pd.globRRI{nn,1} * (uuHRiv + gHHRiv) + pd.globRRI{nn,2} * uvHRiv ... 
+                                                + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHRiv)) );
+          pd.globLRI{3} = pd.globLRI{3} + 0.5 * ( pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv) ...
+                                                + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHRiv)) );
           
           if pd.isCoupling
-            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, 0.5 * permute( reshape( uRiv .* pd.g.nuQ0E0T{nn,1} + vRiv .* pd.g.nuQ0E0T{nn,2} ...
-                                                                                                        + jump, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRI(:,nn) );
+            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, 0.5 * permute( reshape( uRiv .* pd.g.nuQ0E0T{nn,1} + ...
+                                              vRiv .* pd.g.nuQ0E0T{nn,2} + jump, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRI(:,nn) );
           end % if
           
         case 'Roe'
@@ -370,7 +376,8 @@ for nn = 1 : 3
       pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv + gHHRiv);
       
       if pd.isCoupling % squeeze needed since river boundary flux is sparse
-        pd.massFluxQ0E0T(:,nn,:) = squeeze(pd.massFluxQ0E0T(:,nn,:)) + bsxfun(@times, reshape( uHRiv .* pd.g.nuQ0E0T{nn,1} + vHRiv .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K] ).', pd.g.markE0TbdrRI(:,nn) );
+        pd.massFluxQ0E0T(:,nn,:) = squeeze(pd.massFluxQ0E0T(:,nn,:)) + bsxfun(@times, reshape( uHRiv .* pd.g.nuQ0E0T{nn,1} ...
+                                                   + vHRiv .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K] ).', pd.g.markE0TbdrRI(:,nn) );
       end % if
     end % if
   end % if
@@ -398,8 +405,9 @@ for nn = 1 : 3
           pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + 0.5 * pd.globVOS{nn} * (lambda .* (hQ0E0Tint{nn} - hOSQ0E0T));
           
           if pd.isCoupling
-            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2} ...
-                                                                                                   + 0.5 * lambda .* (hQ0E0Tint{nn} - hOSQ0E0T), [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrOS(:,nn) );
+            pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + ...
+                                          cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2} + 0.5 * lambda .* (hQ0E0Tint{nn} - hOSQ0E0T), [numQuad1D, K, 1] ), ...
+                                          [2 3 1] ), pd.g.markE0TbdrOS(:,nn) );
           end % if
           
         case 'Roe'
@@ -414,7 +422,8 @@ for nn = 1 : 3
           pd.globROS{nn,1} * uvHOS + pd.globROS{nn,2} * (vvHOS + gHHOS) ];
       
       if pd.isCoupling
-        pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrOS(:,nn) );
+        pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + ...
+                                          cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrOS(:,nn) );
       end % if
     end % if
   end % if
