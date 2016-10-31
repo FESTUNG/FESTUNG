@@ -45,19 +45,24 @@
 %> @endparblock
 %
 function problemData = initializeProblem(problemData)
+p = problemData.p;
+qOrd2D = max(2*p,1);
+
 %% Initial data.
 problemData.cDisc = cell(problemData.numSpecies,1);
+problemData.cQ0T = cell(problemData.numSpecies,1);
+problemData.concDisc = cell(problemData.numSpecies,1);
 
 problemData.numOperations = 0;
 
 if ~isfield(problemData, 'h0Disc') % TODO
-  problemData.h0Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(0,x1,x2), 2*problemData.p+1,problemData.hatM, problemData.basesOnQuad);
+  problemData.h0Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(0,x1,x2), 2*p+1,problemData.hatM, problemData.basesOnQuad);
 end % if
-hQ0T = problemData.h0Disc * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.';
+hQ0T = problemData.h0Disc * problemData.basesOnQuad.phi2D{qOrd2D}.';
 
 for species = 1:problemData.numSpecies
   if ~isfield(problemData, 'cH0Disc') % TODO
-    problemData.cDisc{species} = projectFuncCont2DataDisc(problemData.g, problemData.cH0Cont{species}, 2*problemData.p+1, ...
+    problemData.cDisc{species} = projectFuncCont2DataDisc(problemData.g, problemData.cH0Cont{species}, 2*p+1, ...
                                                           problemData.hatM, problemData.basesOnQuad);
   else
     problemData.cDisc{species} = problemData.cH0Disc{species};
@@ -66,19 +71,21 @@ for species = 1:problemData.numSpecies
   if problemData.isVisSol{species} || problemData.isSlopeLim{species}
     
     % Compute the concentration
-    dataQ0T = (problemData.cDisc{species} * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.') ./ hQ0T;
-    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad);
+    problemData.cQ0T{species} = (problemData.cDisc{species} * problemData.basesOnQuad.phi2D{qOrd2D}.') ./ hQ0T;
+    problemData.concDisc{species} = projectDataQ0T2DataDisc(problemData.cQ0T{species}, 2*p, problemData.hatM, problemData.basesOnQuad);
   
     % Limiting the concentration
     if problemData.isSlopeLim{species}
 
       cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(0, x1, x2));
-      [dataDisc, minMaxV0T] = applySlopeLimiterDisc(problemData.g, dataDisc, problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
-                                                    problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim{species});
+      [problemData.concDisc{species}, minMaxV0T] = applySlopeLimiterDisc(problemData.g, problemData.concDisc{species}, ...
+                                                                                    problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
+                                                                                    problemData.globMDiscTaylor, problemData.basesOnQuad, ...
+                                                                                    problemData.typeSlopeLim{species});
       
       % Compute the integrated concentration
-      dataDiscQ0T = dataDisc * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.';
-      problemData.cDisc{species} = projectDataQ0T2DataDisc(dataDiscQ0T .* hQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad);
+      dataDiscQ0T = problemData.concDisc{species} * problemData.basesOnQuad.phi2D{qOrd2D}.';
+      problemData.cDisc{species} = projectDataQ0T2DataDisc(dataDiscQ0T .* hQ0T, 2*p, problemData.hatM, problemData.basesOnQuad);
       
       if problemData.isMask(species)
         problemData.mask(:,species) = computeMask(minMaxV0T, problemData.maskTol, problemData.maskType);
@@ -94,7 +101,7 @@ for species = 1:problemData.numSpecies
     end % if
     
     if problemData.isVisSol{species}
-      cLagrange = projectDataDisc2DataLagr(dataDisc);
+      cLagrange = projectDataDisc2DataLagr(problemData.concDisc{species});
       visualizeDataLagr(problemData.g, cLagrange, ['c_' num2str(species) '_h'], ...
                         problemData.outputBasename{species}, 0, problemData.outputTypes{species});
 

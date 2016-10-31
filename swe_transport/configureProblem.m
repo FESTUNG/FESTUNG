@@ -161,11 +161,12 @@ switch problemData.configSource
     error('Invalid config source.')
 end % switch
 
+problemData.transportData.isCoupling = true;
+
 problemData.transportData.gridSource = problemData.gridSource;
 problemData.transportData.refinement = problemData.refinement;
 problemData.transportData.hmax = problemData.hmax;
 problemData.transportData.p = problemData.p;
-
 problemData.transportData.ordRK = problemData.ordRK;
 problemData.transportData.tEnd = problemData.tEnd;
 problemData.transportData.numSteps = problemData.numSteps;

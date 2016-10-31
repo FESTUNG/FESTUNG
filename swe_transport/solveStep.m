@@ -54,14 +54,11 @@
 function problemData = solveStep(problemData, nStep)
 
 % Obtain Runge-Kutta rule
-[problemData.timeLvls, problemData.omega] = rungeKuttaSSP(problemData.sweData.schemeOrder, problemData.sweData.dt, ...
-                                                          problemData.sweData.t);
+[problemData.timeLvls, problemData.omega] = rungeKuttaSSP(problemData.sweData.schemeOrder, problemData.sweData.dt, problemData.sweData.t);
 
 % Initialize time stepping
 K = problemData.sweData.K;
 N = problemData.sweData.N;
-p = problemData.sweData.p;
-qOrd2D = max(2*p,1);
 
 problemData.sweData.tLvls = problemData.timeLvls;
 problemData.sweData.omega = problemData.omega;
@@ -73,8 +70,6 @@ problemData.sweData.cDiscRK = problemData.sweData.cDiscRK0;
 
 problemData.transportData.timeLvls = problemData.timeLvls;
 problemData.transportData.omega = problemData.omega;
-
-problemData.transportData.hQ0T = (reshape(problemData.sweData.cDiscRK0(1:K*N), [N K])' -problemData.sweData.zbDisc) * problemData.sweData.basesOnQuad.phi2D{qOrd2D}.';
 
 problemData.transportData.cDiscRK0 = cellfun(@(c) reshape(c.', [K*N,1]), problemData.transportData.cDisc, 'UniformOutput', false);
 problemData.transportData.cDiscRK = problemData.transportData.cDiscRK0;
