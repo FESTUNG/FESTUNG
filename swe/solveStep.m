@@ -56,7 +56,7 @@ K = problemData.K;
 N = problemData.N;
 
 if problemData.isAdaptiveTimestep
-  problemData.dt = selectTimeStepSWE(problemData.avgDiff(:,1), problemData.avgDiff(:,2), problemData.avgDepth, problemData.gConst, problemData.dt, nStep);
+  problemData.dt = selectTimeStep(problemData.avgDiff(:,1), problemData.avgDiff(:,2), problemData.avgDepth, problemData.gConst, problemData.dt, nStep);
 end % if
 
 % Obtain Runge-Kutta rule
@@ -72,9 +72,9 @@ switch problemData.schemeType
 end % switch
 
 % Initialize solution vectors for RK steps
-problemData.cDiscRK0 = [ reshape(problemData.cDisc(:,:,1).', K*N, 1) ; ...
-                reshape(problemData.cDisc(:,:,2).', K*N, 1) ; ...
-                reshape(problemData.cDisc(:,:,3).', K*N, 1) ];
+problemData.cDiscRK0 = [reshape(problemData.cDisc(:,:,1).', K*N, 1); ...
+                        reshape(problemData.cDisc(:,:,2).', K*N, 1); ...
+                        reshape(problemData.cDisc(:,:,3).', K*N, 1)];
 problemData.cDiscRK = problemData.cDiscRK0;
 
 % Carry out RK steps
