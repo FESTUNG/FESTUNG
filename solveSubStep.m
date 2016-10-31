@@ -64,6 +64,11 @@ qOrd2D = max(2*p,1);
 [Q1, Q2, W] = quadRule2D(qOrd2D); 
 numQuad2D = length(W);
 
+if ~problemData.isCoupling
+    problemData.hQ0T = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(problemData.timeLvls(nSubStep),x1,x2), 2*p, ...
+                                                problemData.hatM, problemData.basesOnQuad) * problemData.basesOnQuad.phi2D{max(2*p,1)}.';
+end % if
+
 for species = 1:problemData.numSpecies
   
   % Assembly of time-dependent global matrices
@@ -99,7 +104,7 @@ for species = 1:problemData.numSpecies
   numElem = sum(problemData.mask(:,species));
   advectiveTerm = zeros(K*N,1);
   indx = logical(kron(problemData.mask(:,species),ones(N,1)));
-  advectiveTerm(indx) = sysA * reshape(problemData.concentrationDiscRK{species}(problemData.mask(:,species),:)', [numElem*N 1]);
+  advectiveTerm(indx) = sysA * reshape(problemData.concDisc{species}(problemData.mask(:,species),:)', [numElem*N 1]);
   
   % Computing the discrete time derivative
   cDiscDot = problemData.globM \ (sysV - advectiveTerm);
@@ -118,21 +123,21 @@ for species = 1:problemData.numSpecies
                                   (problemData.cDiscRK{species} + problemData.tau * cDiscDot);
 
   % Compute the concentration
-  dataQ0T = (reshape(problemData.cDiscRK{species}, [N K]).' * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.') ./ problemData.hQ0T;
-  problemData.concentrationDiscRK{species} = projectDataQ0T2DataDisc(dataQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad);
+  dataQ0T = (reshape(problemData.cDiscRK{species}, [N K]).' * problemData.basesOnQuad.phi2D{qOrd2D}.') ./ problemData.hQ0T;
+  problemData.concDisc{species} = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.hatM, problemData.basesOnQuad);
   
   % Limiting the concentration
   if problemData.isSlopeLim{species}
 
     cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(problemData.timeLvls(nSubStep), x1, x2));
-    [problemData.concentrationDiscRK{species}, minMaxV0T] = applySlopeLimiterDisc(problemData.g, problemData.concentrationDiscRK{species}, ...
-                                                                                  problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
-                                                                                  problemData.globMDiscTaylor, problemData.basesOnQuad, ...
-                                                                                  problemData.typeSlopeLim{species});
+    [problemData.concDisc{species}, minMaxV0T] = applySlopeLimiterDisc(problemData.g, problemData.concDisc{species}, ...
+                                                                       problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
+                                                                       problemData.globMDiscTaylor, problemData.basesOnQuad, ...
+                                                                       problemData.typeSlopeLim{species});
     
     % Compute the integrated concentration
-    dataDiscQ0T = problemData.concentrationDiscRK{species} * problemData.basesOnQuad.phi2D{max(2*problemData.p,1)}.';
-    problemData.cDiscRK{species} = projectDataQ0T2DataDisc(dataDiscQ0T .* problemData.hQ0T, 2*problemData.p, problemData.hatM, problemData.basesOnQuad);
+    dataDiscQ0T = problemData.concDisc{species} * problemData.basesOnQuad.phi2D{qOrd2D}.';
+    problemData.cDiscRK{species} = projectDataQ0T2DataDisc(dataDiscQ0T .* problemData.hQ0T, 2*p, problemData.hatM, problemData.basesOnQuad);
     problemData.cDiscRK{species} = reshape(problemData.cDiscRK{species}', [K*N 1]);
     
     % TODO it is possible to call this part after iterateSubSteps

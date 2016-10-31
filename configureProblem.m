@@ -74,6 +74,7 @@ problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degr
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
 problemData = setdefault(problemData, 'maskTol'   , 1.0e-8);  % maximal tolerance of slope for which species are considered constant
+problemData = setdefault(problemData, 'isCoupling', false); % Receive velocity coefficients and fluxes from a different model, e.g. 'swe'
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
