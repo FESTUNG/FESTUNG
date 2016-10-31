@@ -64,7 +64,7 @@ coordBary(:,:,1:2) = bsxfun(@times, coordBary(:,:,1:2), .5 ./ g.areaT.');
 coordBary(:,:,3) = 1 - coordBary(:,:,1) - coordBary(:,:,2);
 % Find triangles with only positive barycentric coordinates
 [idxCoord, idxTriangle] = find(coordBary(:,:,1) >= 0 & coordBary(:,:,2) >= 0 & coordBary(:,:,3) >= 0);
-% TODO: vectorize this
+
 ret = cell(numCoord,1);
 for n = 1 : numCoord
   triangles = idxTriangle(idxCoord == n);

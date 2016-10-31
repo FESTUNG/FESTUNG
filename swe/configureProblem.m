@@ -286,9 +286,7 @@ pd.configADCIRC = h(['swe/fort_' pd.name '.15']);
 
 %% Map ADCIRC variables to internal names
 % Constants
-if ~pd.isCoupling % TODO
-  pd.p = pd.configADCIRC.IRK;
-end % if
+pd.p = pd.configADCIRC.IRK;
 pd.schemeOrder = pd.configADCIRC.IRK+1;
 pd.minTol = pd.configADCIRC.H0;
 pd.gConst = pd.configADCIRC.G;
@@ -337,6 +335,8 @@ end % switch
     
 % Newtonian tidal potential
 pd.isTidalDomain = pd.configADCIRC.NTIP == 1;
+
+pd.isVisStations = pd.configADCIRC.NOUTE || pd.configADCIRC.NOUTV;
 
 % Boundary conditions
 pd.isOSCont = false;
