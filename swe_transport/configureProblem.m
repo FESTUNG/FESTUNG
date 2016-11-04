@@ -91,8 +91,8 @@ switch problemData.configSource
     problemData.name = 'galv';
     % TODO these should be unused
     problemData = setdefault(problemData, 'hmax', 1);
-    problemData = setdefault(problemData, 'tEnd', 1296000);
-    problemData = setdefault(problemData, 'numSteps', 259200);
+    problemData = setdefault(problemData, 'tEnd', 7776000);
+    problemData = setdefault(problemData, 'numSteps', 1555200);
   otherwise
     error('Invalid config source.')
 end % switch
