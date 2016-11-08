@@ -51,10 +51,10 @@ if problemData.isSolutionAvailable
   problemData.errors = zeros(problemData.numSpecies,2);
   for species = 1 : problemData.numSpecies
     %% Error evaluation
-    problemData.errors(species,1) = computeL2Error(problemData.g, problemData.cDisc{species}, @(x1,x2) problemData.solCont{species}(problemData.t,x1,x2) .* problemData.hCont(problemData.t,x1,x2), 2*p, problemData.basesOnQuad);
+    problemData.errors(species,1) = computeL2Error(problemData.g, problemData.cDisc{species}, @(x1,x2) problemData.solCont{species}(problemData.tEnd,x1,x2) .* problemData.hCont(problemData.tEnd,x1,x2), 2*p, problemData.basesOnQuad);
     dataQ0T = (problemData.cDisc{species} * problemData.basesOnQuad.phi2D{qOrd2D}.') ./ problemData.hQ0T;
     dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.hatM, problemData.basesOnQuad);
-    problemData.errors(species,2) = computeL2Error(problemData.g, dataDisc, @(x1,x2) problemData.solCont{species}(problemData.t,x1,x2), 2*p, problemData.basesOnQuad);
+    problemData.errors(species,2) = computeL2Error(problemData.g, dataDisc, @(x1,x2) problemData.solCont{species}(problemData.tEnd,x1,x2), 2*p, problemData.basesOnQuad);
   end % for
 end % if
 
