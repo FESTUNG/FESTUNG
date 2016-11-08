@@ -91,12 +91,12 @@ if problemData.isSolutionAvail
   
   % Error in x-velocity (u)
   dataQ0T = (problemData.cDisc(:,:,2) * problemData.basesOnQuad.phi2D{max(2*p,1)}.') ./ (hDisc * problemData.basesOnQuad.phi2D{max(2*p,1)}.');
-  dataDisc = problemData.swe_projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+  dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   problemData.err(5) = computeL2Error(problemData.g, dataDisc, uEnd, 2*p, problemData.basesOnQuad);
   
   % Error in y-velocity (v)
   dataQ0T = (problemData.cDisc(:,:,3) * problemData.basesOnQuad.phi2D{max(2*p,1)}.') ./ (hDisc * problemData.basesOnQuad.phi2D{max(2*p,1)}.');
-  dataDisc = problemData.swe_projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+  dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   problemData.err(6) = computeL2Error(problemData.g, dataDisc, vEnd, 2*p, problemData.basesOnQuad);
 end % if
 end
