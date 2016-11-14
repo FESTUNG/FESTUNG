@@ -84,15 +84,12 @@ switch problemData.configSource
     problemData = setdefault(problemData, 'tEnd'      , (problemData.numSteps/3142)*2*pi);  % end time
   case 'analytical'
     problemData = setdefault(problemData, 'hmax', 200);
-    problemData = setdefault(problemData, 'tEnd', 500);
     problemData = setdefault(problemData, 'numSteps', 200*2^(problemData.refinement+problemData.p));
+    problemData = setdefault(problemData, 'tEnd', 500);
   case 'ADCIRC'
-    problemData.isSolutionAvailable = false;
-    problemData.name = 'galv';
-    % TODO these should be unused
     problemData = setdefault(problemData, 'hmax', 1);
-    problemData = setdefault(problemData, 'tEnd', 7776000);
     problemData = setdefault(problemData, 'numSteps', 1555200);
+    problemData = setdefault(problemData, 'tEnd', 7776000);
   otherwise
     error('Invalid config source.')
 end % switch
@@ -109,6 +106,8 @@ switch problemData.configSource
   case 'analytical'
     problemData.sweData.configSource = 'analytical';
   case 'ADCIRC'
+    problemData.isSolutionAvailable = false;
+    problemData.name = 'galv';
     problemData.sweData.configSource = 'ADCIRC';
     problemData.sweData.name = problemData.name;
   otherwise
