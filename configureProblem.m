@@ -73,7 +73,7 @@ problemData = setdefault(problemData, 'refinement', 0);
 problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degree
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
-problemData = setdefault(problemData, 'maskTol'   , 1.0e-14);  % maximal tolerance of slope for which species are considered constant
+problemData = setdefault(problemData, 'maskTol'   , 1.0e-12);  % maximal tolerance of slope for which species are considered constant
 problemData = setdefault(problemData, 'isCoupling', false); % Receive velocity coefficients and fluxes from a different model, e.g. 'swe'
 
 %% Parameter check.
@@ -93,7 +93,7 @@ switch problemData.configSource
     error('Invalid config source.')
 end % switch
 
-problemData = setdefault(problemData, 'isMask', true(problemData.numSpecies, 1));  % computation only where species is not constant
+problemData = setdefault(problemData, 'isMask', true(problemData.numSpecies, 1)); % computation only where species is not constant
 problemData.maskType = 'vertex-based';
 
 problemData.isVisSol = cell(problemData.numSpecies,1);
@@ -131,8 +131,8 @@ switch problemData.configSource
   case 'ADCIRC'
     problemData.isSolutionAvailable = false;
     problemData = setdefault(problemData, 'hmax'      , 1);  % maximum edge length of triangle
-    problemData = setdefault(problemData, 'numSteps'  , 172800);  % number of time steps
-    problemData = setdefault(problemData, 'tEnd'      , 864000);  % end time
+    problemData = setdefault(problemData, 'numSteps'  , 1555200);  % number of time steps
+    problemData = setdefault(problemData, 'tEnd'      , 7776000);  % end time
     problemData.isSolutionAvailable = false;
     problemData = configureADCIRC(problemData);
   otherwise
@@ -214,14 +214,14 @@ problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(t,x
 problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.vCont(t,x1,x2));
 
 % analytical solution
-problemData.solCont = {@(t,x1,x2) sin(ds*(x1+x2-t))+2, @(t,x1,x2) cos(ds*(x1+x2-t))+2, @(t,x1,x2) -cos(ds*(x1+x2-t))+2};
-sol_tCont = {@(t,x1,x2) -ds*cos(ds*(x1+x2-t)), @(t,x1,x2) ds*sin(ds*(x1+x2-t)), @(t,x1,x2) -ds*sin(ds*(x1+x2-t))};
-sol_xCont = {@(t,x1,x2) ds*cos(ds*(x1+x2-t)), @(t,x1,x2) -ds*sin(ds*(x1+x2-t)), @(t,x1,x2) ds*sin(ds*(x1+x2-t))};
-sol_yCont = {@(t,x1,x2) ds*cos(ds*(x1+x2-t)), @(t,x1,x2) -ds*sin(ds*(x1+x2-t)), @(t,x1,x2) ds*sin(ds*(x1+x2-t))};
+problemData.solCont = {@(t,x1,x2) 1E-3*(sin(ds*(x1+x2-t))+2), @(t,x1,x2) 1E-3*(cos(ds*(x1+x2-t))+2), @(t,x1,x2) 1E-3*(-cos(ds*(x1+x2-t))+2)};
+sol_tCont = {@(t,x1,x2) 1E-3*(-ds*cos(ds*(x1+x2-t))), @(t,x1,x2) 1E-3*(ds*sin(ds*(x1+x2-t))), @(t,x1,x2) 1E-3*(-ds*sin(ds*(x1+x2-t)))};
+sol_xCont = {@(t,x1,x2) 1E-3*(ds*cos(ds*(x1+x2-t))), @(t,x1,x2) 1E-3*(-ds*sin(ds*(x1+x2-t))), @(t,x1,x2) 1E-3*(ds*sin(ds*(x1+x2-t)))};
+sol_yCont = {@(t,x1,x2) 1E-3*(ds*cos(ds*(x1+x2-t))), @(t,x1,x2) 1E-3*(-ds*sin(ds*(x1+x2-t))), @(t,x1,x2) 1E-3*(ds*sin(ds*(x1+x2-t)))};
 
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
-  problemData.isSlopeLim{species}  = true; % slope limiting
+  problemData.isSlopeLim{species}  = false; % slope limiting
   problemData.typeSlopeLim{species} = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = problemData.numSteps/10; % no visualization of every timestep
@@ -235,22 +235,27 @@ for species = 1:problemData.numSpecies
   problemData.cDCont{species} = @(t,x1,x2) problemData.solCont{species}(t,x1,x2);
   problemData.gNCont{species} = @(t,x1,x2) 0*x1; % TODO allow to neglect this if no Neumann boundary is used
 end % for
-  
+
 %% Reaction term definitions.
 % NPZ model
 % parameters (Notation as in paper)
-I0 = 1;
-Vm = 0.001;
-ks = 1;
-Rm = 0.0001;
-ep = 0.0001;
-gamma = 0.5;
-I = @(t,x1,x2) (x1==x1);
-f = @(t,x1,x2) I(t,x1,x2) /I0; % linear response
-g = @(t,x1,x2,N) Vm ./ (ks + N); % Michaelis-Menten uptake
-h = @(t,x1,x2,P) Rm * P; % linear grazing
-i = @(t,x1,x2,P) ep; % linear death rate
-j = @(t,x1,x2,Z) ep; % linear death rate
+% I0 = 35; % muE / (m s^2)
+Vm = 2.0 / 86400; % 1 / s
+ks = 2.0E-7; % 0.2 mug / l = 0.2E-9 / (0.1m)^3 = 2.0E-7 kg / m^3
+Rm = 0.5 / 86400; % 1 / s
+ep1 = 0.1 / 86400; % 1 / s
+ep2 = 0.2 / 86400; % 1 / s
+gamma = 0.7; % no unit
+lambda = 5.0E5; % 0.5 (0.1m)^3 / (mug) = 5.0 1E-4 / 1E-9 m^3 / kg
+h0 = 10; % m
+k = 0.1; % m
+
+I = @(t,x1,x2) -h0 / (1 - exp(-k*h0))  * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
+f = @(t,x1,x2) 1 - exp(-I(t,x1,x2)); % saturating response
+g = @(t,x1,x2,N) Vm * N ./ (ks + N); % Michaelis-Menten uptake
+h = @(t,x1,x2,P) Rm * (1 - exp(-lambda * P)); % saturating (Ivlev)
+i = @(t,x1,x2,P) ep1; % linear death rate
+j = @(t,x1,x2,Z) ep2; % linear death rate
 
 problemData.reactions{1} = @(t,x1,x2,c,cH) f(t,x1,x2) .* g(t,x1,x2,c{3}) .* cH{1} - h(t,x1,x2,c{1}) .* cH{2} - i(t,x1,x2,c{1}) .* cH{1};
 problemData.reactions{2} = @(t,x1,x2,c,cH) gamma * h(t,x1,x2,c{1}) .* cH{2} - j(t,x1,x2,c{2}) .* cH{2};
@@ -310,18 +315,23 @@ end % for
 %% Reaction term definitions.
 % NPZ model
 % parameters (Notation as in paper)
-I0 = 1;
-Vm = 0.001;
-ks = 1;
-Rm = 0.1;
-ep = 0.001;
-gamma = 0.5;
-I = @(t,x1,x2) (x1==x1);
-f = @(t,x1,x2) I(t,x1,x2) /I0; % linear response
-g = @(t,x1,x2,N) Vm ./ (ks + N); % Michaelis-Menten uptake
-h = @(t,x1,x2,P) Rm * P; % linear grazing
-i = @(t,x1,x2,P) ep; % linear death rate
-j = @(t,x1,x2,Z) ep; % linear death rate
+% I0 = 35; % muE / (m s^2)
+Vm = 2.0 / 86400; % 1 / s
+ks = 2.0E-7; % 0.2 mug / l = 0.2E-9 / (0.1m)^3 = 2.0E-7 kg / m^3
+Rm = 0.5 / 86400; % 1 / s
+ep1 = 0.1 / 86400; % 1 / s
+ep2 = 0.2 / 86400; % 1 / s
+gamma = 0.7; % no unit
+lambda = 5.0E5; % 0.5 (0.1m)^3 / (mug) = 5.0 1E-4 / 1E-9 m^3 / kg
+h0 = 10; % m
+k = 0.1; % m
+
+I = @(t,x1,x2) -h0 / (1 - exp(-k*h0))  * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
+f = @(t,x1,x2) 1 - exp(-I(t,x1,x2)); % saturating response
+g = @(t,x1,x2,N) Vm * N ./ (ks + N); % Michaelis-Menten uptake
+h = @(t,x1,x2,P) Rm * (1 - exp(-lambda * P)); % saturating (Ivlev)
+i = @(t,x1,x2,P) ep1; % linear death rate
+j = @(t,x1,x2,Z) ep2; % linear death rate
 
 problemData.reactions{1} = @(t,x1,x2,c,cH) f(t,x1,x2) .* g(t,x1,x2,c{3}) .* cH{1} - h(t,x1,x2,c{1}) .* cH{2} - i(t,x1,x2,c{1}) .* cH{1};
 problemData.reactions{2} = @(t,x1,x2,c,cH) gamma * h(t,x1,x2,c{1}) .* cH{2} - j(t,x1,x2,c{2}) .* cH{2};
@@ -371,11 +381,11 @@ problemData.xiOSCont = @(t,x1,x2) ( cos(0.000067597751162*t) * 0.075 * cos(-194.
 aux = false(3397,N,2);
 aux([725 726 727 794 795 796 797 870 871 872 933 934 997 998 999 1000 1585 1586 1587 1625 1626 1627 1628 1629 1670 1671 1672 1673],:,1) = true;
 aux([423 424 465 466 467 468 805 806 807 876 877 878 1366 1367 1368 1424 1425 1426 1427],:,2) = true;
-problemData.cH0Disc = { 1E-6 * aux(:,:,1) .* problemData.h0Disc;
-                        1E-6 * aux(:,:,2) .* problemData.h0Disc;
+problemData.cH0Disc = { 5E-6 * aux(:,:,1) .* problemData.h0Disc;
+                        5E-6 * aux(:,:,2) .* problemData.h0Disc;
                         zeros(3397,N) };
 
-problemData.cDCont = { @(t,x1,x2) 0*x1; @(t,x1,x2) 0*x1; @(t,x1,x2) 7.0*1E-6*(x2 > 3280000) }; % besprechen, 14 g/mol * 0.5 mmol/m^3 = 7.0*1E-6 kg / m^3
+problemData.cDCont = { @(t,x1,x2) 0*x1; @(t,x1,x2) 0*x1; @(t,x1,x2) 1.0*1E-5*(x2 > 3280000) }; % (1*14u + 3*16u) * 0.007 mol/m^3 = 4.34 * 10^-4 kg/m^3
 
 problemData.outputBasename = {['output' filesep 'phyto'], ['output' filesep 'zoo'], ['output' filesep 'nitro']};
 
@@ -396,7 +406,7 @@ end % for
 %% Reaction term definitions.
 % NPZ model
 % parameters (Notation as in paper)
-I0 = 35; % muE / (m s^2)
+% I0 = 35; % muE / (m s^2)
 Vm = 2.0 / 86400; % 1 / s
 ks = 2.0E-7; % 0.2 mug / l = 0.2E-9 / (0.1m)^3 = 2.0E-7 kg / m^3
 Rm = 0.5 / 86400; % 1 / s
@@ -407,8 +417,8 @@ lambda = 5.0E5; % 0.5 (0.1m)^3 / (mug) = 5.0 1E-4 / 1E-9 m^3 / kg
 h0 = 10; % m
 k = 0.1; % m
 
-I = @(t,x1,x2) I0 * h0 / k * (1 - exp(k*zbCont(x1,x2))) / (1 - exp(-k*h0));
-f = @(t,x1,x2) 1 - exp(I(t,x1,x2) / I0); % saturating response
+I = @(t,x1,x2) -h0 / (1 - exp(-k*h0))  * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
+f = @(t,x1,x2) 1 - exp(-I(t,x1,x2)); % saturating response
 g = @(t,x1,x2,N) Vm * N ./ (ks + N); % Michaelis-Menten uptake
 h = @(t,x1,x2,P) Rm * (1 - exp(-lambda * P)); % saturating (Ivlev)
 i = @(t,x1,x2,P) ep1; % linear death rate
