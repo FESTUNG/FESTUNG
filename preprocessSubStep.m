@@ -150,11 +150,7 @@ if pd.g.numEbdrOS > 0
     for n = 1 : numFrequency
       xiOS = xiOS + pd.xiFreqOS{1,n}(tRhs) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(tRhs) * pd.xiAmpOS{2,n};
     end % for
-    if pd.isRamp
-      xiOS = pd.ramp(tRhs/86400) * kron(xiOS, ones(numQuad1D, 1));
-    else
-      xiOS = kron(xiOS, ones(numQuad1D, 1));
-    end % if
+    xiOS = pd.ramp(tRhs/86400) * kron(xiOS, ones(numQuad1D, 1));
     for n = 1 : 3
       xiOSQ0E0Tint{n} = xiOS;
     end % for
@@ -341,7 +337,7 @@ for nn = 1 : 3
           uuHRiv = uuH + uRivQ0E0T{nn} .* uHRiv;
           uvHRiv = uvH + uRivQ0E0T{nn} .* vHRiv;
           vvHRiv = vvH + vRivQ0E0T{nn} .* vHRiv;
-          gHHRiv = gHH - pd.gConst * (cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn} + xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn}));
+          gHHRiv = gHH + pd.gConst * (-cQ0E0Tint{1,nn} .* pd.zbQ0E0Tint{nn} + xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - pd.zbQ0E0Tint{nn}));
           
           uRiv = cQ0E0Tint{2,nn} + uHRiv;
           vRiv = cQ0E0Tint{3,nn} + vHRiv;
