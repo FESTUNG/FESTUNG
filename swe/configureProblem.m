@@ -91,7 +91,7 @@ pd = setdefault(pd, 'elevTol', 20);
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
 pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
 pd = setdefault(pd, 'outputTypes', 'vtk'); % Output file type
-pd = setdefault(pd, 'outputList', { 'u', 'v', 'xi' }); % List of variables to visualize
+pd = setdefault(pd, 'outputList', { 'xi', 'velocity' }); % List of variables to visualize
 pd = setdefault(pd, 'isVisStations', false); % Output stations
 
 %% Simulation scenario specific parameters
@@ -395,6 +395,7 @@ switch pd.name
     
     % Ramping function
     pd.isRamp = false;
+    pd.ramp = @(t_days) 1;
 
     % Coriolis coefficient
     pd.configADCIRC.NCOR = 0;
@@ -450,6 +451,7 @@ switch pd.name
     
     % Ramping function
     pd.isRamp = false;
+    pd.ramp = @(t_days) 1;
     
     % Coriolis coefficient
     pd.configADCIRC.NCOR = 0;

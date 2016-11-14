@@ -214,15 +214,21 @@ switch pd.gridSource
         warning('No stations specified! Disabling station output.')
         pd.isVisStation = false;
       else
+        if pd.p > 1
+          warning('Note that for station output superlinear solutions are approximated by linear ones.');
+        end % if
         % Find triangle indices for each station
-        coordElev = [ pd.configADCIRC.XEL, pd.configADCIRC.YEL ];
-        pd.stationElev = coord2triangle(pd.g, coordElev(:,1), coordElev(:,2));
-        pd.dataElev = cell(size(pd.stationElev));
-        coordVel = [ pd.configADCIRC.XEV, pd.configADCIRC.YEV ];
-        pd.stationVel = coord2triangle(pd.g, coordVel(:,1), coordVel(:,2));
-        pd.dataVel = cell(size(pd.stationVel,1),2);
+        if pd.configADCIRC.NSTAE > 0
+          coordElev = [ pd.configADCIRC.XEL, pd.configADCIRC.YEL ];
+          pd.stationElev = coord2triangle(pd.g, coordElev(:,1), coordElev(:,2));
+          pd.dataElev = cell(size(pd.stationElev));
+        end % if
+        if pd.configADCIRC.NSTAV > 0
+          coordVel = [ pd.configADCIRC.XEV, pd.configADCIRC.YEV ];
+          pd.stationVel = coord2triangle(pd.g, coordVel(:,1), coordVel(:,2));
+          pd.dataVel = cell(size(pd.stationVel,1),2);
+        end % if
       end % if
-      error('not implemented')
     end % if
     
     % Clean out ADCIRC config struct
@@ -527,6 +533,9 @@ end % if
 
 %% Variable timestepping preparation.
 if pd.isAdaptiveTimestep
+  if pd.p > 1
+    warning('Note that for time step adaptivity superlinear solutions are approximated by linear ones.');
+  end % if
   pd.avgDiff = sum(abs(pd.g.coordV0T(:,[1 2 3],:) - pd.g.coordV0T(:,[2 3 1],:)), 2) / 3;
   pd.avgDepth = -sum(pd.zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2)), 2) / 3;
 end % if

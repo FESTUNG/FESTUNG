@@ -81,7 +81,11 @@ if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
   % Save elevation station values
   if isfield(pd, 'stationElev')
     for n = 1 : length(pd.stationElev)
-      dataStationV0T = dataLagr{end}(pd.stationElev{n}(:,1),:); % Extract values in vertices of relevant triangles
+      if pd.p == 0
+        dataStationV0T = repmat(dataLagr{end}(pd.stationElev{n}(:,1)), 1, 3); % Extract values in vertices of relevant triangles
+      else
+        dataStationV0T = dataLagr{end}(pd.stationElev{n}(:,1),1:3); % Extract values in vertices of relevant triangles
+      end % if
       pd.dataElev{n} = [ pd.dataElev{n} ; ...     % Append mean of barycentric weighted values
                          mean(sum(pd.stationElev{n}(:,2:4) .* dataStationV0T, 2)) ];
     end % for
@@ -111,11 +115,18 @@ if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
   % Save velocity station values
   if isfield(pd, 'stationVel')
     for n = 1 : length(pd.stationVel)
-      dataStationV0T = dataLagr{end-1}(pd.stationVel{n}(:,1),:); % Extract values in vertices of relevant triangles
+      if pd.p == 0
+        dataStationV0T = repmat(dataLagr{end-1}(pd.stationVel{n}(:,1)), 1, 3); % Extract values in vertices of relevant triangles
+      else
+        dataStationV0T = dataLagr{end-1}(pd.stationVel{n}(:,1),1:3); % Extract values in vertices of relevant triangles
+      end % if
       pd.dataVel{n,1} = [ pd.dataVel{n,1} ; ...     % Append mean of barycentric weighted values
                           mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
-                        
-      dataStationV0T = dataLagr{end}(pd.stationVel{n}(:,1),:); % Extract values in vertices of relevant triangles
+      if pd.p == 0
+        dataStationV0T = repmat(dataLagr{end}(pd.stationVel{n}(:,1)), 1, 3); % Extract values in vertices of relevant triangles
+      else
+        dataStationV0T = dataLagr{end}(pd.stationVel{n}(:,1),1:3); % Extract values in vertices of relevant triangles
+      end % if
       pd.dataVel{n,2} = [ pd.dataVel{n,1} ; ...     % Append mean of barycentric weighted values
                           mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
     end % for

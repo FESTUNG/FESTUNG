@@ -49,22 +49,23 @@ if problemData.isWaitbar
   close(problemData.waitbar)
 end % if
 
-%% Save stations. % TODO
+%% Save stations.
 if problemData.isVisStations
   if isfield(problemData, 'dataElev')
     data = problemData.dataElev;
-    save('output/elev.mat', 'data')
-    fprintf('Data written to output/elev.mat\n')
+    save(['output' filesep problemData.name '_elev.mat'], 'data')
+    fprintf(['Data written to output' filesep problemData.name '_elev.mat\n'])
   end % if
   if isfield(problemData, 'dataVel')
     data = problemData.dataVel;
-    save('output/vel.mat', 'data')
-    fprintf('Data written to output/vel.mat\n')
+    save(['output' filesep problemData.name '_vel.mat'], 'data')
+    fprintf(['Data written to output' filesep problemData.name '_vel.mat\n'])
   end % if
 end % if
 
 %% Compute error if analytical solution available.
 p = problemData.p;
+qOrd = max(2*p,1);
 if problemData.isSolutionAvail
   
   problemData.err = zeros(6,1);
@@ -90,12 +91,12 @@ if problemData.isSolutionAvail
   problemData.err(4) = computeL2Error(problemData.g, problemData.cDisc(:,:,3), @(x1,x2) vEnd(x1,x2) .* hEnd(x1,x2), 2*p, problemData.basesOnQuad);
   
   % Error in x-velocity (u)
-  dataQ0T = (problemData.cDisc(:,:,2) * problemData.basesOnQuad.phi2D{max(2*p,1)}.') ./ (hDisc * problemData.basesOnQuad.phi2D{max(2*p,1)}.');
+  dataQ0T = (problemData.cDisc(:,:,2) * problemData.basesOnQuad.phi2D{qOrd}.') ./ (hDisc * problemData.basesOnQuad.phi2D{qOrd}.');
   dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   problemData.err(5) = computeL2Error(problemData.g, dataDisc, uEnd, 2*p, problemData.basesOnQuad);
   
   % Error in y-velocity (v)
-  dataQ0T = (problemData.cDisc(:,:,3) * problemData.basesOnQuad.phi2D{max(2*p,1)}.') ./ (hDisc * problemData.basesOnQuad.phi2D{max(2*p,1)}.');
+  dataQ0T = (problemData.cDisc(:,:,3) * problemData.basesOnQuad.phi2D{qOrd}.') ./ (hDisc * problemData.basesOnQuad.phi2D{qOrd}.');
   dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   problemData.err(6) = computeL2Error(problemData.g, dataDisc, vEnd, 2*p, problemData.basesOnQuad);
 end % if

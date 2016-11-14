@@ -56,7 +56,7 @@ K = problemData.K;
 N = problemData.N;
 
 if problemData.isAdaptiveTimestep
-  problemData.dt = selectTimeStep(problemData.avgDiff(:,1), problemData.avgDiff(:,2), problemData.avgDepth, problemData.gConst, problemData.dt, nStep);
+  problemData = selectTimeStep(problemData, nStep);
 end % if
 
 % Obtain Runge-Kutta rule
