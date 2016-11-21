@@ -140,6 +140,9 @@ if pd.g.numEbdrOS > 0
       xiOSQ0E0Tint{n} = pd.xiOSCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs);
       xiOSQ0E0Tint{n} = reshape(xiOSQ0E0Tint{n}.', K*numQuad1D,1);
     end % for
+    if any(ismember(pd.slopeLimList, 'xi'))
+      pd.dataV0Tos = pd.g.markV0TbdrOS .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiOSCont(x1, x2, pd.tRhs)); % TODO time
+    end % if
   elseif isfield(pd, 'xiFreqOS') && isfield(pd, 'xiAmpOS')
     % Open sea elevation data given
     % Since the open sea boundary condition is only used for non-linear
@@ -150,12 +153,15 @@ if pd.g.numEbdrOS > 0
     for n = 1 : numFrequency
       xiOS = xiOS + pd.xiFreqOS{1,n}(tRhs) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(tRhs) * pd.xiAmpOS{2,n};
     end % for
+    if any(ismember(pd.slopeLimList, 'xi'))
+      pd.dataV0Tos = repmat(xiOS, 1, 3);
+    end % if
     xiOS = pd.ramp(tRhs/86400) * kron(xiOS, ones(numQuad1D, 1));
     for n = 1 : 3
       xiOSQ0E0Tint{n} = xiOS;
     end % for
   else
-    error('No open sea elevation given!')
+    error('No open sea elevation given.')
   end % if
 end % if
 
@@ -175,6 +181,9 @@ if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont || pd.isRiemRiv)
       uRivQ0E0T{n} = reshape(pd.uRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
       vRivQ0E0T{n} = reshape(pd.vRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
     end % for
+    if any(ismember(pd.slopeLimList, 'xi'))
+      pd.dataV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.tRhs)); % TODO time
+    end % if
   else
     for n = 1 : 3
       xiRivQ0E0T{n} = pd.ramp(tRhs/86400) * pd.xiRivQ0E0T(:,n);

@@ -254,6 +254,12 @@ pd.g.markE0TbdrRA = pd.g.idE0T == 2; % [K x 3] mark local edges on the radiation
 pd.g.markE0TbdrRI = pd.g.idE0T == 3; % [K x 3] mark local edges on the river boundary
 pd.g.markE0TbdrOS = pd.g.idE0T == 4; % [K x 3] mark local edges on the open sea boundary
 
+if ~isempty(pd.slopeLimList)
+  pd.g.markV0TbdrRI = ismember(pd.g.V0T, pd.g.V0E(pd.g.E0T(pd.g.markE0TbdrRI), :));
+  pd.g.markV0TbdrOS = ismember(pd.g.V0T, pd.g.V0E(pd.g.E0T(pd.g.markE0TbdrOS), :));
+  pd.g.markV0TbdrD = pd.g.markV0TbdrRI | pd.g.markV0TbdrOS;
+end % if
+
 pd.g = execin('swe/computeDerivedGridData', pd.g);
 
 qOrd1D = 2*pd.p+1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
@@ -360,11 +366,6 @@ for nn = 1 : 3
   end % for
 end % for
 
-% Evaluate zb in each vertex
-if ~isempty(pd.slopeLimList)
-  pd.zbV0T = computeFuncContV0T(pd.g, pd.zbCont);
-end % if
-
 % Visualization of coefficients
 varName = {};
 dataLagr = {};
@@ -415,7 +416,7 @@ pd.linearTerms = [ sparse(K*N,K*N), globQ{1} + globQOS{1} + globQRA{1} - globH{1
 % Slope limiting matrices
 if ~isempty(pd.slopeLimList)
   globMTaylor = assembleMatElemPhiTaylorPhiTaylor(pd.g, N);
-  pd.globMDiscTaylor = assembleMatElemPhiDiscPhiTaylor(pd.g, N);
+  pd.globMDiscTaylor = assembleMatElemPhiDiscPhiTaylor(pd.g, N, pd.basesOnQuad);
   pd.globMCorr = spdiags(1 ./ diag(globMTaylor), 0, K*N, K*N) * globMTaylor;
 end % if
 
@@ -469,6 +470,9 @@ end % if
 pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.g.numEbdrRI > 0 % River boundaries
   if ~pd.isRivCont
+    if any(ismember(pd.slopeLimList, 'xi')) % get vertex values from average of edge values
+      pd.dataV0Triv = 0.5 * [ sum(pd.xiRivQ0E0T(:,[2,3]),2) sum(pd.xiRivQ0E0T(:,[1,3]),2) sum(pd.xiRivQ0E0T(:,[1,2]),2) ];
+    end % if
     pd.xiRivQ0E0T = kron(pd.xiRivQ0E0T, ones(numQuad1D,1));
     pd.uRivQ0E0T = kron(pd.uRivQ0E0T, ones(numQuad1D,1));
     pd.vRivQ0E0T = kron(pd.vRivQ0E0T, ones(numQuad1D,1));
@@ -506,10 +510,20 @@ if pd.g.numEbdrRI > 0 % River boundaries
 end % if
 
 if pd.g.numEbdrOS > 0 % Open sea boundaries
+  if ~pd.isOSCont && any(ismember(pd.slopeLimList, 'xi'))
+    pd.dataV0Tos = zeros(K,1);
+    for n = 1 : numFrequency
+      pd.dataV0Tos = pd.dataV0Tos + pd.xiFreqOS{1,n}(pd.t0) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(pd.t0) * pd.xiAmpOS{2,n};
+    end % for
+    pd.dataV0Tos = repmat(pd.dataV0Tos, 1, 3);
+  end % if
+  
   pd.globROS = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrOS);
   if pd.isRiemOS
     pd.globVOS = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaE0TbdrOS);
   end % if
+elseif any(ismember(pd.slopeLimList, 'xi'))
+  pd.dataV0Tos = zeros(K,3);
 end % if
 
 if pd.isRamp && (pd.isRivCont || pd.isOSCont)
