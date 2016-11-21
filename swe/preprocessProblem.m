@@ -240,7 +240,9 @@ end % switch
 
 if pd.isVisGrid,  visualizeGrid(pd.g);  end
 %% Globally constant parameters
-pd.outputFrequency = max(floor(pd.numSteps / pd.outputCount), 1);
+pd = setdefault(pd, 'outputStart', pd.t0 * ones(1,4));
+pd = setdefault(pd, 'outputEnd', pd.tEnd * ones(1,4));
+pd = setdefault(pd, 'outputFrequency', max(floor(pd.numSteps / pd.outputCount), 1) * ones(1,4));
 pd.K = pd.g.numT; % number of triangles
 pd.N = nchoosek(pd.p + 2, pd.p); % number of local DOFs
 K = pd.K;

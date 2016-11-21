@@ -99,7 +99,7 @@ switch nargin
 end % switch
 assert(exist(grid_file, 'file') == 2, ['Grid file "' grid_file '" does not exist!'])
 assert(exist(conn_file, 'file') == 2, ['Connectivity file "' conn_file '" does not exist!'])
-assert(isscalar(numForcingOS) && round(numForcingOS) == numForcingOS && numForcingOS >= 0, 'Invalid number of open sea boundary forcings.')
+assert(isnumeric(numForcingOS) && round(numForcingOS) == numForcingOS && numForcingOS >= 0, 'Invalid number of open sea boundary forcings.')
 validateattributes(projCenter, {'numeric'}, {'size', [1 2]}, mfilename, 'projectionCenter')
 
 %% Grid file

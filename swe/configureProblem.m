@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'galv');
+pd = setdefault(pd, 'name', 'bahamas');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -287,7 +287,7 @@ pd.configADCIRC = h(['swe/fort_' pd.name '.15']);
 %% Map ADCIRC variables to internal names
 % Constants
 pd.p = pd.configADCIRC.IRK;
-pd.schemeOrder = pd.configADCIRC.IRK+1;
+pd.schemeOrder = min(pd.configADCIRC.IRK+1, 3);
 pd.minTol = pd.configADCIRC.H0;
 pd.gConst = pd.configADCIRC.G;
 
@@ -341,6 +341,18 @@ pd.isVisStations = pd.configADCIRC.NOUTE || pd.configADCIRC.NOUTV;
 % Boundary conditions
 pd.isOSCont = false;
 pd.isRivCont = false;
+
+pd.outputList = {};
+if pd.configADCIRC.NOUTGE
+  pd.outputList = [pd.outputList, 'xi'];
+end % if
+if pd.configADCIRC.NOUTGV
+  pd.outputList = [pd.outputList, 'velocity'];
+end % if
+
+pd.outputStart = pd.t0 + 86400 * [ pd.configADCIRC.TOUTSGE, pd.configADCIRC.TOUTSE, pd.configADCIRC.TOUTSGV, pd.configADCIRC.TOUTSV ];
+pd.outputEnd = pd.t0 + 86400 * [ pd.configADCIRC.TOUTFGE, pd.configADCIRC.TOUTFE, pd.configADCIRC.TOUTFGV, pd.configADCIRC.TOUTFV ];
+pd.outputFrequency = [ pd.configADCIRC.NSPOOLGE, pd.configADCIRC.NSPOOLE, pd.configADCIRC.NSPOOLGV, pd.configADCIRC.NSPOOLV ];
 
 % Hot-start input and output
 pd.isHotstartInput = pd.configADCIRC.IHOT == 1;

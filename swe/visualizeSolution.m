@@ -57,83 +57,93 @@
 %> @endparblock
 %
 function pd = visualizeSolution(pd, nStep)
-if mod(nStep, pd.outputFrequency) == 0 || pd.isFinished
-  nOutput = ceil(nStep / pd.outputFrequency);
-  varName = {};
-  vecNames = struct;
-  dataLagr = {};
-  
-  %% Depth and elevation
+varNameElev = {};
+varNameVel = {};
+vecNames = struct;
+dataLagrElev = {};
+dataLagrVel = {};
+
+% Evaluate water depth (h)
+if (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'h')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1)
   hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
+  varNameElev = [ varNameElev, {'h'} ];
+  dataLagrElev = [ dataLagrElev, {projectDataDisc2DataLagr(hDisc)} ];
+end % if
 
-  % Evaluate water depth (h)
-  if any(ismember(pd.outputList, 'h'))
-    varName = [ varName, {'h'} ];
-    dataLagr = [ dataLagr, {projectDataDisc2DataLagr(hDisc)} ];
-  end % if
+% Evaluate water elevation (xi)
+if ( (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'xi')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1) ) || ( (mod(nStep, pd.outputFrequency(2)) == 0 || pd.isFinished) && isfield(pd, 'stationElev') && pd.t >= pd.outputStart(2) && pd.t <= pd.outputEnd(2) )
+  varNameElev = [ varNameElev, {'xi'} ];
+  dataLagrElev = [ dataLagrElev, {projectDataDisc2DataLagr(pd.cDisc(:,:,1))} ];
+end % if
 
-  % Evaluate water elevation (xi)
-  if any(ismember(pd.outputList, 'xi')) || isfield(pd, 'stationElev')
-    varName = [ varName, {'xi'} ];
-    dataLagr = [ dataLagr, {projectDataDisc2DataLagr(pd.cDisc(:,:,1))} ];
-  end % if
+% Save elevation station values
+if (mod(nStep, pd.outputFrequency(2)) == 0 || pd.isFinished) && isfield(pd, 'stationElev') && pd.t >= pd.outputStart(2) && pd.t <= pd.outputEnd(2)
+  for n = 1 : length(pd.stationElev)
+    if pd.p == 0
+      dataStationV0T = repmat(dataLagrElev{end}(pd.stationElev{n}(:,1)), 1, 3); % Extract values in vertices of relevant triangles
+    else
+      dataStationV0T = dataLagrElev{end}(pd.stationElev{n}(:,1),1:3); % Extract values in vertices of relevant triangles
+    end % if
+    pd.dataElev{n} = [ pd.dataElev{n} ; ...     % Append mean of barycentric weighted values
+                       mean(sum(pd.stationElev{n}(:,2:4) .* dataStationV0T, 2)) ];
+  end % for
+end % if
 
-  % Save elevation station values
-  if isfield(pd, 'stationElev')
-    for n = 1 : length(pd.stationElev)
-      if pd.p == 0
-        dataStationV0T = repmat(dataLagr{end}(pd.stationElev{n}(:,1)), 1, 3); % Extract values in vertices of relevant triangles
-      else
-        dataStationV0T = dataLagr{end}(pd.stationElev{n}(:,1),1:3); % Extract values in vertices of relevant triangles
-      end % if
-      pd.dataElev{n} = [ pd.dataElev{n} ; ...     % Append mean of barycentric weighted values
-                         mean(sum(pd.stationElev{n}(:,2:4) .* dataStationV0T, 2)) ];
-    end % for
-  end % if
+%% Momentum 
+if (mod(nStep, pd.outputFrequency(3)) == 0 || pd.isFinished) && any(ismember(pd.outputList, {'uH', 'vH', 'momentum'})) && pd.t >= pd.outputStart(3) && pd.t <= pd.outputEnd(3)
+  vecNames.momentum = {'uH', 'vH'};
+  varNameVel = [ varNameVel, vecNames.momentum ];    
+  dataLagrVel = [ dataLagrVel, {projectDataDisc2DataLagr(pd.cDisc(:,:,2)), projectDataDisc2DataLagr(pd.cDisc(:,:,3))} ];
+end % if
 
-  %% Momentum 
-  if any(ismember(pd.outputList, {'uH', 'vH', 'momentum'}))
-    vecNames.momentum = {'uH', 'vH'};
-    varName = [ varName, vecNames.momentum ];    
-    dataLagr = [ dataLagr, {projectDataDisc2DataLagr(pd.cDisc(:,:,2)), projectDataDisc2DataLagr(pd.cDisc(:,:,3))} ];
+%% Velocity    
+% Evaluate velocity
+if ( (mod(nStep, pd.outputFrequency(3)) == 0 || pd.isFinished) && any(ismember(pd.outputList, {'u', 'v', 'velocity'}))  && pd.t >= pd.outputStart(3) && pd.t <= pd.outputEnd(3) ) || ( (mod(nStep, pd.outputFrequency(4)) == 0 || pd.isFinished) && isfield(pd, 'stationVel') && pd.t >= pd.outputStart(4) && pd.t <= pd.outputEnd(4) )
+  if ~exist('hDisc', 'var')
+    hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
   end % if
-  
-  %% Velocity    
-  % Evaluate velocity
-  if any(ismember(pd.outputList, {'u', 'v', 'velocity'})) || isfield(pd, 'stationVel')
-    vecNames.velocity = {'u', 'v'};
-    varName = [ varName, vecNames.velocity ];
-    dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
-    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
-    dataLagr = [ dataLagr, {projectDataDisc2DataLagr(dataDisc)} ];
-    
-    dataQ0T = (pd.cDisc(:,:,3) * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.') ./ (hDisc * pd.basesOnQuad.phi2D{max(2*pd.p,1)}.');
-    dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
-    dataLagr = [ dataLagr, {projectDataDisc2DataLagr(dataDisc)} ];
-  end % if
+  qOrd = max(2*pd.p,1);
 
-  % Save velocity station values
-  if isfield(pd, 'stationVel')
-    for n = 1 : length(pd.stationVel)
-      if pd.p == 0
-        dataStationV0T = repmat(dataLagr{end-1}(pd.stationVel{n}(:,1)), 1, 3); % Extract values in vertices of relevant triangles
-      else
-        dataStationV0T = dataLagr{end-1}(pd.stationVel{n}(:,1),1:3); % Extract values in vertices of relevant triangles
-      end % if
-      pd.dataVel{n,1} = [ pd.dataVel{n,1} ; ...     % Append mean of barycentric weighted values
-                          mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
-      if pd.p == 0
-        dataStationV0T = repmat(dataLagr{end}(pd.stationVel{n}(:,1)), 1, 3); % Extract values in vertices of relevant triangles
-      else
-        dataStationV0T = dataLagr{end}(pd.stationVel{n}(:,1),1:3); % Extract values in vertices of relevant triangles
-      end % if
-      pd.dataVel{n,2} = [ pd.dataVel{n,1} ; ...     % Append mean of barycentric weighted values
-                          mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
-    end % for
+  vecNames.velocity = {'u', 'v'};
+  varNameVel = [ varNameVel, vecNames.velocity ];
+  dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{qOrd}.') ./ (hDisc * pd.basesOnQuad.phi2D{qOrd}.');
+  dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+  dataLagrVel = [ dataLagrVel, {projectDataDisc2DataLagr(dataDisc)} ];
+
+  dataQ0T = (pd.cDisc(:,:,3) * pd.basesOnQuad.phi2D{qOrd}.') ./ (hDisc * pd.basesOnQuad.phi2D{qOrd}.');
+  dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+  dataLagrVel = [ dataLagrVel, {projectDataDisc2DataLagr(dataDisc)} ];
+end % if
+
+% Save velocity station values
+if (mod(nStep, pd.outputFrequency(4)) == 0 || pd.isFinished) && isfield(pd, 'stationVel') && pd.t >= pd.outputStart(4) && pd.t <= pd.outputEnd(4)
+  for n = 1 : length(pd.stationVel)
+    if pd.p == 0
+      dataStationV0T = repmat(dataLagrVel{end-1}(pd.stationVel{n}(:,1)), 1, 3); % Extract values in vertices of relevant triangles
+    else
+      dataStationV0T = dataLagrVel{end-1}(pd.stationVel{n}(:,1),1:3); % Extract values in vertices of relevant triangles
+    end % if
+    pd.dataVel{n,1} = [ pd.dataVel{n,1} ; ...     % Append mean of barycentric weighted values
+                        mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
+    if pd.p == 0
+      dataStationV0T = repmat(dataLagrVel{end}(pd.stationVel{n}(:,1)), 1, 3); % Extract values in vertices of relevant triangles
+    else
+      dataStationV0T = dataLagrVel{end}(pd.stationVel{n}(:,1),1:3); % Extract values in vertices of relevant triangles
+    end % if
+    pd.dataVel{n,2} = [ pd.dataVel{n,2} ; ...     % Append mean of barycentric weighted values
+                        mean(sum(pd.stationVel{n}(:,2:4) .* dataStationV0T, 2)) ];
+  end % for
+end % if
+
+%% Write visualization output
+if pd.outputFrequency(1) == pd.outputFrequency(3) && (~isequal(dataLagrElev, {}) || ~isequal(dataLagrVel, {})) && mod(nStep, pd.outputFrequency(1)) == 0
+  visualizeDataLagr(pd.g, [dataLagrElev, dataLagrVel], [varNameElev, varNameVel], ['output' filesep pd.name], ceil(nStep / pd.outputFrequency(1)), pd.outputTypes, vecNames);
+else
+  if ~isequal(dataLagrElev, {}) && mod(nStep, pd.outputFrequency(1)) == 0
+    visualizeDataLagr(pd.g, dataLagrElev, varNameElev, ['output' filesep pd.name '_elev'], ceil(nStep / pd.outputFrequency(1)), pd.outputTypes, struct);
   end % if
-  
-  %% Write visualization output
-  visualizeDataLagr(pd.g, dataLagr, varName, ['output' filesep pd.name], nOutput, pd.outputTypes, vecNames);
+  if ~isequal(dataLagrVel, {}) && mod(nStep, pd.outputFrequency(3)) == 0
+    visualizeDataLagr(pd.g, dataLagrVel, varNameVel, ['output' filesep pd.name '_vel'], ceil(nStep / pd.outputFrequency(3)), pd.outputTypes, struct);
+  end % if
 end % if
 end % function
-
