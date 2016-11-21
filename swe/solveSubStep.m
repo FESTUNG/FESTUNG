@@ -75,6 +75,20 @@ switch problemData.schemeType
   case 'explicit'
     sysA = [ sparse(K*N,K*max(N,3)); problemData.tidalTerms{1}; problemData.tidalTerms{2} ];
     cDiscDot = problemData.sysW \ (sysV - problemData.linearTerms * problemData.cDiscRK + sysA * hDisc);
+    
+    % Apply slope limiting to time derivative
+    for i = 1 : length(problemData.slopeLimList)
+      switch problemData.slopeLimList{i}
+        case 'xi'
+          cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot(1:K*N), [N K])', problemData.globM, problemData.globMDiscTaylor);
+          cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
+          cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
+          cDiscDot(1:K*N) = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
+        otherwise
+          error('Slope limiting not implemented for variables other than free surface elevation.')
+      end % switch
+    end % for
+    
     problemData.cDiscRK = problemData.omega(nSubStep) * problemData.cDiscRK0 + (1 - problemData.omega(nSubStep)) * (problemData.cDiscRK + dt * cDiscDot);
 
   case 'semi-implicit'

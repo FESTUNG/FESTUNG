@@ -64,7 +64,15 @@ problemData.cDisc(:,:,1) = reshape(problemData.cDiscRK(        1 :   K*N), N, K)
 problemData.cDisc(:,:,2) = reshape(problemData.cDiscRK(  K*N + 1 : 2*K*N), N, K).';
 problemData.cDisc(:,:,3) = reshape(problemData.cDiscRK(2*K*N + 1 : 3*K*N), N, K).';
 
-% TODO: slope limiting here
+for i = 1 : length(problemData.slopeLimList)
+  switch problemData.slopeLimList{i}
+    case 'xi'
+      problemData.cDisc(:,:,1) = applySlopeLimiterDisc(problemData.g, problemData.cDisc(:,:,1), problemData.g.markV0TbdrD, problemData.ramp(problemData.tLvls(nSubStep)/86400) * ...
+                                  (problemData.dataV0Triv + problemData.dataV0Tos), problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim); % TODO time
+    otherwise
+      error('Slope limiting not implemented for variables other than free surface elevation.')
+  end % switch
+end % for
 
 % Ensure water height doesn't fall below threshold
 problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.zbLagr + problemData.minTol, problemData.elevTol);

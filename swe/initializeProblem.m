@@ -79,11 +79,16 @@ end % if
 
 for i = 1 : length(pd.slopeLimList)
   switch pd.slopeLimList{i}
-    case 'H'
-      dataV0T = pd.ramp(pd.t0 / 86400) * pd.g.markV0TbdrRI .* xiRivV0T + (pd.g.markV0TbdrOS & ~pd.g.markV0TbdrRI) .* xiOSV0T;
-      pd.cDisc(:,:,1) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,1), pd.g.markV0TbdrRI | pd.g.markV0TbdrOS, dataV0T, pd.globM, pd.globMDiscTaylor, pd.typeSlopeLim);
+    case 'xi'
+      if pd.isRivCont
+        pd.dataV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0));
+      end % if
+      if pd.isOSCont
+        pd.dataV0Tos = pd.g.markV0TbdrOS .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiOSCont(x1, x2, pd.t0));
+      end % if
+      pd.cDisc(:,:,1) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,1), pd.g.markV0TbdrD, pd.ramp(pd.t0/86400) * (pd.dataV0Triv + pd.dataV0Tos), pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
     otherwise
-      error('Unknown variable for slope limiting')
+      error('Slope limiting not implemented for variables other than free surface elevation.')
   end % switch
 end % for
 
