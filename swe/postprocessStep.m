@@ -63,5 +63,5 @@ if problemData.isSteadyState && problemData.changeL2 < problemData.convergenceCr
   fprintf('Steady state is reached.\n')
   problemData.isFinished = true;
 end % if
-end
+end % function
 
