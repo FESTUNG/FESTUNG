@@ -136,13 +136,13 @@ if (mod(nStep, pd.outputFrequency(4)) == 0 || pd.isFinished) && isfield(pd, 'sta
 end % if
 
 %% Write visualization output
-if pd.outputFrequency(1) == pd.outputFrequency(3) && (~isequal(dataLagrElev, {}) || ~isequal(dataLagrVel, {})) && mod(nStep, pd.outputFrequency(1)) == 0
+if pd.outputFrequency(1) == pd.outputFrequency(3) && (~isequal(dataLagrElev, {}) || ~isequal(dataLagrVel, {})) && (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished)
   visualizeDataLagr(pd.g, [dataLagrElev, dataLagrVel], [varNameElev, varNameVel], ['output' filesep pd.name], ceil(nStep / pd.outputFrequency(1)), pd.outputTypes, vecNames);
 else
-  if ~isequal(dataLagrElev, {}) && mod(nStep, pd.outputFrequency(1)) == 0
+  if ~isequal(dataLagrElev, {}) && (mod(nStep, pd.outputFrequency(1)) || pd.isFinished) == 0
     visualizeDataLagr(pd.g, dataLagrElev, varNameElev, ['output' filesep pd.name '_elev'], ceil(nStep / pd.outputFrequency(1)), pd.outputTypes, struct);
   end % if
-  if ~isequal(dataLagrVel, {}) && mod(nStep, pd.outputFrequency(3)) == 0
+  if ~isequal(dataLagrVel, {}) && (mod(nStep, pd.outputFrequency(3))|| pd.isFinished) == 0
     visualizeDataLagr(pd.g, dataLagrVel, varNameVel, ['output' filesep pd.name '_vel'], ceil(nStep / pd.outputFrequency(3)), pd.outputTypes, struct);
   end % if
 end % if
