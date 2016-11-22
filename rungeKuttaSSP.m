@@ -1,6 +1,6 @@
 % Provides weights and time levels for explicit strong stability preserving (SSP)
 % Runge-Kutta methods up to order 3.
-%
+
 %===============================================================================
 %> @file rungeKuttaSSP.m
 %>
