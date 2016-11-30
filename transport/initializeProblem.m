@@ -53,7 +53,7 @@ problemData.cDisc = cell(problemData.numSpecies,1);
 problemData.cQ0T = cell(problemData.numSpecies,1);
 problemData.concDisc = cell(problemData.numSpecies,1);
 
-problemData.numOperations = 0;
+problemData.numOperations = zeros(1,problemData.numSpecies);
 
 if ~isfield(problemData, 'h0Disc') % TODO
   problemData.h0Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(0,x1,x2), 2*p+1,problemData.hatM, problemData.basesOnQuad);
@@ -88,7 +88,7 @@ for species = 1:problemData.numSpecies
       problemData.cDisc{species} = projectDataQ0T2DataDisc(dataDiscQ0T .* hQ0T, 2*p, problemData.hatM, problemData.basesOnQuad);
       
       if problemData.isMask(species)
-        problemData.mask(:,species) = computeMask(minMaxV0T, problemData.maskTol, problemData.maskType);
+        problemData.mask(:,species) = computeMask(minMaxV0T, problemData.maskTol(species), problemData.maskType);
         
         if isequal(problemData.mask(:,species), zeros(problemData.K,1)) % possible workaround
           problemData.mask(1,species) = true;

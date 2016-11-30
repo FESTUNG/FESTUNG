@@ -73,7 +73,6 @@ problemData = setdefault(problemData, 'refinement', 0);
 problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degree
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
-problemData = setdefault(problemData, 'maskTol'   , 1.0e-12);  % maximal tolerance of slope for which species are considered constant
 problemData = setdefault(problemData, 'isCoupling', false); % Receive velocity coefficients and fluxes from a different model, e.g. 'swe'
 
 %% Parameter check.
@@ -89,12 +88,14 @@ switch problemData.configSource
     problemData = setdefault(problemData, 'numSpecies', 3);  % number of transported species
   case 'ADCIRC'
     problemData = setdefault(problemData, 'numSpecies', 3);  % number of transported species
+    problemData.maskTol = [1e-10, 1e-13, 1e-13];
   otherwise
     error('Invalid config source.')
 end % switch
 
+problemData = setdefault(problemData, 'maskTol', 1.0e-12 * ones(1, problemData.numSpecies));  % maximal tolerance of slope for which species are considered constant
 problemData = setdefault(problemData, 'isMask', true(problemData.numSpecies, 1)); % computation only where species is not constant
-problemData.maskType = 'vertex-based';
+problemData = setdefault(problemData, 'maskType', 'vertex-based');
 
 problemData.isVisSol = cell(problemData.numSpecies,1);
 problemData.isSlopeLim = cell(problemData.numSpecies,1);
@@ -368,24 +369,14 @@ N = nchoosek(problemData.p+2, problemData.p);
 % TODO because of zb this will not be consistent to swe
 problemData.h0Disc = hotstartData.cDisc(:,:,1) - projectFuncCont2DataDisc(problemData.g, zbCont, 2*problemData.p+1, eye(N), computeBasesOnQuad(N, struct));
 
-problemData.xiOSCont = @(t,x1,x2) ( cos(0.000067597751162*t) * 0.075 * cos(-194.806 * pi/180) ...
-                                  - sin(0.000067597751162*t) * 0.075 * sin(-194.806 * pi/180) ...
-                                  + cos(0.000072921165921*t) * 0.095 * cos(-206.265 * pi/180) ...
-                                  - sin(0.000072921165921*t) * 0.095 * sin(-206.265 * pi/180) ...
-                                  + cos(0.000137879713787*t) * 0.100 * cos(-340.000 * pi/180) ...
-                                  - sin(0.000137879713787*t) * 0.100 * sin(-340.000 * pi/180) ...
-                                  + cos(0.000140518917083*t) * 0.395  ... % ... * cos(0) - ... * sin(0)
-                                  + cos(0.000145444119418*t) * 0.060 * cos(-42.9718 * pi/180) ...
-                                  - sin(0.000145444119418*t) * 0.060 * sin(-42.9718 * pi/180) ) * (x2 <= 3280000) + (x2 > 3280000);
-
 aux = false(3397,N,2);
 aux([725 726 727 794 795 796 797 870 871 872 933 934 997 998 999 1000 1585 1586 1587 1625 1626 1627 1628 1629 1670 1671 1672 1673],:,1) = true;
 aux([423 424 465 466 467 468 805 806 807 876 877 878 1366 1367 1368 1424 1425 1426 1427],:,2) = true;
-problemData.cH0Disc = { 5E-6 * aux(:,:,1) .* problemData.h0Disc;
-                        5E-6 * aux(:,:,2) .* problemData.h0Disc;
+problemData.cH0Disc = { 1E-6 * aux(:,:,1) .* problemData.h0Disc;
+                        1E-6 * aux(:,:,2) .* problemData.h0Disc;
                         zeros(3397,N) };
 
-problemData.cDCont = { @(t,x1,x2) 0*x1; @(t,x1,x2) 0*x1; @(t,x1,x2) 1.0*1E-5*(x2 > 3280000) }; % (1*14u + 3*16u) * 0.007 mol/m^3 = 4.34 * 10^-4 kg/m^3
+problemData.cDCont = { @(t,x1,x2) 0*x1; @(t,x1,x2) 0*x1; @(t,x1,x2) 4.0*1E-4*(x2 > 3280000) }; % (1*14u + 3*16u) * 0.007 mol/m^3 = 4.34 * 10^-4 kg/m^3
 
 problemData.outputBasename = {['output' filesep 'phyto'], ['output' filesep 'zoo'], ['output' filesep 'nitro']};
 

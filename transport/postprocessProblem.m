@@ -58,11 +58,13 @@ if problemData.isSolutionAvailable
   end % for
 end % if
 
-if ~isequal(problemData.isMask, zeros(problemData.numSpecies, 1))
-  fprintf([ '%d operations were needed for solving the transport model on %d triangles, %d time steps and %d species.\n' ...
-            'This corresponds to %3.1f %% of the full number of operations.\n'], ...
-            problemData.numOperations, problemData.g.numT, problemData.numSteps, problemData.numSpecies, ...
-            problemData.numOperations / (problemData.g.numT*problemData.numSteps*problemData.numSpecies) * 100);
-end % if
+for species = 1 : problemData.numSpecies
+  if problemData.isMask(species)
+    fprintf([ '%d operations were needed for solving the transport model on %d triangles, %d time steps for species %d .\n' ...
+            'This corresponds to %3.1f %% of the full number of operations.\n' ], ...
+            problemData.numOperations(species), problemData.g.numT, problemData.numSteps, species, ...
+            problemData.numOperations(species) / (problemData.g.numT*problemData.numSteps) * 100);
+  end % if
+end % for
 end % function
 
