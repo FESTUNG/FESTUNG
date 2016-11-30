@@ -172,18 +172,20 @@ switch pd.gridSource
       numFrequency = pd.configADCIRC.NBFR;
       pd.xiFreqOS = cell(2,numFrequency);
       pd.xiAmpOS = cell(2,numFrequency);
-      markTbdrOS = pd.g.T0E(pd.g.idE == 4, 1);
+      markEbdrOS = pd.g.idE == 4;
       for n = 1 : numFrequency
         pd.xiFreqOS{1,n} = @(t) cos(pd.configADCIRC.AMIG(n)*t);
         pd.xiFreqOS{2,n} = @(t) -sin(pd.configADCIRC.AMIG(n)*t);
 
-        pd.xiAmpOS{1,n} = sparse(pd.g.numT,1);
-        pd.xiAmpOS{1,n}(markTbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+        xiAmp = zeros(pd.g.numE,1);
+        xiAmp(markEbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
                                                cos( pi/180 * (pd.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
+        pd.xiAmpOS{1,n} = xiAmp(pd.g.E0T);
 
-        pd.xiAmpOS{2,n} = sparse(pd.g.numT,1);
-        pd.xiAmpOS{2,n}(markTbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
+        xiAmp = zeros(pd.g.numE,1);
+        xiAmp(markEbdrOS) = pd.configADCIRC.FF(n) * forcingOS(n,:,1) .* ...
                                                sin( pi/180 * (pd.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
+        pd.xiAmpOS{2,n} = xiAmp(pd.g.E0T);
       end % for
 
       if pd.g.numEbdrOS ~= 0 && numFrequency == 0
@@ -192,8 +194,8 @@ switch pd.gridSource
     end % if
     
     % River inflow
-    markEbdrRiv = pd.g.idE == 3;
     if ~pd.isRivCont
+      markEbdrRiv = pd.g.idE == 3;
       xiRivE = sparse(pd.g.numE, 1);
       xiRivE(markEbdrRiv) = flowRateRiv(:,1);
       uRivE = sparse(pd.g.numE, 1);
@@ -238,7 +240,7 @@ switch pd.gridSource
     error('Invalid gridSource given.')
 end % switch
 
-if pd.isVisGrid,  visualizeGrid(pd.g);  end
+if pd.isVisGrid,  visualizeGrid(pd.g);  end % if
 %% Globally constant parameters
 pd = setdefault(pd, 'outputStart', pd.t0 * ones(1,4));
 pd = setdefault(pd, 'outputEnd', pd.tEnd * ones(1,4));
@@ -470,12 +472,56 @@ end % if
 pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.g.numEbdrRI > 0 % River boundaries
   if ~pd.isRivCont
-    if any(ismember(pd.slopeLimList, 'xi')) % get vertex values from average of edge values
-      pd.dataV0Triv = 0.5 * [ sum(pd.xiRivQ0E0T(:,[2,3]),2) sum(pd.xiRivQ0E0T(:,[1,3]),2) sum(pd.xiRivQ0E0T(:,[1,2]),2) ];
+    if any(ismember(pd.slopeLimList, 'elevation')) % get vertex values from average of edge values
+      pd.xiV0Triv = 0.5 * [ sum(pd.xiRivQ0E0T(:,[2,3]),2) sum(pd.xiRivQ0E0T(:,[1,3]),2) sum(pd.xiRivQ0E0T(:,[1,2]),2) ];
     end % if
+    if any(ismember(pd.slopeLimList, 'momentum')) % get vertex values from average of edge values
+      pd.zbV0T = computeFuncContV0T(pd.g, pd.zbCont);
+
+      % To determine the vertex values for all triangles we first compute
+      % the vertex values for triangles that have a boundary edge of river
+      % type. We average the values from both sides of the vertex if the 
+      % triangle has more than one boundary edge.
+      xiV0T = [ sum(pd.xiRivQ0E0T(:,[2,3]),2) ./ sum(pd.g.markE0TbdrRI(:,[2,3]),2), ...
+                sum(pd.xiRivQ0E0T(:,[1,3]),2) ./ sum(pd.g.markE0TbdrRI(:,[1,3]),2), ...
+                sum(pd.xiRivQ0E0T(:,[1,2]),2) ./ sum(pd.g.markE0TbdrRI(:,[1,2]),2) ];
+      uV0T = [ sum(pd.uRivQ0E0T(:,[2,3]),2) ./ sum(pd.g.markV0TbdrRI(:,[2,3]),2), ...
+               sum(pd.uRivQ0E0T(:,[1,3]),2) ./ sum(pd.g.markV0TbdrRI(:,[1,3]),2), ...
+               sum(pd.uRivQ0E0T(:,[1,2]),2) ./ sum(pd.g.markV0TbdrRI(:,[1,2]),2) ];
+      vV0T = [ sum(pd.vRivQ0E0T(:,[2,3]),2) ./ sum(pd.g.markV0TbdrRI(:,[2,3]),2), ...
+               sum(pd.vRivQ0E0T(:,[1,3]),2) ./ sum(pd.g.markV0TbdrRI(:,[1,3]),2), ...
+               sum(pd.vRivQ0E0T(:,[1,2]),2) ./ sum(pd.g.markV0TbdrRI(:,[1,2]),2) ];
+
+      % all vertices for which values have to be set
+      nonUniqueVertices = pd.g.V0T(pd.g.markV0TbdrRI);
+      % the vertex values for triangles with boundary edges and NaN if it
+      % is not a boundary vertex
+      dataV0T = [ xiV0T(pd.g.markV0TbdrRI), uV0T(pd.g.markV0TbdrRI), vV0T(pd.g.markV0TbdrRI) ];
+      dataV = zeros(pd.g.numV,3);
+      dataVCount = zeros(pd.g.numV,3);
+      for i = 1:length(nonUniqueVertices)
+        dataV(nonUniqueVertices(i),:) = dataV(nonUniqueVertices(i),:) + setNaN2Zero(dataV0T(i,:));
+        dataVCount(nonUniqueVertices(i),:) = dataVCount(nonUniqueVertices(i),:) + ~isnan(dataV0T(i,:));
+      end
+      % dataV contains the sum of all triangles vertex values and is
+      % divided by the number of contributing elements in dataVCount
+      dataV = dataV ./ dataVCount;
+      
+      xiV = dataV(:, 1);
+      pd.xiV0Triv = xiV(pd.g.V0T);
+      hV0T = pd.xiV0Triv - pd.zbV0T;
+      uV = dataV(:, 2);
+      pd.uHV0Triv = uV(pd.g.V0T) .* hV0T;
+      vV = dataV(:, 3);
+      pd.vHV0Triv = vV(pd.g.V0T) .* hV0T;
+    end % if
+
     pd.xiRivQ0E0T = kron(pd.xiRivQ0E0T, ones(numQuad1D,1));
     pd.uRivQ0E0T = kron(pd.uRivQ0E0T, ones(numQuad1D,1));
     pd.vRivQ0E0T = kron(pd.vRivQ0E0T, ones(numQuad1D,1));
+
+  elseif any(ismember(pd.slopeLimList, 'momentum'))
+    pd.zbV0T = computeFuncContV0T(pd.g, pd.zbCont);
   end % if
   
   pd.globRRI = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
@@ -507,23 +553,47 @@ if pd.g.numEbdrRI > 0 % River boundaries
       end % if
     end % for
   end % if
+else
+  if any(ismember(pd.slopeLimList, 'elevation'))
+    pd.xiV0Triv = sparse(K,3);
+  end % if
+  if any(ismember(pd.slopeLimList, 'momentum'))
+    pd.uHV0Triv = sparse(K,3);
+    pd.vHV0Triv = sparse(K,3);
+  end % if
 end % if
 
 if pd.g.numEbdrOS > 0 % Open sea boundaries
-  if ~pd.isOSCont && any(ismember(pd.slopeLimList, 'xi'))
-    pd.dataV0Tos = zeros(K,1);
+  if ~pd.isOSCont && any(ismember(pd.slopeLimList, 'elevation'))
+    xiE0Tos = zeros(K,3);
     for n = 1 : numFrequency
-      pd.dataV0Tos = pd.dataV0Tos + pd.xiFreqOS{1,n}(pd.t0) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(pd.t0) * pd.xiAmpOS{2,n};
+      xiE0Tos = xiE0Tos + pd.xiFreqOS{1,n}(pd.t0) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(pd.t0) * pd.xiAmpOS{2,n};
     end % for
-    pd.dataV0Tos = repmat(pd.dataV0Tos, 1, 3);
+    
+    xiV0T = [ sum(xiE0Tos(:,[2,3]),2) ./ sum(pd.g.markE0TbdrOS(:,[2,3]),2), ...
+              sum(xiE0Tos(:,[1,3]),2) ./ sum(pd.g.markE0TbdrOS(:,[1,3]),2), ...
+              sum(xiE0Tos(:,[1,2]),2) ./ sum(pd.g.markE0TbdrOS(:,[1,2]),2) ];
+
+    nonUniqueVertices = pd.g.V0T(pd.g.markV0TbdrOS);
+    dataV0T = xiV0T(pd.g.markV0TbdrOS);
+    dataV = zeros(pd.g.numV,1);
+    dataVCount = zeros(pd.g.numV,1);
+    for i = 1:length(nonUniqueVertices)
+      dataV(nonUniqueVertices(i),:) = dataV(nonUniqueVertices(i),:) + setNaN2Zero(dataV0T(i,:));
+      dataVCount(nonUniqueVertices(i),:) = dataVCount(nonUniqueVertices(i),:) + ~isnan(dataV0T(i,:));
+    end
+    dataV = dataV ./ dataVCount;
+
+    xiV = dataV(:,1);
+    pd.xiV0Tos = xiV(pd.g.V0T);
   end % if
   
   pd.globROS = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrOS);
   if pd.isRiemOS
     pd.globVOS = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaE0TbdrOS);
   end % if
-elseif any(ismember(pd.slopeLimList, 'xi'))
-  pd.dataV0Tos = zeros(K,3);
+elseif any(ismember(pd.slopeLimList, 'elevation'))
+  pd.xiV0Tos = sparse(K,3);
 end % if
 
 if pd.isRamp && (pd.isRivCont || pd.isOSCont)

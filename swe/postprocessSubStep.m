@@ -66,11 +66,20 @@ problemData.cDisc(:,:,3) = reshape(problemData.cDiscRK(2*K*N + 1 : 3*K*N), N, K)
 
 for i = 1 : length(problemData.slopeLimList)
   switch problemData.slopeLimList{i}
-    case 'xi'
-      problemData.cDisc(:,:,1) = applySlopeLimiterDisc(problemData.g, problemData.cDisc(:,:,1), problemData.g.markV0TbdrD, problemData.ramp(problemData.tLvls(nSubStep)/86400) * ...
-                                  (problemData.dataV0Triv + problemData.dataV0Tos), problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim); % TODO time
+    case 'elevation'
+      problemData.cDisc(:,:,1) = applySlopeLimiterDisc(problemData.g, problemData.cDisc(:,:,1), problemData.g.markV0TbdrD, ...
+                                  problemData.ramp(getdefault(problemData.tLvls, nSubStep+1, problemData.t + problemData.dt)/86400) * (problemData.xiV0Triv + problemData.xiV0Tos), ...
+                                  problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim);
+    case 'momentum'
+      problemData.cDisc(:,:,2) = applySlopeLimiterDisc(problemData.g, problemData.cDisc(:,:,2), problemData.g.markV0TbdrRI, ...
+                                  problemData.ramp(getdefault(problemData.tLvls, nSubStep+1, problemData.t + problemData.dt)/86400) * problemData.uHV0Triv, ...
+                                  problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim);
+      
+      problemData.cDisc(:,:,3) = applySlopeLimiterDisc(problemData.g, problemData.cDisc(:,:,3), problemData.g.markV0TbdrRI, ...
+                                  problemData.ramp(getdefault(problemData.tLvls, nSubStep+1, problemData.t + problemData.dt)/86400) * problemData.vHV0Triv, ...
+                                  problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim);
     otherwise
-      error('Slope limiting not implemented for variables other than free surface elevation.')
+      error('Slope limiting not implemented for non primary variables.')
   end % switch
 end % for
 
