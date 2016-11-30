@@ -142,14 +142,14 @@ for species = 1:problemData.numSpecies
     
     % TODO it is possible to call this part after iterateSubSteps
     if problemData.isMask(species) && nSubStep == problemData.ordRK % update only after all RK steps for consitency
-      problemData.mask(:,species) = computeMask(minMaxV0T, problemData.maskTol, problemData.maskType);
+      problemData.mask(:,species) = computeMask(minMaxV0T, problemData.maskTol(species), problemData.maskType);
       
       if isequal(problemData.mask(:,species), zeros(K,1)) % TODO: possible workaround
         problemData.mask(1,species) = true;
       end % if
     end % if
   end % if
-  problemData.numOperations = problemData.numOperations + numElem;
+  problemData.numOperations(species) = problemData.numOperations(species) + numElem;
 end % for
 
 end % function
