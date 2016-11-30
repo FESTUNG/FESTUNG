@@ -79,16 +79,24 @@ end % if
 
 for i = 1 : length(pd.slopeLimList)
   switch pd.slopeLimList{i}
-    case 'xi'
+    case 'elevation'
       if pd.isRivCont
-        pd.dataV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0));
+        pd.xiV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0));
       end % if
       if pd.isOSCont
-        pd.dataV0Tos = pd.g.markV0TbdrOS .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiOSCont(x1, x2, pd.t0));
+        pd.xiV0Tos = pd.g.markV0TbdrOS .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiOSCont(x1, x2, pd.t0));
       end % if
-      pd.cDisc(:,:,1) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,1), pd.g.markV0TbdrD, pd.ramp(pd.t0/86400) * (pd.dataV0Triv + pd.dataV0Tos), pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
+      pd.cDisc(:,:,1) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,1), pd.g.markV0TbdrD, pd.ramp(pd.t0/86400) * (pd.xiV0Triv + pd.xiV0Tos), pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
+    case 'momentum'
+      if pd.isRivCont
+        hV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0)) - pd.zbV0T;
+        pd.uHV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.uRivCont(x1, x2, pd.t0)) .* hV0Triv;
+        pd.vHV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.vRivCont(x1, x2, pd.t0)) .* hV0Triv;
+      end % if
+      pd.cDisc(:,:,2) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,2), pd.g.markV0TbdrRI, pd.ramp(pd.t0/86400) * pd.uHV0Triv, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
+      pd.cDisc(:,:,3) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,3), pd.g.markV0TbdrRI, pd.ramp(pd.t0/86400) * pd.vHV0Triv, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
     otherwise
-      error('Slope limiting not implemented for variables other than free surface elevation.')
+      error('Slope limiting not implemented for non primary variables.')
   end % switch
 end % for
 

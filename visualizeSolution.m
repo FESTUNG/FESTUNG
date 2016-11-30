@@ -71,8 +71,8 @@ if (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.
 end % if
 
 % Evaluate water elevation (xi)
-if ( (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'xi')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1) ) || ( (mod(nStep, pd.outputFrequency(2)) == 0 || pd.isFinished) && isfield(pd, 'stationElev') && pd.t >= pd.outputStart(2) && pd.t <= pd.outputEnd(2) )
-  varNameElev = [ varNameElev, {'xi'} ];
+if ( (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'elevation')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1) ) || ( (mod(nStep, pd.outputFrequency(2)) == 0 || pd.isFinished) && isfield(pd, 'stationElev') && pd.t >= pd.outputStart(2) && pd.t <= pd.outputEnd(2) )
+  varNameElev = [ varNameElev, {'elevation'} ];
   dataLagrElev = [ dataLagrElev, {projectDataDisc2DataLagr(pd.cDisc(:,:,1))} ];
 end % if
 

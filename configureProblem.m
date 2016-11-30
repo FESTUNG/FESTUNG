@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'bahamas');
+pd = setdefault(pd, 'name', 'test2');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -83,7 +83,7 @@ pd = setdefault(pd, 'isRiemRiv', true); % Riemann solver type on river boundary 
 pd = setdefault(pd, 'typeBdrL', 'riemann'); % Flux type on land boundary ('reflected', 'natural', or 'riemann')
 pd = setdefault(pd, 'averagingType', 'full-harmonic'); % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd = setdefault(pd, 'typeSlopeLim', 'linear'); % Slope limiter type ('linear', 'hierarch_vert', 'strict')
-pd = setdefault(pd, 'slopeLimList', {}); % Apply slope limiter to specified variables ('h', 'uH', 'vH')
+pd = setdefault(pd, 'slopeLimList', {'elevation', 'momentum'}); % Apply slope limiter to specified variables ('xi', 'uH', 'vH')
 pd = setdefault(pd, 'isCoupling', false); % Compute velocity coefficients and flux of first unknown, e.g., for coupled transport problem
 pd = setdefault(pd, 'elevTol', 20);
 
@@ -91,7 +91,7 @@ pd = setdefault(pd, 'elevTol', 20);
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
 pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
 pd = setdefault(pd, 'outputTypes', 'vtk'); % Output file type
-pd = setdefault(pd, 'outputList', { 'xi', 'velocity' }); % List of variables to visualize
+pd = setdefault(pd, 'outputList', { 'elevation', 'velocity' }); % List of variables to visualize
 pd = setdefault(pd, 'isVisStations', false); % Output stations
 
 %% Simulation scenario specific parameters
@@ -108,9 +108,13 @@ switch pd.configSource
     error('Invalid config source.')
 end % switch
 
+if ~pd.isSlopeLim
+  pd.slopeLimList = {};
+end % if
 if pd.isHotstartInput && pd.isRamp
   warning('Ramp function should probably not be used in case of Hotstart input.');
 end % if
+assert(isempty(pd.slopeLimList) || pd.p > 0, 'Slope limiting only available for p > 0.');
 end % function
 
 %% Debugging
@@ -121,6 +125,7 @@ pd.isTidalDomain = false;
 pd.isHotstartInput = false;
 pd.isHotstartOutput = false;
 pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
+pd.isSlopeLim = false;
 
 % Overwrite grid parameters
 pd.gridSource = 'square';
@@ -180,6 +185,7 @@ pd.isTidalDomain = false;
 pd.isHotstartInput = false;
 pd.isHotstartOutput = false;
 pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
+pd.isSlopeLim = false;
 
 % Overwrite grid parameters
 pd.gridSource = 'hierarchical';
@@ -288,6 +294,9 @@ pd.configADCIRC = h(['swe/fort_' pd.name '.15']);
 % Constants
 pd.p = pd.configADCIRC.IRK;
 pd.schemeOrder = min(pd.configADCIRC.IRK+1, 3);
+
+pd.isSlopeLim = mod(pd.configADCIRC.ISLOPE, 2) == 1;
+
 pd.minTol = pd.configADCIRC.H0;
 pd.gConst = pd.configADCIRC.G;
 
@@ -344,7 +353,7 @@ pd.isRivCont = false;
 
 pd.outputList = {};
 if pd.configADCIRC.NOUTGE
-  pd.outputList = [pd.outputList, 'xi'];
+  pd.outputList = [pd.outputList, 'elevation'];
 end % if
 if pd.configADCIRC.NOUTGV
   pd.outputList = [pd.outputList, 'velocity'];
@@ -380,6 +389,7 @@ switch pd.name
     pd.isHotstartInput = false;
     pd.isHotstartOutput = false;
     pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
+    pd.isSlopeLim = false;
 
     % Overwrite grid parameters
     pd.isSpherical = false;
@@ -389,7 +399,7 @@ switch pd.name
     % Overwrite time-stepping parameters
     pd = setdefault(pd, 't0', 0); % Start time of simulation
     pd = setdefault(pd, 'tEnd', 1036800);  % end time
-    pd = setdefault(pd, 'dt', 30); % Time step size
+    pd = setdefault(pd, 'dt', 15); % Time step size
     pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
     pd = setdefault(pd, 'outputCount', 240); % Number of outputs over total simulation time
 
@@ -430,10 +440,11 @@ switch pd.name
     pd.isTidalDomain = false;
     
     pd.isHotstartInput = true;
-    pd.hotstartInput = [pd.name '_initialCondition.mat'];
+    pd.hotstartInput = [pd.name '_initialCondition_lin.mat'];
     pd.isHotstartOutput = false;
     
     pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
+    pd.isSlopeLim = false;
     
     % Overwrite grid parameters
     pd.isSpherical = false;
@@ -443,10 +454,10 @@ switch pd.name
     % Overwrite time-stepping parameters
     pd = setdefault(pd, 't0', 0); % Start time of simulation
     pd = setdefault(pd, 'tEnd', 259.2);  % end time
-    pd = setdefault(pd, 'dt', 0.2); % Time step size
+    pd = setdefault(pd, 'dt', 0.1); % Time step size
     pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
     pd = setdefault(pd, 'outputCount', 72); % Number of outputs over total simulation time
-    
+
     pd.isAdaptiveTimestep = false; % Use adaptive timestep width
     
     % Steady state simulation
@@ -476,6 +487,65 @@ switch pd.name
     pd.xiRivCont = @(x1,x2,t) 0*x1;
     pd.uRivCont = @(x1,x2,t) x1==x1;
     pd.vRivCont = @(x1,x2,t) 0*x1;
+  case 'galv'
+    pd.isSolutionAvail = false;
+    pd.isRhsAvail = false;
+    pd.isTidalDomain = false;
+    
+    pd.isHotstartInput = true;
+    pd.hotstartInput = 'output/galv_1.mat';
+    pd.isHotstartOutput = false;
+    pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
+    pd.isSlopeLim = false;
+
+    % Overwrite grid parameters
+    pd.isSpherical = false;
+    pd.configADCIRC.SLAM0 = 0;
+    pd.configADCIRC.SFEA0 = 0;
+
+    % Overwrite time-stepping parameters
+    pd = setdefault(pd, 't0', 864000); % Start time of simulation
+    pd = setdefault(pd, 'tEnd', 1728000);  % end time
+    pd = setdefault(pd, 'dt', 5); % Time step size
+    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
+    pd = setdefault(pd, 'outputCount', 200); % Number of outputs over total simulation time
+
+    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
+
+    pd.isSteadyState = false; % End simulation upon convergence
+
+    % Solution parameters
+    pd.gConst = 9.81;
+    pd.minTol = 0.25;
+
+    pd.isBottomFrictionNonlinear = true; % NOLIBF
+    pd.isBottomFrictionVarying = false; % NWP
+    pd.bottomFrictionCoef = 0.0040;
+    
+    % Ramping function
+    pd.isRamp = false;
+    pd.ramp = @(t_days) 1;
+
+    % Coriolis coefficient
+    pd.configADCIRC.NCOR = 0;
+    pd.configADCIRC.CORI = 7.07E-5;
+
+    % Boundary conditions
+    pd.isOSCont = true;
+    pd.xiOSCont = @(x1,x2,t)  ( 0.075 * cos(0.000067597751162*t - pi/180*194.806 ) ...
+                              + 0.095 * cos(0.000072921165921*t - pi/180*206.265 ) ...
+                              + 0.10  * cos(0.000137879713787*t - pi/180*340.0   ) ...
+                              + 0.395 * cos(0.000140518917083*t - pi/180*  0.0   ) ...
+                              + 0.06  * cos(0.000145444119418*t - pi/180*42.97180) ) * (x1==x1);
+    
+    pd.configADCIRC.NBFR = 0;
+
+    pd.isRivCont = true;
+    n = [117.25; 503.5];
+    n = n / norm(n);
+    pd.xiRivCont = @(x1,x2,t) 0*x1;
+    pd.uRivCont = @(x1,x2,t) -0.5 * n(1) * (x1==x1);
+    pd.vRivCont = @(x1,x2,t) -0.5 * n(2) * (x1==x1);
   otherwise
     error('Invalid model.')
 end % switch

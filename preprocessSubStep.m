@@ -140,8 +140,8 @@ if pd.g.numEbdrOS > 0
       xiOSQ0E0Tint{n} = pd.xiOSCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs);
       xiOSQ0E0Tint{n} = reshape(xiOSQ0E0Tint{n}.', K*numQuad1D,1);
     end % for
-    if any(ismember(pd.slopeLimList, 'xi'))
-      pd.dataV0Tos = pd.g.markV0TbdrOS .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiOSCont(x1, x2, pd.tRhs)); % TODO time
+    if any(ismember(pd.slopeLimList, 'elevation'))
+      pd.xiV0Tos = pd.g.markV0TbdrOS .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiOSCont(x1, x2, getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)));
     end % if
   elseif isfield(pd, 'xiFreqOS') && isfield(pd, 'xiAmpOS')
     % Open sea elevation data given
@@ -149,16 +149,36 @@ if pd.g.numEbdrOS > 0
     % contributions we discretize it explicitly. Otherwise we would have
     % to make a distinction.
     numFrequency = size(pd.xiFreqOS, 2);
-    xiOS = zeros(K, 1);
+    xiOS = zeros(K, 3);
+    xiE0Tos = zeros(K, 3);
     for n = 1 : numFrequency
       xiOS = xiOS + pd.xiFreqOS{1,n}(tRhs) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(tRhs) * pd.xiAmpOS{2,n};
+      if any(ismember(pd.slopeLimList, 'elevation'))
+        xiE0Tos = xiE0Tos + pd.xiFreqOS{1,n}(getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)) * pd.xiAmpOS{1,n} + ...
+                            pd.xiFreqOS{2,n}(getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)) * pd.xiAmpOS{2,n};
+      end % if
     end % for
-    if any(ismember(pd.slopeLimList, 'xi'))
-      pd.dataV0Tos = repmat(xiOS, 1, 3);
+    if any(ismember(pd.slopeLimList, 'elevation'))
+      
+      xiV0T = [ sum(xiE0Tos(:,[2,3]),2) ./ sum(pd.g.markE0TbdrOS(:,[2,3]),2), ...
+                sum(xiE0Tos(:,[1,3]),2) ./ sum(pd.g.markE0TbdrOS(:,[1,3]),2), ...
+                sum(xiE0Tos(:,[1,2]),2) ./ sum(pd.g.markE0TbdrOS(:,[1,2]),2) ];
+
+      nonUniqueVertices = pd.g.V0T(pd.g.markV0TbdrOS);
+      dataV0T = xiV0T(pd.g.markV0TbdrOS);
+      dataV = zeros(pd.g.numV,1);
+      dataVCount = zeros(pd.g.numV,1);
+      for i = 1:length(nonUniqueVertices)
+        dataV(nonUniqueVertices(i),:) = dataV(nonUniqueVertices(i),:) + setNaN2Zero(dataV0T(i,:));
+        dataVCount(nonUniqueVertices(i),:) = dataVCount(nonUniqueVertices(i),:) + ~isnan(dataV0T(i,:));
+      end
+      dataV = dataV ./ dataVCount;
+
+      xiV = dataV(:, 1);
+      pd.xiV0Tos = xiV(pd.g.V0T);      
     end % if
-    xiOS = pd.ramp(tRhs/86400) * kron(xiOS, ones(numQuad1D, 1));
     for n = 1 : 3
-      xiOSQ0E0Tint{n} = xiOS;
+      xiOSQ0E0Tint{n} = pd.ramp(tRhs/86400) * kron(xiOS(:,n), ones(numQuad1D, 1));
     end % for
   else
     error('No open sea elevation given.')
@@ -181,9 +201,10 @@ if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont || pd.isRiemRiv)
       uRivQ0E0T{n} = reshape(pd.uRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
       vRivQ0E0T{n} = reshape(pd.vRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
     end % for
-    if any(ismember(pd.slopeLimList, 'xi'))
-      pd.dataV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.tRhs)); % TODO time
+    if any(ismember(pd.slopeLimList, 'elevation'))
+      pd.xiV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)));
     end % if
+    
   else
     for n = 1 : 3
       xiRivQ0E0T{n} = pd.ramp(tRhs/86400) * pd.xiRivQ0E0T(:,n);

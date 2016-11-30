@@ -79,11 +79,21 @@ switch problemData.schemeType
     % Apply slope limiting to time derivative
     for i = 1 : length(problemData.slopeLimList)
       switch problemData.slopeLimList{i}
-        case 'xi'
+        case 'elevation'
           cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot(1:K*N), [N K])', problemData.globM, problemData.globMDiscTaylor);
           cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
           cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
           cDiscDot(1:K*N) = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
+        case 'momentum'
+          cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot(K*N+1:2*K*N), [N K])', problemData.globM, problemData.globMDiscTaylor);
+          cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
+          cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
+          cDiscDot(K*N+1:2*K*N) = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
+          
+          cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot(2*K*N+1:3*K*N), [N K])', problemData.globM, problemData.globMDiscTaylor);
+          cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
+          cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
+          cDiscDot(2*K*N+1:3*K*N) = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
         otherwise
           error('Slope limiting not implemented for variables other than free surface elevation.')
       end % switch
