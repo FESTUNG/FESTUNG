@@ -432,7 +432,7 @@ pd.globV = execin('swe/assembleMatEdgePhiPerQuad',pd.g, refEdgePhiIntPerQuad);
 
 % Bottom-friction terms
 if pd.isBottomFrictionVarying
-  bottomFrictionDisc = projectFuncCont2DataDisc(pd.g, pd.bottomFrictionCont, 2*pd.p, pd.refElemPhiPhi);
+  bottomFrictionDisc = projectFuncCont2DataDisc(pd.g, pd.bottomFrictionCont, 2*pd.p+1, pd.refElemPhiPhi);
   if pd.isBottomFrictionNonlinear
     refElemPhiPhiPerQuad = integrateRefElemPhiPhiPerQuad(N, pd.basesOnQuad);
     pd.globE = assembleMatElemPhiFuncDiscPerQuad(pd.g, refElemPhiPhiPerQuad, bottomFrictionDisc);
