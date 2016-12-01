@@ -79,26 +79,26 @@ if problemData.isSolutionAvail
   
   % Error in water height (H)
   hDisc = problemData.cDisc(:,:,1) - problemData.zbDisc;
-  problemData.err(1) = computeL2Error(problemData.g, hDisc, hEnd, 2*p, problemData.basesOnQuad);
+  problemData.err(1) = computeL2Error(problemData.g, hDisc, hEnd, 2*p+1, problemData.basesOnQuad);
   
   % Error in free surface elevation (xi)
-  problemData.err(2) = computeL2Error(problemData.g, problemData.cDisc(:,:,1), xiEnd, 2*p, problemData.basesOnQuad);
+  problemData.err(2) = computeL2Error(problemData.g, problemData.cDisc(:,:,1), xiEnd, 2*p+1, problemData.basesOnQuad);
   
   % Error in primary variable uH
-  problemData.err(3) = computeL2Error(problemData.g, problemData.cDisc(:,:,2), @(x1,x2) uEnd(x1,x2) .* hEnd(x1,x2), 2*p, problemData.basesOnQuad);
+  problemData.err(3) = computeL2Error(problemData.g, problemData.cDisc(:,:,2), @(x1,x2) uEnd(x1,x2) .* hEnd(x1,x2), 2*p+1, problemData.basesOnQuad);
   
   % Error in primary variable vH
-  problemData.err(4) = computeL2Error(problemData.g, problemData.cDisc(:,:,3), @(x1,x2) vEnd(x1,x2) .* hEnd(x1,x2), 2*p, problemData.basesOnQuad);
+  problemData.err(4) = computeL2Error(problemData.g, problemData.cDisc(:,:,3), @(x1,x2) vEnd(x1,x2) .* hEnd(x1,x2), 2*p+1, problemData.basesOnQuad);
   
   % Error in x-velocity (u)
   dataQ0T = (problemData.cDisc(:,:,2) * problemData.basesOnQuad.phi2D{qOrd}.') ./ (hDisc * problemData.basesOnQuad.phi2D{qOrd}.');
   dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
-  problemData.err(5) = computeL2Error(problemData.g, dataDisc, uEnd, 2*p, problemData.basesOnQuad);
+  problemData.err(5) = computeL2Error(problemData.g, dataDisc, uEnd, 2*p+1, problemData.basesOnQuad);
   
   % Error in y-velocity (v)
   dataQ0T = (problemData.cDisc(:,:,3) * problemData.basesOnQuad.phi2D{qOrd}.') ./ (hDisc * problemData.basesOnQuad.phi2D{qOrd}.');
   dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
-  problemData.err(6) = computeL2Error(problemData.g, dataDisc, vEnd, 2*p, problemData.basesOnQuad);
+  problemData.err(6) = computeL2Error(problemData.g, dataDisc, vEnd, 2*p+1, problemData.basesOnQuad);
 end % if
 end
 

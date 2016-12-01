@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'galv');
+pd = setdefault(pd, 'name', 'test2');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -62,9 +62,9 @@ pd = setdefault(pd, 'configSource', 'ADCIRC');
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
 %   open sea boundary in the east (type 4), and land boundary (type 1) on 
 %   all other edges 
-% - 'hierarchical' creates a unit square [0,1]x[0,1] with specified hmax
-%   and performs uniform refinement according to parameter 'refinement'.
-%   Boundary type 4 on east-boundary, 1 on all others.
+% - 'hierarchical' creates a unit square [0,100]x[0,100] with specified 
+%   hmax and performs uniform refinement according to parameter 
+%   'refinement'. All boundaries are type 3, i.e river.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
 pd = setdefault(pd, 'gridSource', 'ADCIRC');
 
