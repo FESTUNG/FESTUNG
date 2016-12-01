@@ -159,23 +159,24 @@ if pd.g.numEbdrOS > 0
       end % if
     end % for
     if any(ismember(pd.slopeLimList, 'elevation'))
-      
+      % To determine the vertex values for all triangles we first compute
+      % the vertex values for triangles that have a boundary edge of open sea
+      % type. We average the values from both sides of the vertex if the 
+      % triangle has more than one boundary edge.
       xiV0T = [ sum(xiE0Tos(:,[2,3]),2) ./ sum(pd.g.markE0TbdrOS(:,[2,3]),2), ...
                 sum(xiE0Tos(:,[1,3]),2) ./ sum(pd.g.markE0TbdrOS(:,[1,3]),2), ...
                 sum(xiE0Tos(:,[1,2]),2) ./ sum(pd.g.markE0TbdrOS(:,[1,2]),2) ];
 
-      nonUniqueVertices = pd.g.V0T(pd.g.markV0TbdrOS);
-      dataV0T = xiV0T(pd.g.markV0TbdrOS);
-      dataV = zeros(pd.g.numV,1);
-      dataVCount = zeros(pd.g.numV,1);
-      for i = 1:length(nonUniqueVertices)
-        dataV(nonUniqueVertices(i),:) = dataV(nonUniqueVertices(i),:) + setNaN2Zero(dataV0T(i,:));
-        dataVCount(nonUniqueVertices(i),:) = dataVCount(nonUniqueVertices(i),:) + ~isnan(dataV0T(i,:));
-      end
-      dataV = dataV ./ dataVCount;
+      % the vertex values for triangles with boundary edges and (possibly) 
+      % NaN if it is not a boundary vertex
+      xiV0T = xiV0T(pd.g.markV0TbdrOS);
 
-      xiV = dataV(:, 1);
-      pd.xiV0Tos = xiV(pd.g.V0T);      
+      xiV = pd.vertInd2VertIndUniqueOS * setNaN2Zero(xiV0T);
+      
+      % xiV contains the sum of the vertex values of all triangles and is
+      % divided by the number of contributing elements in dataVCountOS
+      xiV = xiV ./ pd.xiVCountOS;
+      pd.xiV0Tos = xiV(pd.g.V0T);
     end % if
     for n = 1 : 3
       xiOSQ0E0Tint{n} = pd.ramp(tRhs/86400) * kron(xiOS(:,n), ones(numQuad1D, 1));
@@ -201,10 +202,17 @@ if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont || pd.isRiemRiv)
       uRivQ0E0T{n} = reshape(pd.uRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
       vRivQ0E0T{n} = reshape(pd.vRivCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2), tRhs).', K*numQuad1D,1);
     end % for
-    if any(ismember(pd.slopeLimList, 'elevation'))
+    if any(ismember(pd.slopeLimList, 'momentum'))
+      xiV0T = computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)));
+      if any(ismember(pd.slopeLimList, 'elevation'))
+        pd.xiV0Triv = pd.g.markV0TbdrRI .* xiV0T;
+      end % if
+      hV0T = xiV0T - pd.zbV0T;
+      pd.uHV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.uRivCont(x1, x2, getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt))) .* hV0T;
+      pd.vHV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.vRivCont(x1, x2, getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt))) .* hV0T;
+    elseif any(ismember(pd.slopeLimList, 'elevation'))
       pd.xiV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)));
     end % if
-    
   else
     for n = 1 : 3
       xiRivQ0E0T{n} = pd.ramp(tRhs/86400) * pd.xiRivQ0E0T(:,n);

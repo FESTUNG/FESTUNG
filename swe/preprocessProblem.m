@@ -472,10 +472,7 @@ end % if
 pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.g.numEbdrRI > 0 % River boundaries
   if ~pd.isRivCont
-    if any(ismember(pd.slopeLimList, 'elevation')) % get vertex values from average of edge values
-      pd.xiV0Triv = 0.5 * [ sum(pd.xiRivQ0E0T(:,[2,3]),2) sum(pd.xiRivQ0E0T(:,[1,3]),2) sum(pd.xiRivQ0E0T(:,[1,2]),2) ];
-    end % if
-    if any(ismember(pd.slopeLimList, 'momentum')) % get vertex values from average of edge values
+    if any(ismember(pd.slopeLimList, 'momentum'))
       pd.zbV0T = computeFuncContV0T(pd.g, pd.zbCont);
 
       % To determine the vertex values for all triangles we first compute
@@ -492,28 +489,65 @@ if pd.g.numEbdrRI > 0 % River boundaries
                sum(pd.vRivQ0E0T(:,[1,3]),2) ./ sum(pd.g.markV0TbdrRI(:,[1,3]),2), ...
                sum(pd.vRivQ0E0T(:,[1,2]),2) ./ sum(pd.g.markV0TbdrRI(:,[1,2]),2) ];
 
-      % all vertices for which values have to be set
+      % all vertex indices for which values have to be set
       nonUniqueVertices = pd.g.V0T(pd.g.markV0TbdrRI);
-      % the vertex values for triangles with boundary edges and NaN if it
-      % is not a boundary vertex
+      % the vertex values for triangles with boundary edges and (possibly) 
+      % NaN if it is not a boundary vertex
       dataV0T = [ xiV0T(pd.g.markV0TbdrRI), uV0T(pd.g.markV0TbdrRI), vV0T(pd.g.markV0TbdrRI) ];
+      
+      % add the values of all contributing vertices via matrix-vector 
+      % product
+      vertInd2VertIndUniqueRI = bsxfun(@eq, (1:pd.g.numV).', nonUniqueVertices.');
+      
       dataV = zeros(pd.g.numV,3);
-      dataVCount = zeros(pd.g.numV,3);
-      for i = 1:length(nonUniqueVertices)
-        dataV(nonUniqueVertices(i),:) = dataV(nonUniqueVertices(i),:) + setNaN2Zero(dataV0T(i,:));
-        dataVCount(nonUniqueVertices(i),:) = dataVCount(nonUniqueVertices(i),:) + ~isnan(dataV0T(i,:));
-      end
+      dataVCountRI = zeros(pd.g.numV,3);
+      
+      dataV(:,1) = vertInd2VertIndUniqueRI * setNaN2Zero(dataV0T(:,1));
+      dataVCountRI(:,1) = vertInd2VertIndUniqueRI * double(~isnan(dataV0T(:,1)));
+      dataV(:,2) = vertInd2VertIndUniqueRI * setNaN2Zero(dataV0T(:,2));
+      dataVCountRI(:,2) = vertInd2VertIndUniqueRI * double(~isnan(dataV0T(:,2)));
+      dataV(:,3) = vertInd2VertIndUniqueRI * setNaN2Zero(dataV0T(:,3));
+      dataVCountRI(:,3) = vertInd2VertIndUniqueRI * double(~isnan(dataV0T(:,3)));
+      
       % dataV contains the sum of all triangles vertex values and is
       % divided by the number of contributing elements in dataVCount
-      dataV = dataV ./ dataVCount;
+      dataV = dataV ./ dataVCountRI;
       
       xiV = dataV(:, 1);
-      pd.xiV0Triv = xiV(pd.g.V0T);
-      hV0T = pd.xiV0Triv - pd.zbV0T;
+      if any(ismember(pd.slopeLimList, 'elevation'))
+        pd.xiV0Triv = xiV(pd.g.V0T);
+      end % if
+      hV0T = xiV(pd.g.V0T) - pd.zbV0T;
       uV = dataV(:, 2);
       pd.uHV0Triv = uV(pd.g.V0T) .* hV0T;
       vV = dataV(:, 3);
       pd.vHV0Triv = vV(pd.g.V0T) .* hV0T;
+    elseif any(ismember(pd.slopeLimList, 'elevation'))
+      % To determine the vertex values for all triangles we first compute
+      % the vertex values for triangles that have a boundary edge of river
+      % type. We average the values from both sides of the vertex if the 
+      % triangle has more than one boundary edge.
+      xiV0T = [ sum(pd.xiRivQ0E0T(:,[2,3]),2) ./ sum(pd.g.markE0TbdrRI(:,[2,3]),2), ...
+                sum(pd.xiRivQ0E0T(:,[1,3]),2) ./ sum(pd.g.markE0TbdrRI(:,[1,3]),2), ...
+                sum(pd.xiRivQ0E0T(:,[1,2]),2) ./ sum(pd.g.markE0TbdrRI(:,[1,2]),2) ];
+      
+      % all vertex indices for which values have to be set
+      nonUniqueVertices = pd.g.V0T(pd.g.markV0TbdrRI);
+      % the vertex values for triangles with boundary edges and (possibly) 
+      % NaN if it is not a boundary vertex
+      xiV0T = xiV0T(pd.g.markV0TbdrRI);
+      
+      % add the values of all contributing vertices via matrix-vector 
+      % product
+      vertInd2VertIndUniqueRI = bsxfun(@eq, (1:pd.g.numV).', nonUniqueVertices.');
+      
+      xiV = vertInd2VertIndUniqueRI * setNaN2Zero(xiV0T);
+      xiVCountRI = vertInd2VertIndUniqueRI * double(~isnan(xiV0T));
+      
+      % xiV contains the sum of all triangles vertex values and is divided
+      % by the number of contributing elements in dataVCount
+      xiV = xiV ./ xiVCountRI;
+      pd.xiV0Triv = xiV(pd.g.V0T);
     end % if
 
     pd.xiRivQ0E0T = kron(pd.xiRivQ0E0T, ones(numQuad1D,1));
@@ -569,22 +603,29 @@ if pd.g.numEbdrOS > 0 % Open sea boundaries
     for n = 1 : numFrequency
       xiE0Tos = xiE0Tos + pd.xiFreqOS{1,n}(pd.t0) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(pd.t0) * pd.xiAmpOS{2,n};
     end % for
-    
+    % To determine the vertex values for all triangles we first compute
+    % the vertex values for triangles that have a boundary edge of open sea
+    % type. We average the values from both sides of the vertex if the 
+    % triangle has more than one boundary edge.
     xiV0T = [ sum(xiE0Tos(:,[2,3]),2) ./ sum(pd.g.markE0TbdrOS(:,[2,3]),2), ...
               sum(xiE0Tos(:,[1,3]),2) ./ sum(pd.g.markE0TbdrOS(:,[1,3]),2), ...
               sum(xiE0Tos(:,[1,2]),2) ./ sum(pd.g.markE0TbdrOS(:,[1,2]),2) ];
 
+    % all vertex indices for which values have to be set
     nonUniqueVertices = pd.g.V0T(pd.g.markV0TbdrOS);
-    dataV0T = xiV0T(pd.g.markV0TbdrOS);
-    dataV = zeros(pd.g.numV,1);
-    dataVCount = zeros(pd.g.numV,1);
-    for i = 1:length(nonUniqueVertices)
-      dataV(nonUniqueVertices(i),:) = dataV(nonUniqueVertices(i),:) + setNaN2Zero(dataV0T(i,:));
-      dataVCount(nonUniqueVertices(i),:) = dataVCount(nonUniqueVertices(i),:) + ~isnan(dataV0T(i,:));
-    end
-    dataV = dataV ./ dataVCount;
-
-    xiV = dataV(:,1);
+    % the vertex values for triangles with boundary edges and (possibly) 
+    % NaN if it is not a boundary vertex
+    xiV0T = xiV0T(pd.g.markV0TbdrOS);
+    
+    % add the values of all contributing vertices via matrix-vector product
+    pd.vertInd2VertIndUniqueOS = bsxfun(@eq, (1:pd.g.numV).', nonUniqueVertices.');
+    
+    xiV = pd.vertInd2VertIndUniqueOS * setNaN2Zero(xiV0T);
+    pd.xiVCountOS = pd.vertInd2VertIndUniqueOS * double(~isnan(xiV0T));
+    
+    % xiV contains the sum of the vertex values of all triangles and is
+    % divided by the number of contributing elements in dataVCountOS
+    xiV = xiV ./ pd.xiVCountOS;
     pd.xiV0Tos = xiV(pd.g.V0T);
   end % if
   
