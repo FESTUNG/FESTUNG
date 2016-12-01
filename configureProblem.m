@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'test2');
+pd = setdefault(pd, 'name', 'galv');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -91,7 +91,7 @@ pd = setdefault(pd, 'elevTol', 20);
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
 pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
 pd = setdefault(pd, 'outputTypes', 'vtk'); % Output file type
-pd = setdefault(pd, 'outputList', { 'elevation', 'velocity' }); % List of variables to visualize
+pd = setdefault(pd, 'outputList', {'elevation', 'velocity'}); % List of variables to visualize
 pd = setdefault(pd, 'isVisStations', false); % Output stations
 
 %% Simulation scenario specific parameters
@@ -444,7 +444,7 @@ switch pd.name
     pd.isHotstartOutput = false;
     
     pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
-    pd.isSlopeLim = false;
+    pd.isSlopeLim = true;
     
     % Overwrite grid parameters
     pd.isSpherical = false;
