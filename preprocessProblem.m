@@ -68,14 +68,14 @@ switch problemData.gridSource
     problemData.g.idE(problemData.g.baryE(:, 2) == 100) = 3; % north
     problemData.g.idE(problemData.g.baryE(:, 1) == 0) = 3; % west
     problemData.g.idE0T = problemData.g.idE(problemData.g.E0T);
-  case 'ADCIRC' % TODO
+  case 'ADCIRC'
     % only to be called if coupled to SWE, grid must therefore be set
-    assert(isfield(problemData, 'g'), 'For this type of grid coupling to Shallow-Water model  is necessary.');
+    assert(isfield(problemData, 'g') && isfield(problemData.g, 'idE') && isfield(problemData.g, 'idE0T'), 'For this type of grid coupling to Shallow-Water model is necessary.');
   otherwise
     error('Invalid gridSource given.')
 end % switch
 
-if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
+if problemData.isVisGrid,  visualizeGrid(problemData.g); end % if
 %% Globally constant parameters.
 problemData.K = problemData.g.numT;  % number of triangles
 problemData.tau = problemData.tEnd / problemData.numSteps; % time step size

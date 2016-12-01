@@ -58,14 +58,8 @@ for species = 1:problemData.numSpecies
     visualizeDataLagr(problemData.g, cLagrange, ['c_' num2str(species) '_h'], ...
                       problemData.outputBasename{species}, ceil(nStep / problemData.outputFrequency{species}), problemData.outputTypes{species});
     if problemData.isMask(species)
-      if isequal(problemData.mask(:,species), [1; zeros(problemData.K-1,1)]) % TODO due to the workaround
-        problemData.mask(1,species) = 0;
-      end % if
       visualizeDataLagr(problemData.g, problemData.mask(:,species), ['mask_' num2str(species)], ...
                         [problemData.outputBasename{species} '_mask'], ceil(nStep / problemData.outputFrequency{species}), problemData.outputTypes{species});
-      if isequal(problemData.mask(:,species), zeros(problemData.K,1)) % TODO due to the workaround
-        problemData.mask(1,species) = 1;
-      end % if
     end % if
   end % if
 end % for
