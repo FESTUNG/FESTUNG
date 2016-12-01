@@ -105,9 +105,9 @@ end % for
 %% Right hand side contribution
 pd.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.isRhsAvail
-  f0Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f0Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
-  f1Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f1Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
-  f2Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f2Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  f0Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f0Cont(x1,x2,tRhs), 2*p+1, pd.refElemPhiPhi, pd.basesOnQuad);
+  f1Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f1Cont(x1,x2,tRhs), 2*p+1, pd.refElemPhiPhi, pd.basesOnQuad);
+  f2Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f2Cont(x1,x2,tRhs), 2*p+1, pd.refElemPhiPhi, pd.basesOnQuad);
   
   pd.globL{1} = pd.globM * reshape(f0Disc.', K*N, 1);
   pd.globL{2} = pd.globM * reshape(f1Disc.', K*N, 1);

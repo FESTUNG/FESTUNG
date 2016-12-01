@@ -74,7 +74,7 @@ hav = problemData.avgDepth + meanElev;
 c = sqrt(problemData.gConst*hav);
 umax = c + abs(meanVelX);
 vmax = c + abs(meanVelY);
-dt1 = min(0.5 ./ (umax ./ problemData.avgDiff(:,1) + vmax ./ problemData.avgDiff(:,2)));
+dt1 = min(0.5 ./ (umax ./ problemData.avgDiff(:,1) + vmax ./ problemData.avgDiff(:,2))) * 3 / (2*p+1);
 if dt1 < problemData.dt
 	warning(['Time increment reduction necessary in step ' num2str(nStep) ': old value ' num2str(problemData.dt) ', new value = ' num2str(dt1) '.']);
 else
