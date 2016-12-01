@@ -53,15 +53,17 @@ problemData.cDisc = cell(problemData.numSpecies,1);
 problemData.cQ0T = cell(problemData.numSpecies,1);
 problemData.concDisc = cell(problemData.numSpecies,1);
 
-problemData.numOperations = zeros(1,problemData.numSpecies);
+problemData.numOperations = zeros(1, problemData.numSpecies);
+problemData.numElem = zeros(1, problemData.numSpecies);
+problemData.minMaxV0T = cell(1, problemData.numSpecies);
 
-if ~isfield(problemData, 'h0Disc') % TODO
+if ~isfield(problemData, 'h0Disc')
   problemData.h0Disc = projectFuncCont2DataDisc(problemData.g, @(x1,x2) problemData.hCont(0,x1,x2), 2*p+1,problemData.hatM, problemData.basesOnQuad);
 end % if
 hQ0T = problemData.h0Disc * problemData.basesOnQuad.phi2D{qOrd2D}.';
 
 for species = 1:problemData.numSpecies
-  if ~isfield(problemData, 'cH0Disc') % TODO
+  if ~isfield(problemData, 'cH0Disc')
     problemData.cDisc{species} = projectFuncCont2DataDisc(problemData.g, problemData.cH0Cont{species}, 2*p+1, ...
                                                           problemData.hatM, problemData.basesOnQuad);
   else
@@ -89,10 +91,7 @@ for species = 1:problemData.numSpecies
       
       if problemData.isMask(species)
         problemData.mask(:,species) = computeMask(minMaxV0T, problemData.maskTol(species), problemData.maskType);
-        
-        if isequal(problemData.mask(:,species), zeros(problemData.K,1)) % possible workaround
-          problemData.mask(1,species) = true;
-        end % if
+        problemData.numElem(species) = sum(problemData.mask(:,species));
       else
         problemData.mask(:,species) = true(problemData.K, 1);
       end % if
@@ -100,20 +99,14 @@ for species = 1:problemData.numSpecies
       problemData.mask(:,species) = true(problemData.K, 1);
     end % if
     
-    if problemData.isVisSol{species}
+    if problemData.isVisSol{species} % TODO use different kind of visualization
       cLagrange = projectDataDisc2DataLagr(problemData.concDisc{species});
       visualizeDataLagr(problemData.g, cLagrange, ['c_' num2str(species) '_h'], ...
                         problemData.outputBasename{species}, 0, problemData.outputTypes{species});
 
       if problemData.isMask(species)
-        if isequal(problemData.mask(:,species), [1; zeros(problemData.K-1,1)]) % TODO due to the workaround
-          problemData.mask(1,species) = 0;
-        end % if
         visualizeDataLagr(problemData.g, problemData.mask(:,species), ['mask_' num2str(species)], ...
                           [problemData.outputBasename{species} '_mask'], 0, problemData.outputTypes{species});
-        if isequal(problemData.mask(:,species), zeros(problemData.K,1)) % TODO due to the workaround
-          problemData.mask(1,species) = 1;
-        end % if
       end % if
     end % if
   else

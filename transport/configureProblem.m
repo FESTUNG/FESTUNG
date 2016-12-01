@@ -143,6 +143,9 @@ end % switch
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 assert(isequal(~problemData.isMask | cell2mat(problemData.isSlopeLim), ones(problemData.numSpecies,1)), 'Usage of mask relies on slope limiting.');
+if problemData.p > 1
+  warning('This model is not designed for higher order approximations and will not feature the full slope limiting operations usually necessary to avoid large slopes.');
+end % if
 end % function
 
 %% LeVeque's solid body rotation
@@ -234,7 +237,7 @@ for species = 1:problemData.numSpecies
   
   problemData.cH0Cont{species} = @(x1,x2) problemData.solCont{species}(0,x1,x2) .* problemData.hCont(0,x1,x2);
   problemData.cDCont{species} = @(t,x1,x2) problemData.solCont{species}(t,x1,x2);
-  problemData.gNCont{species} = @(t,x1,x2) 0*x1; % TODO allow to neglect this if no Neumann boundary is used
+  problemData.gNCont{species} = @(t,x1,x2) 0*x1;
 end % for
 
 %% Reaction term definitions.
@@ -352,10 +355,6 @@ numForcings = 0; % since this information is unnecessary at this point, it will 
 isSpherical = 0;
 projCenter = [0 0];
 
-problemData = setdefault(problemData, 'hCont', @(t,x1,x2) x1==x1);
-problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) 0*x1);
-problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) 0*x1);
-
 problemData = setdefault(problemData, 'domainADCIRC', getFunctionHandle('swe/domainADCIRC'));
 
 [problemData.g, depth] = problemData.domainADCIRC(['swe/fort_' problemData.name '.14'], ['swe/fort_' problemData.name '.17'], numForcings, isSpherical, projCenter);
@@ -364,9 +363,12 @@ problemData.isHotstart = true;
 hotstartData = readHotstart('output/galv_1.mat');
 
 zbCont = @(x1,x2) execin('swe/evaluateFuncFromVertexValues', problemData.g, -depth, x1, x2);
+problemData = setdefault(problemData, 'hCont', @(t,x1,x2) -zbCont(x1,x2));
+problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) 0*x1);
+problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) 0*x1);
 
 N = nchoosek(problemData.p+2, problemData.p);
-% TODO because of zb this will not be consistent to swe
+
 problemData.h0Disc = hotstartData.cDisc(:,:,1) - projectFuncCont2DataDisc(problemData.g, zbCont, 2*problemData.p+1, eye(N), computeBasesOnQuad(N, struct));
 
 aux = false(3397,N,2);

@@ -52,5 +52,14 @@
 function problemData = postprocessStep(problemData, nStep)
 %% Reshape and store solution in problemData
 problemData.cDisc = cellfun(@(c) reshape(c, [problemData.N, problemData.K]).', problemData.cDiscRK, 'UniformOutput', false);
+
+for species = 1 : problemData.numSpecies
+  if problemData.isMask(species) % update only after all RK steps for consitency
+    problemData.numOperations(species) = problemData.numOperations(species) + problemData.numElem(species);
+    problemData.mask(:,species) = computeMask(problemData.minMaxV0T{species}, problemData.maskTol(species), problemData.maskType);
+    problemData.numElem(species) = sum(problemData.mask(:,species));
+  end % if
+end % for
+
 problemData.isFinished = nStep >= problemData.numSteps;
 end % function
