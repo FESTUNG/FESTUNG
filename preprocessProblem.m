@@ -358,8 +358,8 @@ pd.zbQ0E0TE0T = cell(3,3);
 [Q, ~] = quadRule1D(2*pd.p+1); numQuad1D = length(Q);
 for nn = 1 : 3
   [Q1, Q2] = gammaMap(nn, Q);
-  zbTheta = pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).';
-  pd.zbQ0E0Tint{nn} = reshape(zbTheta, K * numQuad1D, 1);
+  zbGamma = pd.zbCont(pd.g.mapRef2Phy(1,Q1,Q2), pd.g.mapRef2Phy(2,Q1,Q2)).';
+  pd.zbQ0E0Tint{nn} = reshape(zbGamma, K * numQuad1D, 1);
   for np = 1 : 3
     [QP1, QP2] = theta(nn, np, Q1, Q2);
     zbTheta = pd.zbCont(pd.g.mapRef2Phy(1,QP1,QP2), pd.g.mapRef2Phy(2,QP1,QP2)).';
@@ -645,14 +645,14 @@ end %
 % Assemble Newtonian tide potential matrix
 if pd.isTidalDomain
   if pd.p == 0
-    refElemPhiPhiConstPhiLeastLin = execin('swe/integrateRefElemPhiPhiPhi', [N 3 1], basesOnQuadLin);
+    refElemPhiPhiLeastLinPhiConst = execin('swe/integrateRefElemPhiPhiPhi', [N 3 1], basesOnQuadLin);
   else
-    refElemPhiPhiConstPhiLeastLin = execin('swe/integrateRefElemPhiPhiPhi', [N N 1], pd.basesOnQuad);
+    refElemPhiPhiLeastLinPhiConst = execin('swe/integrateRefElemPhiPhiPhi', [N N 1], pd.basesOnQuad);
   end % if
   for n = 1 : size(pd.forcingTidal, 3)
     for i = 1 : 2
       for j = 1 : 2
-        pd.forcingTidal{i,j,n} = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiConstPhiLeastLin, pd.forcingTidal{i,j,n});
+        pd.forcingTidal{i,j,n} = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiLeastLinPhiConst, pd.forcingTidal{i,j,n});
       end % for
     end % for
   end % for

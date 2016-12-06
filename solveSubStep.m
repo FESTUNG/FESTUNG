@@ -95,7 +95,7 @@ switch problemData.schemeType
           cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
           cDiscDot(2*K*N+1:3*K*N) = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
         otherwise
-          error('Slope limiting not implemented for variables other than free surface elevation.')
+          error('Slope limiting not implemented for non primary variables.')
       end % switch
     end % for
     

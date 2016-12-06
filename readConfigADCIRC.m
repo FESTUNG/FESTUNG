@@ -129,7 +129,7 @@ assert(isnumeric(config.RNDAY) && config.RNDAY > 0, 'Invalid total length of sim
 % Runge-Kutta time stepping scheme
 config.IRK = param(dataCountr);
 dataCountr = dataCountr+1;
-assert(ismember(config.IRK, [0, 1, 2, 3, 4]),	'Invalid Runge-Kutta scheme.');
+assert(ismember(config.IRK, [0, 1, 2, 3, 4]),	'Invalid approximation order.');
 
 % Slope reconstruction
 config.ISLOPE = param(dataCountr); 
