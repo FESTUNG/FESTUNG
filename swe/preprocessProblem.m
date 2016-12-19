@@ -371,12 +371,12 @@ end % for
 % Visualization of coefficients
 varName = {};
 dataLagr = {};
-if ismember('f_c', pd.outputList)
-  varName = [ varName, {'f_c'} ];
+if ismember('Coriolis', pd.outputList)
+  varName = [ varName, {'Coriolis'} ];
   dataLagr = [ dataLagr, {projectDataDisc2DataLagr(fcDisc)} ];
 end % if
-if ismember('z_b', pd.outputList)
-  varName = [ varName, {'z_b'} ];
+if ismember('bathymetry', pd.outputList)
+  varName = [ varName, {'bathymetry'} ];
   dataLagr = [ dataLagr, {pd.zbLagr} ];
 end % if
 if ~isempty(varName)
@@ -668,7 +668,7 @@ if pd.isAdaptiveTimestep
 end % if
 
 %% Function handles
-pd.swe_visualizeSolution = getFunctionHandle('swe/visualizeSolution');
+pd.visualizeSolution = getFunctionHandle('swe/visualizeSolution');
 pd.computeAveragedVariablesQ0E0Tint = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tint');
 pd.computeAveragedVariablesQ0E0Tland = getFunctionHandle('swe/computeAveragedVariablesQ0E0Tland');
 pd.computeAveragedVariablesQ0E0Triv = getFunctionHandle('swe/computeAveragedVariablesQ0E0Triv');
