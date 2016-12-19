@@ -85,7 +85,7 @@ pd = setdefault(pd, 'averagingType', 'full-harmonic'); % Averaging type for vari
 pd = setdefault(pd, 'typeSlopeLim', 'linear'); % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd = setdefault(pd, 'slopeLimList', {'elevation', 'momentum'}); % Apply slope limiter to specified variables ('xi', 'uH', 'vH')
 pd = setdefault(pd, 'isCoupling', false); % Compute velocity coefficients and flux of first unknown, e.g., for coupled transport problem
-pd = setdefault(pd, 'elevTol', 20);
+pd = setdefault(pd, 'elevTol', 20); % maximum absolute value for elevation
 
 %% Visualization parameters
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
@@ -135,7 +135,7 @@ pd = setdefault(pd, 'hmax', 2^-6);
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
 pd = setdefault(pd, 'numSteps', 3142);  % number of time steps
-pd = setdefault(pd, 'tEnd', pd.numSteps/3142*2*pi);  % end time
+pd = setdefault(pd, 'tEnd', 2*pi);  % end time
 pd = setdefault(pd, 'outputCount', 31); % Number of outputs over total simulation time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
@@ -155,15 +155,15 @@ pd.bottomFrictionCoef = 0;
 pd.isRamp = false;
 pd.ramp = @(t) 1;
 pd.zbCont = @(x1,x2) -0.002*(x1==x1);
-pd.fcCont = @(x1,x2) zeros(size(x1));
+pd.fcCont = @(x1,x2) 0*x1;
 
 % Analytical solution
-pd.xiCont = @(x1,x2,t) zeros(size(x1));
+pd.xiCont = @(x1,x2,t) 0*x1;
 pd.uCont = @(x1,x2,t) 0.5 - x2;
 pd.vCont = @(x1,x2,t) x1 - 0.5;
 
 % Right hand side functions (derived from analytical solution)
-pd.f0Cont = @(x1,x2,t) zeros(size(x1));
+pd.f0Cont = @(x1,x2,t) 0*x1;
 pd.f1Cont = @(x1,x2,t) 0.002*(0.5-x1);
 pd.f2Cont = @(x1,x2,t) 0.002*(0.5-x2);
 
@@ -351,13 +351,13 @@ pd.isVisStations = pd.configADCIRC.NOUTE || pd.configADCIRC.NOUTV;
 pd.isOSCont = false;
 pd.isRivCont = false;
 
-pd.outputList = {};
 if pd.configADCIRC.NOUTGE
   pd.outputList = [pd.outputList, 'elevation'];
 end % if
 if pd.configADCIRC.NOUTGV
   pd.outputList = [pd.outputList, 'velocity'];
 end % if
+pd.outputList = unique(pd.outputList);
 
 pd.outputStart = pd.t0 + 86400 * [ pd.configADCIRC.TOUTSGE, pd.configADCIRC.TOUTSE, pd.configADCIRC.TOUTSGV, pd.configADCIRC.TOUTSV ];
 pd.outputEnd = pd.t0 + 86400 * [ pd.configADCIRC.TOUTFGE, pd.configADCIRC.TOUTFE, pd.configADCIRC.TOUTFGV, pd.configADCIRC.TOUTFV ];

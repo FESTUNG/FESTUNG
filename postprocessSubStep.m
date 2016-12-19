@@ -85,7 +85,7 @@ end % for
 
 % Ensure water height doesn't fall below threshold
 problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.zbLagr + problemData.minTol, problemData.elevTol);
-problemData.cDiscRK(1 : problemData.K*problemData.N) = reshape(problemData.cDisc(:,:,1).', problemData.N * problemData.K, 1);
+problemData.cDiscRK(1 : problemData.K*problemData.N) = reshape(problemData.cDisc(:,:,1).', N*K, 1);
 
 problemData.isSubSteppingFinished = nSubStep >= length(problemData.tLvls);
 end % function
