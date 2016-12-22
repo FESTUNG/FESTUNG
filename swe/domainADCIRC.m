@@ -92,8 +92,13 @@
 function [g, depth, forcingOS, flowRateRiv] = domainADCIRC(grid_file, conn_file, numForcingOS, isSpherical, projCenter)
 % Set default values for input parameters
 switch nargin
+  case 2
+    numForcingOS = 0;
+    isSpherical = false;
+    projCenter = [0 0];
   case 3
     isSpherical = false;
+    projCenter = [0 0];
   case 4
     projCenter = [0 0];
 end % switch
