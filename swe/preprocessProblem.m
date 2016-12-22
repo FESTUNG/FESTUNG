@@ -576,11 +576,11 @@ if pd.g.numEbdrRI > 0 % River boundaries
       uuHRiv = pd.uRivQ0E0T(:,n) .* uHRiv;
       uvHRiv = pd.uRivQ0E0T(:,n) .* vHRiv;
       vvHRiv = pd.vRivQ0E0T(:,n) .* vHRiv;
-      gHHRiv = pd.gConst * pd.xiRivQ0E0T(:,n) .* ( 0.5 * pd.xiRivQ0E0T(:,n) - pd.zbQ0E0Tint{n} );
+      gEERiv = pd.gConst * pd.xiRivQ0E0T(:,n) .* ( 0.5 * pd.xiRivQ0E0T(:,n) - pd.zbQ0E0Tint{n} );
       
       pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{n,1} * uHRiv + pd.globRRI{n,2} * vHRiv;
-      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{n,1} * (uuHRiv + gHHRiv) + pd.globRRI{n,2} * uvHRiv;
-      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{n,1} * uvHRiv + pd.globRRI{n,2} * (vvHRiv + gHHRiv);
+      pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{n,1} * (uuHRiv + gEERiv) + pd.globRRI{n,2} * uvHRiv;
+      pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{n,1} * uvHRiv + pd.globRRI{n,2} * (vvHRiv + gEERiv);
       
       if pd.isCoupling
         pd.massFluxQ0E0TRiv(:,n,:) = bsxfun(@times, reshape(uHRiv.*pd.g.nuQ0E0T{n,1}+vHRiv.*pd.g.nuQ0E0T{n,2}, [numQuad1D, K])', pd.g.markE0TbdrRI(:,n));
