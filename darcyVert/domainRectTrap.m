@@ -14,6 +14,14 @@ end % if
 %
 validateattributes(X1, {'numeric'}, {'numel', 2}, mfilename, 'X1')
 %
+if length(X1) == 2
+  validateattributes(X1, {'numeric'}, {'numel', 2}, mfilename, 'X1')
+  dX1 = (X1(2) - X1(1)) / g.numElem(1);
+  X1 = X1(1) : dX1 : X1(2);
+else
+  validateattributes(X1, {'numeric'},  {'size', [1, g.numElem(1)+1]}, mfilename, 'X1')
+end % if
+%
 if length(X2) == 2
   validateattributes(X2, {'numeric'}, {'numel', 2}, mfilename, 'X2')
   X2 = kron(ones(1, g.numElem(1) + 1), reshape(X2, 2, 1));
@@ -25,9 +33,8 @@ g.numV = (g.numElem(1) + 1) * (g.numElem(2) + 1);
 g.numT = g.numElem(1) * g.numElem(2);
 g.numE = g.numElem(1) * (g.numElem(2) + 1) + g.numElem(2) * (g.numElem(1) + 1);
 %% Vertex coordinates (coordV)
-dX1 = (X1(2) - X1(1)) / g.numElem(1);
 g.coordV = zeros(g.numV, 2);
-g.coordV(:,1) = repmat( (X1(1) : dX1 : X1(2)).', g.numElem(2) + 1, 1);
+g.coordV(:,1) = repmat( X1.', g.numElem(2) + 1, 1);
 g.coordV(:,2) = kron(ones(1, g.numElem(2) + 1), X2(1,:)).' + ...
                 kron(0:g.numElem(2), (X2(2,:) - X2(1,:)) / g.numElem(2)).';
 %% Mapping Trapezoid -> Vertex (V0T)
@@ -103,5 +110,18 @@ g.areaT = 0.5 * (g.areaE0T(:,3) + g.areaE0T(:,4)) .* g.J0T{1}(:,1,1);
 %% Mapping from reference element to physical element (mapRef2Phy)
 g.mapRef2Phy = @(i,X1,X2) g.J0T{1}(:,i,1) * X1 + g.J0T{1}(:,i,2) * X2 + ...
                           g.J0T{2}(:,i,2) * (X1 .* X2) + g.coordV0T(:,1,i) * ones(size(X1));
+%% 1D mesh for surface
+g.g1D.numT = g.numElem(1);
+g.g1D.idxE2D0T = g.numT + 1 : g.numT + g.numElem(1);
+g.g1D.idxV2D0V = g.numElem(2) * (g.numElem(1) + 1) + 1 : (g.numElem(2) + 1) * (g.numElem(1) + 1);
+g.g1D.idxT2D0T = bsxfun(@plus, (1 : g.numElem(1) : g.numT).', 0 : g.numElem(2) - 1 );
+g.g1D.V0T = [(1 : g.g1D.numT).', (2 : g.g1D.numT+1).'];
+g.g1D.coordV = [X1.', X2(2,:).'];
+g.g1D.coordV0T = zeros(g.g1D.numT, 2, 2);
+for k = 1 : 2
+  g.g1D.coordV0T(:, k, :) = g.g1D.coordV(g.g1D.V0T(:, k), :);
+end % for
+g.g1D.areaT = repmat(dX1, g.g1D.numT, 1);
+g.g1D.detJ0T = g.g1D.areaT;
 end % function
 

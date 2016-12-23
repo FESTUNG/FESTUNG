@@ -95,6 +95,6 @@ if iscell(refElemPhiPhi)
   end % for
 else
   % triangular mesh with affine-linear mapping
-  ret = 2*kron(spdiags(g.areaT, 0, g.numT, g.numT), refElemPhiPhi);
+  ret = kron(spdiags(g.detJ0T, 0, g.numT, g.numT), refElemPhiPhi);
 end % if
 end % function
