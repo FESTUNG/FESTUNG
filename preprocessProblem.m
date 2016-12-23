@@ -25,8 +25,8 @@ problemData.basesOnQuad = execin('darcyVert/computeBasesOnQuadTrap', problemData
 problemData.hatM = execin('darcyVert/integrateRefElemTrapPhiPhi', problemData.N, problemData.qOrd, problemData.basesOnQuad);
 problemData.hatG = execin('darcyVert/integrateRefElemTrapDphiPhiPhi', problemData.N, problemData.qOrd, problemData.basesOnQuad);
 problemData.hatH = execin('darcyVert/integrateRefElemTrapDphiPhi', problemData.N, problemData.qOrd, problemData.basesOnQuad);
-% problemData.hatRdiag = integrateRefEdgeTrapPhiIntPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
-% problemData.hatRoffdiag = integrateRefEdgeTrapPhiIntPhiExtPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
+problemData.hatRdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiIntPhiInt', problemData.N, problemData.qOrd, problemData.basesOnQuad);
+problemData.hatRoffdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiExtPhiExt', problemData.N, problemData.qOrd, problemData.basesOnQuad);
 problemData.hatSdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiInt', problemData.N, problemData.qOrd, problemData.basesOnQuad);
 problemData.hatSoffdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiExt', problemData.N, problemData.qOrd, problemData.basesOnQuad);
 
