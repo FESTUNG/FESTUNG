@@ -29,8 +29,8 @@ hatSdiag = integrateRefEdgeTrapPhiIntPhiInt(problemData.N, problemData.qOrd, pro
 hatSoffdiag = integrateRefEdgeTrapPhiIntPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
 
 %% Assembly of time-independent global matrices.
-problemData.globM = assembleMatElemTrapPhiPhi(problemData.g, problemData.hatM);
-problemData.globH = assembleMatElemTrapDphiPhi(problemData.g, hatH);
+problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
+problemData.globH = assembleMatElemDphiPhi(problemData.g, hatH);
 problemData.globQ = assembleMatEdgeTrapPhiPhiNu(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag);
 problemData.globQN = assembleMatEdgeTrapPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrN, hatSdiag);
 problemData.globS = problemData.eta * assembleMatEdgeTrapPhiPhi(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag);

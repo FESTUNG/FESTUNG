@@ -1,6 +1,6 @@
 % Assembles two matrices, each containing integrals of products of a basis 
 % function with a (spatial) derivative of a basis function.
-%
+
 %===============================================================================
 %> @file assembleMatElemDphiPhi.m
 %>
@@ -84,15 +84,35 @@
 %> @endparblock
 %
 function ret = assembleMatElemDphiPhi(g, refElemDphiPhi)
-K = g.numT; N = size(refElemDphiPhi, 1);
+K = g.numT;
+if iscell(refElemDphiPhi)
+  % mesh with non-linear mapping
+  N = size(refElemDphiPhi{1}, 1);
 
-% Check function arguments that are directly used
-validateattributes(refElemDphiPhi, {'numeric'}, {'size', [N N 2]}, mfilename, 'refElemDphiPhi');
+  % Check function arguments that are directly used
+  validateattributes(refElemDphiPhi, {'cell'}, {'size', size(g.J0T)}, mfilename, 'refElemDphiPhi');
+  assert(all(cellfun(@(c) isequal(size(c), [N N 2]), refElemDphiPhi, 'UniformOutput', true)), 'refElemDphiPhi');
 
-% Assemble matrices
-ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);
-ret{1} = + kron(spdiags(g.B(:,2,2), 0,K,K), refElemDphiPhi(:,:,1)) ...
-         - kron(spdiags(g.B(:,2,1), 0,K,K), refElemDphiPhi(:,:,2));
-ret{2} = - kron(spdiags(g.B(:,1,2), 0,K,K), refElemDphiPhi(:,:,1)) ...
-         + kron(spdiags(g.B(:,1,1), 0,K,K), refElemDphiPhi(:,:,2));
+  ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
+  for m = 1 : 2
+    for s = 1 : 3
+      ret{m} = ret{m} + ...
+               kron(spdiags(g.J0T{s}(:,3-m,3-m), 0, K, K), refElemDphiPhi{s}(:,:,  m)) - ...
+               kron(spdiags(g.J0T{s}(:,3-m,  m), 0, K, K), refElemDphiPhi{s}(:,:,3-m));
+    end % for s
+  end % for m
+else
+  % triangular mesh with affine-linear mapping
+  N = size(refElemDphiPhi, 1);
+
+  % Check function arguments that are directly used
+  validateattributes(refElemDphiPhi, {'numeric'}, {'size', [N N 2]}, mfilename, 'refElemDphiPhi');
+
+  % Assemble matrices
+  ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
+  for m = 1 : 2
+    ret{m} = kron(spdiags(g.B(:,3-m,3-m), 0, K, K), refElemDphiPhi(:,:,  m)) ...
+           - kron(spdiags(g.B(:,3-m,  m), 0, K, K), refElemDphiPhi(:,:,3-m));
+  end % for m
+end % if
 end % function

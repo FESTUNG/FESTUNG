@@ -5,7 +5,8 @@ problemData.g = problemData.generateGrid(problemData.numElem);
 if problemData.isVisGrid, execin('darcyVert/visualizeGridTrap', problemData.g); end
 
 %% Globally constant parameters.
-problemData.N = (problemData.p + 1)^2;  % number of local DOFs
+problemData.N = (problemData.p + 1)^2;  % number of local DOFs on trapezoidals
+problemData.barN = problemData.p + 1;  % number of local DOFs on intervals
 problemData.tau = (problemData.tEnd - problemData.t0) / problemData.numSteps;  % time step size
 
 %% Configuration output.
@@ -29,10 +30,13 @@ problemData.hatH = execin('darcyVert/integrateRefElemTrapDphiPhi', problemData.N
 problemData.hatSdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiInt', problemData.N, problemData.qOrd, problemData.basesOnQuad);
 problemData.hatSoffdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiExt', problemData.N, problemData.qOrd, problemData.basesOnQuad);
 
+problemData.barHatM = integrateRefElem1DPhiPhi(problemData.barN, problemData.qOrd, problemData.basesOnQuad);
+
 %% Assembly of time-independent global matrices.
 % TODO: Adapt free surface
-problemData.globM = execin('darcyVert/assembleMatElemTrapPhiPhi', problemData.g, problemData.hatM);
-problemData.globH = execin('darcyVert/assembleMatElemTrapDphiPhi', problemData.g, problemData.hatH);
+problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
+problemData.globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
 problemData.globQ = execin('darcyVert/assembleMatEdgeTrapPhiPhiNu', problemData.g, problemData.g.markE0Tint, problemData.hatSdiag, problemData.hatSoffdiag);
 
+problemData.barGlobM = assembleMatElem1DPhiPhi(problemData.g, problemData.barHatM);
 end % function
