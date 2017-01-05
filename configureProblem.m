@@ -22,7 +22,7 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 z_bot = 2;
 h_0 = 2;
 paramE = 0.01;
-gConst = 10;
+problemData.gConst = 10;
 % Diffusion matrix
 problemData.DCont = cell(2,2);
 problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
@@ -41,7 +41,7 @@ problemData.fhCont = @(t,x1) paramE * paramE * cos(paramE * (t + x1)) - ...
                         ( problemData.hCont(t,x1) + 2 * paramE * sin(paramE * (t + x1)) );
 problemData.fuCont = @(t,x1,x2) sqrt(paramE) * paramE * (x2 - z_bot) .* cos(paramE * (t + x1)) .* ...
                         ( 1 + 0.5 * sqrt(paramE) * (x2 - z_bot) .* sin(paramE * (t + x1)) ) + ...
-                       gConst * paramE * paramE * cos(paramE * (t + x1)) + ...
+                       problemData.gConst * paramE * paramE * cos(paramE * (t + x1)) + ...
                        1.e-3 .* paramE * paramE * sqrt(paramE) * (x2 - z_bot) .* sin(paramE * (t + x1));
                      
 %% Domain and triangulation.
