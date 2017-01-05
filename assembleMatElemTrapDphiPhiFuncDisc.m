@@ -12,7 +12,7 @@ else
 end % if
 end % function
 
-function ret = assembleMatElemTrapDphiPhiFuncDiscMatrix(g , refElemDphiPhiPhi, dataDisc)
+function ret = assembleMatElemTrapDphiPhiFuncDiscMatrix(g, refElemDphiPhiPhi, dataDisc)
 [K, N] = size(dataDisc{1,1});
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 for m = 1 : 2
@@ -28,8 +28,8 @@ for m = 1 : 2
 end % for m
 end  % function
 
-function ret = assembleMatElemTrapDphiPhiFuncDiscVector(g , refElemDphiPhiPhi, dataDisc)
-[K, N] = size(dataDisc{1,1});
+function ret = assembleMatElemTrapDphiPhiFuncDiscVector(g, refElemDphiPhiPhi, dataDisc)
+[K, N] = size(dataDisc{1});
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 for m = 1 : 2
   for l = 1 : N
@@ -42,8 +42,8 @@ for m = 1 : 2
 end % for m
 end  % function
 
-function ret = assembleMatElemTrapDphiPhiFuncDiscScalar(g , refElemDphiPhiPhi, dataDisc)
-[K, N] = size(dataDisc{1,1});
+function ret = assembleMatElemTrapDphiPhiFuncDiscScalar(g, refElemDphiPhiPhi, dataDisc)
+[K, N] = size(dataDisc);
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 for m = 1 : 2
   for l = 1 : N

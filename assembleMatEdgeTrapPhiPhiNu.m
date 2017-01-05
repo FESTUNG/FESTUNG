@@ -1,7 +1,10 @@
-function ret = assembleMatEdgeTrapPhiPhiNu(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
+function ret = assembleMatEdgeTrapPhiPhiNu(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, edgeIndex)
+if nargin < 5
+  edgeIndex = 1 : 4;
+end % if
 K = g.numT; N = size(refEdgePhiIntPhiInt, 1);
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
-for n = 1 : 4
+for n = edgeIndex
   areaE0Tint = 0.5 * markE0Tint(:,n) .* g.areaE0T(:,n);
   for m = 1 : 2
     areaNuE0Tint = areaE0Tint .* g.nuE0T(:,n,m);
