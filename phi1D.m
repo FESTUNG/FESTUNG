@@ -1,5 +1,5 @@
 % Evaluates the i-th one-dimensional basis function.
-%
+
 %===============================================================================
 %> @file phi1D.m
 %>

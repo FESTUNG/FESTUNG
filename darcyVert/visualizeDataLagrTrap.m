@@ -60,8 +60,8 @@
 %> Then, the following code writes a single output file with a scalar field
 %> for 'h' and a vector field 'velocity' with components 'u' and 'v'.
 %> @code
-%> varName = { 'h', 'u', 'v' }
-%> vecName = struct('velocity', {{'u','v'}})
+%> varName = { 'h', 'u', 'v' };
+%> vecName = struct('velocity', {{'u','v'}});
 %> dataLagr = { projectDataDisc2DataLagr(cDisc{1}), ...
 %>              projectDataDisc2DataLagr(cDisc{2}), ...
 %>              projectDataDisc2DataLagr(cDisc{3}) };
