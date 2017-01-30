@@ -19,8 +19,8 @@ fprintf('L2 errors of cDisc w.r.t. the initial condition: %g, %g, %g\n', ...
   execin('darcyVert/computeL2ErrorTrap', problemData.g, problemData.cDisc{3}, u20Cont, problemData.qOrd, problemData.basesOnQuad2D));
 
 if problemData.isVisSol
-  cLagr = cellfun(@(c) execin('darcyVert/projectDataDisc2DataLagrTrap', c), problemData.cDisc, 'UniformOutput', false);
-  execin('darcyVert/visualizeDataLagrTrap', problemData.g, cLagr, {'h', 'u1', 'u2'}, problemData.outputBasename, 0, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+  cLagr = cellfun(@(c) execin('darcyVert/projectDataDisc2DataLagrTrap', c), problemData.cDisc(2:3), 'UniformOutput', false);
+  execin('darcyVert/visualizeDataLagrTrap', problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, 0, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
 end % if
 
 end % function
