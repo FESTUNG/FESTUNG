@@ -7,14 +7,14 @@ basesOnQuad.phi1D = zeros(R1D, N, 4);
 basesOnQuad.phi2D = zeros(R2D, N);
 basesOnQuad.gradPhi2D = zeros(R2D, N, 2);
 for i = 1 : N
-  basesOnQuad.phi2D(:,i) = phiTrap(i, Q1, Q2);
+  basesOnQuad.phi2D(:,i) = phiTensorProduct(i, Q1, Q2, @phi1D, @phi1D);
   for m = 1 : 2
-    basesOnQuad.gradPhi2D(:,i,m) = gradPhiTrap(i, m, Q1, Q2);
+    basesOnQuad.gradPhi2D(:,i,m) = gradPhiTensorProduct(i, m, Q1, Q2, @phi1D, @phi1D, @gradPhi1D, @gradPhi1D);
   end % for m
   for n = 1 : 2
     gamma_n = n - 1;
-    basesOnQuad.phi1D(:,i,n) = phiTrap(i, Q, gamma_n);  % edges 1 (bottom), 2 (top)
-    basesOnQuad.phi1D(:,i,5-n) = phiTrap(i, gamma_n, Q); % edges 3 (right), 4 (left)
+    basesOnQuad.phi1D(:,i,n) = phiTensorProduct(i, Q, gamma_n, @phi1D, @phi1D);  % edges 1 (bottom), 2 (top)
+    basesOnQuad.phi1D(:,i,5-n) = phiTensorProduct(i, gamma_n, Q, @phi1D, @phi1D); % edges 3 (right), 4 (left)
   end % for n
 end  % for i
 end  % function
