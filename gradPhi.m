@@ -1,5 +1,5 @@
 % Evaluates the m-th component of the i-th basis function.
-%
+
 %===============================================================================
 %> @file gradPhi.m
 %>

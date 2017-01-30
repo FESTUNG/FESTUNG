@@ -2,10 +2,14 @@ function problemData = preprocessStep(problemData, nStep)
 t = nStep * problemData.tau;
 barK = problemData.g.g1D.numT;
 
-%% L2-projections of algebraic coefficients.
+%% L2-projections of algebraic coefficients and right hand side.
 DDisc = cellfun(@(c) execin('darcyVert/projectFuncCont2DataDiscTrap', problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
         problemData.hatM{1}, problemData.basesOnQuad2D), problemData.DCont, 'UniformOutput', false);
-
+problemData.globLu = reshape(execin('darcyVert/projectFuncCont2DataDiscTrap', problemData.g, @(x1,x2) problemData.fuCont(t,x1,x2), problemData.qOrd, ...
+        problemData.hatM{1}, problemData.basesOnQuad2D).', [], 1);
+% problemData.globLh = execin('darcyVert/projectFuncCont2DataDiscTrap', problemData.g, @(x1) problemData.fhCont(t,x1), problemData.qOrd, ...
+%         problemData.hatM{1}, problemData.basesOnQuad2D);
+problemData.globLh = zeros(barK * problemData.barN, 1);
 %% Determine quadrature rules
 [~,W] = quadRule1D(problemData.qOrd); 
 numQuad1D = length(W);
@@ -38,23 +42,25 @@ problemData.globE = execin('darcyVert/assembleMatElemTrapDphiPhiFuncDisc', probl
 problemData.globG = execin('darcyVert/assembleMatElemTrapDphiPhiFuncDisc', problemData.g, problemData.hatG, DDisc);
 
 problemData.globR = execin('darcyVert/assembleMatEdgeTrapPhiPhiFuncDiscNu', problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
-problemData.globP = execin('darcyVert/assembleMatEdgeTrapPhiPhiFuncDiscNu', problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDisc{2}); %problemData.cDisc(2:3));
-% problemData.globP = globPm{1} + globPm{2};
+problemData.globP = execin('darcyVert/assembleMatEdgeTrapPhiPhiFuncDiscNu', problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDisc{2});
 
-problemData.globJH = zeros(problemData.g.numT * problemData.N, 1);
-problemData.globJU = zeros(problemData.g.numT * problemData.N, 1);
+problemData.globJu = zeros(problemData.g.numT * problemData.N, 1);
+problemData.globJh = zeros(problemData.g.numT * problemData.N, 1);
+problemData.barGlobJh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 for n = 3 : 4
   hAvgE0T = 0.5 * problemData.g.g1D.markT2DT * ( hV0T1D(:,n-2) + spdiags(ones(barK, 1), 7-2*n, barK, barK) * hV0T1D(:,mapE0E(n)-2) );
   hJmpE0T = problemData.g.g1D.markT2DT * ( hV0T1D(:,n-2) - spdiags(ones(barK, 1), 7-2*n, barK, barK) * hV0T1D(:,mapE0E(n)-2) );
   u1AvgQ0E0T = 0.5 * (u1Q0E0Tint{n} + u1Q0E0TE0T{n});
   lambdaE0T = 0.75 * abs(u1AvgQ0E0T) + 0.25 * sqrt( u1AvgQ0E0T .* u1AvgQ0E0T + 4 * problemData.gConst * kron(hAvgE0T, ones(numQuad1D,1)) );
-              
-  problemData.globJU = problemData.globJU + problemData.globS{n} * ( lambdaE0T .* (u1Q0E0Tint{n} - u1Q0E0TE0T{n}) );
-  problemData.globJH = problemData.globJH + problemData.globS{n} * ( lambdaE0T .* kron(hJmpE0T, ones(numQuad1D,1)) );
+  hJmpLambdaE0T = lambdaE0T .* kron(hJmpE0T, ones(numQuad1D,1));
+    
+  problemData.globJu = problemData.globJu + problemData.globS{n} * ( lambdaE0T .* (u1Q0E0Tint{n} - u1Q0E0TE0T{n}) );
+  problemData.globJh = problemData.globJh + problemData.globS{n} * hJmpLambdaE0T;
+  problemData.barGlobJh = problemData.barGlobJh + problemData.barGlobS{n} * hJmpLambdaE0T;
 end % for n
 
 problemData.tildeGlobP = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
-
+problemData.barGlobP = assembleMatEdgeTrapPhiPhi1DFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
 problemData.barGlobG = assembleMatElem1DDphiPhiFuncDisc(problemData.g.g1D, barU1Disc, problemData.barHatG);
 
 %% Assembly of boundary contributions.
@@ -62,6 +68,6 @@ u1Cont = @(x1,x2) problemData.u1Cont(t,x1,x2);
 problemData.globRbdr = execin('darcyVert/assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu', problemData.g, problemData.g.markE0Tbdr, problemData.hatRdiag, DDisc);
 problemData.globJD = execin('darcyVert/assembleVecEdgeTrapPhiIntFuncContNu', problemData.g, problemData.g.markE0Tbdr, u1Cont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
-problemData.globPbdr = execin('darcyVert/assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu', problemData.g, problemData.g.markE0Tbdr, problemData.hatRdiag, problemData.cDisc{2}); %problemData.cDisc(2:3));
-% problemData.globPbdr = globPm{1} + globPm{2};
+problemData.globPbdr = execin('darcyVert/assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu', problemData.g, problemData.g.markE0Tbdr, problemData.hatRdiag, problemData.cDisc{2});
+problemData.barGlobPbdr = assembleMatEdgeTrapPhiIntPhi1DIntFuncDisc1DIntNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tbdr, problemData.barHatPdiag);
 end % function

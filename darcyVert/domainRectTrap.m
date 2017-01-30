@@ -126,5 +126,12 @@ g.g1D.detJ0T = g.g1D.areaT;
 g.g1D.mapRef2Phy = @(X) g.g1D.detJ0T * X + g.g1D.coordV0T(:,1) * ones(size(X));
 [c,~,r] = find(g.g1D.idxT2D0T);
 g.g1D.markT2DT = sparse(r,c,true(size(r)));
+%% Mapping of neighbouring elements (markV0TV0T, markV0TE0T)
+g.g1D.markV0TV0T = cell(1,2);
+g.g1D.markV0TE0T = cell(1,2);
+for n = 1 : 2
+  g.g1D.markV0TV0T{n} = sparse(bsxfun(@eq, g.g1D.V0T(:,n), g.g1D.V0T(:,3-n)'));
+  g.g1D.markV0TE0T{n} = (double(g.g1D.markT2DT.') * g.markE0TE0T{5-n}) > 0;
+end % for
 end % function
 

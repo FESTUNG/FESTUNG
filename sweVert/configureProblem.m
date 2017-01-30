@@ -2,16 +2,16 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 domainWidth = 100;  % width of computational domain
-problemData.numElem = [4,4];%[24, 24];  % number of elements per direction
+problemData.numElem = [2,2];%[24, 24];  % number of elements per direction
 problemData.p = 1; % local polynomial degree
 problemData.qOrd = 4; % order of quadrature formula
 problemData.t0 = 0; % start time
 problemData.tEnd = 0.1; % end time
 problemData.numSteps = 400; % number of time steps
 problemData.isVisGrid = true; % visualization of grid
-problemData.isVisSol = false; % visualization of solution
+problemData.isVisSol = true; % visualization of solution
 problemData.eta = 1; % penalty parameter (eta>0)
-problemData.outputBasename = ['output' filesep 'solution_darcy' ]; % Basename of output files
+problemData.outputBasename = ['output' filesep 'solution_sweVert' ]; % Basename of output files
 problemData.outputTypes = { 'vtk' };
 
 %% Parameter check.

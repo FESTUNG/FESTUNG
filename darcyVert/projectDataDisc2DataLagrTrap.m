@@ -53,6 +53,6 @@ switch p
 end  % switch
 dataLagr = zeros(K, length(L1));
 for i = 1 : N
-  dataLagr = dataLagr + dataDisc(:, i) * phiTrap(i, L1, L2);
+  dataLagr = dataLagr + dataDisc(:, i) * phiTensorProduct(i, L1, L2, @phi1D, @phi1D);
 end  % for
 end  % function

@@ -13,6 +13,7 @@ for n = 1 : 2
   end  % for i
 end  % for n
 for n = 3 : 4
+  np = mapE0E(n);
   for i = 1 : N(1)
     for j = 1 : N(1)
       for l = 1 : N(2)

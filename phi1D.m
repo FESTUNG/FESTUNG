@@ -39,5 +39,6 @@ switch i
   case 1,  ret = ones(size(X));
   case 2,  ret = sqrt(3) * (1 - 2 * X);
   case 3,  ret = sqrt(5) * ( (6 * X - 6) .* X + 1 );
+  case 4,  ret = sqrt(7) * ( ( ( 20 * X - 30 ) .* X + 12 ) .* X - 1 );
 end % switch
 end % function
