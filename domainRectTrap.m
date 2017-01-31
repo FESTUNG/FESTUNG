@@ -112,6 +112,7 @@ g.mapRef2Phy = @(i,X1,X2) g.J0T{1}(:,i,1) * X1 + g.J0T{1}(:,i,2) * X2 + ...
                           g.J0T{2}(:,i,2) * (X1 .* X2) + g.coordV0T(:,1,i) * ones(size(X1));
 %% 1D mesh for surface
 g.g1D.numT = g.numElem(1);
+g.g1D.numV = g.g1D.numT + 1;
 g.g1D.idxE2D0T = g.numT + 1 : g.numT + g.numElem(1);
 g.g1D.idxV2D0V = g.numElem(2) * (g.numElem(1) + 1) + 1 : (g.numElem(2) + 1) * (g.numElem(1) + 1);
 g.g1D.idxT2D0T = bsxfun(@plus, (1 : g.numElem(1) : g.numT).', 0 : g.numElem(2) - 1 ).';
@@ -121,6 +122,9 @@ g.g1D.coordV0T = zeros(g.g1D.numT, 2, 2);
 for k = 1 : 2
   g.g1D.coordV0T(:, k, :) = g.g1D.coordV(g.g1D.V0T(:, k), :);
 end % for
+g.g1D.idV = zeros(g.g1D.numV, 1); g.g1D.idV(1) = 4; g.g1D.idV(end) = 2;
+g.g1D.idV0T = g.g1D.idV(g.g1D.V0T);
+g.g1D.nuV0T = repmat([-1 1], g.g1D.numT, 1);
 g.g1D.areaT = repmat(dX1, g.g1D.numT, 1);
 g.g1D.detJ0T = g.g1D.areaT;
 g.g1D.mapRef2Phy = @(X) g.g1D.detJ0T * X + g.g1D.coordV0T(:,1) * ones(size(X));
