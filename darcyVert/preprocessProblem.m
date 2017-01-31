@@ -33,8 +33,8 @@ problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 problemData.globH = assembleMatElemDphiPhi(problemData.g, hatH);
 problemData.globQ = assembleMatEdgeTrapPhiPhiNu(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag);
 problemData.globQN = assembleMatEdgeTrapPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrN, hatSdiag);
-problemData.globS = problemData.eta * assembleMatEdgeTrapPhiPhi(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag);
-problemData.globSD = problemData.eta * assembleMatEdgeTrapPhiIntPhiInt(problemData.g, problemData.g.markE0TbdrD, hatSdiag);
+problemData.globS = problemData.eta * assembleMatEdgeTrapPhiPhi(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag, ones(problemData.g.numT, 4));
+problemData.globSD = problemData.eta * assembleMatEdgeTrapPhiIntPhiInt(problemData.g, problemData.g.markE0TbdrD, hatSdiag, ones(problemData.g.numT, 4));
 
 problemData.sysW = [ sparse(2 * problemData.g.numT * problemData.N, 3 * problemData.g.numT * problemData.N) ; ...
                      sparse(problemData.g.numT * problemData.N, 2 * problemData.g.numT * problemData.N), problemData.globM ];
