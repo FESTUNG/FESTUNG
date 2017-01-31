@@ -1,13 +1,12 @@
-function ret = assembleMatEdgeTrapPhiIntPhi1DIntFuncDisc1DIntNuHeight(g2D, g1D, dataDisc1D, heightV0T1D, markE0Tint, refEdgePhiIntPhi1DIntPhi1DInt)
-K = g2D.numT; barK = g1D.numT;
-[N, ~, barN, ~] = size(refEdgePhiIntPhi1DIntPhi1DInt);
-ret = sparse(barK*barN, K*N);
-for n = 3 : 4
-  areaNuE0Tint = markE0Tint(:,n) .* g2D.areaE0T(:,n) .* g2D.nuE0T(:,n,1);
-  areaNuE0THeightint = areaNuE0Tint ./ (g1D.markT2DT * heightV0T1D(:,5-n));
-  for l = 1 : barN
-    areaNuE0THeightDataDisc = dataDisc1D(:,l) * areaNuE0THeightint.';
-    ret = ret + kron(g1D.markT2DT.' .* areaNuE0THeightDataDisc, refEdgePhiIntPhi1DIntPhi1DInt(:,:,l,n).');
-  end % for l
-end  % for n
-end  % function
+function ret = assembleMatEdge1DPhiIntPhiIntFuncDiscIntNuHeight(g, dataDisc, heightV0T, markV0T, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt)
+[K,N] = size(dataDisc{1});
+ret = sparse(K*N, K*N);
+for n = 1 : 2
+  nuV0THeightInt = markV0T(:,n) .* g.nuV0T(:,n) ./ heightV0T(:,n);
+  for s = 1 : 2
+    for l = 1 : N
+      ret = ret + kron(spdiags(nuV0THeightInt .* dataDisc{s}(:,l), 0, K, K), ...
+                       refEdgePhiIntPhiIntPhiInt{s}(:,:,l,n));
+    end % for l
+  end % for s
+end % for n
