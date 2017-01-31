@@ -11,7 +11,7 @@ problemData.globLu = problemData.globM * ...
 problemData.globLh = problemData.barGlobM * reshape(projectFuncCont2DataDisc1D(problemData.g.g1D, @(x1) problemData.fhCont(t,x1), ...
         problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D).', [], 1);
 %% Determine quadrature rules
-[~,W] = quadRule1D(problemData.qOrd); 
+[Q,W] = quadRule1D(problemData.qOrd); 
 numQuad1D = length(W);
 mapE0E = [2 1 4 3];
       
@@ -19,7 +19,8 @@ mapE0E = [2 1 4 3];
 hV0T1D = problemData.cDisc{1} * problemData.basesOnQuad1D.phi0D; % cDisc{1} in vertices of surface mesh
 heightV0T1D = [ problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), 4, 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 1, 2), ...
                 problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), 3, 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 2, 2) ];
-
+heightQ0T1D = heightV0T1D(:,1) * (1-Q) + heightV0T1D(:,2) * Q;
+              
 u1Q0E0Tint = cell(4,1); % cDisc{2} in quad points of edges
 u1Q0E0TE0T = cell(4,1); % cDisc{2} of neighboring element in quad points of edges
 for n = 1 : 4
@@ -56,12 +57,12 @@ for n = 3 : 4
     
   problemData.globJu = problemData.globJu + problemData.globS{n} * ( lambdaE0T .* (u1Q0E0Tint{n} - u1Q0E0TE0T{n}) );
   problemData.globJh = problemData.globJh + problemData.globS{n} * hJmpLambdaE0T;
-  problemData.barGlobJh = problemData.barGlobJh + problemData.barGlobS{n} * hJmpLambdaE0T;
+  problemData.barGlobJh = problemData.barGlobJh + (problemData.barGlobS{n} * hJmpLambdaE0T) ./ kron(heightV0T1D(:, n-2), ones(problemData.barN, 1));
 end % for n
 
 problemData.tildeGlobP = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
-problemData.barGlobP = assembleMatEdgeTrapPhiPhi1DFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
-problemData.barGlobG = assembleMatElem1DDphiPhiFuncDisc(problemData.g.g1D, barU1Disc, problemData.barHatG);
+problemData.barGlobP = assembleMatEdge1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, heightV0T1D, problemData.g.g1D.markV0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
+problemData.barGlobG = assembleMatElem1DDphiPhiFuncDiscHeight(problemData.g.g1D, barU1Disc, heightQ0T1D, problemData.barHatG);
 
 %% Assembly of boundary contributions.
 u1Cont = @(x1,x2) problemData.u1Cont(t,x1,x2);
@@ -69,5 +70,5 @@ problemData.globRbdr = execin('darcyVert/assembleMatEdgeTrapPhiIntPhiIntFuncDisc
 problemData.globJD = execin('darcyVert/assembleVecEdgeTrapPhiIntFuncContNu', problemData.g, problemData.g.markE0Tbdr, u1Cont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 problemData.globPbdr = execin('darcyVert/assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu', problemData.g, problemData.g.markE0Tbdr, problemData.hatRdiag, problemData.cDisc{2});
-problemData.barGlobPbdr = assembleMatEdgeTrapPhiIntPhi1DIntFuncDisc1DIntNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tbdr, problemData.barHatPdiag);
+problemData.barGlobPbdr = assembleMatEdge1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, heightV0T1D, problemData.g.g1D.markV0Tbdr, problemData.barHatPdiag);
 end % function

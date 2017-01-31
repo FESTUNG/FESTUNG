@@ -11,6 +11,9 @@ problemData.g.markE0TbdrL = problemData.g.idE0T == 2 | problemData.g.idE0T == 4;
 problemData.g.markE0TbdrF = problemData.g.idE0T == 3; % free boundary
 problemData.g.markE0TbdrB = problemData.g.idE0T == 1; % bottom boundary
 
+problemData.g.g1D.markV0Tint = problemData.g.g1D.idV0T == 0;
+problemData.g.g1D.markV0Tbdr = ~problemData.g.g1D.markV0Tint;
+
 %% Globally constant parameters.
 problemData.N = (problemData.p + 1)^2;  % number of local DOFs on trapezoidals
 problemData.barN = problemData.p + 1;  % number of local DOFs on intervals
@@ -34,10 +37,10 @@ problemData.hatRoffdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiExtPhiE
 hatSdiag = integrateRefEdgeTrapPhiIntPerQuad(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 problemData.barHatM = integrateRefElem1DPhiPhi(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
-problemData.barHatG = integrateRefElem1DDphiPhiPhi(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
+problemData.barHatG = integrateRefElem1DDphiPhiPhiPerQuad(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 barHatSdiag = integrateRefEdgeTrapPhi1DIntPerQuad(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
-problemData.barHatPdiag = integrateRefEdgeTrapPhiIntPhi1DIntPhi1DInt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
-problemData.barHatPoffdiag = integrateRefEdgeTrapPhiExtPhi1DIntPhi1DExt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
+problemData.barHatPdiag = integrateRefEdge1DPhiIntPhiIntPhiInt(problemData.barN, problemData.basesOnQuad1D);
+problemData.barHatPoffdiag = integrateRefEdge1DPhiIntPhiExtPhiExt(problemData.barN, problemData.basesOnQuad1D);
 
 tildeHatH = integrateRefElemTrapDphiPhi1D([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
 tildeHatQdiag = integrateRefEdgeTrapPhiIntPhi1DInt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
@@ -59,9 +62,13 @@ problemData.globS = assembleMatEdgeTrapPhiPerQuad(problemData.g, hatSdiag);
 problemData.barGlobS = assembleMatEdgeTrapPhi1DPerQuad(problemData.g, barHatSdiag);
 
 problemData.tildeGlobH = assembleMatElemDphiPhi1D(problemData.g, tildeHatH);
-problemData.tildeGlobH = cellfun(@(c) problemData.gConst * c, problemData.tildeGlobH, 'UniformOutput', false);
 problemData.tildeGlobQ = assembleMatEdgeTrapPhiPhi1DNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tint, tildeHatQdiag, tildeHatQoffdiag);
 problemData.tildeGlobQbdr = assembleMatEdgeTrapPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr, tildeHatQdiag);
+for m = 1 : 2
+  problemData.tildeGlobH = cellfun(@(c) problemData.gConst * c, problemData.tildeGlobH, 'UniformOutput', false);
+  problemData.tildeGlobQ = cellfun(@(c) problemData.gConst * c, problemData.tildeGlobQ, 'UniformOutput', false);
+  problemData.tildeGlobQbdr = cellfun(@(c) problemData.gConst * c, problemData.tildeGlobQbdr, 'UniformOutput', false);
+end % for m
 
 problemData.barGlobM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.barHatM);
 end % function
