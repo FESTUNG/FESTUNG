@@ -17,11 +17,6 @@
 %>  2. solveSubStep()
 %>  3. postprocessSubStep()
 %> 
-%> This routine is executed second in each loop iteration.
-%> It assembles the global system, computes the discrete time derivative
-%> and applies slope limiting to it (i.e., applies "selective mass lumping"
-%> as described in @ref RAWFK2016). This is used to compute the solution at
-%> the next Runge-Kutta level, which then is slope-limited itself.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
@@ -65,23 +60,7 @@ sysV = problemData.globL - problemData.globKD - problemData.globKN;
 % Computing the discrete time derivative
 cDiscDot = problemData.globM \ (sysV - sysA * problemData.cDiscRK{nSubStep});
 
-% Apply slope limiting to time derivative
-if problemData.isSlopeLim
-  cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot, [N K])', problemData.globM, problemData.globMDiscTaylor);
-  cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
-  cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
-  cDiscDot = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
-end % if
-
 % Compute next step
 problemData.cDiscRK{nSubStep + 1} = problemData.omega(nSubStep) * problemData.cDiscRK{1} + (1 - problemData.omega(nSubStep)) * (problemData.cDiscRK{nSubStep} + problemData.tau * cDiscDot);
 
-% Limiting the solution
-if problemData.isSlopeLim
-  % Evaluate boundary condition at new time level
-  tBC = getdefault(problemData.t, nSubStep + 1, problemData.t(1) + problemData.tau);
-  cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont(tBC, x1, x2));
-  problemData.cDiscRK{nSubStep + 1} = reshape(applySlopeLimiterDisc(problemData.g, reshape(problemData.cDiscRK{nSubStep + 1}, [N K])', problemData.g.markV0TbdrD, ...
-                                      cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim)', [K*N 1]);
-end % if
 end % function
