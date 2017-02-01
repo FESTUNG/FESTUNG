@@ -45,11 +45,18 @@
 %
 function problemData = initializeProblem(problemData)
 problemData.isFinished = false;
-%% Initial data.
+%% Initial data on elements
 problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 2*problemData.p+1, ...
                                              problemData.hatM, problemData.basesOnQuad);
 fprintf('L2 error w.r.t. the initial condition: %g\n', ...
   computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
+
+%% Initial data on faces
+problemData.lamDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 2*problemData.p+1, ...
+                                             problemData.hatM, problemData.basesOnQuad);
+fprintf('L2 error w.r.t. the initial condition: %g\n', ...
+  computeL2Error(problemData.g, problemData.lamDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
+
 %% visualization of inital condition.
 if problemData.isVisSol
   cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
