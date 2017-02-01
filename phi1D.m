@@ -40,5 +40,6 @@ switch i
   case 2,  ret = sqrt(3) * (1 - 2 * X);
   case 3,  ret = sqrt(5) * ( (6 * X - 6) .* X + 1 );
   case 4,  ret = sqrt(7) * ( ( ( 20 * X - 30 ) .* X + 12 ) .* X - 1 );
+  case 5,  ret = sqrt(9) * ( ( ( ( 70 * X - 140 ) .* X + 90 ) .* X - 20 ) .* X + 1 );
 end % switch
 end % function
