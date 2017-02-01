@@ -77,32 +77,5 @@ for k = 1 : 4
 end % for
 %% Generate grid data that changes when coordV, coordV0T changes
 g = generateCoordDependGridData(g);
-%% 1D mesh for surface
-g.g1D.numT = g.numElem(1);
-g.g1D.numV = g.g1D.numT + 1;
-g.g1D.idxE2D0T = g.numT + 1 : g.numT + g.numElem(1);
-g.g1D.idxV2D0V = g.numElem(2) * (g.numElem(1) + 1) + 1 : (g.numElem(2) + 1) * (g.numElem(1) + 1);
-g.g1D.idxT2D0T = bsxfun(@plus, (1 : g.numElem(1) : g.numT).', 0 : g.numElem(2) - 1 ).';
-g.g1D.V0T = [(1 : g.g1D.numT).', (2 : g.g1D.numT+1).'];
-g.g1D.coordV = [X1.', X2(2,:).'];
-g.g1D.coordV0T = zeros(g.g1D.numT, 2, 2);
-for k = 1 : 2
-  g.g1D.coordV0T(:, k, :) = g.g1D.coordV(g.g1D.V0T(:, k), :);
-end % for
-g.g1D.idV = zeros(g.g1D.numV, 1); g.g1D.idV(1) = 4; g.g1D.idV(end) = 2;
-g.g1D.idV0T = g.g1D.idV(g.g1D.V0T);
-g.g1D.nuV0T = repmat([-1 1], g.g1D.numT, 1);
-g.g1D.areaT = repmat(dX1, g.g1D.numT, 1);
-g.g1D.detJ0T = g.g1D.areaT;
-g.g1D.mapRef2Phy = @(X) g.g1D.detJ0T * X + g.g1D.coordV0T(:,1) * ones(size(X));
-[c,~,r] = find(g.g1D.idxT2D0T);
-g.g1D.markT2DT = sparse(r,c,true(size(r)));
-%% Mapping of neighbouring elements (markV0TV0T, markV0TE0T)
-g.g1D.markV0TV0T = cell(1,2);
-g.g1D.markV0TE0T = cell(1,2);
-for n = 1 : 2
-  g.g1D.markV0TV0T{n} = sparse(bsxfun(@eq, g.g1D.V0T(:,n), g.g1D.V0T(:,3-n)'));
-  g.g1D.markV0TE0T{n} = (double(g.g1D.markT2DT.') * g.markE0TE0T{5-n}) > 0;
-end % for
 end % function
 
