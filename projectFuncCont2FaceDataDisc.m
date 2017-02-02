@@ -97,29 +97,52 @@ validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma');
 ord = max(ord,1);  [Q1, W] = quadRule1D(ord);
 N = size(refFacePhiPhi, 1);
 
+
+dataDisc = zeros( g.numE, N );
+
+
 % for n = 1 : 3 % 3 edges
 %
 %     asdf1 = F1(Q1, Q2);
 %     asdf2 = F2(Q1, Q2);
+for i = 1:g.numE
 
-F1 = @(X1, X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0E(:,1)*ones(size(X1));
-F2 = @(X1, X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0E(:,2)*ones(size(X1));
+    %gammaMap(n, S)
+    localIdx = g.E0E(i,1);
+    adjTri = g.T0E(i, 1);
+    edgeNum = g.V0T(adjTri, localIdx);
+    vertNum = g.V0E(edgeNum, 1);
+    %vertNum = g.V0T(adjTri, localIdx);
 
-%     [x1, x2] = gammaMap( n, Q1 );
-%     [x1, x2] = gammaMap( 2, Q1 );
-%     [x1, x2] = gammaMap( 3, Q1 );
-
+%     F1 = @(X1, X2) g.B(adjTri,1,1)*X1 + g.B(adjTri,1,2)*X2 + g.coordV0T(vertNum,1)*ones(size(X1));
+%     F2 = @(X1, X2) g.B(adjTri,2,1)*X1 + g.B(adjTri,2,2)*X2 + g.coordV0T(vertNum,2)*ones(size(X1));
+    
+    F1 = @(X1, X2) g.B(adjTri,1,1)*X1 + g.B(adjTri,1,2)*X2 + g.coordV(vertNum,1)*ones(size(X1));
+    F2 = @(X1, X2) g.B(adjTri,2,1)*X1 + g.B(adjTri,2,2)*X2 + g.coordV(vertNum,2)*ones(size(X1));
+    
+    [x1, x2] = gammaMap( localIdx, Q1 );
+    
+    %     [x1, x2] = gammaMap( n, Q1 );
+    %     [x1, x2] = gammaMap( 2, Q1 );
+    %     [x1, x2] = gammaMap( 3, Q1 );
+    
+    
+%     g.B(adjTri,1,1)*x1 
+%     g.B(adjTri,1,2)*x2 
+%     g.coordV(vertNum,1)*ones(size(x1))
+%     
 %     asdf1 = F1(x1, x2);
 %     asdf2 = F2(x1, x2);
-g.coordV0E(:,1)
-
-rhs = funcCont( F1(x1, x2), F2(x1, x2) ) * (repmat(W.', 1, N) .* basesOnGamma.phi1D{ord}(:,1:N,n));
-% * (repmat(W.', 1, N) .* basesOnQuad.phi1D{ord}(:,1:N));
-
-% rhs = funcCont(F1(Q1, Q2), F2(Q1, Q2)) * (repmat(W.', 1, N) .* basesOnQuad.phi1D{ord}(:,1:N));
-dataDisc = rhs / refFacePhiPhi(:,:);
-
-% end % for
+%     g.coordV0E(:,1)
+%     rhs = zeros( 1, N);
+%     rhs(:,1) = 1.;
+     rhs = funcCont( F1(x1, x2), F2(x1, x2) ) * (repmat(W.', 1, N) .* basesOnGamma.phi1D{ord}(:,1:N));
+    % * (repmat(W.', 1, N) .* basesOnQuad.phi1D{ord}(:,1:N));
+    
+    % rhs = funcCont(F1(Q1, Q2), F2(Q1, Q2)) * (repmat(W.', 1, N) .* basesOnQuad.phi1D{ord}(:,1:N));
+    dataDisc(i, :) = rhs / refFacePhiPhi(:,:);
+    
+end % for
 
 
 % ord = max(ord,1);  [Q1, Q2, W] = quadRule2D(ord);

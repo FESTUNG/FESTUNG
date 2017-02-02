@@ -61,16 +61,16 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
-problemData.hmax        = 2^0; % maximum edge length of triangle
+problemData.hmax        = 2^-3; % maximum edge length of triangle
 problemData.p           = 2; % local polynomial degree
 problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
-problemData.numSteps    = 128; % number of time steps
-problemData.tEnd        = pi/4; % end time
+problemData.numSteps    = 1; % number of time steps
+problemData.tEnd        = pi/512; % end time
 
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution
 
-problemData.outputFrequency = 8; % no visualization of every timestep
+problemData.outputFrequency = 1; % no visualization of every timestep
 problemData.outputBasename  = ['output' filesep 'solution_hdg_advection']; % Basename of output files
 problemData.outputTypes     = {'vtk'}; % solution output file types
 %% Parameter check.
@@ -100,8 +100,8 @@ problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
 
-problemData.generateGridData = domainArbitrarySquare( -0.5, 0.5, problemData.hmax );
-
+problemData.generateGridData = @(hmax) domainArbitrarySquare( -0.5, 0.5, hmax );
+% problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
 % if license('checkout','PDE_Toolbox')
 %   problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
 % else

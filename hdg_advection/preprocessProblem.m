@@ -79,6 +79,8 @@ problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.
 problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
 
 problemData.hatMHybrid = integrateRefEdgePhiPhiHybrid(problemData.NHybrid, problemData.basesOnGamma);
+
+
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 end % function
