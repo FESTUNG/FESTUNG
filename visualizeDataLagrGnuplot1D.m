@@ -11,6 +11,7 @@ file     = fopen(fileName, 'wt'); % if this file exists, then overwrite
 
 len = size(dataLagr, 2);
 Q1 = [1:-1/(len-1):0];
+
 %% TODO Make this loop disappear
 for i = 1:g.numE
     localIdx = g.E0E(i,1);
