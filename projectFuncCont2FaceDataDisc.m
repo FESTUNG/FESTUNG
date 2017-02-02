@@ -24,43 +24,43 @@
 %>  \int_{T_k} w_h d_h(t) = \int_{T_k} w_h d(t) \,.
 %> @f]
 %> Choosing @f$w_h = \varphi_{ki} \text{ for } i \in \{1,...,N\}@f$ and using
-%> an affine mapping 
-%> @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$ from 
+%> an affine mapping
+%> @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$ from
 %> the reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$, defined as
 %> @f[
-%> \mathbf{F}_k (\hat{\mathbf{x}}) = 
+%> \mathbf{F}_k (\hat{\mathbf{x}}) =
 %>   \mathsf{{B}}_k \hat{\mathbf{x}} + \hat{\mathbf{a}}_{k1}
 %>   \text{ with }
 %> \mathbb{R}^{2\times2} \ni \mathsf{{B}}_k =
-%>   \left[ \hat{\mathbf{a}}_{k2} - \hat{\mathbf{a}}_{k1} | 
+%>   \left[ \hat{\mathbf{a}}_{k2} - \hat{\mathbf{a}}_{k1} |
 %>          \hat{\mathbf{a}}_{k3} - \hat{\mathbf{a}}_{k1} \right] \,,
 %> @f]
 %> we obtain
 %> @f[
 %>  \sum_{j=1}^N D_{kj}(t) \int_{\hat{T}} \hat{\varphi}_i(\hat{\mathbf{x}})
 %>  \hat{\varphi}_j(\hat{\mathbf{x}}) \mathrm{d} \hat{\mathbf{x}} =
-%> \int_{\hat{T}} \hat{\varphi}_i(\hat{\mathbf{x}}) 
+%> \int_{\hat{T}} \hat{\varphi}_i(\hat{\mathbf{x}})
 %> d(t, \mathbf{F}_k(\hat{\mathbf{x}})) \mathrm{d} \hat{\mathbf{x}} \,.
 %> @f]
 %> Written in matrix form, this is equivalent to
 %> @f[
 %>  \hat{\mathsf{M}} \begin{bmatrix} D_{k1} \\ \vdots \\ D_{kN} \end{bmatrix} =
-%>  \int_{\hat{T}} \begin{bmatrix} 
+%>  \int_{\hat{T}} \begin{bmatrix}
 %>    \hat{\varphi}_1(\hat{\mathbf{x}}) d(t, \mathbf{F}_k(\hat{\mathbf{x}})) \\
 %>    \vdots \\
 %>    \hat{\varphi}_N(\hat{\mathbf{x}}) d(t, \mathbf{F}_k(\hat{\mathbf{x}}))
 %>  \end{bmatrix} \mathrm{d} \hat{\mathbf{x}} \,,
 %> @f]
-%> with local mass matrix on the reference triangle 
+%> with local mass matrix on the reference triangle
 %> @f$\hat{M} \in \mathbb{R}^{N\times N}@f$ as defined in
 %> <code>integrateRefElemPhiPhi</code>.
 %>
-%> @param  g          The lists describing the geometric and topological 
-%>                    properties of a triangulation (see 
-%>                    <code>generateGridData()</code>) 
+%> @param  g          The lists describing the geometric and topological
+%>                    properties of a triangulation (see
+%>                    <code>generateGridData()</code>)
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  funcCont   A function handle for the continuous function
-%> @param  ord        The order of the quadrature rule provided by 
+%> @param  ord        The order of the quadrature rule provided by
 %>                    <code>quadRule2D()</code>
 %> @param refElemPhiPhi Local matrix @f$\hat{\mathsf{M}}@f$ as provided
 %>                    by <code>integrateRefElemPhiPhi()</code>.
@@ -74,7 +74,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
-%> 
+%>
 %> @par License
 %> @parblock
 %> This program is free software: you can redistribute it and/or modify
@@ -91,11 +91,37 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataDisc = projectFuncCont2FaceDataDisc(g, funcCont, ord, refElemPhiPhi, basesOnQuad)
+function dataDisc = projectFuncCont2FaceDataDisc(g, funcCont, ord, refFacePhiPhi, basesOnGamma)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
-validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad');
+validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma');
 ord = max(ord,1);  [Q1, W] = quadRule1D(ord);
-N = size(refElemPhiPhi, 1);
+N = size(refFacePhiPhi, 1);
+
+% for n = 1 : 3 % 3 edges
+%
+%     asdf1 = F1(Q1, Q2);
+%     asdf2 = F2(Q1, Q2);
+
+F1 = @(X1, X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0E(:,1)*ones(size(X1));
+F2 = @(X1, X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0E(:,2)*ones(size(X1));
+
+%     [x1, x2] = gammaMap( n, Q1 );
+%     [x1, x2] = gammaMap( 2, Q1 );
+%     [x1, x2] = gammaMap( 3, Q1 );
+
+%     asdf1 = F1(x1, x2);
+%     asdf2 = F2(x1, x2);
+g.coordV0E(:,1)
+
+rhs = funcCont( F1(x1, x2), F2(x1, x2) ) * (repmat(W.', 1, N) .* basesOnGamma.phi1D{ord}(:,1:N,n));
+% * (repmat(W.', 1, N) .* basesOnQuad.phi1D{ord}(:,1:N));
+
+% rhs = funcCont(F1(Q1, Q2), F2(Q1, Q2)) * (repmat(W.', 1, N) .* basesOnQuad.phi1D{ord}(:,1:N));
+dataDisc = rhs / refFacePhiPhi(:,:);
+
+% end % for
+
+
 % ord = max(ord,1);  [Q1, Q2, W] = quadRule2D(ord);
 % N = size(refElemPhiPhi, 1);
 % F1 = @(X1, X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));

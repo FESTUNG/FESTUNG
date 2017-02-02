@@ -52,6 +52,7 @@ if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 %% Globally constant parameters.
 problemData.K           = problemData.g.numT;  % number of triangles
 problemData.N           = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
+problemData.NHybrid     = problemData.p + 1; % number of local DOFs on Faces
 problemData.tau         = problemData.tEnd / problemData.numSteps;  % time step size
 
 % [K x 3] arrays that mark local edges (E0T) or vertices (V0T) that are 
@@ -68,11 +69,16 @@ problemData.g = computeDerivedGridData(problemData.g);
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
 problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct);
+
+problemData.basesOnGamma = computeBasesOnGamma(problemData.NHybrid, struct);
+
 %% Computation of matrices on the reference triangle.
 problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
 problemData.hatG              = integrateRefElemDphiPhiPhi(problemData.N, problemData.basesOnQuad);
 problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
 problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
+
+problemData.hatMHybrid = integrateRefEdgePhiPhiHybrid(problemData.NHybrid, problemData.basesOnGamma);
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 end % function

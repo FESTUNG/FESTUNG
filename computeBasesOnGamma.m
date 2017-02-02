@@ -32,11 +32,9 @@ for it = 1 : length(requiredOrders)
   ord = requiredOrders(it);
 
   [Q, ~] = quadRule1D(ord);
-  basesOnGamma.phi1D{ord} = zeros(length(Q), N, 3);
-  for nn = 1 : 3
-    [Q1, Q2] = gammaMap(nn, Q);
+  basesOnGamma.phi1D{ord} = zeros(length(Q), N);
     for i = 1 : N
-      basesOnGamma.phi1D{ord}(:, i, nn) = phi1D(i, Q);
+      basesOnGamma.phi1D{ord}(:, i) = phi1D(i, Q);
     end
 %     for np = 1 : 3
 %       [QP1,QP2] = theta(nn, np, Q1, Q2);
@@ -44,37 +42,5 @@ for it = 1 : length(requiredOrders)
 %         basesOnGamma.thetaPhi1D{ord}(:, i, nn, np) = phi(i, QP1, QP2);
 %       end % for
 %     end % for
-  end % for
 end % for
-
-
-% % Fill global variables
-% for it = 1 : length(requiredOrders)
-%   ord = requiredOrders(it);
-%   [Q1, Q2, ~] = quadRule2D(ord);
-%   basesOnGamma.phi2D{ord}      = zeros(length(Q1), N);
-%   for i = 1 : N
-%     basesOnGamma.phi2D{ord}(:, i) = phi(i, Q1, Q2);
-%   end % for
-%   basesOnGamma.gradPhi2D{ord}  = zeros(length(Q1), N, 2);
-%   for m = 1 : 2
-%     for i = 1 : N
-%       basesOnGamma.gradPhi2D{ord}(:, i, m) = gradPhi(i, m, Q1, Q2);
-%     end % for
-%   end % for
-%   [Q, ~] = quadRule1D(ord);
-%   basesOnGamma.phi1D{ord} = zeros(length(Q), N, 3);
-%   for nn = 1 : 3
-%     [Q1, Q2] = gammaMap(nn, Q);
-%     for i = 1 : N
-%       basesOnGamma.phi1D{ord}(:, i, nn) = phi(i, Q1, Q2);
-%     end
-%     for np = 1 : 3
-%       [QP1,QP2] = theta(nn, np, Q1, Q2);
-%       for i = 1 : N
-%         basesOnGamma.thetaPhi1D{ord}(:, i, nn, np) = phi(i, QP1, QP2);
-%       end % for
-%     end % for
-%   end % for
-% end % for
 end % function

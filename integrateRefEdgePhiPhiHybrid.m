@@ -52,7 +52,7 @@
 function ret = integrateRefEdgePhiPhiHybrid(N, basesOnGamma)
 validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma')
 p = N-1;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
-ret = zeros(N, N, 3); % [N x N x 3]
+ret = zeros(N, N); % [N x N]
   for i = 1 : N
     for j = 1 : N
       ret(i, j) = sum( W' .* basesOnGamma.phi1D{qOrd}(:,i) .* basesOnGamma.phi1D{qOrd}(:,j) );

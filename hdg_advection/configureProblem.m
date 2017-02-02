@@ -60,7 +60,8 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
-problemData.hmax        = 2^-3; % maximum edge length of triangle
+%problemData.hmax        = 2^-3; % maximum edge length of triangle
+problemData.hmax        = 2^0; % maximum edge length of triangle
 problemData.p           = 2; % local polynomial degree
 problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
 problemData.numSteps    = 128; % number of time steps
@@ -78,7 +79,6 @@ assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta m
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 %% Coefficients and boundary data (rotating Gaussian).
-%G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
 problemData.rgX1c = -0.2;
 problemData.rgX2c =  0.0;
 problemData.rgEps =  0.0;
@@ -99,12 +99,15 @@ problemData.cDCont = @(t,x1,x2) problemData.getRGSol(t, x1, x2);
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
-if license('checkout','PDE_Toolbox')
-  problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
-else
-  fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
-  problemData.generateGridData = @domainSquare;
-end % if
+
+problemData.generateGridData = domainArbitrarySquare( -0.5, 0.5, problemData.hmax );
+
+% if license('checkout','PDE_Toolbox')
+%   problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
+% else
+%   fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
+%   problemData.generateGridData = @domainSquare;
+% end % if
 % Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
 problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
