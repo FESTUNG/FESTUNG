@@ -5,7 +5,7 @@ domainWidth = 100;  % width of computational domain
 domainHeight = 2;  % height of computational domain
 problemData.numElem = [24, 24];  % number of elements per direction
 problemData.p = 1; % local polynomial degree
-problemData.qOrd = 4; % order of quadrature formula
+problemData.qOrd = 2 * problemData.p + 1; % order of quadrature formula
 problemData.t0 = 0; % start time
 problemData.tEnd = 0.1; % end time
 problemData.numSteps = 40; % number of time steps
@@ -16,7 +16,7 @@ problemData.outputBasename = ['output' filesep 'solution_darcy' ]; % Basename of
 problemData.outputTypes = { 'vtk' };
 
 %% Parameter check.
-assert(problemData.p >= 0 && problemData.p <= 2, 'Polynomial order must be zero to two.')
+assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
