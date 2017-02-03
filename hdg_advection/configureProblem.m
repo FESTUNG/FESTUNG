@@ -61,7 +61,7 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
-problemData.hmax        = 2^-4; % maximum edge length of triangle
+problemData.hmax        = 2^-0; % maximum edge length of triangle
 problemData.p           = 2; % local polynomial degree
 problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
 problemData.numSteps    = 1; % number of time steps
@@ -97,6 +97,10 @@ problemData.u2Cont = @(t,x1,x2)  4.*x1;
 %problemData.cDCont = @(t,x1,x2) zeros(size(x1));
 problemData.cDCont = @(t,x1,x2) problemData.getRGSol(t, x1, x2);
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
+
+%% HDG specific parameters
+problemData.stab = 2.; %stabilization parameter in mod. LF/Rusanov flux
+
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
 
