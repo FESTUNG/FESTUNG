@@ -78,9 +78,15 @@ problemData.hatG              = integrateRefElemDphiPhiPhi(problemData.N, proble
 problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
 problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
 
+%% Computation of HDG matrices on the reference triangle.
 problemData.hatMHybrid = integrateRefEdgePhiPhiHybrid(problemData.NHybrid, problemData.basesOnGamma);
 
+%% HDG related global matrices
+problemData.globMHybrid = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMHybrid);
 
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
+
+problemData.globASDF = integrateRefEdgePhiMuHybrid(problemData.N, problemData.NHybrid, problemData.basesOnQuad, problemData.basesOnGamma);
+
 end % function
