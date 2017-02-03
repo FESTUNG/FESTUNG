@@ -5,16 +5,6 @@ assert(~isempty(find(N == (0:3)+1, 1)), ...
   'Number of degrees of freedom does not match a polynomial order')
 validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma')
 
-% Determine polynomial degree and quadrature orders
-% if nargin < 3
-%   p = (sqrt(8*N+1)-3)/2;
-%   if p > 0
-%     requiredOrders = [2*p, 2*p+1]; 
-%   else
-%     requiredOrders = 1; 
-%   end % if
-% end % if
-
 if nargin < 3
   p = N - 1;
   if p > 0
