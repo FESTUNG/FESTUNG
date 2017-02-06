@@ -3,10 +3,10 @@ function problemData = preprocessStep(problemData, nStep)
 t = nStep * problemData.tau;
 
 %% L2-projections of algebraic coefficients.
-KDisc = cellfun(@(c) projectFuncCont2DataDiscTrap(problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
-        problemData.hatM{1}, problemData.basesOnQuad), problemData.KCont, 'UniformOutput', false);
-fDisc = projectFuncCont2DataDiscTrap(problemData.g, @(x1,x2) problemData.fCont(t,x1,x2), problemData.qOrd, ...
-        problemData.hatM{1}, problemData.basesOnQuad);
+KDisc = cellfun(@(c) projectFuncCont2DataDiscTrap(problemData.g, @(x1,x2) c(t,x1,x2), problemData.N, problemData.qOrd, ...
+        problemData.globM, problemData.basesOnQuad), problemData.KCont, 'UniformOutput', false);
+fDisc = projectFuncCont2DataDiscTrap(problemData.g, @(x1,x2) problemData.fCont(t,x1,x2), problemData.N, problemData.qOrd, ...
+        problemData.globM, problemData.basesOnQuad);
                              
 %% Assembly of time-dependent global matrices.
 problemData.globG = assembleMatElemTrapDphiPhiFuncDisc(problemData.g, problemData.hatG, KDisc);

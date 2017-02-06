@@ -51,11 +51,12 @@
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  funcCont   A function handle for the continuous function
+%> @param  N          Number of local degrees of freedom
 %> @param  qOrd       The order of the quadrature rule provided by 
 %>                    <code>quadRule2D()</code>
-%> @param refElemPhiPhi Local matrix @f$\hat{\mathsf{M}}@f$ as provided
-%>                    by <code>integrateRefElemPhiPhi()</code>.
-%>                    @f$[N \times N]@f$
+%> @param  globM      Global mass matrix @f$\mathsf{M}@f$ as provided
+%>                    by <code>assembleMatElemPhiPhi()</code>.
+%>                    @f$[KN \times KN]@f$
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi2D.
@@ -82,12 +83,14 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataDisc = projectFuncCont2DataDiscTrap(g, funcCont, qOrd, refElemPhiPhi, basesOnQuad)
+function dataDisc = projectFuncCont2DataDiscTrap(g, funcCont, N, qOrd, globM, basesOnQuad)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
+validateattributes(globM, {'numeric'}, {'size', [g.numT * N, g.numT * N]}, mfilename, 'globM');
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad');
 [Q, W] = quadRule1D(max(qOrd,1)); [Q1, Q2] = meshgrid(Q); W = W' * W;
 Q1 = Q1(:)'; Q2 = Q2(:)'; W = W(:);
-N = size(refElemPhiPhi, 1);
-rhs = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2)) * (repmat(W, 1, N) .* basesOnQuad.phi2D(:,1:N));
-dataDisc = rhs / refElemPhiPhi;
+rhs = (funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2)) .* ...
+        (g.detJ0T{1} * ones(size(Q1)) + g.detJ0T{2} * Q1 + g.detJ0T{3} * Q2)) * ...
+      (repmat(W, 1, N) .* basesOnQuad.phi2D(:,1:N));
+dataDisc = reshape(globM \ reshape(rhs.', g.numT * N, 1), N, g.numT).';
 end % function
