@@ -53,6 +53,31 @@ function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
 N = problemData.N;
 
+
+matL = 1.; % Here goes the time discretization
+vecF = 1.; % Here goes the time discretization
+matM = 1.;
+LinvF = 0;
+LinvM = 0;
+
+%% Solve local systems
+% TODO May I use this syntax? Does Matlab now, which part of the solution
+% shall go into which vector/matrix?
+[LinvF, LinvM] = mldivide(matL, [vecF matM]);
+
+matN = 1.;
+matP = 1.;
+
+matKD = 1.;
+
+sysA = ( -1. .* matN * LinvM + P );
+sysB = (matKD - matN * LinvF ) ;
+
+lDiscDot = mldivide(sysA, sysB);
+
+cDiscDot = LinvF - LinvM * lDiscDot;
+problemData.cDiscRK{nSubStep + 1} = cDiscDot;
+
 % Building the system
 sysA = -problemData.globG{1} - problemData.globG{2} + problemData.globR;
 sysV = problemData.globL - problemData.globKD - problemData.globKN;

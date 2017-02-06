@@ -1,5 +1,5 @@
 %
-function ret = integrateRefEdgePhiMuHybrid(N, Nhybrid, basesOnQuad, basesOnGamma)
+function ret = integrateRefEdgePhiIntMu(N, Nhybrid, basesOnQuad, basesOnGamma)
 validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma')
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 p = Nhybrid-1;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
@@ -11,7 +11,7 @@ for nn = 1 : 3
 %         basesOnGamma.phi1D{qOrd}(:,i)
 %         basesOnQuad.phi1D{qOrd}(:,j)
 %         W'
-      ret(i, j, nn) = sum( W' .* basesOnGamma.phi1D{qOrd}(:,i) .* basesOnQuad.phi1D{qOrd}(:,j) );
+      ret(i, j, nn) = sum( W' .* basesOnGamma.phi1D{qOrd}(:,i) .* basesOnQuad.phi1D{qOrd}(:,j, nn) );
     end % for
   end % for
 end % for  

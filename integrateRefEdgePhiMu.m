@@ -49,7 +49,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgePhiPhiHybrid(N, basesOnGamma)
+function ret = integrateRefEdgePhiMu(N, basesOnGamma)
 validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma')
 p = N-1;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
 ret = zeros(N, N); % [N x N]

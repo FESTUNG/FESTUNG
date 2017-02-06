@@ -75,15 +75,17 @@ problemData.basesOnGamma = computeBasesOnGamma(problemData.NHybrid, struct);
 %% Computation of matrices on the reference triangle.
 problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
 problemData.hatG              = integrateRefElemDphiPhiPhi(problemData.N, problemData.basesOnQuad);
-problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
-problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
+
+% problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
+% problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
 
 %% Computation of HDG matrices on the reference triangle.
-problemData.hatMHybrid = integrateRefEdgePhiPhiHybrid(problemData.NHybrid, problemData.basesOnGamma);
+%Hybrid mass matrix
+problemData.hatMlambda = integrateRefEdgePhiPhiHybrid(problemData.NHybrid, problemData.basesOnGamma);
 
 %% HDG related global matrices
-problemData.globMHybrid = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMHybrid);
-
+problemData.globMlambda = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMHybrid);
+problemData.hatRlambdaOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
