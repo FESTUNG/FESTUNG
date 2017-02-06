@@ -1,4 +1,4 @@
-#!/usr/bin/perl.exe
+#!/usr/bin/perl
 if ($#ARGV != 0)
 {
   die "Argument must contain filename $#ARGV"
