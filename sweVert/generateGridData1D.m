@@ -49,7 +49,7 @@ if nargin == 4
   assert(g1D.numT == g2D.numElem(1), 'Number of horizontal 2D elements does not match given number');
   g1D.idxE2D0T = g2D.numT + 1 : g2D.numT + g2D.numElem(1);
   g1D.idxV2D0V = g2D.numElem(2) * (g2D.numElem(1) + 1) + 1 : (g2D.numElem(2) + 1) * (g2D.numElem(1) + 1);
-  g1D.idxT2D0T = bsxfun(@plus, (1 : g2D.numElem(1) : g2D.numT).', 0 : g2D.numElem(2) - 1 ).';
+  g1D.idxT2D0T = bsxfun(@plus, (1 : g2D.numElem(1) : g2D.numT).', 0 : g2D.numElem(1) - 1 ).';
   [c, ~, r] = find(g1D.idxT2D0T);
   g1D.markT2DT = sparse(r, c, true(size(r)));
   g1D.markV0TE0T = cell(1,2);
