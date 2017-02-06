@@ -53,18 +53,26 @@ function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
 N = problemData.N;
 
-
+%% Solve local systems
+% System construction
 matL = 1.; % Here goes the time discretization
 vecF = 1.; % Here goes the time discretization
 matM = 1.;
 LinvF = 0;
 LinvM = 0;
 
-%% Solve local systems
+%Right hand side for impl. Euler step
+sysLocalB = vecF + (1/dt) .* problemData.globalM * problemData.cDisc;
+
+%Possible further modifications for Runge-Kutta time-stepping
+% TODO
+
+% System solve
 % TODO May I use this syntax? Does Matlab now, which part of the solution
 % shall go into which vector/matrix?
-[LinvF, LinvM] = mldivide(matL, [vecF matM]);
+[LinvF, LinvM] = mldivide(matL, [sysLocalB matM]);
 
+%% Solve global systems
 matN = 1.;
 matP = 1.;
 
@@ -73,8 +81,10 @@ matKD = 1.;
 sysA = ( -1. .* matN * LinvM + P );
 sysB = (matKD - matN * LinvF ) ;
 
+% System solve
 lDiscDot = mldivide(sysA, sysB);
 
+%Update solution on elements
 cDiscDot = LinvF - LinvM * lDiscDot;
 problemData.cDiscRK{nSubStep + 1} = cDiscDot;
 
