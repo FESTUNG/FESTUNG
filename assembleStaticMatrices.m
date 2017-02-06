@@ -14,9 +14,9 @@ problemData.tildeGlobH = assembleMatElemDphiPhi1D(problemData.g, problemData.til
 problemData.tildeGlobQ = assembleMatEdgeTrapPhiPhi1DNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tint, problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
 problemData.tildeGlobQbdr = assembleMatEdgeTrapPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr, problemData.tildeHatQdiag);
 for m = 1 : 2
-  problemData.tildeGlobH = cellfun(@(c) problemData.gConst * c, problemData.tildeGlobH, 'UniformOutput', false);
-  problemData.tildeGlobQ = cellfun(@(c) problemData.gConst * c, problemData.tildeGlobQ, 'UniformOutput', false);
-  problemData.tildeGlobQbdr = cellfun(@(c) problemData.gConst * c, problemData.tildeGlobQbdr, 'UniformOutput', false);
+  problemData.tildeGlobH{m} = problemData.gConst * problemData.tildeGlobH{m};
+  problemData.tildeGlobQ{m} = problemData.gConst * problemData.tildeGlobQ{m};
+  problemData.tildeGlobQbdr{m} = problemData.gConst * problemData.tildeGlobQbdr{m};
 end % for m
 end
 

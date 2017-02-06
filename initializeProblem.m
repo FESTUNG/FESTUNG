@@ -12,8 +12,8 @@ problemData = adaptMesh(problemData, true);
 %% Initial velocity.
 u10Cont = @(x1,x2) problemData.u1Cont(0,x1,x2);
 u20Cont = @(x1,x2) problemData.u2Cont(0,x1,x2);
-problemData.cDisc{2} = execin('darcyVert/projectFuncCont2DataDiscTrap', problemData.g, u10Cont, problemData.qOrd, problemData.hatM{1}, problemData.basesOnQuad2D);
-problemData.cDisc{3} = execin('darcyVert/projectFuncCont2DataDiscTrap', problemData.g, u20Cont, problemData.qOrd, problemData.hatM{1}, problemData.basesOnQuad2D);
+problemData.cDisc{2} = execin('darcyVert/projectFuncCont2DataDiscTrap', problemData.g, u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
+problemData.cDisc{3} = execin('darcyVert/projectFuncCont2DataDiscTrap', problemData.g, u20Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
 
 %% Error computation and visualization of inital condition.
 if problemData.isVisGrid, execin('darcyVert/visualizeGridTrap', problemData.g); end
