@@ -44,24 +44,25 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 % 
 % Linear height
 %
-% z_bot = 0;
-% h_0 = 1;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% % Analytical solution
-% problemData.hCont = @(t,x1) (x1/5-0.1) + 1;
-% problemData.u1Cont = @(t,x1,x2) ones(size(x1));
-% problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q1Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) ones(size(x1))/5;
-% problemData.fuCont = @(t,x1,x2)  problemData.gConst/5 * ones(size(x1));
+z_bot = 0;
+h_0 = 1;
+h_var = 0.05;
+problemData.gConst = 10;
+% Diffusion matrix
+problemData.DCont = cell(2,2);
+problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
+problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
+problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+% Analytical solution
+problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1;
+problemData.u1Cont = @(t,x1,x2) ones(size(x1));
+problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
+problemData.q1Cont = @(t,x1,x2) zeros(size(x1));
+problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
+% Analytical right hand side
+problemData.fhCont = @(t,x1) ones(size(x1))*h_var;
+problemData.fuCont = @(t,x1,x2)  problemData.gConst*h_var * ones(size(x1));
    
 % 
 % z-Linear velocity
@@ -88,24 +89,24 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 % 
 % x-Linear velocity
 %
-z_bot = 0;
-h_0 = 1;
-problemData.gConst = 10;
-% Diffusion matrix
-problemData.DCont = cell(2,2);
-problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% Analytical solution
-problemData.hCont = @(t,x1) ones(size(x1));
-problemData.u1Cont = @(t,x1,x2) x1;
-problemData.u2Cont = @(t,x1,x2) -x2;
-problemData.q1Cont = @(t,x1,x2) -ones(size(x1));
-problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
-% Analytical right hand side
-problemData.fhCont = @(t,x1) ones(size(x1));
-problemData.fuCont = @(t,x1,x2) x1;
+% z_bot = 0;
+% h_0 = 1;
+% problemData.gConst = 10;
+% % Diffusion matrix
+% problemData.DCont = cell(2,2);
+% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+% % Analytical solution
+% problemData.hCont = @(t,x1) ones(size(x1));
+% problemData.u1Cont = @(t,x1,x2) x1;
+% problemData.u2Cont = @(t,x1,x2) -x2;
+% problemData.q1Cont = @(t,x1,x2) -ones(size(x1));
+% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
+% % Analytical right hand side
+% problemData.fhCont = @(t,x1) ones(size(x1));
+% problemData.fuCont = @(t,x1,x2) x1;
                        
 % z_bot = 2;
 % h_0 = 2;
