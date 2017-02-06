@@ -73,6 +73,9 @@ problemData.isVisSol    = true; % visualization of solution
 problemData.outputFrequency = 1; % no visualization of every timestep
 problemData.outputBasename  = ['output' filesep 'solution_hdg_advection']; % Basename of output files
 problemData.outputTypes     = {'vtk'}; % solution output file types
+
+problemData.dt = problemData.tEnd / problemData.numSteps;
+
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta must be zero to three.')

@@ -4,7 +4,7 @@ function ret = phi1D(i, X)
 xi = 2 * ( X ) - 1;
 
 switch i
-    case 1,  ret = 1.;
+    case 1,  ret = ones( 1, size(X, 2) );
     case 2,  ret = xi;
     case 3,  ret = 0.5 * (3.*xi.^2 - 1);
     case 4,  ret = 0.125 * ( 35 * xi.^4 - 30*xi.^2 + 3);

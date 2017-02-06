@@ -74,11 +74,13 @@ problemData.basesOnGamma = computeBasesOnGamma(problemData.Nlambda, struct);
 
 %% Computation of matrices on the reference triangle.
 problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
-%
-% problemData.hatG              = integrateRefElemDphiPhiPhi(problemData.N, problemData.basesOnQuad);
-%problemData.hatG              = integrateRefElemFluxDphiPhi(problemData.N, problemData.basesOnQuad);
+problemData.hatG              = integrateRefElemDphiPhiPhi(problemData.N, problemData.basesOnQuad);
+problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
+problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
 
-problemData.hatR    = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+
+%HDG shit
+%problemData.hatG              = integrateRefElemFluxDphiPhi(problemData.N, problemData.basesOnQuad);
 % integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
 
 % problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
@@ -87,13 +89,30 @@ problemData.hatR    = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambd
 %% Computation of HDG matrices on the reference triangle.
 %Hybrid mass matrix
 problemData.hatMlambda = integrateRefEdgeMuMu(problemData.Nlambda, problemData.basesOnGamma);
+problemData.Gmat = integrateRefElemDphiPhi(problemData.N, problemData.basesOnQuad);
+
+problemData.hatRlambda    = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+problemData.hatRphi    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
+
 
 %% HDG related global matrices
-problemData.globMlambda = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMHybrid);
+problemData.globMlambda = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMlambda);
 problemData.hatRlambdaOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
+
+problemData.hatSbarOnQuad = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
+problemData.hatGbarOnQuad = integrateRefEdgePhiIntPhiIntFlux(problemData.N, problemData.basesOnQuad);
+
+
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
-problemData.globASDF = integrateRefEdgePhiMuHybrid(problemData.N, problemData.NHybrid, problemData.basesOnQuad, problemData.basesOnGamma);
+%Term III.2
+problemData.globRlambda =  problemData.stab .* assembleMatEdgeMuPhiInt( problemData.g, problemData.hatRlambda );
+
+%Term III.3 WIP
+% problemData.globRphi = assembleMatEdgePhiIntPhiInt( problemData.g, problemData.stab, problemData.hatM );
+
+%Term V.1 WIP
+% problemData.globMlambda = assembleMatEdgeMuMu( problemData.g, problemData.stab, problemData.hatM );
 
 end % function

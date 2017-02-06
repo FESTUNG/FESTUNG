@@ -87,4 +87,9 @@ problemData.globKN = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.
 
 % Assembly of the source contribution
 problemData.globL = problemData.globM * reshape(fDisc', K*N, 1);
+
+%% HDG stuff
+
+
+
 end % function
