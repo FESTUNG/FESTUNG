@@ -46,11 +46,11 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function g = domainArbitrarySquare(X1, X2, h)
+function g = domainArbitrarySquare(Xmin, Xmax, h)
 dim = ceil(1/h); % number of edges per side of the unit square
 h = 1/dim;
 %% Build coordV.
-[X, Y] = meshgrid(X1:h:X2);
+[X, Y] = meshgrid(Xmin:h:Xmax);
 Xlist = reshape(X, length(X)^2, 1);  Ylist = reshape(Y, length(X)^2, 1);
 coordV = [Xlist, Ylist];
 %% Build V0T.
@@ -63,9 +63,9 @@ V0T2(dim+1 : dim+1 : dim*(dim+1), :) = [];
 %% Generate grid data and boundary IDs
 g = generateGridData(coordV, [V0T1; V0T2]);
 g.idE = zeros(g.numE, 1);
-g.idE(g.baryE(:, 2) == 0) = 1; % south
-g.idE(g.baryE(:, 1) == 1) = 2; % east
-g.idE(g.baryE(:, 2) == 1) = 3; % north
-g.idE(g.baryE(:, 1) == 0) = 4; % west
+g.idE(g.baryE(:, 2) == Xmin) = 1; % south
+g.idE(g.baryE(:, 1) == Xmax) = 2; % east
+g.idE(g.baryE(:, 2) == Xmax) = 3; % north
+g.idE(g.baryE(:, 1) == Xmin) = 4; % west
 g.idE0T = g.idE(g.E0T); % local edge IDs
 end % function
