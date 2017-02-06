@@ -27,10 +27,9 @@ g.J0T{2}(:, 2, 2) = (g.coordV0T(:, 3, 2) - g.coordV0T(:, 2, 2)) - ...
                     (g.coordV0T(:, 4, 2) - g.coordV0T(:, 1, 2));
 g.J0T{3}(:, 2, 1) = (g.coordV0T(:, 3, 2) - g.coordV0T(:, 2, 2)) - ...
                     (g.coordV0T(:, 4, 2) - g.coordV0T(:, 1, 2));
-g.detJ0T = cell(1,3);
-for s = 1 : 3
-  g.detJ0T{s} = g.J0T{s}(:,1,1) .* g.J0T{s}(:,2,2) - g.J0T{s}(:,2,1) .* g.J0T{s}(:,1,2);
-end % for
+g.detJ0T = { g.J0T{1}(:, 1, 1) .* g.J0T{1}(:, 2, 2), ...
+             g.J0T{1}(:, 1, 1) .* g.J0T{2}(:, 2, 2), ...
+             zeros(g.numT, 1) };
 %% Element area (areaT)
 g.areaT = 0.5 * (g.areaE0T(:, 3) + g.areaE0T(:, 4)) .* g.J0T{1}(:, 1, 1);
 %% Mapping from reference element to physical element (mapRef2Phy)
