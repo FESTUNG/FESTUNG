@@ -11,9 +11,8 @@ for m = 1 : 2
             (problemData.globH{m} - problemData.globQ{m}) * cSys{2} );
 end % for m
 % Water height
-%%%% TODO: Factor barK???
 hSys = cSys{1} + problemData.tau * ( problemData.barGlobM \ (problemData.globLh + problemData.barGlobJh + ...
-            (barK * problemData.barGlobG - problemData.barGlobP - problemData.barGlobPbdr) * cSys{1}) );
+            (problemData.barGlobG - problemData.barGlobP - problemData.barGlobPbdr) * cSys{1}) );
 % Horizontal velocity
 cSys{2} = cSys{2} + problemData.tau * ( problemData.globM \ (problemData.globLu + problemData.globJu + ...
             (problemData.globE - problemData.globP - problemData.globPbdr) * cSys{2} + ...

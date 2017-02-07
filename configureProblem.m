@@ -3,7 +3,7 @@ function problemData = configureProblem(problemData)
 %% Parameters.
 domainWidth = 1;  % width of computational domain
 problemData.numElem = [8,8];%[24, 24];  % number of elements per direction
-problemData.p = 0; % local polynomial degree
+problemData.p = 2; % local polynomial degree
 problemData.qOrd = 2*problemData.p + 1; % order of quadrature formula
 problemData.t0 = 0; % start time
 problemData.tEnd = 0.1; % end time
@@ -111,25 +111,95 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 % 
 % linear velocity and height
 %
+% z_bot = 0;
+% h_0 = 1;
+% h_var = 0.05;
+% problemData.gConst = 10;
+% % Diffusion matrix
+% problemData.DCont = cell(2,2);
+% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+% % Analytical solution
+% problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1;
+% problemData.u1Cont = @(t,x1,x2) x1;
+% problemData.u2Cont = @(t,x1,x2) -x2;
+% problemData.q1Cont = @(t,x1,x2) -ones(size(x1));
+% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
+% % Analytical right hand side
+% problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + h_var * x1;
+% problemData.fuCont = @(t,x1,x2) x1 + problemData.gConst * h_var;
+   
+% 
+% Quadratic height
+%
+% z_bot = 0;
+% h_0 = 1;
+% h_var = 0.1;
+% problemData.gConst = 10;
+% % Diffusion matrix
+% problemData.DCont = cell(2,2);
+% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+% % Analytical solution
+% problemData.hCont = @(t,x1) (x1.^2-0.5)*h_var + 1;
+% problemData.u1Cont = @(t,x1,x2) ones(size(x1));
+% problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
+% problemData.q1Cont = @(t,x1,x2) zeros(size(x1));
+% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
+% % Analytical right hand side
+% problemData.fhCont = @(t,x1) 2*h_var*x1;
+% problemData.fuCont = @(t,x1,x2)  2*problemData.gConst*h_var * x1;
+   
+
+% 
+% quadratic velocity
+%
+% z_bot = 0;
+% h_0 = 1;
+% h_var = 0.05;
+% problemData.gConst = 10;
+% % Diffusion matrix
+% problemData.DCont = cell(2,2);
+% problemData.DCont{1,1} = @(t,x1,x2) ones(size(x1));
+% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,2} = @(t,x1,x2) ones(size(x1));
+% % Analytical solution
+% problemData.hCont = @(t,x1) ones(size(x1));
+% problemData.u1Cont = @(t,x1,x2) x1 - x2.^2;
+% problemData.u2Cont = @(t,x1,x2) -x2;
+% problemData.q1Cont = @(t,x1,x2) ones(size(x1));
+% problemData.q2Cont = @(t,x1,x2) -2*x2;
+% % Analytical right hand side
+% problemData.fhCont = @(t,x1) problemData.hCont(t,x1);
+% problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + 2;
+                  
+% 
+% quadratic velocity and linear height
+%
 z_bot = 0;
 h_0 = 1;
 h_var = 0.05;
 problemData.gConst = 10;
 % Diffusion matrix
 problemData.DCont = cell(2,2);
-problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+problemData.DCont{1,1} = @(t,x1,x2) ones(size(x1));
 problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
 problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+problemData.DCont{2,2} = @(t,x1,x2) ones(size(x1));
 % Analytical solution
 problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1;
-problemData.u1Cont = @(t,x1,x2) x1;
+problemData.u1Cont = @(t,x1,x2) x1 - x2.^2;
 problemData.u2Cont = @(t,x1,x2) -x2;
-problemData.q1Cont = @(t,x1,x2) -ones(size(x1));
-problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
+problemData.q1Cont = @(t,x1,x2) ones(size(x1));
+problemData.q2Cont = @(t,x1,x2) -2*x2;
 % Analytical right hand side
-problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + h_var * x1;
-problemData.fuCont = @(t,x1,x2) x1 + problemData.gConst * h_var;
+problemData.fhCont = @(t,x1) problemData.hCont(t,x1) - h_var * (problemData.hCont(t,x1) + z_bot).^2;
+problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + 2 + problemData.gConst * h_var;
                        
 % z_bot = 0;
 % h_0 = 2;
