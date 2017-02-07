@@ -67,7 +67,7 @@ end % for n
 
 problemData.tildeGlobP = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
 problemData.barGlobP = assembleMatEdge1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, heightV0T1D, problemData.g.g1D.markV0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
-problemData.barGlobG = assembleMatElem1DDphiPhiFuncDiscHeight(problemData.g.g1D, barU1Disc, heightQ0T1D, problemData.barHatG);
+problemData.barGlobG = assembleMatElem1DDphiPhiFuncDiscHeight(barU1Disc, heightQ0T1D, problemData.barHatG);
 
 %% Assembly of boundary contributions.
 u1Cont = @(x1,x2) problemData.u1Cont(t,x1,x2);
