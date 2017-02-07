@@ -22,11 +22,12 @@ for iT = 1:K
             tmp = zeros(N, Nlambda);
             for i = 1:N
                 for j=1:Nlambda
-                    tmp(i,j) = uEval( iT, :, iDim)  * Sbar( :, i, j, iDim) ;
+                    tmp(i,j) = uEval( iT, :, iDim)  * Sbar( :, i, j, iDim);
                 end
             end
             
-            ret{iDim}(iTs:iTe,  iEs:iEe  ) = ret{iDim}( iTs:iTe, iEs:iEe ) + g.areaE( edgeNr ) .* tmp;
+            ret{iDim}(iTs:iTe,  iEs:iEe  ) = ret{iDim}( iTs:iTe, iEs:iEe ) ...
+                                            + g.areaE( edgeNr ) .* g.nuE0T( iT, iE , iDim) .* tmp;
         end
     end
 end
