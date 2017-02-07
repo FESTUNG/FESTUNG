@@ -91,28 +91,33 @@ problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.
 problemData.hatMlambda = integrateRefEdgeMuMu(problemData.Nlambda, problemData.basesOnGamma);
 problemData.Gmat = integrateRefElemDphiPhi(problemData.N, problemData.basesOnQuad);
 
-problemData.hatRlambda    = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
-problemData.hatRphi    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
+problemData.hatRlambda = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
 
 
 %% HDG related global matrices
-problemData.globMlambda = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMlambda);
 problemData.hatRlambdaOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
 
-problemData.hatSbarOnQuad = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
-problemData.hatGbarOnQuad = integrateRefEdgePhiIntPhiIntFlux(problemData.N, problemData.basesOnQuad);
+problemData.hatGbarOnQuad = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
+problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+
+% problemData.hatGbarOnQuad = integrateRefEdgePhiIntPhiIntFlux(problemData.N, problemData.basesOnQuad);
 
 
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
+% problemData.globMlambda = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMlambda);
 
 %Term III.2
 problemData.globRlambda =  problemData.stab .* assembleMatEdgeMuPhiInt( problemData.g, problemData.hatRlambda );
 
 %Term III.3 WIP
-% problemData.globRphi = assembleMatEdgePhiIntPhiInt( problemData.g, problemData.stab, problemData.hatM );
+problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
 
 %Term V.1 WIP
 % problemData.globMlambda = assembleMatEdgeMuMu( problemData.g, problemData.stab, problemData.hatM );
+%Term V.1 WIP und VI.1
+problemData.globT = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, problemData.hatM);
+
 
 end % function

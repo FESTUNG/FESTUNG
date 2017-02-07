@@ -89,7 +89,25 @@ problemData.globKN = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.
 problemData.globL = problemData.globM * reshape(fDisc', K*N, 1);
 
 %% HDG stuff
+% fEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont(problemData.t(nSubStep),x1,x2), ...
+%                                      problemData.N, problemData.basesOnQuad);
+uEval(:,:,1) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont(problemData.t(nSubStep),x1,x2), ...
+                                     problemData.N, problemData.basesOnQuad);
+uEval(:,:,2) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u2Cont(problemData.t(nSubStep),x1,x2), ...
+                                     problemData.N, problemData.basesOnQuad);
 
+problemData.globG = assembleMatElemPhiPhiFlux( problemData.g, problemData.N, uEval, problemData.hatGbarOnQuad );
+                                 
+problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.N, problemData.Nlambda, ...
+                                                 uEval, problemData.hatSbarOnQuad );
 
+% Assembly of Dirichlet boundary contributions
+problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
+    @(x1,x2) problemData.cDCont(problemData.t(nSubStep),x1,x2), problemData.Nlambda, problemData.basesOnGamma );
+
+problemData.globcDiscTime = problemData.globM * reshape( problemData.cDisc, size(problemData.globM, 1), 1 );
+
+%Rlambda is not time-depentend -> it is already constructed
+                                             
 
 end % function
