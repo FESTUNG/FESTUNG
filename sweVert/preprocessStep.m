@@ -53,16 +53,16 @@ problemData.globJu = zeros(problemData.g.numT * problemData.N, 1);
 problemData.globJh = zeros(problemData.g.numT * problemData.N, 1);
 problemData.barGlobJh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 for n = 3 : 4
-  hAvgE0T = 0.5 * problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,n-2) + spdiags(ones(barK, 1), 7-2*n, barK, barK) * problemData.hV0T1D(:,mapE0E(n)-2) );
-  hJmpE0T = problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,n-2) - spdiags(ones(barK, 1), 7-2*n, barK, barK) * problemData.hV0T1D(:,mapE0E(n)-2) );
+  %spdiags(ones(barK, 1), 7-2*n, barK, barK)
+  hAvgE0T = 0.5 * problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,5-n) + problemData.g.g1D.markV0TV0T{5-n} * problemData.hV0T1D(:,5-mapE0E(n)) );
+  hJmpE0T = problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,5-n) - problemData.g.g1D.markV0TV0T{5-n} * problemData.hV0T1D(:,5-mapE0E(n)) );
   u1AvgQ0E0T = 0.5 * (u1Q0E0Tint{n} + u1Q0E0TE0T{n});
-  lambdaE0T = 0.75 * abs(u1AvgQ0E0T) + 0.25 * sqrt( u1AvgQ0E0T .* u1AvgQ0E0T + 4 * problemData.gConst * kron(hAvgE0T, ones(numQuad1D,1)) );
-%   lambdaE0T = 0 * lambdaE0T;
-  hJmpLambdaE0T = lambdaE0T .* kron(hJmpE0T, ones(numQuad1D,1));
+  lambdaQ0E0T = 0.75 * abs(u1AvgQ0E0T) + 0.25 * sqrt( u1AvgQ0E0T .* u1AvgQ0E0T + 4 * problemData.gConst * kron(hAvgE0T, ones(numQuad1D,1)) );
+  hJmpLambdaE0T = lambdaQ0E0T .* kron(hJmpE0T, ones(numQuad1D,1));
     
-  problemData.globJu = problemData.globJu + problemData.globS{n} * ( lambdaE0T .* (u1Q0E0Tint{n} - u1Q0E0TE0T{n}) );
+  problemData.globJu = problemData.globJu + problemData.globS{n} * ( lambdaQ0E0T .* (u1Q0E0Tint{n} - u1Q0E0TE0T{n}) );
   problemData.globJh = problemData.globJh + problemData.globS{n} * hJmpLambdaE0T;
-  problemData.barGlobJh = problemData.barGlobJh + (problemData.barGlobS{n} * hJmpLambdaE0T) ./ kron(heightV0T1D(:, n-2), ones(problemData.barN, 1));
+  problemData.barGlobJh = problemData.barGlobJh + (problemData.barGlobS{n} * hJmpLambdaE0T) ./ kron(heightV0T1D(:, 5-n), ones(problemData.barN, 1));
 end % for n
 
 problemData.tildeGlobP = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);

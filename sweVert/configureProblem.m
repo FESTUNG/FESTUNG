@@ -2,13 +2,13 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 domainWidth = 1;  % width of computational domain
-problemData.numElem = [8,8];%[24, 24];  % number of elements per direction
-problemData.p = 2; % local polynomial degree
+problemData.numElem = 16*[2,2];%[24, 24];  % number of elements per direction
+problemData.p = 1; % local polynomial degree
 problemData.qOrd = 2*problemData.p + 1; % order of quadrature formula
 problemData.t0 = 0; % start time
 problemData.tEnd = 0.1; % end time
 problemData.numSteps = 1; % number of time steps
-problemData.isVisGrid = true; % visualization of grid
+problemData.isVisGrid = false; % visualization of grid
 problemData.isVisSol = true; % visualization of solution
 problemData.eta = 1; % penalty parameter (eta>0)
 problemData.outputBasename = ['output' filesep 'solution_sweVert' ]; % Basename of output files
@@ -198,7 +198,7 @@ problemData.u2Cont = @(t,x1,x2) -x2;
 problemData.q1Cont = @(t,x1,x2) ones(size(x1));
 problemData.q2Cont = @(t,x1,x2) -2*x2;
 % Analytical right hand side
-problemData.fhCont = @(t,x1) problemData.hCont(t,x1) - h_var * (problemData.hCont(t,x1) + z_bot).^2;
+problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + h_var * x1 - h_var * (problemData.hCont(t,x1) + z_bot).^2;
 problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + 2 + problemData.gConst * h_var;
                        
 % z_bot = 0;
