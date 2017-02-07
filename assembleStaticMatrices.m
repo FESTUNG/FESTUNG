@@ -18,5 +18,4 @@ for m = 1 : 2
   problemData.tildeGlobQ{m} = problemData.gConst * problemData.tildeGlobQ{m};
   problemData.tildeGlobQbdr{m} = problemData.gConst * problemData.tildeGlobQbdr{m};
 end % for m
-end
-
+end % function

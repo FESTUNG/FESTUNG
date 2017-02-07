@@ -57,7 +57,7 @@ for n = 3 : 4
   hJmpE0T = problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,n-2) - spdiags(ones(barK, 1), 7-2*n, barK, barK) * problemData.hV0T1D(:,mapE0E(n)-2) );
   u1AvgQ0E0T = 0.5 * (u1Q0E0Tint{n} + u1Q0E0TE0T{n});
   lambdaE0T = 0.75 * abs(u1AvgQ0E0T) + 0.25 * sqrt( u1AvgQ0E0T .* u1AvgQ0E0T + 4 * problemData.gConst * kron(hAvgE0T, ones(numQuad1D,1)) );
-  lambdaE0T = 0 * lambdaE0T;
+%   lambdaE0T = 0 * lambdaE0T;
   hJmpLambdaE0T = lambdaE0T .* kron(hJmpE0T, ones(numQuad1D,1));
     
   problemData.globJu = problemData.globJu + problemData.globS{n} * ( lambdaE0T .* (u1Q0E0Tint{n} - u1Q0E0TE0T{n}) );

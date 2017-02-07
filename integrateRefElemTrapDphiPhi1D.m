@@ -1,7 +1,7 @@
 function ret = integrateRefElemTrapDphiPhi1D(N, qOrd, basesOnQuad2D, basesOnQuad1D)
 validateattributes(N, {'numeric'}, {'numel', 2}, mfilename, 'N')
 validateattributes(basesOnQuad2D, {'struct'}, {}, mfilename, 'basesOnQuad2D')
-validateattributes(basesOnQuad2D, {'struct'}, {}, mfilename, 'basesOnQuad1D')
+validateattributes(basesOnQuad1D, {'struct'}, {}, mfilename, 'basesOnQuad1D')
 [Q, W] = quadRule1D(qOrd); [Q1, Q2] = meshgrid(Q); W = W' * W;
 Q1 = Q1(:); Q2 = Q2(:); W = W(:)';
 ret = { zeros(N(1), N(2), 2), zeros(N(1), N(2), 2), zeros(N(1), N(2), 2) };
