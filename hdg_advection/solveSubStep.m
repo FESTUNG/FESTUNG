@@ -88,19 +88,43 @@ N = problemData.N;
 % cDiscDot = LinvF - LinvM * lDiscDot;
 % problemData.cDiscRK{nSubStep + 1} = cDiscDot;
 
+% Testing HDG
+matL = problemData.globM ./ problemData.dt - problemData.globG{1} - problemData.globG{2} - problemData.globRphi   ; % Here goes the time discretization
+vecF = problemData.globcDiscTime ./ problemData.dt; % Add here source terms if needed
+matM = problemData.globS{1} + problemData.globS{2} + problemData.globRlambda;
+
+localSolves = mldivide(matL, [vecF matM]);
+LinvF = localSolves(:, 1);
+LinvM = localSolves(:, 2:end);
+
+matN = - problemData.globU - problemData.globRgamma ;
+matP = problemData.globP;
+
+vecKD = problemData.globKDlambda;
+
+sysMatA = -matN * LinvM + matP;
+sysRhs = vecKD - matN * LinvF;
+
+lambdaNew = mldivide( sysMatA, sysRhs );
+
+problemData.cDisc = LinvF - LinvM * lambdaNew;
+problemData.cDisc = reshape( problemData.cDisc, problemData.g.numT, problemData.N );
+
+% LinvF = 0;
+% LinvM = 0;
 
 %% Standard DG
-
-% K = problemData.K;
-% N = problemData.N;
-% Building the system
-sysA = -problemData.globG{1} - problemData.globG{2} + problemData.globR;
-sysV = problemData.globL - problemData.globKD - problemData.globKN;
-
-% Computing the discrete time derivative
-cDiscDot = problemData.globM \ (sysV - sysA * problemData.cDiscRK{nSubStep});
-
-% Compute next step
-problemData.cDiscRK{nSubStep + 1} = problemData.omega(nSubStep) * problemData.cDiscRK{1} + (1 - problemData.omega(nSubStep)) * (problemData.cDiscRK{nSubStep} + problemData.tau * cDiscDot);
+% 
+% % K = problemData.K;
+% % N = problemData.N;
+% % Building the system
+% sysA = -problemData.globG{1} - problemData.globG{2} + problemData.globR;
+% sysV = problemData.globL - problemData.globKD - problemData.globKN;
+% 
+% % Computing the discrete time derivative
+% cDiscDot = problemData.globM \ (sysV - sysA * problemData.cDiscRK{nSubStep});
+% 
+% % Compute next step
+% problemData.cDiscRK{nSubStep + 1} = problemData.omega(nSubStep) * problemData.cDiscRK{1} + (1 - problemData.omega(nSubStep)) * (problemData.cDiscRK{nSubStep} + problemData.tau * cDiscDot);
 
 end % function

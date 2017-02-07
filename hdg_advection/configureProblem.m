@@ -64,8 +64,8 @@ function problemData = configureProblem(problemData)
 problemData.hmax        = 2^-0; % maximum edge length of triangle
 problemData.p           = 2; % local polynomial degree
 problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
-problemData.numSteps    = 1; % number of time steps
-problemData.tEnd        = pi/512; % end time
+problemData.numSteps    = 4; % number of time steps
+problemData.tEnd        = pi/16; % end time
 
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution

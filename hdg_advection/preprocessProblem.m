@@ -69,14 +69,13 @@ problemData.g = computeDerivedGridData(problemData.g);
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
 problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct);
-
 problemData.basesOnGamma = computeBasesOnGamma(problemData.Nlambda, struct);
 
 %% Computation of matrices on the reference triangle.
 problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
-problemData.hatG              = integrateRefElemDphiPhiPhi(problemData.N, problemData.basesOnQuad);
-problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
-problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
+% problemData.hatG              = integrateRefElemDphiPhiPhi(problemData.N, problemData.basesOnQuad);
+% problemData.hatRdiagOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
+% problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
 
 
 %HDG shit
@@ -89,7 +88,7 @@ problemData.hatRoffdiagOnQuad = integrateRefEdgePhiIntPhiExtPerQuad(problemData.
 %% Computation of HDG matrices on the reference triangle.
 %Hybrid mass matrix
 problemData.hatMlambda = integrateRefEdgeMuMu(problemData.Nlambda, problemData.basesOnGamma);
-problemData.Gmat = integrateRefElemDphiPhi(problemData.N, problemData.basesOnQuad);
+% problemData.Gmat = integrateRefElemDphiPhi(problemData.N, problemData.basesOnQuad);
 
 problemData.hatRlambda = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
 problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
@@ -117,7 +116,16 @@ problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problem
 %Term V.1 WIP
 % problemData.globMlambda = assembleMatEdgeMuMu( problemData.g, problemData.stab, problemData.hatM );
 %Term V.1 WIP und VI.1
-problemData.globT = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, problemData.hatM);
+problemData.globP = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, problemData.hatMlambda);
+
+%Term V.2 g, markE0Tbdr, refEdgePhiIntMu
+hatRlambdaTransposed = zeros( problemData.Nlambda, problemData.N, 3);
+for i=1:3
+    hatRlambdaTransposed(:, :, i) = problemData.hatRlambda(:,:,i)';
+end
+problemData.globU = problemData.stab .* assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, hatRlambdaTransposed );
+
+problemData.globRgamma = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, hatRlambdaTransposed );
 
 
 end % function

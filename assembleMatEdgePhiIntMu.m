@@ -1,16 +1,28 @@
 %
 %
-function ret = assembleMatEdgePhiIntMu(g, markE0Tbdr, refEdgePhiIntMu)
+function ret = assembleMatEdgePhiIntMu(g, markE0T, refEdgePhiIntMu)
 % Extract dimensions
 K = g.numT;  N = size(refEdgePhiIntMu, 2);
+Kedge = g.numE; Nlambda = size(refEdgePhiIntMu, 1);
 
 % Check function arguments that are directly used
-validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
-validateattributes(refEdgePhiIntMu, {'numeric'}, {'size', [N N 3]}, mfilename, 'refEdgePhiIntMu');
+validateattributes(markE0T, {'logical'}, {'size', [K 3]}, mfilename, 'markE0T');
+validateattributes(refEdgePhiIntMu, {'numeric'}, {'size', [Nlambda N 3]}, mfilename, 'refEdgePhiIntMu');
 
 % Assemble matrix
-ret = sparse(K*N, K*N);
-for n = 1 : 3
-  ret = ret + kron(spdiags(markE0Tbdr(:,n),0,K,K), refEdgePhiIntMu(:,:));
-end % for
+ret = sparse(Kedge*Nlambda, K*N);
+for iT = 1:K
+    for iE = 1:3
+        iTs = (iT-1)*N + 1;
+        iTe = (iT)*N;
+        iEs = (g.E0T(iT, iE) - 1)*Nlambda + 1;
+        iEe = (g.E0T(iT, iE))*Nlambda;
+        ret( iEs:iEe, iTs:iTe ) = ret( iEs:iEe, iTs:iTe ) + markE0T(iT,iE) .* refEdgePhiIntMu(:,:, iE);
+    end
+end
+
+
+% for n = 1 : 3
+%   ret = ret + kron(spdiags(markE0Tint(:,n),0,Kedge,K), refEdgePhiIntMu(:,:));
+% end % for
 end % function

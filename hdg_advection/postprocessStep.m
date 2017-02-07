@@ -56,7 +56,10 @@ K = problemData.K;
 N = problemData.N;
 
 %% Reshape and store solution in problemData
-problemData.cDisc = reshape(problemData.cDiscRK{end}, N, K)';
+% problemData.cDisc = reshape(problemData.cDiscRK{end}, N, K)';
 problemData.isFinished = nStep >= problemData.numSteps;
+
+problemData.t = problemData.t + problemData.dt;
+
 end % function
 

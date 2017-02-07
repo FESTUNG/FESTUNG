@@ -53,5 +53,6 @@
 %> @endparblock
 %
 function problemData = postprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
-problemData.isSubSteppingFinished = nSubStep >= length(problemData.omega);
+% problemData.isSubSteppingFinished = nSubStep >= length(problemData.omega);
+ problemData.isSubSteppingFinished = true;
 end % function
