@@ -65,7 +65,7 @@ problemData.hmax        = 2^-0; % maximum edge length of triangle
 problemData.p           = 2; % local polynomial degree
 problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
 problemData.numSteps    = 4; % number of time steps
-problemData.tEnd        = pi/16; % end time
+problemData.tEnd        = pi/4; % end time
 
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution
@@ -73,8 +73,6 @@ problemData.isVisSol    = true; % visualization of solution
 problemData.outputFrequency = 1; % no visualization of every timestep
 problemData.outputBasename  = ['output' filesep 'solution_hdg_advection']; % Basename of output files
 problemData.outputTypes     = {'vtk'}; % solution output file types
-
-problemData.dt = problemData.tEnd / problemData.numSteps;
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
@@ -102,7 +100,7 @@ problemData.cDCont = @(t,x1,x2) problemData.getRGSol(t, x1, x2);
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 
 %% HDG specific parameters
-problemData.stab = 2.; %stabilization parameter in mod. LF/Rusanov flux
+problemData.stab = 1.; %stabilization parameter in mod. LF/Rusanov flux
 
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).

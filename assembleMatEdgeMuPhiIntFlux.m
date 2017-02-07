@@ -11,13 +11,14 @@ ret{2} = sparse( K*N, KEdge*Nlambda);
 
 for iT = 1:K
     for iE = 1:3
+        edgeNr = g.E0T(iT, iE);
+        
         iTs = (iT-1)*N + 1;
         iTe = (iT)*N;
         iEs = (g.E0T(iT, iE) - 1)*Nlambda + 1;
         iEe = (g.E0T(iT, iE))*Nlambda;
         
         for iDim = 1:2
-            
             tmp = zeros(N, Nlambda);
             for i = 1:N
                 for j=1:Nlambda
@@ -25,8 +26,7 @@ for iT = 1:K
                 end
             end
             
-            
-            ret{iDim}(iTs:iTe,  iEs:iEe  ) = ret{iDim}( iTs:iTe, iEs:iEe ) +  tmp;
+            ret{iDim}(iTs:iTe,  iEs:iEe  ) = ret{iDim}( iTs:iTe, iEs:iEe ) + g.areaE( edgeNr ) .* tmp;
         end
     end
 end

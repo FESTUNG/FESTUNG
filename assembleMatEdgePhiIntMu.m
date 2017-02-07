@@ -13,11 +13,12 @@ validateattributes(refEdgePhiIntMu, {'numeric'}, {'size', [Nlambda N 3]}, mfilen
 ret = sparse(Kedge*Nlambda, K*N);
 for iT = 1:K
     for iE = 1:3
+        edgeNr = g.E0T(iT, iE);
         iTs = (iT-1)*N + 1;
         iTe = (iT)*N;
         iEs = (g.E0T(iT, iE) - 1)*Nlambda + 1;
         iEe = (g.E0T(iT, iE))*Nlambda;
-        ret( iEs:iEe, iTs:iTe ) = ret( iEs:iEe, iTs:iTe ) + markE0T(iT,iE) .* refEdgePhiIntMu(:,:, iE);
+        ret( iEs:iEe, iTs:iTe ) = ret( iEs:iEe, iTs:iTe ) + markE0T(iT,iE) .* g.areaE( edgeNr ) .* refEdgePhiIntMu(:,:, iE);
     end
 end
 

@@ -108,7 +108,7 @@ sysRhs = vecKD - matN * LinvF;
 lambdaNew = mldivide( sysMatA, sysRhs );
 
 problemData.cDisc = LinvF - LinvM * lambdaNew;
-problemData.cDisc = reshape( problemData.cDisc, problemData.g.numT, problemData.N );
+problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
 
 % LinvF = 0;
 % LinvM = 0;

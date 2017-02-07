@@ -50,6 +50,7 @@ problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 
                                              problemData.hatM, problemData.basesOnQuad);
                                          
 problemData.t = 0.;
+problemData.dt = problemData.tEnd / problemData.numSteps;
 
 fprintf('L2 error w.r.t. the initial condition: %g\n', ...
   computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));

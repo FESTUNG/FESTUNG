@@ -10,7 +10,7 @@ p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [~,~,W] = quadRule2D(qOrd);
 Nip = size(W,2);
 ret = zeros(N, N, 2, Nip ); % [ N x N x 2]
 
-if N > 1 % p > 0
+% if N > 1 % p > 0
     for i = 1 : N
         for j = 1 : N
             for m = 1 : 2
@@ -20,5 +20,5 @@ if N > 1 % p > 0
             end % for
         end % for
     end % for
-end % if
+% end % if
 end % function

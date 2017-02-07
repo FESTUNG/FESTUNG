@@ -18,11 +18,12 @@ ret = sparse(K*N, KEdge*Nlambda);
 % end % for
 for iT = 1:K
     for iE = 1:3
+        edgeNr = g.E0T(iT, iE);
         iTs = (iT-1)*N + 1;
         iTe = (iT)*N;
         iEs = (g.E0T(iT, iE) - 1)*Nlambda + 1;
         iEe = (g.E0T(iT, iE))*Nlambda;
-        ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) +  refEdgePhiIntMu(:,:, iE);
+        ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE( edgeNr ) .* refEdgePhiIntMu(:,:, iE);
     end
 end
 
