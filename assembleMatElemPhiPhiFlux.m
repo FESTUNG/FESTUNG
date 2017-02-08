@@ -1,5 +1,4 @@
 function ret = assembleMatElemPhiPhiFlux( g, N, uEval, Gbar )
-
 %Assert that the length of uEval and hatSbarOnQuad is ok
 K = g.numT;
 
@@ -13,11 +12,10 @@ for iT = 1:K
     iTe = (iT)*N;
     
     for iDim = 1:2
-        
         tmp = zeros(N, N);
         for i = 1:N
             for j=1:N
-                tmp(i,j) = uEval( iT, :, iDim)  * Gbar( :, i, j, iDim) ;
+                tmp(i,j) = uEval( iT, :, iDim) * Gbar( :, i, j, iDim) ;
             end
         end
         ret{iDim}( iTs:iTe,  iTs:iTe) = ret{iDim}( iTs:iTe,  iTs:iTe ) + g.areaT( iT ) .* tmp;

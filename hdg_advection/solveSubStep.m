@@ -87,11 +87,10 @@ N = problemData.N;
 % %Update solution on elements
 % cDiscDot = LinvF - LinvM * lDiscDot;
 % problemData.cDiscRK{nSubStep + 1} = cDiscDot;
-
 % Testing HDG
-matL = problemData.globM ./ problemData.dt - problemData.globG{1} - problemData.globG{2} - problemData.globRphi   ; % Here goes the time discretization
-vecF = problemData.globcDiscTime ./ problemData.dt; % Add here source terms if needed
-matM = problemData.globS{1} + problemData.globS{2} + problemData.globRlambda;
+matL = problemData.globM ./ problemData.dt - problemData.globG{1} - problemData.globG{2} + problemData.globRphi   ; % Here goes the time discretization
+vecF = problemData.globcDiscTime ./ problemData.dt - problemData.globVecFluxDir - problemData.globVecValDir ; % Add here source terms if needed
+matM = problemData.globS{1} + problemData.globS{2} - problemData.globRlambda;
 
 localSolves = mldivide(matL, [vecF matM]);
 LinvF = localSolves(:, 1);
@@ -105,9 +104,9 @@ vecKD = problemData.globKDlambda;
 sysMatA = -matN * LinvM + matP;
 sysRhs = vecKD - matN * LinvF;
 
-lambdaNew = mldivide( sysMatA, sysRhs );
+problemData.cDiscLambda = mldivide( sysMatA, sysRhs );
 
-problemData.cDisc = LinvF - LinvM * lambdaNew;
+problemData.cDisc = LinvF - LinvM * problemData.cDiscLambda;
 problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
 
 % LinvF = 0;

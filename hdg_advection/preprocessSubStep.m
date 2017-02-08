@@ -91,11 +91,22 @@ N = problemData.N;
 %% HDG stuff
 % fEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont(problemData.t(nSubStep),x1,x2), ...
 %                                      problemData.N, problemData.basesOnQuad);
-uEval(:,:,1) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont(problemData.t(nSubStep),x1,x2), ...
+uEval(:,:,1) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont( problemData.t+problemData.dt, x1,x2), ...
                                      problemData.N, problemData.basesOnQuad);
-uEval(:,:,2) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u2Cont(problemData.t(nSubStep),x1,x2), ...
+uEval(:,:,2) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u2Cont( problemData.t+problemData.dt,x1,x2), ...
                                      problemData.N, problemData.basesOnQuad);
 
+cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(  problemData.t+problemData.dt, x1 ,x2), ...
+                                         problemData.Nlambda);
+                                     
+fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, c), ...
+                                           cEdge, problemData.Nlambda)
+                                 
+problemData.globVecFluxDir = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
+
+problemData.globVecValDir = problemData.stab .* assembleVecEdgePhiIntVal( problemData.g, problemData.N, cEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
+
+                                       
 problemData.globG = assembleMatElemPhiPhiFlux( problemData.g, problemData.N, uEval, problemData.hatGbarOnQuad );
                                  
 problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.N, problemData.Nlambda, ...
@@ -103,9 +114,9 @@ problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.N, p
 
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!
-problemData.t
-problemData.dt
-problemData.t+problemData.dt
+% problemData.t
+% problemData.dt
+% problemData.t+problemData.dt
 problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
     @(x1,x2) problemData.cDCont( problemData.t, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
 

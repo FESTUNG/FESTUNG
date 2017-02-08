@@ -25,9 +25,9 @@ for iT = 1:K
                     tmp(i,j) = uEval( iT, :, iDim)  * Sbar( :, i, j, iDim);
                 end
             end
-            
-            ret{iDim}(iTs:iTe,  iEs:iEe  ) = ret{iDim}( iTs:iTe, iEs:iEe ) ...
-                                            + g.areaE( edgeNr ) .* g.nuE0T( iT, iE , iDim) .* tmp;
+
+            ret{iDim}( iTs:iTe,  iEs:iEe ) = ret{iDim}( iTs:iTe, iEs:iEe ) ...
+                                            + g.markE0Tint( iT, iE ) .* g.areaE( edgeNr ) .* g.nuE0T( iT, iE , iDim) .* tmp;
         end
     end
 end
