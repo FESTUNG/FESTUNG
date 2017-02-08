@@ -108,9 +108,12 @@ problemData.globVecValDir = problemData.stab .* assembleVecEdgePhiIntVal( proble
 
                                        
 problemData.globG = assembleMatElemPhiPhiFlux( problemData.g, problemData.N, uEval, problemData.hatGbarOnQuad );
-                                 
+                       
+uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, 1.), ...
+                                    problemData.Nlambda);
+
 problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.N, problemData.Nlambda, ...
-                                                 uEval, problemData.hatSbarOnQuad );
+                                                 uEdge, problemData.hatSbarOnQuad );
 
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!

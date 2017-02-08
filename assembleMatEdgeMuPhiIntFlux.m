@@ -1,4 +1,4 @@
-function ret = assembleMatEdgeMuPhiIntFlux( g, N, Nlambda, uEval, Sbar )
+function ret = assembleMatEdgeMuPhiIntFlux( g, N, Nlambda, uEdge, Sbar )
 
 %Assert that the length of uEval and hatSbarOnQuad is ok
 K = g.numT;
@@ -22,7 +22,10 @@ for iT = 1:K
             tmp = zeros(N, Nlambda);
             for i = 1:N
                 for j=1:Nlambda
-                    tmp(i,j) = uEval( iT, :, iDim)  * Sbar( :, i, j, iDim);
+%                     uEdge( iDim, :, edgeNr)
+%                     Sbar( :, i, j, iDim)
+%                     uEdge( iDim, :, edgeNr) * Sbar( :, i, j, iDim)
+                    tmp(i,j) = uEdge( iDim, :, edgeNr) * Sbar( :, i, j, iDim);
                 end
             end
 
