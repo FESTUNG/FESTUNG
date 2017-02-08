@@ -12,8 +12,8 @@ problemData = adaptMesh(problemData, true);
 %% Initial velocity.
 u10Cont = @(x1,x2) problemData.u1Cont(0,x1,x2);
 u20Cont = @(x1,x2) problemData.u2Cont(0,x1,x2);
-problemData.cDisc{2} = execin('darcyVert/projectFuncCont2DataDiscTrap', problemData.g, u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
-problemData.cDisc{3} = execin('darcyVert/projectFuncCont2DataDiscTrap', problemData.g, u20Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
+problemData.cDisc{2} = problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
+problemData.cDisc{3} = problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, u20Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
 
 %% Error computation and visualization of inital condition.
 if problemData.isVisGrid, execin('darcyVert/visualizeGridTrap', problemData.g); end
@@ -25,6 +25,6 @@ fprintf('L2 errors of cDisc w.r.t. the initial condition: %g, %g, %g\n', ...
 
 if problemData.isVisSol
   cLagr = cellfun(@(c) execin('darcyVert/projectDataDisc2DataLagrTrap', c), problemData.cDisc(2:3), 'UniformOutput', false);
-  execin('darcyVert/visualizeDataLagrTrap', problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, 0, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+  problemData.fn_visualizeDataLagrTrap(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, 0, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
 end % if
 end % function

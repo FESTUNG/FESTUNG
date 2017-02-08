@@ -76,6 +76,7 @@ for k = 1 : 4
   g.coordV0T(:, k, :) = g.coordV(g.V0T(:, k), :);
 end % for
 %% Generate grid data that changes when coordV, coordV0T changes
-g = generateCoordDependGridData(g);
+g.generateCoordDependGridData = getFunctionHandle('darcyVert/generateCoordDependGridData');
+g = g.generateCoordDependGridData(g);
 end % function
 

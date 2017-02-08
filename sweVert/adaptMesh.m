@@ -31,7 +31,7 @@ if force || any(markModifiedV0T1D(:))
   end % for k
   
   % Re-generate coordinate-dependent grid data
-  problemData.g = execin('darcyVert/generateCoordDependGridData', problemData.g);
+  problemData.g = problemData.g.generateCoordDependGridData(problemData.g);
   
   % Re-assemble static matrices
   problemData = assembleStaticMatrices(problemData);
