@@ -52,8 +52,8 @@
 %
 function problemData = outputStep(problemData, nStep)
 %% Visualization
-if problemData.isVisSol
+if problemData.isVisSol && mod(nStep, problemData.outputFrequency) == 0
   cLagr = cellfun(@(c) execin('darcyVert/projectDataDisc2DataLagrTrap', c), problemData.cDisc(2:3), 'UniformOutput', false);
-  execin('darcyVert/visualizeDataLagrTrap', problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nStep, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+  problemData.fn_visualizeDataLagrTrap(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nStep, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
 end % if
 end % function
