@@ -22,9 +22,6 @@ for iT = 1:K
             tmp = zeros(N, Nlambda);
             for i = 1:N
                 for j=1:Nlambda
-%                     uEdge( iDim, :, edgeNr)
-%                     Sbar( :, i, j, iDim)
-%                     uEdge( iDim, :, edgeNr) * Sbar( :, i, j, iDim)
                     tmp(i,j) = uEdge( iDim, :, edgeNr) * Sbar( :, i, j, iDim);
                 end
             end
