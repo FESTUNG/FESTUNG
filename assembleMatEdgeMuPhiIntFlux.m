@@ -5,7 +5,7 @@ K = g.numT;
 KEdge = g.numE;
 
 % Assemble matrix
-ret = cell(2,1); 
+ret = cell(2,1);
 ret{1} = sparse( K*N, KEdge*Nlambda);
 ret{2} = sparse( K*N, KEdge*Nlambda);
 
@@ -25,12 +25,10 @@ for iT = 1:K
                     tmp(i,j) = uEdge( iDim, :, edgeNr) * Sbar( :, i, j, iDim);
                 end
             end
-
+            
             ret{iDim}( iTs:iTe,  iEs:iEe ) = ret{iDim}( iTs:iTe, iEs:iEe ) ...
-                                            + g.markE0Tint( iT, iE ) .* g.areaE( edgeNr ) .* g.nuE0T( iT, iE , iDim) .* tmp;
+                + g.markE0Tint( iT, iE ) .* g.areaE( edgeNr ) .* g.nuE0T( iT, iE , iDim) .* tmp;
         end
     end
 end
-
-
 end
