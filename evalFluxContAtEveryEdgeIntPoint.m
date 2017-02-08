@@ -24,6 +24,6 @@ for iE = 1:Kedge
    
 %     cCont(iE, :)
 %     fluxCont( F1(x1, x2), F1(x1, x2), cCont(iE, :) )
-    dataEval(:, :, iE)  = fluxCont( F1(x1, x2), F1(x1, x2), cCont(iE, :) );
+    dataEval(:, :, iE)  = fluxCont( F1(x1, x2), F2(x1, x2), cCont(iE, :) );
 end
 end % function

@@ -100,7 +100,7 @@ cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cD
                                          problemData.Nlambda);
                                      
 fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, c), ...
-                                           cEdge, problemData.Nlambda)
+                                           cEdge, problemData.Nlambda);
                                  
 problemData.globVecFluxDir = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
 
