@@ -2,16 +2,16 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 domainWidth = 100;  % width of computational domain
-problemData.numElem = 16*[1,1];%[24, 24];  % number of elements per direction
+problemData.numElem = 32*[1,1];%[24, 24];  % number of elements per direction
 problemData.p = 1; % local polynomial degree
 problemData.qOrd = 2*problemData.p + 1; % order of quadrature formula
 problemData.t0 = 0; % start time
 problemData.tEnd = 0.1; % end time
-problemData.numSteps = 100; % number of time steps
+problemData.numSteps = 200; % number of time steps
 problemData.isVisGrid = false; % visualization of grid
-problemData.isVisSol = true; % visualization of solution
+problemData.isVisSol = false; % visualization of solution
 problemData.eta = 1; % penalty parameter (eta>0)
-problemData.outputFrequency = 100; % no visualization of every timestep
+problemData.outputFrequency = 10; % no visualization of every timestep
 problemData.outputBasename = ['output' filesep 'solution_sweVert' ]; % Basename of output files
 problemData.outputTypes = { 'vtk' };
 
@@ -202,7 +202,7 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 % problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + h_var * x1 - h_var * (problemData.hCont(t,x1) + z_bot).^2;
 % problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + 2 + problemData.gConst * h_var;
                        
-z_bot = 0;
+z_bot = 2;
 h_0 = 2;
 paramE = 0.01;
 problemData.gConst = 10;

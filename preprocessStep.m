@@ -7,19 +7,20 @@ problemData = adaptMesh(problemData);
 %% L2-projections of algebraic coefficients and right hand side.
 DDisc = cellfun(@(c) problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, @(x1,x2) c(t,x1,x2), problemData.N, problemData.qOrd, ...
         problemData.globM, problemData.basesOnQuad2D), problemData.DCont, 'UniformOutput', false);
-problemData.globLu = problemData.globM * ...
-        reshape(problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, @(x1,x2) problemData.fuCont(t,x1,x2), ...
-        problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D).', [], 1);
-problemData.globLh = problemData.barGlobM * reshape(projectFuncCont2DataDisc1D(problemData.g.g1D, @(x1) problemData.fhCont(t,x1), ...
-        problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D).', [], 1);
-%% Determine quadrature rules
-[Q,W] = quadRule1D(problemData.qOrd); 
-numQuad1D = length(W);
+problemData.globLu = problemData.globM * reshape( ...
+          problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, @(x1,x2) problemData.fuCont(t,x1,x2), ...
+          problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D).', ...
+        [], 1);
+problemData.globLh = problemData.barGlobM * reshape( ...
+          projectFuncCont2DataDisc1D(problemData.g.g1D, @(x1) problemData.fhCont(t,x1), ...
+          problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D).', ...
+        [], 1);
+%% Determine quadrature rule and mapping of local edge indices
+[Q,~] = quadRule1D(problemData.qOrd); numQuad1D = length(Q);
 mapE0E = [2 1 4 3];
       
 %% Create lookup tables for solution on quadrature points
-heightV0T1D = [ problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), 4, 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 1, 2), ...
-                problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), 3, 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 2, 2) ];
+heightV0T1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), [4 3], 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), [1 2], 2);
 heightQ0T1D = heightV0T1D(:,1) * (1-Q) + heightV0T1D(:,2) * Q;
               
 u1Q0E0Tint = cell(4,1); % cDisc{2} in quad points of edges
@@ -52,7 +53,6 @@ problemData.globJu = zeros(problemData.g.numT * problemData.N, 1);
 problemData.globJh = zeros(problemData.g.numT * problemData.N, 1);
 problemData.barGlobJh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 for n = 3 : 4
-  %spdiags(ones(barK, 1), 7-2*n, barK, barK)
   hAvgE0T = 0.5 * problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,5-n) + problemData.g.g1D.markV0TV0T{5-n} * problemData.hV0T1D(:,5-mapE0E(n)) );
   hJmpE0T = problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,5-n) - problemData.g.g1D.markV0TV0T{5-n} * problemData.hV0T1D(:,5-mapE0E(n)) );
   u1AvgQ0E0T = 0.5 * (u1Q0E0Tint{n} + u1Q0E0TE0T{n});
