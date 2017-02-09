@@ -1,19 +1,28 @@
 function problemData = configureProblem(problemData)
 
 %% Parameters.
-domainWidth = 100;  % width of computational domain
-problemData.numElem = 32*[1,1];%[24, 24];  % number of elements per direction
-problemData.p = 1; % local polynomial degree
-problemData.qOrd = 2*problemData.p + 1; % order of quadrature formula
-problemData.t0 = 0; % start time
-problemData.tEnd = 0.1; % end time
-problemData.numSteps = 200; % number of time steps
-problemData.isVisGrid = false; % visualization of grid
-problemData.isVisSol = false; % visualization of solution
-problemData.eta = 1; % penalty parameter (eta>0)
-problemData.outputFrequency = 10; % no visualization of every timestep
-problemData.outputBasename = ['output' filesep 'solution_sweVert' ]; % Basename of output files
-problemData.outputTypes = { 'vtk' };
+domainWidth = 1;  % width of computational domain
+
+% Number of elements in x- and y-direction
+problemData = setdefault(problemData, 'numElem', [16, 16]);
+
+% Local polynomial approximation order (0 to 4)
+problemData = setdefault(problemData, 'p', 2);
+
+% Order of quadrature rule
+problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
+
+% Time stepping parameters
+problemData = setdefault(problemData, 't0', 0);  % start time
+problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
+problemData = setdefault(problemData, 'numSteps', 1);  % number of time steps
+
+% Visualization settings
+problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
+problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
+problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'solution_sweVert' ]); % Basename of output files
+problemData = setdefault(problemData, 'outputTypes', { 'vtk' });
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
@@ -135,7 +144,7 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 % 
 % Quadratic height
 %
-% z_bot = 0;
+% z_bot = -0.5;
 % h_0 = 1;
 % h_var = 0.1;
 % problemData.gConst = 10;
@@ -161,7 +170,6 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 %
 % z_bot = 0;
 % h_0 = 1;
-% h_var = 0.05;
 % problemData.gConst = 10;
 % % Diffusion matrix
 % problemData.DCont = cell(2,2);
@@ -201,6 +209,75 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 % % Analytical right hand side
 % problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + h_var * x1 - h_var * (problemData.hCont(t,x1) + z_bot).^2;
 % problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + 2 + problemData.gConst * h_var;
+                     
+% 
+% quadratic velocity and linear height and linear diffusion
+%
+% z_bot = 0;
+% h_0 = 1;
+% h_var = 0.05;
+% problemData.gConst = 10;
+% % Diffusion matrix
+% problemData.DCont = cell(2,2);
+% problemData.DCont{1,1} = @(t,x1,x2) x1 + 1;
+% problemData.DCont{1,2} = @(t,x1,x2) ones(size(x1));
+% problemData.DCont{2,1} = @(t,x1,x2) ones(size(x1));
+% problemData.DCont{2,2} = @(t,x1,x2) x2 + 1;
+% % Analytical solution
+% problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1;
+% problemData.u1Cont = @(t,x1,x2) x1 - x2.^2;
+% problemData.u2Cont = @(t,x1,x2) -x2;
+% problemData.q1Cont = @(t,x1,x2) ones(size(x1));
+% problemData.q2Cont = @(t,x1,x2) -2*x2;
+% % Analytical right hand side
+% problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + h_var * x1 - h_var * (problemData.hCont(t,x1) + z_bot).^2;
+% problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + problemData.gConst * h_var + 1 + 4 * x2;
+                              
+% 
+% piecewise linear velocity and height
+%
+% z_bot = 0;
+% h_0 = 1;
+% h_var = 0.05;
+% problemData.gConst = 10;
+% % Diffusion matrix
+% problemData.DCont = cell(2,2);
+% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
+% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
+% % Analytical solution
+% problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1 + (x1>0.5)*0.05;
+% problemData.u1Cont = @(t,x1,x2) (1+x1>0.5).*x1;
+% problemData.u2Cont = @(t,x1,x2) -(1+x1>0.5).*x2;
+% problemData.q1Cont = @(t,x1,x2) -(1+x1>0.5).*ones(size(x1));
+% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
+% % Analytical right hand side
+% problemData.fhCont = @(t,x1) (1+x1>0.5).*(problemData.hCont(t,x1) + h_var * x1);
+% problemData.fuCont = @(t,x1,x2) (1+x1>0.5).*x1 + problemData.gConst * h_var;
+             
+% 
+% quadratic velocity and quadratic height
+%
+% z_bot = 0;
+% h_0 = 1;
+% h_var = 0.05;
+% problemData.gConst = 10;
+% % Diffusion matrix
+% problemData.DCont = cell(2,2);
+% problemData.DCont{1,1} = @(t,x1,x2) x1 + 1;
+% problemData.DCont{1,2} = @(t,x1,x2) ones(size(x1));
+% problemData.DCont{2,1} = @(t,x1,x2) ones(size(x1));
+% problemData.DCont{2,2} = @(t,x1,x2) x2 + 1;
+% % Analytical solution
+% problemData.hCont = @(t,x1) (x1.^2-0.5)*h_var + 1;
+% problemData.u1Cont = @(t,x1,x2) x1 - x2.^2;
+% problemData.u2Cont = @(t,x1,x2) -x2;
+% problemData.q1Cont = @(t,x1,x2) ones(size(x1));
+% problemData.q2Cont = @(t,x1,x2) -2*x2;
+% % Analytical right hand side
+% problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + 2 * h_var * x1 - 2 * h_var * x1 .* (problemData.hCont(t,x1) + z_bot).^2;
+% problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + 2 * problemData.gConst * h_var * x1 + 1 + 4 * x2;
                        
 z_bot = 2;
 h_0 = 2;

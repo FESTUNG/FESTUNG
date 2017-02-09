@@ -38,13 +38,19 @@
 %> @endparblock
 %
 function problemData = postprocessProblem(problemData)
-htEndCont = @(x1) problemData.hCont(problemData.tEnd, x1);
-u1tEndCont = @(x1,x2) problemData.u1Cont(problemData.tEnd, x1, x2);
-u2tEndCont = @(x1,x2) problemData.u2Cont(problemData.tEnd, x1, x2);
+if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))
+  htEndCont = @(x1) problemData.hCont(problemData.tEnd, x1);
+  u1tEndCont = @(x1,x2) problemData.u1Cont(problemData.tEnd, x1, x2);
+  u2tEndCont = @(x1,x2) problemData.u2Cont(problemData.tEnd, x1, x2);
 
-fprintf('L2 errors of cDisc w.r.t. the analytical solution: %g, %g, %g\n', ...
-  computeL2Error1D(problemData.g.g1D, problemData.cDisc{1}, htEndCont, problemData.qOrd, problemData.basesOnQuad1D), ...
-  execin('darcyVert/computeL2ErrorTrap', problemData.g, problemData.cDisc{2}, u1tEndCont, problemData.qOrd, problemData.basesOnQuad2D), ...
-  execin('darcyVert/computeL2ErrorTrap', problemData.g, problemData.cDisc{3}, u2tEndCont, problemData.qOrd, problemData.basesOnQuad2D));
+  problemData.error = [ computeL2Error1D(problemData.g.g1D, problemData.cDisc{1}, ...
+                            htEndCont, problemData.qOrd, problemData.basesOnQuad1D), ...
+                        execin('darcyVert/computeL2ErrorTrap', problemData.g, problemData.cDisc{2}, ...
+                            u1tEndCont, problemData.qOrd, problemData.basesOnQuad2D), ...
+                        execin('darcyVert/computeL2ErrorTrap', problemData.g, problemData.cDisc{3}, ...
+                            u2tEndCont, problemData.qOrd, problemData.basesOnQuad2D) ];
+
+  fprintf('L2 errors of cDisc w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
+end % if
 end % function
 
