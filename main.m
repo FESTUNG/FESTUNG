@@ -86,10 +86,17 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function main(problemName)
+function varargout = main(problemName, problemData)
 %% Check given problem
+narginchk(1, 2)
+nargoutchk(0, 1)
 validateattributes(problemName, {'char'},{'nonempty'}, mfilename, 'problemName')
 assert(isdir(problemName), 'No directory for specified problem found.')
+if nargin == 2
+  validateattributes(problemData, {'struct'}, {}, mfilename, 'problemData')
+else
+  problemData = struct;
+end % if
 %% List of functions making up a problem description
 preprocessList = { 'configureProblem'; 'preprocessProblem'; 'initializeProblem' };
 stepList = { 'preprocessStep'; 'solveStep'; 'postprocessStep'; 'outputStep' };
@@ -111,7 +118,6 @@ oldpath = addpath(problemName, pwd);
 try
   %% Pre-process and initialize problem
   tPreprocess = tic;
-  problemData = struct;
   for nFunc = 1 : length(preprocessList)
     problemData = feval(preprocessList{nFunc}, problemData);
   end % for
@@ -143,6 +149,9 @@ catch e
   rethrow(e)
 end % try/catch
 fprintf('Total computation time: %g seconds.\n', toc);
+if nargout > 0
+  varargout{1} = problemData;
+end % if
 diary off
 %% Restore original search path
 path(oldpath);
