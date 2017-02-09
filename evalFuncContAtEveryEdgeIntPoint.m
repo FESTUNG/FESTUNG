@@ -22,7 +22,7 @@ for iE = 1:Kedge
     F1 = @(X1, X2) g.B(adjTri,1,1)*X1 + g.B(adjTri,1,2)*X2 + g.coordV0T(adjTri,1,1)*ones(size(X1));
     F2 = @(X1, X2) g.B(adjTri,2,1)*X1 + g.B(adjTri,2,2)*X2 + g.coordV0T(adjTri,1,2)*ones(size(X1));
    
-    funcCont( F1(x1, x2), F2(x1, x2) )
+%     funcCont( F1(x1, x2), F2(x1, x2) )
     dataEval(iE, :)  = funcCont( F1(x1, x2), F2(x1, x2) ) ;
 end
 end % function

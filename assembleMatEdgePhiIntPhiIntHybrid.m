@@ -19,7 +19,7 @@ for iT = 1:K
         iTe = (iT)*N;
         iEs = (g.E0T(iT, iE) - 1)*N + 1;
         iEe = (g.E0T(iT, iE))*N;
-        ret( iTs:iTe,  iTs:iTe  ) = ret( iTs:iTe,  iTs:iTe ) + g.areaE( g.E0T(iT, iE) ) .* refEdgePhiIntPhiInt(:,:,iE);
+        ret( iTs:iTe,  iTs:iTe  ) = ret( iTs:iTe,  iTs:iTe ) + g.markE0Tint(iT, iE) .* g.areaE( g.E0T(iT, iE) ) .* refEdgePhiIntPhiInt(:,:,iE);
 %         ret = ret + kron(spdiags(g.areaE,0,K,K), refEdgePhiIntPhiInt(:,:,n));
     end
 end

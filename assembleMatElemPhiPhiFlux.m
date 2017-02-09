@@ -18,7 +18,7 @@ for iT = 1:K
                 tmp(i,j) = uEval( iT, :, iDim) * Gbar( :, i, j, iDim) ;
             end
         end
-        ret{iDim}( iTs:iTe,  iTs:iTe) = ret{iDim}( iTs:iTe,  iTs:iTe ) + g.areaT( iT ) .* tmp;
+        ret{iDim}( iTs:iTe,  iTs:iTe) = ret{iDim}( iTs:iTe,  iTs:iTe ) + 2 .* g.areaT( iT ) .* tmp;
     end
 end
 

@@ -25,7 +25,7 @@ for iT = 1:K
         end
         
         for i = 1:N
-            tmp(i) = tmp(i) + markE0Tbdr(iT, iE) .* ( W * (fluxEvalNu' .* basesOnQuad.phi1D{qOrd}( :, i, iE) ) );
+            tmp(i) = tmp(i) + g.areaE( edgeNr ) .* markE0Tbdr(iT, iE) .* ( W * (fluxEvalNu' .* basesOnQuad.phi1D{qOrd}( :, i, iE) ) );
         end
         
         ret(iTs:iTe) = ret(iTs:iTe) + tmp;

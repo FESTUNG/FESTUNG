@@ -121,9 +121,9 @@ problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.N, p
 % problemData.dt
 % problemData.t+problemData.dt
 problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
-    @(x1,x2) problemData.cDCont( problemData.t, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
+    @(x1,x2) problemData.cDCont( problemData.t+problemData.dt, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
 
-problemData.globcDiscTime = problemData.globM * reshape( problemData.cDisc, size(problemData.globM, 1), 1 );
+problemData.globcDiscTime = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 
 %Rlambda is not time-depentend -> it is already constructed
                                              
