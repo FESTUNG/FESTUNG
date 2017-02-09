@@ -104,7 +104,12 @@ vecKD = problemData.globKDlambda;
 sysMatA = -matN * LinvM + matP;
 sysRhs = vecKD - matN * LinvF;
 
-problemData.cDiscLambda = mldivide( sysMatA, sysRhs );
+%problemData.cDiscLambda = mldivide( sysMatA, sysRhs );
+
+warning('Inserting exact solution for lambda')
+problemData.cDiscLambda = projectFuncCont2FaceDataDisc(problemData.g, @(x1, x2) problemData.getRGSol(problemData.t+problemData.dt, x1, x2), problemData.p*2, problemData.hatMlambda, problemData.basesOnGamma);
+problemData.cDiscLambda = reshape( problemData.cDiscLambda', problemData.Nlambda*problemData.g.numE, 1 );
+
 
 problemData.cDisc = LinvF - LinvM * problemData.cDiscLambda;
 problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';

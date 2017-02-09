@@ -123,6 +123,11 @@ hatRlambdaTransposed = zeros( problemData.Nlambda, problemData.N, 3);
 for i=1:3
     hatRlambdaTransposed(:, :, i) = problemData.hatRlambda(:,:,i)';
 end
+
+%Testing
+% l
+
+
 problemData.globU = problemData.stab .* assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, hatRlambdaTransposed );
 
 problemData.globRgamma = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, hatRlambdaTransposed );

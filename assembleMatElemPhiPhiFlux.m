@@ -7,6 +7,8 @@ ret = cell(2,1);
 ret{1} = sparse(K*N, K*N); 
 ret{2} = sparse(K*N, K*N);
 
+% ret( i, j, ip, m )
+
 for iT = 1:K
     iTs = (iT-1)*N + 1;
     iTe = (iT)*N;
@@ -15,6 +17,8 @@ for iT = 1:K
         tmp = zeros(N, N);
         for i = 1:N
             for j=1:N
+%                 Gbar( :, i, j, iDim)
+%                 uEval( iT, :, iDim)
                 tmp(i,j) = uEval( iT, :, iDim) * Gbar( :, i, j, iDim) ;
             end
         end
