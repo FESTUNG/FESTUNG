@@ -19,10 +19,10 @@ ret = zeros( Nip, N, N, 2 ); % [ N x N x 2]
         for j = 1 : N
             for m = 1 : 2
                 for ip = 1:Nip
-                    W(ip)
-                    basesOnQuad.gradPhi2D{qOrd}(ip,i,m)
-                    basesOnQuad.phi2D{qOrd}(ip,j)
-                    basesOnQuad.gradPhi2D{qOrd}(ip,i,m) .* basesOnQuad.phi2D{qOrd}(ip,j)
+%                     W(ip)
+%                     basesOnQuad.gradPhi2D{qOrd}(ip,i,m)
+%                     basesOnQuad.phi2D{qOrd}(ip,j)
+%                     basesOnQuad.gradPhi2D{qOrd}(ip,i,m) .* basesOnQuad.phi2D{qOrd}(ip,j)
                     ret( ip, i, j, m ) =  W(ip) .* basesOnQuad.gradPhi2D{qOrd}(ip,i,m) .* basesOnQuad.phi2D{qOrd}(ip,j) ;
                     ret( ip, i, j, m )
                 end

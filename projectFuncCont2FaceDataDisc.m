@@ -31,7 +31,8 @@ for i = 1:g.numE
     F2 = @(X1, X2) g.B(adjTri,2,1)*X1 + g.B(adjTri,2,2)*X2 + g.coordV0T(adjTri,1,2)*ones(size(X1));
 
     [x1, x2] = gammaMap( localIdx, Q1 );
-
+%     F1(x1, x2)
+%     F2(x1, x2)
     rhs(i, :)  = funcCont( F1(x1, x2), F2(x1, x2) ) * (repmat(W.', 1, N) .* basesOnGamma.phi1D{ord}(:,1:N));
 %     dataDisc(i, :) = rhs / refFacePhiPhi(:,:);
 end % for

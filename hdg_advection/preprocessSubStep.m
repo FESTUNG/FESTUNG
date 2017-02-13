@@ -91,29 +91,28 @@ N = problemData.N;
 %% HDG stuff
 % fEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont(problemData.t(nSubStep),x1,x2), ...
 %                                      problemData.N, problemData.basesOnQuad);
-uEval(:,:,1) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont( problemData.t+problemData.dt, x1,x2), ...
+problemData.uEval(:,:,1) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont( problemData.t+problemData.dt, x1,x2), ...
                                      problemData.N, problemData.basesOnQuad);
-uEval(:,:,2) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u2Cont( problemData.t+problemData.dt,x1,x2), ...
+problemData.uEval(:,:,2) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u2Cont( problemData.t+problemData.dt,x1,x2), ...
                                      problemData.N, problemData.basesOnQuad);
 
-cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(  problemData.t+problemData.dt, x1 ,x2), ...
+problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(  problemData.t+problemData.dt, x1 ,x2), ...
                                          problemData.Nlambda);
                                      
-fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, c), ...
-                                           cEdge, problemData.Nlambda);
+problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, c), ...
+                                           problemData.cEdge, problemData.Nlambda);
                                  
-problemData.globVecFluxDir = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
+problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
 
-problemData.globVecValDir = problemData.stab .* assembleVecEdgePhiIntVal( problemData.g, problemData.N, cEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
-
+problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, problemData.cEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
                                        
-problemData.globG = assembleMatElemPhiPhiFlux( problemData.g, problemData.N, uEval, problemData.hatGbarOnQuad );
+problemData.globG = assembleMatElemPhiPhiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
                        
-uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, 1.), ...
+problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, 1.), ...
                                     problemData.Nlambda);
 
 problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.N, problemData.Nlambda, ...
-                                                 uEdge, problemData.hatSbarOnQuad );
+                                                 problemData.uEdge, problemData.hatSbarOnQuad );
 
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!
@@ -123,7 +122,9 @@ problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.N, p
 problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
     @(x1,x2) problemData.cDCont( problemData.t+problemData.dt, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
 
-problemData.globcDiscTime = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+
+problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 
 %Rlambda is not time-depentend -> it is already constructed
                                              

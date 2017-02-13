@@ -2,6 +2,7 @@ function ret = phi1D(i, X)
 
 %Mapping basis function from [-1,1] onto [0,1]
 xi = 2 * ( X ) - 1;
+% xi = 2 * ( X-1 )  1;
 
 switch i
     case 1,  ret = ones( 1, size(X, 2) );

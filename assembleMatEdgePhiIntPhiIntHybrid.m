@@ -12,15 +12,24 @@ validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N 3]}, mfilenam
 %   ret = ret + kron(spdiags(g.areaE,0,K,K), refEdgePhiIntPhiInt(:,:,n));
 % end % for
 
+% warning('gebastel in assembleMatEdgePhiIntPhiIntHybrid. Ich schalte das mal ab, weil ueberalle Dirichlet BC gelten');
+% warning('gebastel in assembleMatEdgePhiIntPhiIntHybrid. Ich schalte es ueberall ein');
+
 ret = sparse(K*N, K*N);
 for iT = 1:K
+    iTs = (iT-1)*N + 1;
+    iTe = (iT)*N;
     for iE = 1:3
-        iTs = (iT-1)*N + 1;
-        iTe = (iT)*N;
-        iEs = (g.E0T(iT, iE) - 1)*N + 1;
-        iEe = (g.E0T(iT, iE))*N;
-        ret( iTs:iTe,  iTs:iTe  ) = ret( iTs:iTe,  iTs:iTe ) + g.markE0Tint(iT, iE) .* g.areaE( g.E0T(iT, iE) ) .* refEdgePhiIntPhiInt(:,:,iE);
+%         iEs = (g.E0T(iT, iE) - 1)*N + 1;
+%         iEe = (g.E0T(iT, iE))*N;
+%         ret( iTs:iTe,  iTs:iTe  ) = ret( iTs:iTe,  iTs:iTe ) + g.markE0Tint(iT, iE) .* g.areaE( g.E0T(iT, iE) ) .* refEdgePhiIntPhiInt(:,:,iE);
+%         ret( iTs:iTe,  iTs:iTe  ) = ret( iTs:iTe,  iTs:iTe ) + g.markE0Tint(iT, iE) .* refEdgePhiIntPhiInt(:,:,iE);
 %         ret = ret + kron(spdiags(g.areaE,0,K,K), refEdgePhiIntPhiInt(:,:,n));
+
+% Last used version
+        ret( iTs:iTe,  iTs:iTe  ) = ret( iTs:iTe,  iTs:iTe ) + g.markE0Tint(iT, iE) .* g.areaE( g.E0T(iT, iE) ) .* refEdgePhiIntPhiInt(:,:,iE);
+%         ret( iTs:iTe,  iTs:iTe  ) = ret( iTs:iTe,  iTs:iTe ) + g.areaE( g.E0T(iT, iE) ) .* refEdgePhiIntPhiInt(:,:,iE);
+
     end
 end
 

@@ -8,9 +8,12 @@ ret = zeros(N, Nhybrid, 3); % [N x N]
 for nn = 1 : 3
   for i = 1 : N
     for j = 1 : Nhybrid
-%         basesOnGamma.phi1D{qOrd}(:,i)
-%         basesOnQuad.phi1D{qOrd}(:,j)
-%         W'
+        disp('====');
+        basesOnQuad.phi1D{qOrd}(:,i)
+        basesOnGamma.phi1D{qOrd}(:,j)
+        W'
+        W' .* basesOnQuad.phi1D{qOrd}(:,i, nn) .* basesOnGamma.phi1D{qOrd}(:,j) 
+        sum( W' .* basesOnQuad.phi1D{qOrd}(:,i, nn) .* basesOnGamma.phi1D{qOrd}(:,j) )
       ret(i, j, nn) = sum( W' .* basesOnQuad.phi1D{qOrd}(:,i, nn) .* basesOnGamma.phi1D{qOrd}(:,j) );
     end % for
   end % for

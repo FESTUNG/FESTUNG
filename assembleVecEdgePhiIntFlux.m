@@ -11,6 +11,7 @@ p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
 
 % Assemble matrix
 ret = zeros( K*N, 1 );
+% warning('flipping in assembleVecEdgePhiIntFlux');
 
 for iT = 1:K
     for iE = 1:3
@@ -22,9 +23,16 @@ for iT = 1:K
         fluxEvalNu = zeros( 1, size(W,2));
         for m=1:2
             fluxEvalNu =  fluxEvalNu + fluxEval( m, :, edgeNr ) .* g.nuE0T( iT, iE, m );
+%             fluxEvalNu =  fluxEvalNu + fliplr( fluxEval( m, :, edgeNr ) ) .* g.nuE0T( iT, iE, m );
         end
         
         for i = 1:N
+%             g.areaE( edgeNr ) 
+%             markE0Tbdr(iT, iE)
+%             fluxEvalNu'
+%             basesOnQuad.phi1D{qOrd}( :, i, iE)
+%             ( W * (fluxEvalNu' .* basesOnQuad.phi1D{qOrd}( :, i, iE) ) )
+%             g.areaE( edgeNr ) .* markE0Tbdr(iT, iE) .* ( W * (fluxEvalNu' .* basesOnQuad.phi1D{qOrd}( :, i, iE) ) )
             tmp(i) = tmp(i) + g.areaE( edgeNr ) .* markE0Tbdr(iT, iE) .* ( W * (fluxEvalNu' .* basesOnQuad.phi1D{qOrd}( :, i, iE) ) );
         end
         

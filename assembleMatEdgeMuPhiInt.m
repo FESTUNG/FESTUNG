@@ -9,6 +9,8 @@ KEdge = g.numE; Nlambda = size(refEdgePhiIntMu, 2);
 % validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
 validateattributes(refEdgePhiIntMu, {'numeric'}, {'size', [N Nlambda 3]}, mfilename, 'refEdgePhiIntMu');
 
+% warning('area removed from assembleMatEdgeMuPhiInt');
+
 % Assemble matrix
 ret = sparse(K*N, KEdge*Nlambda);
 % for n = 1 : 3
@@ -21,9 +23,12 @@ for iT = 1:K
         edgeNr = g.E0T(iT, iE);
         iTs = (iT-1)*N + 1;
         iTe = (iT)*N;
-        iEs = (g.E0T(iT, iE) - 1)*Nlambda + 1;
-        iEe = (g.E0T(iT, iE))*Nlambda;
-        ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE( edgeNr ) .* refEdgePhiIntMu(:,:, iE);
+        iEs = (edgeNr - 1)*Nlambda + 1;
+        iEe = (edgeNr)*Nlambda;
+%         ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE( edgeNr ) .* refEdgePhiIntMu(:,:, iE);
+%         ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE0T( iT, iE ) .* refEdgePhiIntMu(:,:, iE);
+        ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE0T( iT, iE ) .* refEdgePhiIntMu(:,:, iE);
+%         ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + refEdgePhiIntMu(:,:, iE);
     end
 end
 

@@ -95,7 +95,7 @@ problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData
 
 
 %% HDG related global matrices
-problemData.hatRlambdaOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
+% problemData.hatRphiOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
 
 problemData.hatGbarOnQuad = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
 problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
@@ -108,7 +108,7 @@ problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 % problemData.globMlambda = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMlambda);
 
 %Term III.2
-problemData.globRlambda =  problemData.stab .* assembleMatEdgeMuPhiInt( problemData.g, problemData.hatRlambda );
+problemData.globRlambda = assembleMatEdgeMuPhiInt( problemData.g, problemData.hatRlambda );
 
 %Term III.3 WIP
 problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
@@ -128,7 +128,7 @@ end
 % l
 
 
-problemData.globU = problemData.stab .* assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, hatRlambdaTransposed );
+problemData.globU = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, hatRlambdaTransposed );
 
 problemData.globRgamma = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, hatRlambdaTransposed );
 

@@ -88,15 +88,26 @@ N = problemData.N;
 % cDiscDot = LinvF - LinvM * lDiscDot;
 % problemData.cDiscRK{nSubStep + 1} = cDiscDot;
 % Testing HDG
-matL = problemData.globM ./ problemData.dt - problemData.globG{1} - problemData.globG{2} + problemData.globRphi   ; % Here goes the time discretization
-vecF = problemData.globcDiscTime ./ problemData.dt - problemData.globVecFluxDir - problemData.globVecValDir ; % Add here source terms if needed
-matM = problemData.globS{1} + problemData.globS{2} - problemData.globRlambda;
+stab = problemData.stab;
+%% Actual HDG
+% matL = problemData.globM ./ problemData.dt - problemData.globG{1} - problemData.globG{2} ...
+%         + stab * problemData.globRphi; % Here goes the time discretization
+% vecF = problemData.globMcDisc ./ problemData.dt - stab * problemData.globFgamma - stab * problemData.globCd ; % Add here source terms if needed
+% matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda;
 
+%% HDG for testing (no dt)
+matL = problemData.globM - problemData.globG{1} - problemData.globG{2} ...
+        + stab * problemData.globRphi; % Here goes the time discretization
+vecF = problemData.globMcDisc - stab * problemData.globFgamma - stab * problemData.globCd ; % Add here source terms if needed
+matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda;
+
+%% Computing local solves
 localSolves = mldivide(matL, [vecF matM]);
 LinvF = localSolves(:, 1);
 LinvM = localSolves(:, 2:end);
 
-matN = - problemData.globU - problemData.globRgamma ;
+%% SolVing global system for lambda
+matN = - stab * problemData.globU - problemData.globRgamma ;
 matP = problemData.globP;
 
 vecKD = problemData.globKDlambda;
@@ -104,15 +115,48 @@ vecKD = problemData.globKDlambda;
 sysMatA = -matN * LinvM + matP;
 sysRhs = vecKD - matN * LinvF;
 
-%problemData.cDiscLambda = mldivide( sysMatA, sysRhs );
+problemData.cDiscLambda = mldivide( sysMatA, sysRhs );
 
+%% Testing compute lambda given exact cDisc
+
+lambdaFromC = mldivide( matM, vecF - matL*problemData.cDiscReshaped );
+%% Debugging
+
+% Inserting 'approximated' cDisc and cDiscLambda to compare residuals
+r1d = problemData.globRphi * reshape( problemData.cDisc', size(problemData.globM, 1), 1 ) - problemData.globRlambda * problemData.cDiscLambda;
+r2d = - stab * problemData.globFgamma - problemData.globCd;
+diffr1r2d = r1d - r2d;
+
+%Inserting exact lambda and reconstruct c
 warning('Inserting exact solution for lambda')
 problemData.cDiscLambda = projectFuncCont2FaceDataDisc(problemData.g, @(x1, x2) problemData.getRGSol(problemData.t+problemData.dt, x1, x2), problemData.p*2, problemData.hatMlambda, problemData.basesOnGamma);
 problemData.cDiscLambda = reshape( problemData.cDiscLambda', problemData.Nlambda*problemData.g.numE, 1 );
+CFromLambda = mldivide( matL, vecF - matM*problemData.cDiscLambda );
 
+% Inserting 'exact' cDisc and cDiscLambda to compare residuals
+% r1 = problemData.globRphi * reshape( problemData.cDisc', size(problemData.globM, 1), 1 ) - problemData.globRlambda * problemData.cDiscLambda;
+% r2 = - problemData.globFgamma - problemData.globCd;
+% diffr1r2 = r1 - r2;
 
+r11 = problemData.globRphi * problemData.cDiscReshaped;
+r12 = problemData.globRlambda * problemData.cDiscLambda;
+
+r21 = problemData.globFgamma;
+r22 = problemData.globCd;
+
+diffr1r2 = r11 - r12 + r21 + r22;
+
+%Compute residual
+% problemData.t+problemData.dt
+% matL*reshape( problemData.cDisc', size(problemData.globM, 1), 1 ) 
+% - matM * problemData.cDiscLambda
+res = vecF- matL*reshape( problemData.cDisc', size(problemData.globM, 1), 1 ) - matM * problemData.cDiscLambda;
+
+%% Reconstructing local solutions from updated lambda
 problemData.cDisc = LinvF - LinvM * problemData.cDiscLambda;
 problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
+
+% problemData.globM * problemData.cDiscReshaped -  problemData.globMcDisc
 
 % LinvF = 0;
 % LinvM = 0;
