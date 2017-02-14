@@ -12,9 +12,14 @@ ret{2} = sparse( K*N, KEdge*Nlambda);
 for iT = 1:K
     for iE = 1:3
         edgeNr = g.E0T(iT, iE);
+        
+        uEdgeLocal = uEdge( :, :, iT, iE);
         flip = 1;
+        %         if (g.T0E(edgeNr, 2) == iT)
         if (g.T0E(edgeNr, 2) == iT)
+            %         if (2 == iT)
             flip = 2;
+            %             uEdgeLocal = flipud( uEdgeLocal );
         end
         
         iTs = (iT-1)*N + 1;
@@ -26,12 +31,13 @@ for iT = 1:K
             tmp = zeros(N, Nlambda);
             for i = 1:N
                 for j=1:Nlambda
-                    tmp(i,j) = uEdge( iDim, :, edgeNr) * Sbar( :, i, j, iDim, flip);
+                    %                     tmp(i,j) = uEdge( iDim, :, iT, iE) * Sbar( :, i, j, iDim, flip);
+                    tmp(i,j) = uEdgeLocal( iDim, :) .*g.nuE0T( iT, iE , iDim) * Sbar( :, i, j, iE, flip);
                 end
             end
             
             ret{iDim}( iTs:iTe,  iEs:iEe ) = ret{iDim}( iTs:iTe, iEs:iEe ) ...
-                + g.markE0Tint( iT, iE ) .* g.areaE( edgeNr ) .* g.nuE0T( iT, iE , iDim) .* tmp;
+                + g.markE0Tint( iT, iE ) .* g.areaE( edgeNr ) .* tmp;
         end
     end
 end

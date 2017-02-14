@@ -56,10 +56,10 @@ N = problemData.N;
 stab = problemData.stab;
 
 if (problemData.isInTesting == true)
-    %% HDG for testing (no dt)
-    matL = problemData.globM - problemData.globG{1} - problemData.globG{2} ...
+    %% Actual HDG for testing with dt
+    matL = problemData.globM ./ problemData.dt - problemData.globG{1} - problemData.globG{2} ...
         + stab * problemData.globRphi; % Here goes the time discretization
-    vecF = problemData.globMcDisc - stab * problemData.globFgamma - stab * problemData.globCd ; % Add here source terms if needed
+    vecF = problemData.globMcDisc ./ problemData.dt - stab * problemData.globFgamma - stab * problemData.globCd ; % Add here source terms if needed
     matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda;
     
     %% Computing local solves
@@ -72,6 +72,32 @@ if (problemData.isInTesting == true)
     matP = problemData.globP;
     
     vecKD = problemData.globKDlambda;
+    
+    resC11 = matL * problemData.cDiscReshaped;
+    resC12 = matM * problemData.cDiscLambdaReshaped;
+    resC = (resC11 + resC12) - vecF;
+    
+    resEdge11 = problemData.globS{1} * problemData.cDiscLambdaReshaped;
+    resEdge12 = problemData.globS{2} * problemData.cDiscLambdaReshaped;
+    resEdge21 = stab * problemData.globFgamma;
+    
+    resEdge = ( resEdge11 + resEdge12 ) + resEdge21;
+    
+    resHyb1 = matN * problemData.cDiscReshaped + matP * problemData.cDiscLambdaReshaped;
+    resHyb2 = vecKD;
+    resHyb = resHyb1 - resHyb2;
+    
+    r11 = problemData.globRphi * problemData.cDiscReshaped;
+    r12 = problemData.globRlambda * problemData.cDiscLambdaReshaped;
+    
+%     r21 = problemData.globMcDisc ./ problemData.dt;
+%     r22 = problemData.globFgamma;
+    r21 = 0;
+    r22 = 0;
+    r23 = problemData.globCd;
+    
+    diffr1r2 = r11 - r12 - r21 + r22 + r23;
+    
     
     sysMatA = -matN * LinvM + matP;
     sysRhs = vecKD - matN * LinvF;
@@ -99,15 +125,7 @@ if (problemData.isInTesting == true)
     % r1 = problemData.globRphi * reshape( problemData.cDisc', size(problemData.globM, 1), 1 ) - problemData.globRlambda * problemData.cDiscLambda;
     % r2 = - problemData.globFgamma - problemData.globCd;
     % diffr1r2 = r1 - r2;
-    
-    r11 = problemData.globRphi * problemData.cDiscReshaped;
-    r12 = problemData.globRlambda * problemData.cDiscLambda;
-    
-    r21 = problemData.globFgamma;
-    r22 = problemData.globCd;
-    
-    diffr1r2 = r11 - r12 + r21 + r22;
-    
+   
     %Compute residual
     % problemData.t+problemData.dt
     % matL*reshape( problemData.cDisc', size(problemData.globM, 1), 1 )

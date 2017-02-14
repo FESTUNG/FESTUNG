@@ -51,12 +51,12 @@ problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 
 
 problemData.t = 0.;
 
-if (problemData.isInTesting == true)
-    warning('Setting dt to zero for testing')
-    problemData.dt = 0;
-else
-    problemData.dt = problemData.tEnd / problemData.numSteps;
-end
+% if (problemData.isInTesting == true)
+%     warning('Setting dt to zero for testing')
+%     problemData.dt = 0;
+% else
+problemData.dt = problemData.tEnd / problemData.numSteps;
+% end
 
 fprintf('L2 error w.r.t. the initial condition: %g\n', ...
     computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));

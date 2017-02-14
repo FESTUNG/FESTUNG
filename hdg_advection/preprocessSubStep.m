@@ -103,7 +103,7 @@ problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) pr
                                          problemData.Nlambda);
                                      
 %Evaluate the flux on every edge
-problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, c), ...
+problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, problemData, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, c), ...
                                            problemData.cEdge, problemData.Nlambda);
                                  
 problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
@@ -128,10 +128,14 @@ problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemD
 
 % Reshape cDisc to have a vector
 problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+problemData.cDiscLambdaReshaped = reshape( problemData.cDiscLambda', size(problemData.globP, 1), 1 );
 % M*cDisc, should I store it?
 problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 %Rlambda is not time-depentend -> it is already constructed
 
 % warning('teste III.3');
 % testingIII3( problemData.g, problemData );
+
+% warning('teste III.4');
+% testingIII4( g, problemData );
 end % function
