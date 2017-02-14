@@ -76,15 +76,16 @@ if (problemData.isInTesting == true)
     sysMatA = -matN * LinvM + matP;
     sysRhs = vecKD - matN * LinvF;
     
-    problemData.cDiscLambda = mldivide( sysMatA, sysRhs );
+    cDiscLambdaOld = problemData.cDiscLambda;
+    cDiscLambdaOldReshaped = reshape( cDiscLambdaOld', size(problemData.globP, 1), 1 );
+    cDiscLambdaUnused = mldivide( sysMatA, sysRhs );
     
     %% Testing compute lambda given exact cDisc
-    
     lambdaFromC = mldivide( matM, vecF - matL*problemData.cDiscReshaped );
     %% Debugging
     
     % Inserting 'approximated' cDisc and cDiscLambda to compare residuals
-    r1d = problemData.globRphi * reshape( problemData.cDisc', size(problemData.globM, 1), 1 ) - problemData.globRlambda * problemData.cDiscLambda;
+    r1d = problemData.globRphi * problemData.cDiscReshaped - problemData.globRlambda * cDiscLambdaUnused;
     r2d = - stab * problemData.globFgamma - problemData.globCd;
     diffr1r2d = r1d - r2d;
     

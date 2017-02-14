@@ -109,7 +109,10 @@ problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, 
 problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
 
 problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, problemData.cEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
-                                       
+                               
+% problemData.globCd = assembleVecEdgePhiIntValTesting( problemData.g, problemData.N,  @(x1, x2) problemData.cDCont(  problemData.t+problemData.dt, x1 ,x2), problemData.g.markE0TbdrD, problemData.basesOnQuad );
+
+
 problemData.globG = assembleMatElemPhiPhiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
                        
 problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, 1.), ...
@@ -128,4 +131,7 @@ problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM,
 % M*cDisc, should I store it?
 problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 %Rlambda is not time-depentend -> it is already constructed
+
+warning('teste III.3');
+testingIII3( problemData.g, problemData );
 end % function

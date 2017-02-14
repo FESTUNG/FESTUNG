@@ -90,11 +90,10 @@ problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemDat
 problemData.hatMlambda = integrateRefEdgeMuMu(problemData.Nlambda, problemData.basesOnGamma);
 % problemData.Gmat = integrateRefElemDphiPhi(problemData.N, problemData.basesOnQuad);
 
+% The matrices are actually transposed
 problemData.hatRgamma  = integrateRefEdgeMuPhiInt(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
 problemData.hatRlambda = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
-
 problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
-
 
 %% HDG related global matrices
 % problemData.hatRphiOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
@@ -111,6 +110,9 @@ problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
 %Term III.2
 problemData.globRlambda = assembleMatEdgeMuPhiInt( problemData.g, problemData.hatRlambda );
+
+problemData.globRlambdaHat = assembleMatEdgeMuPhiIntBC( problemData.g, ~problemData.g.markE0Tint, problemData.hatRlambda );
+problemData.globRlambdaBar = assembleMatEdgeMuPhiIntBC( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
 
 % hatRlambdaTransposed = zeros( problemData.Nlambda, problemData.N, 3);
 % for i=1:3
@@ -129,5 +131,7 @@ problemData.globP = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, p
 
 %Term V.2 g, markE0Tbdr, refEdgePhiIntMu
 problemData.globU = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, problemData.hatRgamma );
+
+
 
 end % function
