@@ -16,13 +16,22 @@ ret = zeros( K*N, 1 );
 for iT = 1:K
     for iE = 1:3
         edgeNr = g.E0T(iT, iE);
+        flip = 1;
+        
+        fluxLocal = fluxEval( :, :, edgeNr);
+        
+        if (g.T0E(edgeNr, 2) == iT)
+            flip = 2;
+            fluxLocal = flipud( fluxLocal );
+        end
+        
         iTs = (iT-1)*N + 1;
         iTe = (iT)*N;
         
         tmp = zeros(N, 1);
         fluxEvalNu = zeros( 1, size(W,2));
         for m=1:2
-            fluxEvalNu =  fluxEvalNu + fluxEval( m, :, edgeNr ) .* g.nuE0T( iT, iE, m );
+            fluxEvalNu =  fluxEvalNu + fluxLocal( m, : ) .* g.nuE0T( iT, iE, m );
 %             fluxEvalNu =  fluxEvalNu + fliplr( fluxEval( m, :, edgeNr ) ) .* g.nuE0T( iT, iE, m );
         end
         

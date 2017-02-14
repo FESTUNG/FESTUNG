@@ -12,6 +12,10 @@ ret{2} = sparse( K*N, KEdge*Nlambda);
 for iT = 1:K
     for iE = 1:3
         edgeNr = g.E0T(iT, iE);
+        flip = 1;
+        if (g.T0E(edgeNr, 2) == iT)
+            flip = 2;
+        end
         
         iTs = (iT-1)*N + 1;
         iTe = (iT)*N;
@@ -22,7 +26,7 @@ for iT = 1:K
             tmp = zeros(N, Nlambda);
             for i = 1:N
                 for j=1:Nlambda
-                    tmp(i,j) = uEdge( iDim, :, edgeNr) * Sbar( :, i, j, iDim);
+                    tmp(i,j) = uEdge( iDim, :, edgeNr) * Sbar( :, i, j, iDim, flip);
                 end
             end
             

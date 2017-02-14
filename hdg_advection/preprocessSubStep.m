@@ -132,6 +132,6 @@ problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM,
 problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 %Rlambda is not time-depentend -> it is already constructed
 
-warning('teste III.3');
-testingIII3( problemData.g, problemData );
+% warning('teste III.3');
+% testingIII3( problemData.g, problemData );
 end % function

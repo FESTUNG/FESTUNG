@@ -61,10 +61,10 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
-problemData.hmax        = 2^-0; % maximum edge length of triangle
+problemData.hmax        = 2^-2; % maximum edge length of triangle
 problemData.p           = 1; % local polynomial degree
 problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
-problemData.numSteps    = 1; % number of time steps
+problemData.numSteps    = 8; % number of time steps
 problemData.tEnd        = pi/(32); % end time
 
 problemData.isVisGrid   = false; % visualization of grid
@@ -77,7 +77,7 @@ problemData.outputTypes     = {'vtk'}; % solution output file types
 %% HDG specific parameters
 problemData.stab = 1.0; %stabilization parameter in mod. LF/Rusanov flux
 %% Testing?
-problemData.isInTesting = true;
+problemData.isInTesting = false;
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
@@ -85,8 +85,8 @@ assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta m
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 %% Coefficients and boundary data (rotating Gaussian).
-problemData.rgX1c = -0.2;
-% problemData.rgX1c = -0.0;
+% problemData.rgX1c = -0.2;
+problemData.rgX1c = -0.0;
 problemData.rgX2c =  0.0;
 problemData.rgEps =  0.0;
 problemData.rgS =  0.1;
@@ -97,19 +97,22 @@ problemData.getRGX2 = @(t, X1, X2) -X1 .* sin(4 * t) + X2 .* cos(4*t) - problemD
 problemData.getRGRadSq = @(t, X1, X2) problemData.getRGX1(t, X1, X2).^2 + problemData.getRGX2(t, X1, X2).^2;
 problemData.getRGSol = @(t, X1, X2) (2*problemData.rgS2) / (2 * problemData.rgS2 + 4 * problemData.rgEps * t) .* exp( - ( problemData.getRGRadSq(t, X1, X2) ) ./ (2. * problemData.rgS2 + 4 * problemData.rgEps * t ) );
 
+
 % problemData.getRGSol = @(t, X1, X2) zeros(size(X1));
 % problemData.getRGSol = @(t, X1, X2) ones(size(X1));
 % problemData.getRGSol = @(t, X1, X2) X1;
-problemData.getRGSol = @(t, X1, X2) X2;
-problemData.u1Cont = @(t,x1,x2) zeros(size(x1));
-problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
+% problemData.getRGSol = @(t, X1, X2) X1.^2;
+% problemData.getRGSol = @(t, X1, X2) X2;
+% problemData.u1Cont = @(t,x1,x2) zeros(size(x1));
+% problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
 
 problemData.c0Cont = @(x1, x2) problemData.getRGSol(0, x1, x2);
 problemData.fCont = @(t,x1,x2) zeros(size(x1));
-% problemData.u1Cont = @(t,x1,x2) -4.*x2;
-% problemData.u2Cont = @(t,x1,x2)  4.*x1;
+problemData.u1Cont = @(t,x1,x2) -4.*x2;
+problemData.u2Cont = @(t,x1,x2)  4.*x1;
 %problemData.cDCont = @(t,x1,x2) zeros(size(x1));
 problemData.cDCont = @(t,x1,x2) problemData.getRGSol(t, x1, x2);
+% problemData.cDCont = @(t,x1,x2) problemData.getRGSol(0, x1, x2);
 % problemData.cDCont = @(t,x1,x2) zeros(size(x1));
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 
