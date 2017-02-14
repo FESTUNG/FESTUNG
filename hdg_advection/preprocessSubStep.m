@@ -91,14 +91,18 @@ N = problemData.N;
 %% HDG stuff
 % fEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont(problemData.t(nSubStep),x1,x2), ...
 %                                      problemData.N, problemData.basesOnQuad);
+
+%Evaluate u (=transport velocities) on every edge
 problemData.uEval(:,:,1) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont( problemData.t+problemData.dt, x1,x2), ...
                                      problemData.N, problemData.basesOnQuad);
 problemData.uEval(:,:,2) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u2Cont( problemData.t+problemData.dt,x1,x2), ...
                                      problemData.N, problemData.basesOnQuad);
 
+%Evaluate c (=solution) on every edge
 problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(  problemData.t+problemData.dt, x1 ,x2), ...
                                          problemData.Nlambda);
                                      
+%Evaluate the flux on every edge
 problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, c), ...
                                            problemData.cEdge, problemData.Nlambda);
                                  
@@ -116,17 +120,12 @@ problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.N, p
 
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!
-% problemData.t
-% problemData.dt
-% problemData.t+problemData.dt
 problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
     @(x1,x2) problemData.cDCont( problemData.t+problemData.dt, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
 
-
+% Reshape cDisc to have a vector
 problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+% M*cDisc, should I store it?
 problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
-
 %Rlambda is not time-depentend -> it is already constructed
-                                             
-
 end % function

@@ -27,9 +27,23 @@ for iT = 1:K
         iEe = (edgeNr)*Nlambda;
 %         ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE( edgeNr ) .* refEdgePhiIntMu(:,:, iE);
 %         ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE0T( iT, iE ) .* refEdgePhiIntMu(:,:, iE);
-        ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE0T( iT, iE ) .* refEdgePhiIntMu(:,:, iE);
+%         ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE0T( iT, iE ) .* refEdgePhiIntMu(:,:, iE);
 %         ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + refEdgePhiIntMu(:,:, iE);
+
+%         if (iT == 2 && edgeNr==3)
+%             tmp = g.areaE0T( iT, iE ) .* refEdgePhiIntMu(:,:, iE);
+%             tmp
+%             fliplr( tmp )
+%             ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + fliplr( tmp );
+%         else    
+%             ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE0T( iT, iE ) .* refEdgePhiIntMu(:,:, iE);
+%         end
+       
+        ret( iTs:iTe,  iEs:iEe  ) = ret( iTs:iTe, iEs:iEe ) + g.areaE0T( iT, iE ) .* refEdgePhiIntMu(:,:, iE);
+
+        
     end
 end
+
 
 end % function

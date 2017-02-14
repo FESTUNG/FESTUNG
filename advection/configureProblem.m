@@ -61,14 +61,14 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 problemData.hmax        = 2^-1; % maximum edge length of triangle
-problemData.p           = 0; % local polynomial degree
+problemData.p           = 1; % local polynomial degree
 problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
 problemData.numSteps    = 100; % number of time steps
 problemData.tEnd        = (problemData.numSteps/3142)*2*pi; % end time
 
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution
-problemData.isSlopeLim  = true; % slope limiting
+problemData.isSlopeLim  = false; % slope limiting
 problemData.typeSlopeLim = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
 
 problemData.outputFrequency = 100; % no visualization of every timestep

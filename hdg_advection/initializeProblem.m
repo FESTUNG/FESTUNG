@@ -17,7 +17,7 @@
 %> projected function.
 %>
 %> @param  problemData  A struct with problem parameters and precomputed
-%>                      fields, as provided by configureProblem() and 
+%>                      fields, as provided by configureProblem() and
 %>                      preprocessProblem(). @f$[\text{struct}]@f$
 %>
 %> @retval problemData  The input struct enriched with initial data.
@@ -26,7 +26,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
-%> 
+%>
 %> @par License
 %> @parblock
 %> This program is free software: you can redistribute it and/or modify
@@ -47,27 +47,31 @@ function problemData = initializeProblem(problemData)
 problemData.isFinished = false;
 %% Initial data on elements
 problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 2*problemData.p+1, ...
-                                             problemData.hatM, problemData.basesOnQuad);
-                                         
+    problemData.hatM, problemData.basesOnQuad);
+
 problemData.t = 0.;
-% problemData.dt = problemData.tEnd / problemData.numSteps;
-warning('Setting dt to zero for testing')
-problemData.dt = 0;
+
+if (problemData.isInTesting == true)
+    warning('Setting dt to zero for testing')
+    problemData.dt = 0;
+else
+    problemData.dt = problemData.tEnd / problemData.numSteps;
+end
 
 fprintf('L2 error w.r.t. the initial condition: %g\n', ...
-  computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
+    computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
 
 %% Initial data on faces
 problemData.cDiscLambda = projectFuncCont2FaceDataDisc(problemData.g, problemData.c0Cont, 2*problemData.p+1, ...
-                                                       problemData.hatMlambda, problemData.basesOnGamma);
+    problemData.hatMlambda, problemData.basesOnGamma);
 % fprintf('L2 error w.r.t. the initial condition: %g\n', ...
 %   computeL2Error(problemData.g, problemData.lamDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
 
 %% visualization of inital condition.
 if problemData.isVisSol
-  cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
-  visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
+    cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
+    visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
 end
 fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
-  problemData.tEnd, problemData.tau, problemData.numSteps)
+    problemData.tEnd, problemData.tau, problemData.numSteps)
 end % function

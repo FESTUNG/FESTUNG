@@ -90,7 +90,9 @@ problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemDat
 problemData.hatMlambda = integrateRefEdgeMuMu(problemData.Nlambda, problemData.basesOnGamma);
 % problemData.Gmat = integrateRefElemDphiPhi(problemData.N, problemData.basesOnQuad);
 
+problemData.hatRgamma  = integrateRefEdgeMuPhiInt(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
 problemData.hatRlambda = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+
 problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
 
 
@@ -110,8 +112,15 @@ problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 %Term III.2
 problemData.globRlambda = assembleMatEdgeMuPhiInt( problemData.g, problemData.hatRlambda );
 
+% hatRlambdaTransposed = zeros( problemData.Nlambda, problemData.N, 3);
+% for i=1:3
+%     hatRlambdaTransposed(:, :, i) = problemData.hatRlambda(:,:,i)';
+% end
+
 %Term III.3 WIP
 problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
+%Term III.2 + III.5 WIP
+problemData.globRgamma = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, problemData.hatRgamma );
 
 %Term V.1 WIP
 % problemData.globMlambda = assembleMatEdgeMuMu( problemData.g, problemData.stab, problemData.hatM );
@@ -119,18 +128,6 @@ problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problem
 problemData.globP = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, problemData.hatMlambda);
 
 %Term V.2 g, markE0Tbdr, refEdgePhiIntMu
-hatRlambdaTransposed = zeros( problemData.Nlambda, problemData.N, 3);
-for i=1:3
-    hatRlambdaTransposed(:, :, i) = problemData.hatRlambda(:,:,i)';
-end
-
-%Testing
-% l
-
-
-problemData.globU = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, hatRlambdaTransposed );
-
-problemData.globRgamma = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, hatRlambdaTransposed );
-
+problemData.globU = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, problemData.hatRgamma );
 
 end % function
