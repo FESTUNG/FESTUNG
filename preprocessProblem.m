@@ -7,12 +7,28 @@ problemData.g.g1D = problemData.generateGrid1D(problemData.numElem(1), problemDa
 %% Additional mesh data
 problemData.g.markE0Tint = problemData.g.idE0T == 0; % [K x 3] mark local edges that are interior
 problemData.g.markE0Tbdr = ~problemData.g.markE0Tint; % all boundaries
-problemData.g.markE0TbdrL = problemData.g.idE0T == 2 | problemData.g.idE0T == 4; % land boundaries
+problemData.g.markE0TbdrL = problemData.g.idE0T == 4; % left boundaries
+problemData.g.markE0TbdrR = problemData.g.idE0T == 2; % right boundaries
 problemData.g.markE0TbdrF = problemData.g.idE0T == 3; % free boundary
 problemData.g.markE0TbdrB = problemData.g.idE0T == 1; % bottom boundary
 
+% AR: -------------------------------------------------------------------------------------------------------------
+problemData.g.markE0TprescDiffusion = problemData.g.idE0T == -1;
+problemData.g.markE0TprescH = problemData.g.idE0T == -1;
+problemData.g.markE0TprescU = problemData.g.idE0T == -1;
+% AR: -------------------------------------------------------------------------------------------------------------
+
 problemData.g.g1D.markV0Tint = problemData.g.g1D.idV0T == 0;
 problemData.g.g1D.markV0Tbdr = ~problemData.g.g1D.markV0Tint;
+
+% AR: -------------------------------------------------------------------------------------------------------------
+problemData.g.g1D.markV0TbdrR = problemData.g.g1D.idV0T == 2; % right boundaries
+problemData.g.g1D.markV0TbdrL = problemData.g.g1D.idV0T == 4; % left boundaries
+problemData.g.g1D.prescUHindex = [-1; -1];
+problemData.g.g1D.markV0TfreeUH = problemData.g.g1D.markV0Tbdr ...
+    .* (problemData.g.g1D.idV0T ~= problemData.g.g1D.prescUHindex(1)) ...
+    .* (problemData.g.g1D.idV0T ~= problemData.g.g1D.prescUHindex(2));
+% AR: -------------------------------------------------------------------------------------------------------------
 
 %% Globally constant parameters.
 problemData.N = (problemData.p + 1)^2;  % number of local DOFs on trapezoidals

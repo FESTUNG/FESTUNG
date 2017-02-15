@@ -12,7 +12,11 @@ problemData.barGlobS = assembleMatEdgeTrapPhi1DPerQuad(problemData.g, problemDat
 
 problemData.tildeGlobH = assembleMatElemDphiPhi1D(problemData.g, problemData.tildeHatH);
 problemData.tildeGlobQ = assembleMatEdgeTrapPhiPhi1DNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tint, problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
-problemData.tildeGlobQbdr = assembleMatEdgeTrapPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr, problemData.tildeHatQdiag);
+
+% AR: -------------------------------------------------------------------------------------------------------------
+problemData.tildeGlobQbdr = assembleMatEdgeTrapPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr .* ~(problemData.g.markE0TprescH), problemData.tildeHatQdiag);
+% AR: -------------------------------------------------------------------------------------------------------------
+
 for m = 1 : 2
   problemData.tildeGlobH{m} = problemData.gConst * problemData.tildeGlobH{m};
   problemData.tildeGlobQ{m} = problemData.gConst * problemData.tildeGlobQ{m};

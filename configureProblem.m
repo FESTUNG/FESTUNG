@@ -4,7 +4,7 @@ function problemData = configureProblem(problemData)
 domainWidth = 100;  % width of computational domain
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [16, 16]);
+problemData = setdefault(problemData, 'numElem', [16, 4]);
 
 % Local polynomial approximation order (0 to 4)
 problemData = setdefault(problemData, 'p', 1);
@@ -14,8 +14,8 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
-problemData = setdefault(problemData, 'numSteps', 1);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 1);  % end time
+problemData = setdefault(problemData, 'numSteps', 10);  % number of time steps
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
@@ -48,6 +48,18 @@ if license('checkout', 'Symbolic_Toolbox')
   
   [problemData, h0Const, zBotConst] = analyticalData(problemData, hSym, u1Sym, u2Sym, gSym, zBotSym, DSym, domainWidth);
 end % if
+
+% AR: -------------------------------------------------------------------------------------------------------------
+deltaMat =          0.01;
+rhoMat  =           0.1;
+hMat    = @(t,x)    deltaMat * sin( rhoMat * ( t + x ) ) + 2;
+u1Mat   = @(t,x,z) sqrt(deltaMat) * z .* sin( deltaMat * ( t + x ) );
+problemData.gravityConst = 10;
+problemData.diffusiveFluxExact = @(t,x,z) x-x - 0.001 * 0.001 * z .* cos(0.01*(t+x)) .* (2 * (x > 50) - 1);
+problemData.UHexact = @(t,x) x-x + hMat(t,x) .* u1Mat(t,x,hMat(t,x)./2);
+problemData.hExact = @(t,x) hMat(t,x);
+problemData.uExact = @(t,x,z) u1Mat(t,x,z);
+% AR: -------------------------------------------------------------------------------------------------------------
 
 %
 % Constant solution
