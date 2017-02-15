@@ -73,16 +73,15 @@ u1Cont = @(x1,x2) problemData.u1Cont(t,x1,x2);
 
 % AR: -------------------------------------------------------------------------------------------------------------
 problemData.globRbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr .* ~(problemData.g.markE0TprescDiffusion), problemData.hatRdiag, DDisc);
-globLuRterms = evaluateExactDiffusion(problemData.g, t, problemData.g.markE0TprescDiffusion, problemData.diffusiveFluxExact, problemData.qOrd, problemData.basesOnQuad2D);
-globLuTildeQterms = evaluateExactGHNu(problemData.g, t, problemData.gravityConst, problemData.g.markE0TprescH, problemData.hExact, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globLuRterms = evaluateExactDiffusion(problemData.g, t, problemData.g.markE0TprescDiffusion, problemData.diffusiveFluxExact, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globLuTildeQterms = evaluateExactGHNu(problemData.g, t, problemData.gravityConst, problemData.g.markE0TprescH, problemData.hExact, problemData.qOrd, problemData.basesOnQuad2D);
 % AR: -------------------------------------------------------------------------------------------------------------
 
 problemData.globJD = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0Tbdr, u1Cont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 % AR: -------------------------------------------------------------------------------------------------------------
 problemData.globPbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr .* ~(problemData.g.markE0TprescU), problemData.hatRdiag, problemData.cDisc(2:3));
-globLuPterms = evaluateExactUsquareNu1(problemData.g, t, problemData.g.markE0TprescU, problemData.uExact, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.globLqTerms = evaluateExactUNu(problemData.g, t, problemData.g.markE0TprescU, problemData.uExact, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globLuPterms = evaluateExactUsquareNu(problemData.g, t, problemData.g.m
 % AR: -------------------------------------------------------------------------------------------------------------
 
 problemData.globPbdr = problemData.globPbdr{1} + problemData.globPbdr{2};
@@ -90,6 +89,5 @@ problemData.globPbdr = problemData.globPbdr{1} + problemData.globPbdr{2};
 % AR: -------------------------------------------------------------------------------------------------------------
 problemData.barGlobPbdr = assembleMatEdge1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, heightV0T1D, problemData.g.g1D.markV0TfreeUH, problemData.barHatPdiag);
 problemData.globLhPterms = evalExactUHNu(problemData.g.g1D, t, problemData.g.g1D.prescUHindex, problemData.UHexact, problemData.basesOnQuad1D);
-problemData.globLubdrTerms = globLuRterms + globLuTildeQterms + globLuPterms;
 % AR: -------------------------------------------------------------------------------------------------------------
 end % function

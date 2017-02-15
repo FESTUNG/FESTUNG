@@ -1,4 +1,4 @@
-function ret = assembleMatEdge1DPhiIntPhiIntFuncDiscIntNuHeight(g, dataDisc, heightV0T, markV0T, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt)
+function ret = ARassembleMatEdge1DPhiIntPhiIntFuncDiscIntNuHeight(g, dataDisc, heightV0T, markV0T, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt)
 [K,N] = size(dataDisc{1});
 ret = sparse(K*N, K*N);
 for n = 1 : 2
