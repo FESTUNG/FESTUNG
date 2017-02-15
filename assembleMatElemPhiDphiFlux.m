@@ -14,21 +14,23 @@ ret{2} = sparse(K*N, K*N);
 for iT = 1:K
     iTs = (iT-1)*N + 1;
     iTe = (iT)*N;
-
-    tmp = zeros(N, N, 2);
-    for iDim = 1:2
-        for i = 1:N
-            for j=1:N
-                %                 Gbar( :, i, j, iDim)
-                %                 uEval( iT, :, iDim)
-                %                 if iT==1
-                %                     tmp(i,j, iDim) = uEval( iT, :, iDim) * Gbar( :, i, j, iDim) ;
-                %                 else
-                %                     tmp(i,j, iDim) = fliplr(uEval( iT, :, iDim)) * Gbar( :, i, j, iDim) ;
-                %                 end
-                tmp(i,j, iDim) = tmp(i,j, iDim) +  uEval( iT, :, iDim) * Gbar( :, i, j, iDim) ;
-                
-                %                 tmp(i,j) = fliplr(uEval( iT, :, iDim)) * Gbar( :, i, j, iDim) ;
+    
+    tmp = zeros(N, N, 2, 2);
+    for iVel = 1:2
+        for iDim = 1:2
+            for i = 1:N
+                for j=1:N
+                    %                 Gbar( :, i, j, iDim)
+                    %                 uEval( iT, :, iDim)
+                    %                 if iT==1
+                    %                     tmp(i,j, iDim) = uEval( iT, :, iDim) * Gbar( :, i, j, iDim) ;
+                    %                 else
+                    %                     tmp(i,j, iDim) = fliplr(uEval( iT, :, iDim)) * Gbar( :, i, j, iDim) ;
+                    %                 end
+                    tmp(i,j, iDim, iVel) = tmp(i,j, iDim, iVel) +  uEval( iT, :, iVel) * Gbar( :, i, j, iDim) ;
+                    
+                    %                 tmp(i,j) = fliplr(uEval( iT, :, iDim)) * Gbar( :, i, j, iDim) ;
+                end
             end
         end
         
@@ -43,12 +45,12 @@ for iT = 1:K
     %     if (iDim == 1)
     %         ret{iDim}( iTs:iTe,  iTs:iTe) = ret{iDim}( iTs:iTe,  iTs:iTe ) + 2 .* tmp;
     ret{1}( iTs:iTe,  iTs:iTe) = ret{1}( iTs:iTe,  iTs:iTe ) ...
-                                 + g.B(iT,2,2) .* tmp(:,:, 1)...
-                                 - g.B(iT,2,1) .* tmp(:,:, 1) ;
+        + g.B(iT,2,2) .* tmp(:,:, 1, 1)...
+        - g.B(iT,2,1) .* tmp(:,:, 2, 1) ;
     %     else
     ret{2}( iTs:iTe,  iTs:iTe) = ret{2}( iTs:iTe,  iTs:iTe ) ...
-                                 - g.B(iT,1,2) .* tmp(:,:, 2) ...
-                                 + g.B(iT,1,1) .* tmp(:,:, 2) ;
+        - g.B(iT,1,2) .* tmp(:,:, 1, 2) ...
+        + g.B(iT,1,1) .* tmp(:,:, 2, 2) ;
     %     end
 end
 
