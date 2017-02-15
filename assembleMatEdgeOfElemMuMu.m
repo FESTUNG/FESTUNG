@@ -30,5 +30,16 @@ for iT = 1:K
     end
 end
 
+%Neumann boundary
+for iT = 1:K
+    for iE = 1:3
+%         iTs = (iT-1)*N + 1;
+%         iTe = (iT)*N;
+        iEs = (g.E0T(iT, iE) - 1)*Nlambda + 1;
+        iEe = (g.E0T(iT, iE))*Nlambda;
+        ret( iEs:iEe,  iEs:iEe  ) = ret( iEs:iEe,  iEs:iEe ) - g.areaE( g.E0T(iT, iE) ) .* ( g.markE0TbdrN(iT, iE) ) .* refEdgeMuMu;        
+    end
+end
+
 % ret = kron(spdiags(g.areaE, 0, KEdge, KEdge), refEdgeMuMu);
 end % function

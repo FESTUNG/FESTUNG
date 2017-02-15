@@ -113,6 +113,8 @@ problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 %Term III.2 and Term III.5
 problemData.globRlambda = assembleMatEdgeMuPhiInt( problemData.g, problemData.hatRlambda );
 
+problemData.globRD = assembleMatEdgeMuPhiNeumannInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRlambda );
+
 %Term III.2, we use the assembly routine above
 problemData.globRlambdaBar = assembleMatEdgeMuPhiIntBC( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
 %Term III.5, we use the assembly routine above
@@ -132,6 +134,9 @@ problemData.globRgamma = assembleMatEdgePhiIntMu( problemData.g, problemData.g.m
 % problemData.globMlambda = assembleMatEdgeMuMu( problemData.g, problemData.stab, problemData.hatM );
 %Term V.1 WIP und VI.1
 problemData.globP = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, problemData.hatMlambda);
+
+problemData.globMneumann = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, problemData.hatMlambda);
+
 
 %Term V.2 g, markE0Tbdr, refEdgePhiIntMu
 problemData.globU = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, problemData.hatRgamma );

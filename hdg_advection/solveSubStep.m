@@ -144,7 +144,7 @@ else
     matL = problemData.globM ./ problemData.dt - problemData.globG{1} - problemData.globG{2} ...
         + stab * problemData.globRphi; % Here goes the time discretization
     vecF = problemData.globMcDisc ./ problemData.dt - stab * problemData.globFgamma - stab * problemData.globCd ; % Add here source terms if needed
-    matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda;
+    matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda + problemData.globSN{1} + problemData.globSN{2}  + stab * problemData.globRD;
     
     %% Computing local solves
     localSolves = mldivide(matL, [vecF matM]);
