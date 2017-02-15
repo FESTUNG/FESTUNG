@@ -26,7 +26,7 @@ for iT = 1:K
                 %                 else
                 %                     tmp(i,j, iDim) = fliplr(uEval( iT, :, iDim)) * Gbar( :, i, j, iDim) ;
                 %                 end
-                tmp(i,j, iDim) = uEval( iT, :, iDim) * Gbar( :, i, j, iDim) ;
+                tmp(i,j, iDim) = tmp(i,j, iDim) +  uEval( iT, :, iDim) * Gbar( :, i, j, iDim) ;
                 
                 %                 tmp(i,j) = fliplr(uEval( iT, :, iDim)) * Gbar( :, i, j, iDim) ;
             end
@@ -42,9 +42,13 @@ for iT = 1:K
     end
     %     if (iDim == 1)
     %         ret{iDim}( iTs:iTe,  iTs:iTe) = ret{iDim}( iTs:iTe,  iTs:iTe ) + 2 .* tmp;
-    ret{1}( iTs:iTe,  iTs:iTe) = ret{1}( iTs:iTe,  iTs:iTe ) + g.B(iT,2,2) .* tmp(:,:, 1) -  g.B(iT,2,1) .* tmp(:,:, 2) ;
+    ret{1}( iTs:iTe,  iTs:iTe) = ret{1}( iTs:iTe,  iTs:iTe ) ...
+                                 + g.B(iT,2,2) .* tmp(:,:, 1)...
+                                 - g.B(iT,2,1) .* tmp(:,:, 1) ;
     %     else
-    ret{2}( iTs:iTe,  iTs:iTe) = ret{2}( iTs:iTe,  iTs:iTe ) - g.B(iT,1,2) .* tmp(:,:, 1) +  g.B(iT,1,1) .* tmp(:,:, 2) ;
+    ret{2}( iTs:iTe,  iTs:iTe) = ret{2}( iTs:iTe,  iTs:iTe ) ...
+                                 - g.B(iT,1,2) .* tmp(:,:, 2) ...
+                                 + g.B(iT,1,1) .* tmp(:,:, 2) ;
     %     end
 end
 

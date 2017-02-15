@@ -19,7 +19,7 @@ for iT = 1:K
         if (g.T0E(edgeNr, 2) == iT)
             %         if (2 == iT)
             flip = 2;
-            %             uEdgeLocal = flipud( uEdgeLocal );
+%             uEdgeLocal = fliplr( uEdgeLocal );
         end
         
         iTs = (iT-1)*N + 1;

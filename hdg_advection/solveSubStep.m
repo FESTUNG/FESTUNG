@@ -109,7 +109,7 @@ if (problemData.isInTesting == true)
     cDiscLambdaUnused = mldivide( sysMatA, sysRhs );
     
     %% Testing compute lambda given exact cDisc
-    lambdaFromC = mldivide( matM, vecF - matL*problemData.cDiscReshaped );
+    lambdaFromC = mldivide( matP, vecKD - matN*problemData.cDiscReshaped );
     %% Debugging
     
     % Inserting 'approximated' cDisc and cDiscLambda to compare residuals
