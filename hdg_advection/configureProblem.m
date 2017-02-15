@@ -105,6 +105,10 @@ problemData.getRGSol = @(t, X1, X2) ones(size(X1));
 % problemData.u1Cont = @(t,x1,x2) zeros(size(x1));
 % problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
 
+% problemData.u1Cont = @(t,x1,x2) ones(size(x1));
+% problemData.u2Cont = @(t,x1,x2) ones(size(x1));
+
+
 problemData.c0Cont = @(x1, x2) problemData.getRGSol(0, x1, x2);
 problemData.fCont = @(t,x1,x2) zeros(size(x1));
 problemData.u1Cont = @(t,x1,x2) -4.*x2;

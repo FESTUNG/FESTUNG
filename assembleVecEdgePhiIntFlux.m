@@ -23,16 +23,16 @@ for iT = 1:K
         fluxLocal = fluxEval( :, :, iT, iE);
         
         bases = basesOnQuad.phi1D{qOrd}( :, :, iE);
-%         if (g.T0E(edgeNr, 2) == iT)
-%             flip = 2;
-%             %             bases = flipud(bases);
-% %             fluxLocal = flipud( fluxLocal );
-%         end
-        if (2 == iT)
-%             flip = 2;
-%             bases = flipud(bases);
-%              fluxLocal = flipud( fluxLocal );
+        if (g.T0E(edgeNr, 2) == iT)
+            flip = 2;
+            %             bases = flipud(bases);
+%             fluxLocal = flipud( fluxLocal );
         end
+%         if (2 == iT)
+% %             flip = 2;
+% %             bases = flipud(bases);
+% %              fluxLocal = flipud( fluxLocal );
+%         end
         
         
         iTs = (iT-1)*N + 1;
@@ -56,7 +56,7 @@ for iT = 1:K
             %             ( W * (fluxEvalNu' .* basesOnQuad.phi1D{qOrd}( :, i, iE) ) )
             %             g.areaE( edgeNr ) .* markE0Tbdr(iT, iE) .* ( W * (fluxEvalNu' .* basesOnQuad.phi1D{qOrd}( :, i, iE) ) )
             %             tmp(i) = tmp(i) + g.areaE( edgeNr ) .* markE0Tbdr(iT, iE) .* ( W * (fluxEvalNu' .* basesOnQuad.phi1D{qOrd}( :, i, iE) ) );
-            g.areaE( edgeNr ) .* markE0Tbdr(iT, iE) .* ( W * (fluxEvalNu' .* bases( :, i ) ) )
+%             g.areaE( edgeNr ) .* markE0Tbdr(iT, iE) .* ( W * (fluxEvalNu' .* bases( :, i ) ) )
             tmp(i) = tmp(i) + g.areaE( edgeNr ) .* markE0Tbdr(iT, iE) .* ( W * (fluxEvalNu' .* bases( :, i ) ) );
         end
 

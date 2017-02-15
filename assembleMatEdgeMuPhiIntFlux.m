@@ -32,7 +32,7 @@ for iT = 1:K
             for i = 1:N
                 for j=1:Nlambda
                     %                     tmp(i,j) = uEdge( iDim, :, iT, iE) * Sbar( :, i, j, iDim, flip);
-                    tmp(i,j) = uEdgeLocal( iDim, :) .*g.nuE0T( iT, iE , iDim) * Sbar( :, i, j, iE, flip);
+                    tmp(i,j) = uEdgeLocal( iDim, :) .* g.nuE0T( iT, iE , iDim) * Sbar( :, i, j, iE, flip);
                 end
             end
             

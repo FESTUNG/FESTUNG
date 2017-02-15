@@ -77,11 +77,14 @@ if (problemData.isInTesting == true)
     resC12 = matM * problemData.cDiscLambdaReshaped;
     resC = (resC11 + resC12) - vecF;
     
-    resEdge11 = problemData.globS{1} * problemData.cDiscLambdaReshaped;
-    resEdge12 = problemData.globS{2} * problemData.cDiscLambdaReshaped;
+    
+    resEdge11 = (- problemData.globG{1} - problemData.globG{2})* problemData.cDiscReshaped;
+    resEdge12 = problemData.globS{1} * problemData.cDiscLambdaReshaped;
+    resEdge13 = problemData.globS{2} * problemData.cDiscLambdaReshaped;
+    
     resEdge21 = stab * problemData.globFgamma;
     
-    resEdge = ( resEdge11 + resEdge12 ) + resEdge21;
+    resEdge = ( resEdge11 + resEdge12  + resEdge13) + resEdge21;
     
     resHyb1 = matN * problemData.cDiscReshaped + matP * problemData.cDiscLambdaReshaped;
     resHyb2 = vecKD;
@@ -97,7 +100,6 @@ if (problemData.isInTesting == true)
     r23 = problemData.globCd;
     
     diffr1r2 = r11 - r12 - r21 + r22 + r23;
-    
     
     sysMatA = -matN * LinvM + matP;
     sysRhs = vecKD - matN * LinvF;
@@ -135,6 +137,8 @@ if (problemData.isInTesting == true)
     %% Reconstructing local solutions from updated lambda
     problemData.cDisc = LinvF - LinvM * problemData.cDiscLambda;
     problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
+    
+    problemData.cDiscLambda = reshape( problemData.cDiscLambda, problemData.Nlambda, problemData.g.numE )';
 else
     %% Actual HDG
     matL = problemData.globM ./ problemData.dt - problemData.globG{1} - problemData.globG{2} ...
@@ -161,6 +165,8 @@ else
     %% Reconstructing local solutions from updated lambda
     problemData.cDisc = LinvF - LinvM * problemData.cDiscLambda;
     problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
+    
+    problemData.cDiscLambda = reshape( problemData.cDiscLambda, problemData.Nlambda, problemData.g.numE )';
 end
 
 

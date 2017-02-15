@@ -98,7 +98,9 @@ problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData
 %% HDG related global matrices
 % problemData.hatRphiOnQuad    = integrateRefEdgePhiIntPhiIntPerQuad(problemData.N, problemData.basesOnQuad);
 
+% Precomputations for term II
 problemData.hatGbarOnQuad = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
+% Precomputations for III.1
 problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
 
 % problemData.hatGbarOnQuad = integrateRefEdgePhiIntPhiIntFlux(problemData.N, problemData.basesOnQuad);
@@ -108,11 +110,13 @@ problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemD
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 % problemData.globMlambda = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMlambda);
 
-%Term III.2
+%Term III.2 and Term III.5
 problemData.globRlambda = assembleMatEdgeMuPhiInt( problemData.g, problemData.hatRlambda );
 
-problemData.globRlambdaHat = assembleMatEdgeMuPhiIntBC( problemData.g, ~problemData.g.markE0Tint, problemData.hatRlambda );
+%Term III.2, we use the assembly routine above
 problemData.globRlambdaBar = assembleMatEdgeMuPhiIntBC( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
+%Term III.5, we use the assembly routine above
+problemData.globRlambdaHat = assembleMatEdgeMuPhiIntBC( problemData.g, ~problemData.g.markE0Tint, problemData.hatRlambda );
 
 % hatRlambdaTransposed = zeros( problemData.Nlambda, problemData.N, 3);
 % for i=1:3
@@ -121,7 +125,7 @@ problemData.globRlambdaBar = assembleMatEdgeMuPhiIntBC( problemData.g, problemDa
 
 %Term III.3 WIP
 problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
-%Term III.2 + III.5 WIP
+%Term VI.2
 problemData.globRgamma = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, problemData.hatRgamma );
 
 %Term V.1 WIP
@@ -131,7 +135,5 @@ problemData.globP = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, p
 
 %Term V.2 g, markE0Tbdr, refEdgePhiIntMu
 problemData.globU = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, problemData.hatRgamma );
-
-
 
 end % function

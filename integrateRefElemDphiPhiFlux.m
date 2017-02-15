@@ -23,8 +23,8 @@ ret = zeros( Nip, N, N, 2 ); % [ N x N x 2]
 %                     basesOnQuad.gradPhi2D{qOrd}(ip,i,m)
 %                     basesOnQuad.phi2D{qOrd}(ip,j)
 %                     basesOnQuad.gradPhi2D{qOrd}(ip,i,m) .* basesOnQuad.phi2D{qOrd}(ip,j)
-                    ret( ip, i, j, m ) =  W(ip) .* basesOnQuad.gradPhi2D{qOrd}(ip,i,m) .* basesOnQuad.phi2D{qOrd}(ip,j) ;
-                    ret( ip, i, j, m )
+                    ret( ip, i, j, m ) =  W(ip) .* basesOnQuad.phi2D{qOrd}(ip,j) .* basesOnQuad.gradPhi2D{qOrd}(ip,i,m) ;
+%                     ret( ip, i, j, m )
                 end
             end % for
         end % for

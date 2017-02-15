@@ -92,7 +92,7 @@ N = problemData.N;
 % fEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont(problemData.t(nSubStep),x1,x2), ...
 %                                      problemData.N, problemData.basesOnQuad);
 
-%Evaluate u (=transport velocities) on every edge
+%Evaluate u (=transport velocities) on every element
 problemData.uEval(:,:,1) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont( problemData.t+problemData.dt, x1,x2), ...
                                      problemData.N, problemData.basesOnQuad);
 problemData.uEval(:,:,2) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u2Cont( problemData.t+problemData.dt,x1,x2), ...
@@ -105,15 +105,16 @@ problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) pr
 %Evaluate the flux on every edge
 problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, problemData, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, c), ...
                                            problemData.cEdge, problemData.Nlambda);
-                                 
+                               
+% Term III.4
 problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
-
+% Term III.6
 problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, problemData.cEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
                                
 % problemData.globCd = assembleVecEdgePhiIntValTesting( problemData.g, problemData.N,  @(x1, x2) problemData.cDCont(  problemData.t+problemData.dt, x1 ,x2), problemData.g.markE0TbdrD, problemData.basesOnQuad );
 
-
-problemData.globG = assembleMatElemPhiPhiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
+% Term II
+problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
                        
 problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, 1.), ...
                                     problemData.Nlambda);

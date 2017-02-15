@@ -28,12 +28,27 @@ for it = 1 : length(requiredOrders)
     for i = 1 : N
         basesOnGamma.phi1D{ord}(:, i) = phi1D(i, Q);
     end
+    
+    
+%     basesOnGamma.thetaPhi1D{ord}(:, i, 1, 1) = basesOnGamma.phi1D{ord}(:, :);
+%     basesOnGamma.thetaPhi1D{ord}(:, i, 1, 2) = basesOnGamma.phi1D{ord}(:, :);
+%     basesOnGamma.thetaPhi1D{ord}(:, i, 1, 3) = basesOnGamma.phi1D{ord}(:, :);
+%     basesOnGamma.thetaPhi1D{ord}(:, i, 2, 1) = fliplr(basesOnGamma.phi1D{ord}(:, :));
+%     basesOnGamma.thetaPhi1D{ord}(:, i, 2, 2) = basesOnGamma.phi1D{ord}(:, :);
+%     basesOnGamma.thetaPhi1D{ord}(:, i, 2, 3) = basesOnGamma.phi1D{ord}(:, :);
+%     basesOnGamma.thetaPhi1D{ord}(:, i, 3, 1) = fliplr(basesOnGamma.phi1D{ord}(:, :));
+%     basesOnGamma.thetaPhi1D{ord}(:, i, 3, 2) = fliplr(basesOnGamma.phi1D{ord}(:, :));
+%     basesOnGamma.thetaPhi1D{ord}(:, i, 3, 3) = basesOnGamma.phi1D{ord}(:, :);
 %     basesOnGamma.phi1D{ord} = fliplr( basesOnGamma.phi1D{ord} );
-    %     for np = 1 : 3
-    %       [QP1,QP2] = theta(nn, np, Q1, Q2);
-    %       for i = 1 : N
-    %         basesOnGamma.thetaPhi1D{ord}(:, i, nn, np) = phi(i, QP1, QP2);
-    %       end % for
-    %     end % for
+%     for nn = 1 : 3
+%         [Q1, Q2] = gammaMap(nn, Q);
+%         for np = 1 : 3
+%             [QP1,QP2] = theta(nn, np, Q1, zeros( 1, size(Q1,2)) );
+%             for i = 1 : N
+%                 %             basesOnGamma.thetaPhi1D{ord}(:, i, nn, np) = phi(i, QP1, QP2);
+%                 basesOnGamma.thetaPhi1D{ord}(:, i, nn, np) = phi1D(i, QP1);
+%             end % for
+%         end % for
+%     end
 end % for
 end % function
