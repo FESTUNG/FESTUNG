@@ -62,7 +62,7 @@ function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
 problemData.hmax        = 2^-4; % maximum edge length of triangle
-problemData.p           = 2; % local polynomial degree
+problemData.p           = 1; % local polynomial degree
 problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
 problemData.numSteps    = 16; % number of time steps
 problemData.tEnd        = pi/(4); % end time
@@ -70,7 +70,7 @@ problemData.tEnd        = pi/(4); % end time
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution
 
-problemData.outputFrequency = 1; % no visualization of every timestep
+problemData.outputFrequency = max(problemData.numSteps/16,1); % no visualization of every timestep
 problemData.outputBasename  = ['output' filesep 'solution_hdg_advection']; % Basename of output files
 problemData.outputTypes     = {'vtk'}; % solution output file types
 
@@ -137,5 +137,6 @@ problemData.generateGridData = @(hmax) domainArbitrarySquare( -0.5, 0.5, hmax );
 % Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
 problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
+% problemData.generateMarkE0TbdrN = @(g) generateRotGaussBoundary(g);
 problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 end % function

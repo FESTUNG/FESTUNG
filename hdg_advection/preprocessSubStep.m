@@ -108,8 +108,9 @@ problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, problemDat
                                
 % Term III.4
 problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
+% problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, problemData.fluxEdge, ~problemData.g.markE0Tint, problemData.basesOnQuad );
 % Term III.6
-problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, problemData.cEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
+problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, problemData.cEdge, problemData.g.markE0TbdrD, problemData, problemData.basesOnQuad );
                                
 % problemData.globCd = assembleVecEdgePhiIntValTesting( problemData.g, problemData.N,  @(x1, x2) problemData.cDCont(  problemData.t+problemData.dt, x1 ,x2), problemData.g.markE0TbdrD, problemData.basesOnQuad );
 
@@ -126,6 +127,10 @@ problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.N, p
 % This has to be evaluated at t_new = t + dt!!
 problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
     @(x1,x2) problemData.cDCont( problemData.t+problemData.dt, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
+
+% Assembly of Neumann boundary contributions
+% problemData.globKNlambda = assembleVecEdgeMuFuncContValNeumann( problemData.g, problemData.g.markE0TbdrN, ...
+%     problemData.cDiscLambda, problemData.Nlambda, problemData.basesOnGamma );
 
 % Reshape cDisc to have a vector
 problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
