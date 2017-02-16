@@ -1,4 +1,4 @@
-function ret = assembleMatEdgeMuPhiIntFlux( g, markE0Tbdr, N, Nlambda, uEdge, Sbar )
+function ret = assembleMatEdgeMuPhiIntFlux( g, markE0Tbdr,uEdge, Sbar )
 
 %Assert that the length of uEval and hatSbarOnQuad is ok
 K = g.numT;
