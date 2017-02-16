@@ -139,4 +139,5 @@ problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
 % problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
 problemData.generateMarkE0TbdrN = @(g) generateRotGaussBoundary(g);
 problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
+
 end % function
