@@ -111,8 +111,6 @@ problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N
 % problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, problemData.fluxEdge, ~problemData.g.markE0Tint, problemData.basesOnQuad );
 % Term III.6
 problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, problemData.cEdge, problemData.g.markE0TbdrD, problemData, problemData.basesOnQuad );
-                               
-% problemData.globCd = assembleVecEdgePhiIntValTesting( problemData.g, problemData.N,  @(x1, x2) problemData.cDCont(  problemData.t+problemData.dt, x1 ,x2), problemData.g.markE0TbdrD, problemData.basesOnQuad );
 
 % Term II
 problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
