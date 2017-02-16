@@ -65,6 +65,8 @@ problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...
 
 % Precompute some repeatedly evaluated fields                          
 problemData.g = computeDerivedGridData(problemData.g);       
+
+problemData.g.flipArray = generateFlipArray( problemData.g );
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
