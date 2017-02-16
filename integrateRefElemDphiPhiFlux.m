@@ -10,21 +10,14 @@ p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [~,~,W] = quadRule2D(qOrd);
 Nip = size(W,2);
 ret = zeros( Nip, N, N, 2 ); % [ N x N x 2]
 
-% ret = cell(2,1); 
-% ret{1} = sparse(N, N, Nip); 
-% ret{2} = sparse(N, N, Nip);
+ret = cell(2,1);
 
 % if N > 1 % p > 0
     for i = 1 : N
         for j = 1 : N
             for m = 1 : 2
                 for ip = 1:Nip
-%                     W(ip)
-%                     basesOnQuad.gradPhi2D{qOrd}(ip,i,m)
-%                     basesOnQuad.phi2D{qOrd}(ip,j)
-%                     basesOnQuad.gradPhi2D{qOrd}(ip,i,m) .* basesOnQuad.phi2D{qOrd}(ip,j)
-                    ret( ip, i, j, m ) =  W(ip) .* basesOnQuad.phi2D{qOrd}(ip,j) .* basesOnQuad.gradPhi2D{qOrd}(ip,i,m) ;
-%                     ret( ip, i, j, m )
+                    ret{m}( i, j, ip ) =  W(ip) .* basesOnQuad.phi2D{qOrd}(ip,j) .* basesOnQuad.gradPhi2D{qOrd}(ip,i,m) ;
                 end
             end % for
         end % for
