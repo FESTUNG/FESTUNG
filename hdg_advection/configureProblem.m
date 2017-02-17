@@ -61,9 +61,10 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
-problemData.hmax        = 2^-4; % maximum edge length of triangle
-problemData.p           = 3; % local polynomial degree
-problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
+problemData.hmax        = 2^-1; % maximum edge length of triangle
+problemData.p           = 1; % local polynomial degree
+problemData.ordRK       = 2; % order of Runge Kutta time stepper.
+% problemData.ordRK       = min(problemData.p+1,4); % order of Runge Kutta time stepper.
 problemData.numSteps    = 16; % number of time steps
 problemData.tEnd        = pi/(4); % end time
 
@@ -79,12 +80,15 @@ problemData.stab = 1.0; %stabilization parameter in mod. LF/Rusanov flux
 %% Testing?
 problemData.isInTesting = false;
 
+problemData.tabRK = getDIRKtableau( problemData.ordRK );
+
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
-assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta must be zero to three.')
+assert(problemData.ordRK >= 1 && problemData.ordRK <= 4, 'Order of Runge Kutta must be zero to three.')
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 %% Coefficients and boundary data (rotating Gaussian).
+
 problemData.rgX1c = -0.2;
 % problemData.rgX1c = -0.0;
 problemData.rgX2c =  0.0;

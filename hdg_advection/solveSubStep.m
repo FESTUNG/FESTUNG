@@ -55,12 +55,14 @@ Kedge = problemData.g.numE;
 N = problemData.N;
 stab = problemData.stab;
 
-%% Actual HDG
-matL = problemData.globM ./ problemData.dt - problemData.globG{1} - problemData.globG{2} ...
-    + stab * problemData.globRphi; % Here goes the time discretization
-vecF = problemData.globMcDisc ./ problemData.dt - stab * problemData.globFgamma - stab * problemData.globCd ; % Add here source terms if needed
-matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda + problemData.globSN{1} + problemData.globSN{2}  + stab * problemData.globRD;
+diagRK = problemData.tabRK.A( nSubStep, nSubStep );
 
+%% Actual HDG
+matL = problemData.globM ./ problemData.dt - diagRK .* problemData.globG{1} - diagRK .* problemData.globG{2} ...
+    + diagRK .* stab * problemData.globRphi; % Here goes the time discretization
+vecF = problemData.globMcDisc ./ problemData.dt - diagRK .* stab * problemData.globFgamma - diagRK .* stab * problemData.globCd ; % Add here source terms if needed
+matM = diagRK .*problemData.globS{1} + diagRK .*problemData.globS{2} - diagRK .*stab * problemData.globRlambda + diagRK .*problemData.globSN{1} +diagRK .* problemData.globSN{2}  + diagRK .* stab * problemData.globRD;
+matM = diagRK .* matM;
 %% Computing local solves
 localSolves = mldivide(matL, [vecF matM]);
 
@@ -81,7 +83,5 @@ problemData.cDiscLambda = mldivide( sysMatA, sysRhs );
 %% Reconstructing local solutions from updated lambda
 problemData.cDisc = LinvF - LinvM * problemData.cDiscLambda;
 problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
-
 problemData.cDiscLambda = reshape( problemData.cDiscLambda, problemData.Nlambda, problemData.g.numE )';
-
 end % function

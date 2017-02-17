@@ -56,5 +56,12 @@
 %> @endparblock
 %
 function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
-% No preprocessing necessary.
+% problemData.stepRK = 0;
+K = problemData.K;
+N = problemData.N;
+
+problemData.cDiscRK = cell( problemData.tabRK.s, 1);
+for i = 1:problemData.tabRK.s
+    problemData.cDiscRK{i} = zeros( K*N, 1 );
+end
 end % function

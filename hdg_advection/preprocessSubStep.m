@@ -57,19 +57,32 @@ function problemData = preprocessSubStep(problemData, nStep, nSubStep) %#ok<INUS
 K = problemData.K;
 N = problemData.N;
 
+problemData.timeRK = problemData.t+ problemData.tabRK.C(nSubStep) * problemData.dt;
+
+problemData.cDiscStep = zeros( K * N, 1 );
+% RK RHS
+problemData.cDiscStep = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+for i=1:nSubStep-1
+    problemData.cDiscStep = problemData.cDiscStep + problemData.dt * problemData.tabRK.A(nSubStep,i) .* problemData.cDiscRK{i};
+end
+
+problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+
+
+
 %% HDG stuff
 %Evaluate u (=transport velocities) on every element
-problemData.uEval(:,:,1) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont( problemData.t+problemData.dt, x1,x2), ...
+problemData.uEval(:,:,1) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u1Cont( problemData.timeRK, x1,x2), ...
                                      problemData.N, problemData.basesOnQuad);
-problemData.uEval(:,:,2) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u2Cont( problemData.t+problemData.dt,x1,x2), ...
+problemData.uEval(:,:,2) = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.u2Cont( problemData.timeRK,x1,x2), ...
                                      problemData.N, problemData.basesOnQuad);
 
 %Evaluate c (=solution) on every edge
-problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(  problemData.t+problemData.dt, x1 ,x2), ...
+problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(  problemData.timeRK, x1 ,x2), ...
                                          problemData.Nlambda);
                                      
 %Evaluate the flux on every edge
-problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, problemData, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, c), ...
+problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, problemData, @(x1, x2, c) problemData.fluxCont( problemData.timeRK, x1 ,x2, c), ...
                                            problemData.cEdge, problemData.Nlambda);
                                
 % Term III.4
@@ -83,7 +96,7 @@ problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, ...
 problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
                
 % Evaluate advection velocity on every element
-problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, 1.), ...
+problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.timeRK, x1 ,x2, 1.), ...
                                     problemData.Nlambda);
 
 problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0Tint, ...
@@ -94,12 +107,11 @@ problemData.globSN = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.m
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!
 problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
-    @(x1,x2) problemData.cDCont( problemData.t+problemData.dt, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
+    @(x1,x2) problemData.cDCont( problemData.timeRK, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
 
 % Reshape cDisc to have a vector
-problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
-problemData.cDiscLambdaReshaped = reshape( problemData.cDiscLambda', size(problemData.globP, 1), 1 );
+% problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+% problemData.cDiscLambdaReshaped = reshape( problemData.cDiscLambda', size(problemData.globP, 1), 1 );
 % M*cDisc, should I store it?
-problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 
 end % function
