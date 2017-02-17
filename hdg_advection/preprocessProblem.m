@@ -93,8 +93,13 @@ problemData.hatMlambda = integrateRefEdgeMuMu(problemData.Nlambda, problemData.b
 % problemData.Gmat = integrateRefElemDphiPhi(problemData.N, problemData.basesOnQuad);
 
 % The matrices are actually transposed
-problemData.hatRgamma  = integrateRefEdgeMuPhiInt(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+% problemData.hatRgamma  = integrateRefEdgeMuPhiInt(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
 problemData.hatRlambda = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+% problemData.hatRgammaTrans = zeros( problemData.N, problemData.Nlambda, 3, 2);
+% for i=1:3
+%     problemData.hatRgammaTrans(:, :, i, 1) = problemData.hatRgamma(:,:,i, 1)';
+%     problemData.hatRgammaTrans(:, :, i, 2) = problemData.hatRgamma(:,:,i, 2)';
+% end
 problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
 
 %% HDG related global matrices
@@ -113,34 +118,32 @@ problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 % problemData.globMlambda = assembleMatEdgePhiPhiHybrid(problemData.g, problemData.hatMlambda);
 
 %Term III.2 and Term III.5
-problemData.globRlambda = assembleMatEdgeMuPhiInt( problemData.g, problemData.hatRlambda );
-
-problemData.globRD = assembleMatEdgeMuPhiNeumannInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRlambda );
+problemData.globRlambda = assembleMatEdgeMuPhiInt( problemData.g, true(problemData.K, 3), problemData.hatRlambda );
+problemData.globRD  = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRlambda );
 
 %Term III.2, we use the assembly routine above
-problemData.globRlambdaBar = assembleMatEdgeMuPhiIntBC( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
+%Interior
+problemData.globRlambdaBar = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
 %Term III.5, we use the assembly routine above
-problemData.globRlambdaHat = assembleMatEdgeMuPhiIntBC( problemData.g, ~problemData.g.markE0Tint, problemData.hatRlambda );
+% Exterior
+problemData.globRlambdaHat = assembleMatEdgeMuPhiInt( problemData.g, ~problemData.g.markE0Tint, problemData.hatRlambda );
 
-% hatRlambdaTransposed = zeros( problemData.Nlambda, problemData.N, 3);
-% for i=1:3
-%     hatRlambdaTransposed(:, :, i) = problemData.hatRlambda(:,:,i)';
-% end
 
 %Term III.3 WIP
 problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
 %Term VI.2
-problemData.globRgamma = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, problemData.hatRgamma );
+problemData.globRgamma = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRlambda );
+problemData.globRgamma = problemData.globRgamma';
 
-%Term V.1 WIP
-% problemData.globMlambda = assembleMatEdgeMuMu( problemData.g, problemData.stab, problemData.hatM );
-%Term V.1 WIP und VI.1
-problemData.globP = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, problemData.hatMlambda);
-
-problemData.globMneumann = assembleMatEdgeOfElemMuMu(problemData.g, problemData.stab, problemData.hatMlambda);
-
+%Term V.1 
+problemData.globMint  = assembleMatEdgeOfElemMuMu(problemData.g,  problemData.g.markE0Tint , problemData.hatMlambda);
+%Term VI.1 
+problemData.globMext  = assembleMatEdgeOfElemMuMu(problemData.g, ~problemData.g.markE0Tint , problemData.hatMlambda);
+%Matrix P 
+problemData.globP = problemData.stab .* problemData.globMint + problemData.globMext ;
 
 %Term V.2 g, markE0Tbdr, refEdgePhiIntMu
-problemData.globU = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, problemData.hatRgamma );
+problemData.globU = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
+problemData.globU = problemData.globU';
 
 end % function

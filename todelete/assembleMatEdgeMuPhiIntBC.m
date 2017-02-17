@@ -26,4 +26,14 @@ for iT = 1:K
     end
 end
 
+ret = sparse(Kedge*Nlambda, K*N);
+for iE = 1:3
+    Rkn1 = markE0T(:,iE) .*  g.flipArray(:, iE) .* g.areaE0T(:, iE);
+    Rkn2 = markE0T(:,iE) .* ~g.flipArray(:, iE) .* g.areaE0T(:, iE);
+    ret = ret + kron(sparse( g.E0T(:, iE), 1:K, Rkn1, Kedge, K ), ...
+              refEdgePhiIntMu(:,:,iE, 1));
+    ret = ret + kron(sparse( g.E0T(:, iE), 1:K, Rkn2, Kedge, K ), ...
+              refEdgePhiIntMu(:,:,iE, 2));
+end % for
+
 end % function
