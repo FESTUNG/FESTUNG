@@ -75,7 +75,9 @@ problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, problemDat
 % Term III.4
 problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
 % Term III.6
-problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, problemData.cEdge, problemData.g.markE0TbdrD, problemData, problemData.basesOnQuad );
+problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, ...
+                                               problemData.cEdge, problemData.g.markE0TbdrD, ...
+                                               problemData.basesOnQuad );
 
 % Term II
 problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );

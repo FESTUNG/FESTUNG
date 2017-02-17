@@ -63,10 +63,11 @@ matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlam
 
 %% Computing local solves
 localSolves = mldivide(matL, [vecF matM]);
+
 LinvF = localSolves(:, 1);
 LinvM = localSolves(:, 2:end);
 
-%% SolVing global system for lambda
+%% Solving global system for lambda
 matN = - stab * problemData.globU - problemData.globRgamma ;
 matP = problemData.globP;
 
