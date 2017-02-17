@@ -51,6 +51,7 @@
 %
 function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
+Kedge = problemData.g.numE;
 N = problemData.N;
 
 stab = problemData.stab;
