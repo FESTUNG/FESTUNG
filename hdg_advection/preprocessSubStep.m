@@ -79,13 +79,14 @@ problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, pro
 
 % Term II
 problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
-                       
+               
+% Evaluate advection velocity on every element
 problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2, c) problemData.fluxCont( problemData.t+problemData.dt, x1 ,x2, 1.), ...
                                     problemData.Nlambda);
 
 problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0Tint, ...
                                                  problemData.uEdge, problemData.hatSbarOnQuad );
-
+% Neumann BC
 problemData.globSN = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0TbdrN, ...
                                                   problemData.uEdge, problemData.hatSbarOnQuad );
 % Assembly of Dirichlet boundary contributions
@@ -98,6 +99,5 @@ problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM,
 problemData.cDiscLambdaReshaped = reshape( problemData.cDiscLambda', size(problemData.globP, 1), 1 );
 % M*cDisc, should I store it?
 problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
-%Rlambda is not time-depentend -> it is already constructed
 
 end % function
