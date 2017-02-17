@@ -93,10 +93,6 @@ problemData.globSN = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.m
 problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
     @(x1,x2) problemData.cDCont( problemData.t+problemData.dt, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
 
-% Assembly of Neumann boundary contributions
-% problemData.globKNlambda = assembleVecEdgeMuFuncContValNeumann( problemData.g, problemData.g.markE0TbdrN, ...
-%     problemData.cDiscLambda, problemData.Nlambda, problemData.basesOnGamma );
-
 % Reshape cDisc to have a vector
 problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 problemData.cDiscLambdaReshaped = reshape( problemData.cDiscLambda', size(problemData.globP, 1), 1 );
