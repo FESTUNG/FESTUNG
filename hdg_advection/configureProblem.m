@@ -68,7 +68,7 @@ problemData.numSteps    = 16; % number of time steps
 problemData.tEnd        = pi/(4); % end time
 
 problemData.isVisGrid   = false; % visualization of grid
-problemData.isVisSol    = true; % visualization of solution
+problemData.isVisSol    = false; % visualization of solution
 
 problemData.outputFrequency = max(problemData.numSteps/16,1); % no visualization of every timestep
 problemData.outputBasename  = ['output' filesep 'solution_hdg_advection']; % Basename of output files
@@ -121,7 +121,8 @@ problemData.cDCont = @(t,x1,x2) problemData.getRGSol(t, x1, x2);
 % problemData.cDCont = @(t,x1,x2) zeros(size(x1));
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 
-problemData.fluxCont = @( t, x1, x2, c ) [  problemData.u1Cont(t, x1, x2) .* c; problemData.u2Cont(t, x1, x2) .* c ];
+%problemData.fluxCont = @( t, x1, x2, c ) [  problemData.u1Cont(t, x1, x2)' .* c,  problemData.u2Cont(t, x1, x2)' .* c ];
+problemData.fluxCont = @( t, x1, x2, c ) rotGaussFlux(t, x1, x2, c);
 
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
