@@ -62,7 +62,9 @@ diagRK = 1.;
 problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 problemData.cDiscLambdaReshaped = reshape( problemData.cDiscLambda', size(problemData.globP, 1), 1 );
 %Evaluate the flux on every edge
-problemData.fluxEdge = evalFluxContAtEveryEdgeIntPoint(problemData.g, problemData, @(x1, x2, c) problemData.fluxCont( problemData.timeRK, x1 ,x2, c), ...
+problemData.fluxEdge = ...
+    evalFluxContAtEveryEdgeIntPoint(problemData.g, problemData, ...
+                         @(x1, x2, c) problemData.fluxCont( problemData.timeRK, x1 ,x2, c), ...
                                            problemData.cEdge, problemData.Nlambda);
                                
 % Term III.4
@@ -79,6 +81,7 @@ problemData.cDiscRK{nSubStep} = - diagRK .* stab * problemData.globFgamma - diag
                                 + diagRK .* stab * problemData.globRphi) * problemData.cDiscReshaped ...
                                 - (problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda + problemData.globSN{1} + problemData.globSN{2}  + stab * problemData.globRD) * problemData.cDiscLambdaReshaped;
 
+                            
 if (nSubStep == problemData.tabRK.s)
     problemData.isSubSteppingFinished = true;
 end

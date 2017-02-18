@@ -119,10 +119,8 @@ problemData.c0Cont = @(x1, x2) problemData.getRGSol(0, x1, x2);
 problemData.fCont = @(t,x1,x2) zeros(size(x1));
 problemData.u1Cont = @(t,x1,x2) -4.*x2;
 problemData.u2Cont = @(t,x1,x2)  4.*x1;
-%problemData.cDCont = @(t,x1,x2) zeros(size(x1));
-problemData.cDCont = @(t,x1,x2) problemData.getRGSol(t, x1, x2);
-% problemData.cDCont = @(t,x1,x2) problemData.getRGSol(0, x1, x2);
 % problemData.cDCont = @(t,x1,x2) zeros(size(x1));
+problemData.cDCont = @(t,x1,x2) problemData.getRGSol(t, x1, x2);
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 
 %problemData.fluxCont = @( t, x1, x2, c ) [  problemData.u1Cont(t, x1, x2)' .* c,  problemData.u2Cont(t, x1, x2)' .* c ];

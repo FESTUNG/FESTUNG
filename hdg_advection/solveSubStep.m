@@ -53,6 +53,7 @@ function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
 Kedge = problemData.g.numE;
 N = problemData.N;
+Nlambda = problemData.Nlambda;
 stab = problemData.stab;
 
 diagRK = problemData.tabRK.A( nSubStep, nSubStep );
@@ -64,8 +65,19 @@ vecF = problemData.globMcDisc ./ problemData.dt - diagRK .* stab * problemData.g
 matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda + problemData.globSN{1} + problemData.globSN{2}  + stab * problemData.globRD;
 matM = diagRK .* matM;
 %% Computing local solves
-localSolves = mldivide(matL, [vecF matM]);
 
+% localSolve = zeros( N, 1 + Kedge * Nlambda);
+% LinvF = zeros( K*N, 1 );
+% LinvM = sparse( K*N, Kedge * Nlambda);
+% for iE=1:K
+%     iEs = (iE-1)*N + 1;
+%     iEe =  iE*N;
+%     localSolve = mldivide(matL(iEs:iEe,iEs:iEe), [vecF(iEs:iEe) matM(iEs:iEe,:)]);
+%     LinvF(iEs:iEe) = localSolve( :, 1);
+%     LinvM(iEs:iEe,:) = localSolve( :, 2:end);
+% end
+
+localSolves = mldivide(matL, [vecF matM]);
 LinvF = localSolves(:, 1);
 LinvM = localSolves(:, 2:end);
 
