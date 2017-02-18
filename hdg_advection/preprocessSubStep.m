@@ -59,16 +59,17 @@ N = problemData.N;
 
 problemData.timeRK = problemData.t+ problemData.tabRK.C(nSubStep) * problemData.dt;
 
-problemData.cDiscStep = zeros( K * N, 1 );
+problemData.cDiscRkStep = zeros( K * N, 1 );
+% problemData.cDiscRkStep = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+% for i=1:nSubStep-1
+%     problemData.cDiscRkStep = problemData.cDiscRkStep + problemData.dt * problemData.tabRK.A(nSubStep,i) .* problemData.cDiscRK{i};
+% end
+
+problemData.cDiscRkRHS = zeros( K * N, 1 );
 % RK RHS
-problemData.cDiscStep = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 for i=1:nSubStep-1
-    problemData.cDiscStep = problemData.cDiscStep + problemData.dt * problemData.tabRK.A(nSubStep,i) .* problemData.cDiscRK{i};
+    problemData.cDiscRkRHS = problemData.cDiscRkRHS + problemData.tabRK.A(nSubStep,i) .* problemData.cDiscRK{i};
 end
-
-problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
-
-
 
 %% HDG stuff
 %Evaluate u (=transport velocities) on every element

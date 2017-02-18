@@ -60,8 +60,8 @@ diagRK = problemData.tabRK.A( nSubStep, nSubStep );
 %% Actual HDG
 matL = problemData.globM ./ problemData.dt - diagRK .* problemData.globG{1} - diagRK .* problemData.globG{2} ...
     + diagRK .* stab * problemData.globRphi; % Here goes the time discretization
-vecF = problemData.globMcDisc ./ problemData.dt - diagRK .* stab * problemData.globFgamma - diagRK .* stab * problemData.globCd ; % Add here source terms if needed
-matM = diagRK .*problemData.globS{1} + diagRK .*problemData.globS{2} - diagRK .*stab * problemData.globRlambda + diagRK .*problemData.globSN{1} +diagRK .* problemData.globSN{2}  + diagRK .* stab * problemData.globRD;
+vecF = problemData.globMcDisc ./ problemData.dt - diagRK .* stab * problemData.globFgamma - diagRK .* stab * problemData.globCd + problemData.cDiscRkRHS; % Add here source terms if needed
+matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda + problemData.globSN{1} + problemData.globSN{2}  + stab * problemData.globRD;
 matM = diagRK .* matM;
 %% Computing local solves
 localSolves = mldivide(matL, [vecF matM]);

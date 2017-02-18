@@ -58,7 +58,12 @@ N = problemData.N;
 %% Reshape and store solution in problemData
 % problemData.cDisc = reshape(problemData.cDiscRK{end}, N, K)';
 
-problemData.cDisc = mldivide( problemData.globM ./ problemData.dt, problemData.cDiskRK{end} );
+newSolution = problemData.globMcDisc ./ problemData.dt;
+for i=1: problemData.tabRK.s
+    newSolution = newSolution + problemData.tabRK.B(i) * problemData.cDiscRK{i};
+end
+problemData.cDisc = mldivide( problemData.globM ./ problemData.dt, newSolution );
+% problemData.cDisc = mldivide( problemData.globM ./ problemData.dt, problemData.globMcDisc ./ problemData.dt + problemData.cDiscRK{end} );
 problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
 
 problemData.isFinished = nStep >= problemData.numSteps;

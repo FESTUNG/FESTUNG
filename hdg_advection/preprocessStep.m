@@ -60,7 +60,8 @@ function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
 K = problemData.K;
 N = problemData.N;
 
-problemData.cDiscRK = cell( problemData.tabRK.s, 1);
+problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+
 for i = 1:problemData.tabRK.s
     problemData.cDiscRK{i} = zeros( K*N, 1 );
 end

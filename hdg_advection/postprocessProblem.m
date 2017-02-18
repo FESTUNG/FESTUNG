@@ -51,6 +51,8 @@ if problemData.isVisSol
 %   visualizeDataLagrGnuplot1D(problemData.g, cLagrangeEdge, 'lambda_h', problemData.outputBasename, ...
 %                     problemData.numSteps, problemData.outputTypes)
 end % if
+
+fprintf('Finished simulation at t_end = %g\n', problemData.t);
 %% Error evaluation
 fprintf('L2 error w.r.t. the exact solution: %g\n', ...
   computeL2ErrorAtTime(problemData.g, problemData.t, problemData.cDisc, problemData.getRGSol, 2*problemData.p, problemData.basesOnQuad));
