@@ -59,11 +59,16 @@ stab = problemData.stab;
 diagRK = problemData.tabRK.A( nSubStep, nSubStep );
 
 %% Actual HDG
-matL = problemData.globM ./ problemData.dt - diagRK .* problemData.globG{1} - diagRK .* problemData.globG{2} ...
-    + diagRK .* stab * problemData.globRphi; % Here goes the time discretization
-vecF = problemData.globMcDisc ./ problemData.dt - diagRK .* stab * problemData.globFgamma - diagRK .* stab * problemData.globCd + problemData.cDiscRkRHS; % Add here source terms if needed
-matM = problemData.globS{1} + problemData.globS{2} - stab * problemData.globRlambda + problemData.globSN{1} + problemData.globSN{2}  + stab * problemData.globRD;
-matM = diagRK .* matM;
+problemData.matLhat = - problemData.globG{1} - problemData.globG{2} ...
+                      + stab * problemData.globRphi;
+matL = problemData.globM ./ problemData.dt + diagRK .* problemData.matLhat; % Here goes the time discretization
+problemData.vecFhat = - stab * problemData.globFgamma - stab * problemData.globCd;
+vecF =  problemData.globMcDisc ./ problemData.dt ...
+      + diagRK .* problemData.vecFhat + problemData.cDiscRkRHS; % Add here source terms if needed
+problemData.matMhat =   problemData.globS{1} + problemData.globS{2} ...
+                      + problemData.globSN{1} + problemData.globSN{2} ...
+                      - stab * problemData.globRlambda   + stab * problemData.globRD;
+matM = diagRK .* problemData.matMhat;
 %% Computing local solves
 
 % localSolve = zeros( N, 1 + Kedge * Nlambda);
