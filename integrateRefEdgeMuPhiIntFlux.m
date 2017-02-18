@@ -11,9 +11,11 @@ for n = 1 : 3 % 3 edges
     for i = 1 : N
         for j = 1 : Nlambda
             for ip = 1:Nip
-                ret{1}(i, j, n, ip) = W(ip) .* basesOnQuad.phi1D{qOrd}(ip,i,n) .* basesOnGamma.phi1D{qOrd}(ip,j) ;
-                baseFlip = flipud(basesOnGamma.phi1D{qOrd});
-                ret{2}(i, j, n, ip) = W(ip) * (basesOnQuad.phi1D{qOrd}(ip,i,n) .* baseFlip(ip,j) );
+%                 ret{1}(i, j, n, ip) = W(ip) .* basesOnQuad.phi1D{qOrd}(ip,i,n) .* basesOnGamma.phi1D{qOrd}(ip,j) ;
+%                 baseFlip = flipud(basesOnGamma.phi1D{qOrd});
+%                 ret{2}(i, j, n, ip) = W(ip) * (basesOnQuad.phi1D{qOrd}(ip,i,n) .* baseFlip(ip,j) );
+                ret{1}(i, j, n, ip) = W(ip) .* basesOnQuad.phi1D{qOrd}(ip,i,n) .* basesOnGamma.thetaPhi1D{qOrd}(ip, j, 1);
+                ret{2}(i, j, n, ip) = W(ip) .* basesOnQuad.phi1D{qOrd}(ip,i,n) .* basesOnGamma.thetaPhi1D{qOrd}(ip, j, 2);
             end
         end % for
     end % for
