@@ -19,17 +19,6 @@ for n=1:3
         tmp(:) = tmp(:) + kron( fluxNu( :, n, 1, r), speye(N) ) * (W(r) .* basesOnQuad.phi1D{qOrd}( r, :, n)' );
     end
     fac = g.areaE0T( :, n ) .* markE0Tbdr(:, n);
-%     ret(:) = ret(:) + kron( fac .* tmp, speye(N) ) * (W * basesOnQuad.phi1D{qOrd}( :, :, n))';
     ret(:) = ret(:) + sum( kron( fac, speye(N) ), 2) .* tmp;
 end
-
-% for n=1:3
-%     tmp = zeros( K, 1 );
-%     for r=1:R
-%         tmp(:) = tmp(:) + fluxEval( :, n, 1, r).* g.nuE0T( :, n, 1 );
-%         tmp(:) = tmp(:) + fluxEval( :, n, 2, r).* g.nuE0T( :, n, 2 );
-%     end
-%     fac = g.areaE0T( :, n ) .* markE0Tbdr(:, n);
-%     ret(:) = ret(:) + kron( fac .* tmp, speye(N) ) * (W * basesOnQuad.phi1D{qOrd}( :, :, n))';
-% end
 end

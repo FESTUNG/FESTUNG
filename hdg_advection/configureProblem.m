@@ -124,7 +124,7 @@ problemData.cDCont = @(t,x1,x2) problemData.getRGSol(t, x1, x2);
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 
 %problemData.fluxCont = @( t, x1, x2, c ) [  problemData.u1Cont(t, x1, x2)' .* c,  problemData.u2Cont(t, x1, x2)' .* c ];
-problemData.fluxCont = @( t, x1, x2, c ) rotGaussFlux(t, x1, x2, c);
+problemData.fluxCont = @( t, x1, x2, c ) evalRotatingGaussianFlux(t, x1, x2, c);
 
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
