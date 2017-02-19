@@ -70,22 +70,35 @@ problemData.matMhat =   problemData.globS{1} + problemData.globS{2} ...
                       - stab * problemData.globRlambda   + stab * problemData.globRD;
 matM = diagRK .* problemData.matMhat;
 %% Computing local solves
-
-% localSolve = zeros( N, 1 + Kedge * Nlambda);
-% LinvF = zeros( K*N, 1 );
-% LinvM = sparse( K*N, Kedge * Nlambda);
-% for iE=1:K
-%     iEs = (iE-1)*N + 1;
-%     iEe =  iE*N;
-%     localSolve = mldivide(matL(iEs:iEe,iEs:iEe), [vecF(iEs:iEe) matM(iEs:iEe,:)]);
-%     LinvF(iEs:iEe) = localSolve( :, 1);
-%     LinvM(iEs:iEe,:) = localSolve( :, 2:end);
-% end
-
-localSolves = mldivide(matL, [vecF matM]);
-LinvF = localSolves(:, 1);
-LinvM = localSolves(:, 2:end);
-
+% There are two options.
+% 1. Invert the block diagonal matrix L locally, i.e. each block is 
+% inverted and then  we construct the inverse matrix L^{-1} from these 
+% blocks. This is usuall quickest for large matrices and also saves a lot 
+% of memory. It may be efficient to invert more than one block at once.
+% 2. We invert the whole mass matrix. This may be very slow and memory
+% consuming for large matrices (=many elements). I guess it may be faster
+% for matrices of moderate size.
+if (problemData.isTrueLocalSolve==true)
+    blockSize = problemData.localSolveBlockSize;
+    matLinvLocal = cell( K/blockSize, 1);
+    %Invert every block locally
+    for iE=1:K/blockSize
+        iEs = (iE-1)*N*blockSize + 1; %index Element start
+        iEe =  iE*N*blockSize; %index Element end
+        matLinvLocal{iE} =  mldivide(matL(iEs:iEe,iEs:iEe), speye(N*blockSize,N*blockSize) );
+    end
+    %Construct inverse matrix
+    matLinv = blkdiag(  matLinvLocal{:} );
+    
+    %Solve L x = [vecF matM]
+    localSolves = matLinv * [vecF matM];
+    LinvF = localSolves(:, 1);
+    LinvM = localSolves(:, 2:end);
+else
+    localSolves = mldivide(matL, [vecF matM]);
+    LinvF = localSolves(:, 1);
+    LinvM = localSolves(:, 2:end);
+end
 %% Solving global system for lambda
 matN = - stab * problemData.globU - problemData.globRgamma ;
 matP = problemData.globP;

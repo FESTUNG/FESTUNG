@@ -69,7 +69,20 @@ problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...
 % Precompute some repeatedly evaluated fields                          
 problemData.g = computeDerivedGridData(problemData.g);       
 
+%% HDG related configuration
 problemData.g.flipArray = generateFlipArray( problemData.g );
+% Choose a block size for the local solves if we want 'true' local solves
+if ( problemData.isTrueLocalSolve  == true )
+    K = problemData.K;
+    problemData.localSolveBlockSize = min(K, 16);
+    if (mod(K, problemData.localSolveBlockSize) ~= 0)
+        problemData.localSolveBlockSize = 1;
+        warning('Block size does not fit the problem. Reset block size to 1');
+    end
+    assert( mod(K, problemData.localSolveBlockSize) == 0, ...
+            'Block size does not fit to problem size!');
+end
+
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
