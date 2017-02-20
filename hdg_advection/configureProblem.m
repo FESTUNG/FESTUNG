@@ -62,16 +62,17 @@ function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
 problemData.hmax        = 2^-6; % maximum edge length of triangle
-problemData.p           = 1; % local polynomial degree
-problemData.ordRK       = 2; % order of Runge Kutta time stepper.
+problemData.p           = 3; % local polynomial degree
+problemData.ordRK       = 4; % order of Runge Kutta time stepper.
 % problemData.ordRK       = min(problemData.p+1,4); % order of Runge Kutta time stepper.
-problemData.numSteps    = 160; % number of time steps
+problemData.numSteps    = 640; % number of time steps
 problemData.tEnd        = 1; % end time
 
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution
 
-problemData.outputFrequency = max(problemData.numSteps/16,1); % no visualization of every timestep
+% problemData.outputFrequency = max(problemData.numSteps/16,1); % no visualization of every timestep
+problemData.outputFrequency = 640; % no visualization of every timestep
 problemData.outputBasename  = ['output' filesep 'solution_hdg_advection']; % Basename of output files
 problemData.outputTypes     = {'vtk'}; % solution output file types
 
@@ -83,8 +84,8 @@ problemData.isTrueLocalSolve = true;
 
 %% Testing?
 problemData.isInTesting = false;
-
 problemData.tabRK = getDIRKtableau( problemData.ordRK );
+problemData.showWaitBar = true;
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')

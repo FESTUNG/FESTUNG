@@ -53,5 +53,7 @@ fprintf('L2 error w.r.t. the initial condition: %g\n', ...
 fprintf('norm(cDisc, 1) = %g\n', norm(problemData.cDisc(:), 1));
 fprintf('norm(cDisc, 2) = %g\n', norm(problemData.cDisc(:), 2));
 fprintf('norm(cDisc, inf) = %g\n', norm(problemData.cDisc(:), inf));
+
+
 end % function
 

@@ -68,4 +68,6 @@ problemData.cDiscRK{1} = reshape(problemData.cDisc', [K*N 1]);
 % Carry out RK steps
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);
+
+
 end % function

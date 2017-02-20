@@ -52,6 +52,9 @@ if problemData.isVisSol
 %                     problemData.numSteps, problemData.outputTypes)
 end % if
 
+if (problemData.showWaitBar == true)
+    close( problemData.waitBar);
+end
 fprintf('Finished simulation at t_end = %g\n', problemData.t);
 %% Error evaluation
 % fprintf('L2 error w.r.t. the exact solution: %g\n', ...

@@ -4,11 +4,11 @@
 %===============================================================================
 %> @file advection/preprocessProblem.m
 %>
-%> @brief Performs all pre-processing tasks, such as grid generation, assembly 
+%> @brief Performs all pre-processing tasks, such as grid generation, assembly
 %>        of stationary blocks, etc. for the problem solution.
 %===============================================================================
 %>
-%> @brief Performs all pre-processing steps, such as grid generation, assembly 
+%> @brief Performs all pre-processing steps, such as grid generation, assembly
 %>        of stationary blocks, etc. for the problem solution.
 %>
 %> This routine is called after advection/configureProblem.m.
@@ -28,7 +28,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
-%> 
+%>
 %> @par License
 %> @parblock
 %> This program is free software: you can redistribute it and/or modify
@@ -58,16 +58,16 @@ problemData.N           = nchoosek(problemData.p + 2, problemData.p); % number o
 problemData.Nlambda     = problemData.p + 1; % number of local DOFs on Faces
 problemData.tau         = problemData.tEnd / problemData.numSteps;  % time step size
 
-% [K x 3] arrays that mark local edges (E0T) or vertices (V0T) that are 
+% [K x 3] arrays that mark local edges (E0T) or vertices (V0T) that are
 % interior or have a certain boundary type.
 problemData.g.markE0Tint  = problemData.generateMarkE0Tint(problemData.g);
 problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
 problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
 problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...
-                            problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD), :)); 
+    problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD), :));
 
-% Precompute some repeatedly evaluated fields                          
-problemData.g = computeDerivedGridData(problemData.g);       
+% Precompute some repeatedly evaluated fields
+problemData.g = computeDerivedGridData(problemData.g);
 
 %% HDG related configuration
 problemData.g.flipArray = generateFlipArray( problemData.g );
@@ -80,7 +80,7 @@ if ( problemData.isTrueLocalSolve  == true )
         warning('Block size does not fit the problem. Reset block size to 1');
     end
     assert( mod(K, problemData.localSolveBlockSize) == 0, ...
-            'Block size does not fit to problem size!');
+        'Block size does not fit to problem size!');
 end
 
 %% Configuration output.
@@ -125,15 +125,18 @@ problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problem
 problemData.globRgamma = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRlambda );
 problemData.globRgamma = problemData.globRgamma';
 
-%Term V.1 
+%Term V.1
 problemData.globMint  = assembleMatEdgeMuMu(problemData.g,  problemData.g.markE0Tint , problemData.hatMlambda);
-%Term VI.1 
+%Term VI.1
 problemData.globMext  = assembleMatEdgeMuMu(problemData.g, ~problemData.g.markE0Tint , problemData.hatMlambda);
-%Matrix P 
+%Matrix P
 problemData.globP = problemData.stab .* problemData.globMint + problemData.globMext ;
 
 %Term V.2 g, markE0Tbdr, refEdgePhiIntMu
 problemData.globU = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
 problemData.globU = problemData.globU';
 
+if ( problemData.showWaitBar == true )
+    problemData.waitBar = waitbar( 0, 'Simulation progress');
+end
 end % function

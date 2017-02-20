@@ -60,9 +60,6 @@ function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
 K = problemData.K;
 N = problemData.N;
 
-fprintf('Solving for step %d of %d .\n', nStep, problemData.numSteps);
-
-
 problemData.globMcDisc = problemData.globM * reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
 
 for i = 1:problemData.tabRK.s
