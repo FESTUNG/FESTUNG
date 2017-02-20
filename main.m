@@ -106,7 +106,9 @@ more off % Disable paging of output
 tic % Start time measurement
 diary([problemName '.log']) % Start logging
 %% Add problem to search path
-oldpath = addpath(problemName, pwd);
+if ~isdeployed
+    oldpath = addpath(problemName, pwd);
+end
 %% Execute problem
 try
   %% Pre-process and initialize problem
@@ -139,11 +141,15 @@ try
 catch e
   %% End logging and restore original path
   diary off
-  path(oldpath);
+  if ~isdeployed
+      path(oldpath);
+  end
   rethrow(e)
 end % try/catch
 fprintf('Total computation time: %g seconds.\n', toc);
 diary off
 %% Restore original search path
-path(oldpath);
+if ~isdeployed
+    path(oldpath);
+end
 end % function
