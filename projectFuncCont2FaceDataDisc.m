@@ -13,7 +13,10 @@ F1 = @(X1, X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
 F2 = @(X1, X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 for n = 1:3
     [x1, x2] = gammaMap( n, Q1 );
-    rhsTest(g.E0T(:, n),:) = W .* funcCont( F1(x1, x2), F2(x1, x2) ) * basesOnGamma.phi1D{ord}(:,:);    
+    %Matlab R2016b
+%     rhsTest2016b(g.E0T(:, n),:) = W .* funcCont( F1(x1, x2), F2(x1, x2) ) * basesOnGamma.phi1D{ord}(:,:);    
+    %Matlab R2016a
+    rhsTest(g.E0T(:, n),:) = repmat( W, g.numT, 1) .* funcCont( F1(x1, x2), F2(x1, x2) ) * basesOnGamma.phi1D{ord}(:,:);    
 end
 dataDisc = rhsTest / refFacePhiPhi(:,:);
 end % function
