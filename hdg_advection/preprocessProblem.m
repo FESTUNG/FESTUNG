@@ -108,7 +108,7 @@ problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemD
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
 %Term III.2 and Term III.5
-problemData.globRD  = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRlambda );
+% problemData.globRD  = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRlambda );
 
 %Term III.2, we use the assembly routine above
 %Interior
