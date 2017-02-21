@@ -93,7 +93,6 @@ if (problemData.isTrueLocalSolve==true)
     end
     %Construct inverse matrix
     matLinv = blkdiag(  matLinvLocal{:} );
-    
     %Solve L x = [vecF matM]
     localSolves = matLinv * [vecF matM];
     LinvF = localSolves(:, 1);
