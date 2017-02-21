@@ -115,9 +115,10 @@ problemData.globRD  = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.mark
 problemData.globRlambdaBar = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
 %Term III.5, we use the assembly routine above
 % Exterior
-problemData.globRlambdaHat = assembleMatEdgeMuPhiInt( problemData.g, ~problemData.g.markE0Tint, problemData.hatRlambda );
+% problemData.globRlambdaHat = assembleMatEdgeMuPhiInt( problemData.g, ~problemData.g.markE0Tint, problemData.hatRlambda );
 % Assemble total matrix
-problemData.globRlambda = problemData.globRlambdaBar + problemData.globRlambdaHat;
+% problemData.globRlambda = problemData.globRlambdaBar + problemData.globRlambdaHat;
+problemData.globRlambda = problemData.globRlambdaBar;
 
 %Term III.3 WIP
 problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
