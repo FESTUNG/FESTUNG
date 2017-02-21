@@ -59,20 +59,20 @@ stab = problemData.stab;
 diagRK = problemData.tabRK.A( nSubStep, nSubStep );
 
 %% Actual HDG
-problemData.matLhat = - problemData.globG{1} - problemData.globG{2} ...
+problemData.matLbar = - problemData.globG{1} - problemData.globG{2} ...
                       + stab * problemData.globRphi;
-matL = problemData.globM ./ problemData.dt + diagRK .* problemData.matLhat; % Here goes the time discretization
-% problemData.vecFhat = - stab * problemData.globFgamma - stab * problemData.globCd;
-problemData.vecFhat = - stab * problemData.globFgamma;
+matL = problemData.globMphi ./ problemData.dt + diagRK .* problemData.matLbar; % Here goes the time discretization
+% problemData.vecBphi = - stab * problemData.globFphiD - stab * problemData.globCd;
+problemData.vecBphi = - stab * problemData.globFphiD;
 vecF =  problemData.globMcDisc ./ problemData.dt ...
-      + diagRK .* problemData.vecFhat + problemData.cDiscRkRHS; % Add here source terms if needed
-% problemData.matMhat =   problemData.globS{1} + problemData.globS{2} ...
+      + diagRK .* problemData.vecBphi + problemData.cDiscRkRHS; % Add here source terms if needed
+% problemData.matMbar =   problemData.globS{1} + problemData.globS{2} ...
 %                       + problemData.globSN{1} + problemData.globSN{2} ...
-%                       - stab * problemData.globRlambda   + stab * problemData.globRD;
-problemData.matMhat =   problemData.globS{1} + problemData.globS{2} ...
-                      + problemData.globSN{1} + problemData.globSN{2} ...
-                      - stab * problemData.globRlambda;
-matM = diagRK .* problemData.matMhat;
+%                       - stab * problemData.globRmu   + stab * problemData.globRD;
+problemData.matMbar =   problemData.globS{1} + problemData.globS{2} ...
+                      + problemData.globSout{1} + problemData.globSout{2} ...
+                      - stab * problemData.globRmu;
+matM = diagRK .* problemData.matMbar;
 %% Computing local solves
 % There are two options.
 % 1. Invert the block diagonal matrix L locally, i.e. each block is 
@@ -103,13 +103,13 @@ else
     LinvM = localSolves(:, 2:end);
 end
 %% Solving global system for lambda
-matN = - stab * problemData.globU - problemData.globRgamma ;
+matN = - stab * problemData.globU - problemData.globKmuOut ;
 matP = problemData.globP;
 
-vecKD = problemData.globKDlambda;
+vecKmuD = problemData.globKmuD;
 
 sysMatA = -matN * LinvM + matP;
-sysRhs = vecKD - matN * LinvF;
+sysRhs = vecKmuD - matN * LinvF;
 
 problemData.cDiscLambda = mldivide( sysMatA, sysRhs );
 

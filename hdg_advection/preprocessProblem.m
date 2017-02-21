@@ -94,10 +94,10 @@ problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemDat
 
 %% Computation of HDG matrices on the reference triangle.
 %Hybrid mass matrix
-problemData.hatMlambda = integrateRefEdgeMuMu(problemData.Nlambda, problemData.basesOnGamma);
+problemData.hatMmu = integrateRefEdgeMuMu(problemData.Nlambda, problemData.basesOnGamma);
 
 % Integrals on edges
-problemData.hatRlambda = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+problemData.hatRmu = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
 problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
 % Precomputations for term II
 problemData.hatGbarOnQuad = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
@@ -105,36 +105,36 @@ problemData.hatGbarOnQuad = integrateRefElemDphiPhiFlux(problemData.N, problemDa
 problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
 
 %% Assembly of time-independent global matrices.
-problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
+problemData.globMphi = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
 %Term III.2 and Term III.5
-% problemData.globRD  = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRlambda );
+% problemData.globRD  = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu );
 
 %Term III.2, we use the assembly routine above
 %Interior
-problemData.globRlambdaBar = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
+problemData.globRmuBar = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
 %Term III.5, we use the assembly routine above
 % Exterior
-% problemData.globRlambdaHat = assembleMatEdgeMuPhiInt( problemData.g, ~problemData.g.markE0Tint, problemData.hatRlambda );
+% problemData.globRmuHat = assembleMatEdgeMuPhiInt( problemData.g, ~problemData.g.markE0Tint, problemData.hatRmu );
 % Assemble total matrix
-% problemData.globRlambda = problemData.globRlambdaBar + problemData.globRlambdaHat;
-problemData.globRlambda = problemData.globRlambdaBar;
+% problemData.globRmu = problemData.globRmuBar + problemData.globRmuHat;
+problemData.globRmu = problemData.globRmuBar;
 
 %Term III.3 WIP
 problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
 %Term VI.2
-problemData.globRgamma = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRlambda );
-problemData.globRgamma = problemData.globRgamma';
+problemData.globKmuOut = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu );
+problemData.globKmuOut = problemData.globKmuOut';
 
 %Term V.1
-problemData.globMint  = assembleMatEdgeMuMu(problemData.g,  problemData.g.markE0Tint , problemData.hatMlambda);
+problemData.globMmuBar  = assembleMatEdgeMuMu(problemData.g,  problemData.g.markE0Tint , problemData.hatMmu);
 %Term VI.1
-problemData.globMext  = assembleMatEdgeMuMu(problemData.g, ~problemData.g.markE0Tint , problemData.hatMlambda);
+problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, ~problemData.g.markE0Tint , problemData.hatMmu);
 %Matrix P
-problemData.globP = problemData.stab .* problemData.globMint + problemData.globMext ;
+problemData.globP = problemData.stab .* problemData.globMmuBar + problemData.globMmuTilde;
 
 %Term V.2 g, markE0Tbdr, refEdgePhiIntMu
-problemData.globU = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRlambda );
+problemData.globU = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
 problemData.globU = problemData.globU';
 
 if ( problemData.showWaitBar == true )

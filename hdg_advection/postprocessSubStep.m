@@ -59,12 +59,12 @@ stab = problemData.stab;
 diagRK = 1.;
 
 
-problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
 problemData.cDiscLambdaReshaped = reshape( problemData.cDiscLambda', size(problemData.globP, 1), 1 );
 
-problemData.cDiscRK{nSubStep} = problemData.vecFhat ...
-                                - problemData.matLhat * problemData.cDiscReshaped ...
-                                - problemData.matMhat * problemData.cDiscLambdaReshaped;
+problemData.cDiscRK{nSubStep} = problemData.vecBphi ...
+                                - problemData.matLbar * problemData.cDiscReshaped ...
+                                - problemData.matMbar * problemData.cDiscLambdaReshaped;
 
                             
 if (nSubStep == problemData.tabRK.s)

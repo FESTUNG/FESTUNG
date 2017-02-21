@@ -60,7 +60,7 @@ N = problemData.N;
 problemData.timeRK = problemData.t+ problemData.tabRK.C(nSubStep) * problemData.dt;
 
 problemData.cDiscRkStep = zeros( K * N, 1 );
-% problemData.cDiscRkStep = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+% problemData.cDiscRkStep = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
 % for i=1:nSubStep-1
 %     problemData.cDiscRkStep = problemData.cDiscRkStep + problemData.dt * problemData.tabRK.A(nSubStep,i) .* problemData.cDiscRK{i};
 % end
@@ -88,7 +88,7 @@ problemData.fluxEdge = ...
                                      problemData.cEdge, problemData.Nlambda);
                                
 % Term III.4
-problemData.globFgamma = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, ...
+problemData.globFphiD = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, ...
     problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
 % Term III.6
 % problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, ...
@@ -106,16 +106,16 @@ problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2) proble
 problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0Tint, ...
                                                  problemData.uEdge, problemData.hatSbarOnQuad );
 % Outflow BC
-problemData.globSN = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0TbdrN, ...
+problemData.globSout = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0TbdrN, ...
                                                   problemData.uEdge, problemData.hatSbarOnQuad );
 
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!
-problemData.globKDlambda = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
+problemData.globKmuD = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
     @(x1,x2) problemData.cDCont( problemData.timeRK, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
 
 % Reshape cDisc to have a vector
-% problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globM, 1), 1 );
+% problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
 % problemData.cDiscLambdaReshaped = reshape( problemData.cDiscLambda', size(problemData.globP, 1), 1 );
 % M*cDisc, should I store it?
 
