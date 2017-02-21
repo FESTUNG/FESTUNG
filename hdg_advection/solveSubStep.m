@@ -111,10 +111,10 @@ vecKmuD = problemData.globKmuD;
 sysMatA = -matN * LinvM + matP;
 sysRhs = vecKmuD - matN * LinvF;
 
-problemData.cDiscLambda = mldivide( sysMatA, sysRhs );
+problemData.lambdaDisc = mldivide( sysMatA, sysRhs );
 
 %% Reconstructing local solutions from updated lambda
-problemData.cDisc = LinvF - LinvM * problemData.cDiscLambda;
+problemData.cDisc = LinvF - LinvM * problemData.lambdaDisc;
 problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
-problemData.cDiscLambda = reshape( problemData.cDiscLambda, problemData.Nlambda, problemData.g.numE )';
+problemData.lambdaDisc = reshape( problemData.lambdaDisc, problemData.Nlambda, problemData.g.numE )';
 end % function

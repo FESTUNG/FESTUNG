@@ -116,7 +116,7 @@ problemData.globKmuD = assembleVecEdgeMuFuncContVal( problemData.g, problemData.
 
 % Reshape cDisc to have a vector
 % problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
-% problemData.cDiscLambdaReshaped = reshape( problemData.cDiscLambda', size(problemData.globP, 1), 1 );
+% problemData.lambdaDiscReshaped = reshape( problemData.lambdaDisc', size(problemData.globP, 1), 1 );
 % M*cDisc, should I store it?
 
 end % function
