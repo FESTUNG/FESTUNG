@@ -63,8 +63,8 @@ problemData.matLbar = - problemData.globG{1} - problemData.globG{2} ...
                       + stab * problemData.globRphi;
 matL = problemData.globMphi ./ problemData.dt + diagRK .* problemData.matLbar; % Here goes the time discretization
 % problemData.vecBphi = - stab * problemData.globFphiD - stab * problemData.globCd;
-problemData.vecBphi = - stab * problemData.globFphiD;
-vecF =  problemData.globMcDisc ./ problemData.dt ...
+problemData.vecBphi = - problemData.globFphiD;
+vecQ =  problemData.globMcDisc ./ problemData.dt ...
       + diagRK .* problemData.vecBphi + problemData.cDiscRkRHS; % Add here source terms if needed
 % problemData.matMbar =   problemData.globS{1} + problemData.globS{2} ...
 %                       + problemData.globSN{1} + problemData.globSN{2} ...
@@ -93,28 +93,28 @@ if (problemData.isTrueLocalSolve==true)
     end
     %Construct inverse matrix
     matLinv = blkdiag(  matLinvLocal{:} );
-    %Solve L x = [vecF matM]
-    localSolves = matLinv * [vecF matM];
-    LinvF = localSolves(:, 1);
+    %Solve L x = [vecQ matM]
+    localSolves = matLinv * [vecQ matM];
+    LinvQ = localSolves(:, 1);
     LinvM = localSolves(:, 2:end);
 else
-    localSolves = mldivide(matL, [vecF matM]);
-    LinvF = localSolves(:, 1);
+    localSolves = mldivide(matL, [vecQ matM]);
+    LinvQ = localSolves(:, 1);
     LinvM = localSolves(:, 2:end);
 end
 %% Solving global system for lambda
 matN = - stab * problemData.globU - problemData.globKmuOut ;
 matP = problemData.globP;
 
-vecKmuD = problemData.globKmuD;
+vecR = problemData.globKmuD;
 
 sysMatA = -matN * LinvM + matP;
-sysRhs = vecKmuD - matN * LinvF;
+sysRhs = vecR - matN * LinvQ;
 
 problemData.lambdaDisc = mldivide( sysMatA, sysRhs );
 
 %% Reconstructing local solutions from updated lambda
-problemData.cDisc = LinvF - LinvM * problemData.lambdaDisc;
+problemData.cDisc = LinvQ - LinvM * problemData.lambdaDisc;
 problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
 problemData.lambdaDisc = reshape( problemData.lambdaDisc, problemData.Nlambda, problemData.g.numE )';
 end % function

@@ -62,8 +62,8 @@ function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
 problemData.hmax        = 2^-4; % maximum edge length of triangle
-problemData.p           =2; % local polynomial degree
-problemData.ordRK       = 3; % order of Runge Kutta time stepper.
+problemData.p           =1; % local polynomial degree
+problemData.ordRK       = 2; % order of Runge Kutta time stepper.
 % problemData.ordRK       = min(problemData.p+1,4); % order of Runge Kutta time stepper.
 problemData.numSteps    = 80; % number of time steps
 problemData.tEnd        = 1; % end time
