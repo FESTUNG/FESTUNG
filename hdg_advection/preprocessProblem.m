@@ -112,13 +112,13 @@ problemData.globMphi = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
 %Term III.2, we use the assembly routine above
 %Interior
-problemData.globRmuBar = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
+problemData.globRmu = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
 %Term III.5, we use the assembly routine above
 % Exterior
 % problemData.globRmuHat = assembleMatEdgeMuPhiInt( problemData.g, ~problemData.g.markE0Tint, problemData.hatRmu );
 % Assemble total matrix
 % problemData.globRmu = problemData.globRmuBar + problemData.globRmuHat;
-problemData.globRmu = problemData.globRmuBar;
+% problemData.globRmu = problemData.globRmuBar;
 
 %Term III.3 WIP
 problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );

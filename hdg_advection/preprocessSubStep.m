@@ -59,12 +59,6 @@ N = problemData.N;
 
 problemData.timeRK = problemData.t+ problemData.tabRK.C(nSubStep) * problemData.dt;
 
-problemData.cDiscRkStep = zeros( K * N, 1 );
-% problemData.cDiscRkStep = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
-% for i=1:nSubStep-1
-%     problemData.cDiscRkStep = problemData.cDiscRkStep + problemData.dt * problemData.tabRK.A(nSubStep,i) .* problemData.cDiscRK{i};
-% end
-
 problemData.cDiscRkRHS = zeros( K * N, 1 );
 % RK RHS
 for i=1:nSubStep-1

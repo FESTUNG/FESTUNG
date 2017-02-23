@@ -2,13 +2,13 @@
 %
 function ret = assembleMatEdgeMuPhiInt(g, markE0T, refEdgePhiIntMu)
 K = g.numT;  N = size(refEdgePhiIntMu, 1);
-Kedge = g.numE; Nlambda = size(refEdgePhiIntMu, 2);
+Kedge = g.numE; Nmu = size(refEdgePhiIntMu, 2);
 
 % Check function arguments that are directly used
 validateattributes(markE0T, {'logical'}, {'size', [K 3]}, mfilename, 'markE0T');
-validateattributes(refEdgePhiIntMu, {'numeric'}, {'size', [N Nlambda 3 2]}, mfilename, 'refEdgePhiIntMu');
+validateattributes(refEdgePhiIntMu, {'numeric'}, {'size', [N Nmu 3 2]}, mfilename, 'refEdgePhiIntMu');
 
-ret = sparse(K*N, Kedge*Nlambda);
+ret = sparse(K*N, Kedge*Nmu);
 for iE = 1:3
     Rkn1 = markE0T(:,iE) .*  g.flipArray(:, iE) .* g.areaE0T(:, iE);
     Rkn2 = markE0T(:,iE) .* ~g.flipArray(:, iE) .* g.areaE0T(:, iE);
