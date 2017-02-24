@@ -53,7 +53,7 @@ function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
 Kedge = problemData.g.numE;
 N = problemData.N;
-Nlambda = problemData.Nmu;
+Nmu = problemData.Nmu;
 stab = problemData.stab;
 
 diagRK = problemData.tabRK.A( nSubStep, nSubStep );
