@@ -1,4 +1,4 @@
-function dataEval = evalFuncContAtEveryIntPoint(g, funcCont, N, basesOnQuad)
+function dataEval = evalFuncContAtEveryIntPoint2(g, funcCont, N, basesOnQuad)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad');
 K = g.numT;
