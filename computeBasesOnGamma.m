@@ -1,7 +1,7 @@
 %
 function basesOnGamma = computeBasesOnGamma(N, basesOnGamma, requiredOrders)
 % Check for valid number of DOFs: N == (p+1)(p+2)/2
-assert(~isempty(find(N == (0:3)+1, 1)), ...
+assert(~isempty(find(N == (0:4)+1, 1)), ...
     'Number of degrees of freedom does not match a polynomial order')
 validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma')
 
