@@ -1,6 +1,7 @@
 %
 function ret = integrateRefEdgeMuPhiIntFlux(N, Nmu, basesOnQuad, basesOnGamma)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnGamma')
 p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
 R = size(W,2);
 ret = cell(2,1);

@@ -1,10 +1,10 @@
 function ret = evalFluxContAtEveryEdgeIntPoint(g, markE0T, fluxCont, cCont, Nmu)
 validateattributes(fluxCont, {'function_handle'}, {}, mfilename, 'fluxCont');
-
 p = Nmu-1;  qOrd = max(2*p, 1);  [Q,~] = quadRule1D(qOrd);
 K = g.numT;
-
 R = size(Q, 2);
+validateattributes(cCont, {'numeric'}, {'size', [K R 3]}, mfilename, 'cCont');
+
 
 ret = zeros( K, 3, 2, size(Q,2) );
 F1 = @(X1, X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));

@@ -73,7 +73,10 @@ problemData.uEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemD
 %Evaluate c (=solution) on every edge
 problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(  problemData.timeRK, x1 ,x2), ...
                                          problemData.Nmu);
-                                     
+% Evaluate advection velocity on every element
+problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2) problemData.fluxCont( problemData.timeRK, x1 ,x2, 1.), ...
+                                    problemData.Nmu);
+                                
 %Evaluate the flux on every edge
 problemData.fluxEdge = ...
     evalFluxContAtEveryEdgeIntPoint( problemData.g, ...
@@ -87,10 +90,7 @@ problemData.globFphiD = assembleVecEdgePhiIntFlux( problemData.g, problemData.N,
 
 % 
 problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
-               
-% Evaluate advection velocity on every element
-problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2) problemData.fluxCont( problemData.timeRK, x1 ,x2, 1.), ...
-                                    problemData.Nmu);
+              
 
 % Flux on interior edges
 problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0Tint, ...

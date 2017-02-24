@@ -1,14 +1,13 @@
 function ret = assembleVecEdgePhiIntFlux( g, N, fluxEval, markE0Tbdr, basesOnQuad )
 %Assert
 K = g.numT;
-
-validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
-validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-
 p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
 % Assemble matrix
 ret = zeros( K*N, 1 );
 [~,~,~,R] = size(fluxEval);
+validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
+validateattributes(fluxEval, {'numeric'}, {'size', [K 3 2 R]}, mfilename, 'fluxEval');
 
 %Matlab 2016b
 % fluxNu2016b = fluxEval( :, :, 1, :) .* g.nuE0T( :, :, 1 ) + fluxEval( :, :, 2, :) .* g.nuE0T( :, :, 2 );

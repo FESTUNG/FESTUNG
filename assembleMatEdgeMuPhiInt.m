@@ -6,7 +6,7 @@ Kedge = g.numE; Nmu = size(refEdgePhiIntMu, 2);
 
 % Check function arguments that are directly used
 validateattributes(markE0T, {'logical'}, {'size', [K 3]}, mfilename, 'markE0T');
-validateattributes(refEdgePhiIntMu, {'numeric'}, {'size', [N Nmu 3 2]}, mfilename, 'refEdgePhiIntMu');
+validateattributes(refEdgePhiIntMu, {'numeric'}, {'size', [N, Nmu, 3, 2]}, mfilename, 'refEdgePhiIntMu');
 
 ret = sparse(K*N, Kedge*Nmu);
 for iE = 1:3

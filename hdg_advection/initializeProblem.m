@@ -73,5 +73,5 @@ if problemData.isVisSol
     visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
 end
 fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
-    problemData.tEnd, problemData.tau, problemData.numSteps)
+    problemData.tEnd, problemData.dt, problemData.numSteps)
 end % function

@@ -53,10 +53,10 @@ if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 problemData.cDiscRK = cell( problemData.tabRK.s, 1);
 
 %% Globally constant parameters.
-problemData.K           = problemData.g.numT;  % number of triangles
-problemData.N           = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
-problemData.Nmu     = problemData.p + 1; % number of local DOFs on Faces
-problemData.tau         = problemData.tEnd / problemData.numSteps;  % time step size
+problemData.K     = problemData.g.numT;  % number of triangles
+problemData.N    = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
+problemData.Nmu  = problemData.p + 1; % number of local DOFs on Faces
+% problemData.tau  = problemData.tEnd / problemData.numSteps;  % time step size
 
 % [K x 3] arrays that mark local edges (E0T) or vertices (V0T) that are
 % interior or have a certain boundary type.
@@ -73,7 +73,7 @@ problemData.g = computeDerivedGridData(problemData.g);
 problemData.g.flipArray = generateFlipArray( problemData.g );
 % Choose a block size for the local solves if we want 'true' local solves
 if ( problemData.isTrueLocalSolve  == true )
-    problemData.localSolveBlockSize = determineLocalSolveBlockSize( problemData );
+    problemData.localSolveBlockSize = determineLocalSolveBlockSize( problemData.K );
 end
 
 %% Configuration output.
@@ -100,33 +100,23 @@ problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemD
 %% Assembly of time-independent global matrices.
 problemData.globMphi = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
-%Term III.2 and Term III.5
-% problemData.globRD  = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu );
-
-%Term III.2, we use the assembly routine above
+%We use the assembly routine above
 %Interior
 problemData.globRmu = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
-%Term III.5, we use the assembly routine above
-% Exterior
-% problemData.globRmuHat = assembleMatEdgeMuPhiInt( problemData.g, ~problemData.g.markE0Tint, problemData.hatRmu );
-% Assemble total matrix
-% problemData.globRmu = problemData.globRmuBar + problemData.globRmuHat;
-% problemData.globRmu = problemData.globRmuBar;
-
-%Term III.3 WIP
+%
 problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
-%Term VI.2
+%
 problemData.globKmuOut = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu );
 problemData.globKmuOut = problemData.globKmuOut';
 
-%Term V.1
+%
 problemData.globMmuBar  = assembleMatEdgeMuMu(problemData.g,  problemData.g.markE0Tint , problemData.hatMmu);
-%Term VI.1
+%
 problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, ~problemData.g.markE0Tint , problemData.hatMmu);
-%Matrix P
+%
 problemData.globP = problemData.stab .* problemData.globMmuBar + problemData.globMmuTilde;
 
-%Term V.2 g, markE0Tbdr, refEdgePhiIntMu
+%
 problemData.globU = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
 problemData.globU = problemData.globU';
 

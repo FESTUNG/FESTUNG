@@ -1,5 +1,5 @@
-function localSolveBlockSize = determineLocalSolveBlockSize( problemData )
-    K = problemData.K;
+function localSolveBlockSize = determineLocalSolveBlockSize( K )
+    assert( K > 0, 'The mesh must have at least one element');
     localSolveBlockSize = min(K, 16);
     if (mod(K, localSolveBlockSize) ~= 0)
         localSolveBlockSize = 1;

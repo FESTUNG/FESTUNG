@@ -50,9 +50,9 @@
 % If it is an internal edge, the entry has to be scaled by 2*alpha
 % check the element transformation
 function ret = assembleMatEdgeMuMu(g, markE0T, refEdgeMuMu)
-
 Nmu = size(refEdgeMuMu, 1);
 Kedge = g.numE;
+validateattributes(refEdgeMuMu, {'numeric'}, {'size', [Nmu Nmu]}, mfilename, 'refEdgeMuMu');
 
 %Interior edges
 ret = sparse(Kedge*Nmu, Kedge*Nmu);
