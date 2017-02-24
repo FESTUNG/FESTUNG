@@ -1,7 +1,7 @@
-function dataEval = evalUContAtEveryEdgeIntPoint(g, fluxCont, Nlambda)
+function dataEval = evalUContAtEveryEdgeIntPoint(g, fluxCont, Nmu)
 validateattributes(fluxCont, {'function_handle'}, {}, mfilename, 'fluxCont');
 
-p = Nlambda-1;  qOrd = max(2*p, 1);  [Q1,~] = quadRule1D(qOrd);
+p = Nmu-1;  qOrd = max(2*p, 1);  [Q1,~] = quadRule1D(qOrd);
 K = g.numT;
 
 dataEval = cell(2,1);

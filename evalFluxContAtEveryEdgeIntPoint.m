@@ -1,7 +1,7 @@
-function ret = evalFluxContAtEveryEdgeIntPoint(g, markE0T, fluxCont, cCont, Nlambda)
+function ret = evalFluxContAtEveryEdgeIntPoint(g, markE0T, fluxCont, cCont, Nmu)
 validateattributes(fluxCont, {'function_handle'}, {}, mfilename, 'fluxCont');
 
-p = Nlambda-1;  qOrd = max(2*p, 1);  [Q,~] = quadRule1D(qOrd);
+p = Nmu-1;  qOrd = max(2*p, 1);  [Q,~] = quadRule1D(qOrd);
 K = g.numT;
 
 R = size(Q, 2);

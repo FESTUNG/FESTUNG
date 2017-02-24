@@ -12,11 +12,11 @@ for iT = 1:K
            baryX = g.baryE( edgeNr, 1 );
            baryY = g.baryE( edgeNr, 2 );
            
-           %Left
+           %Right
            if ( baryX > 0.4999999 )
                bdry( iT, iE ) = 1;
            end
-           %Bottom
+           %Top
            if ( baryY > 0.4999999 )
                bdry( iT, iE ) = 1;
            end

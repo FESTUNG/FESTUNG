@@ -81,15 +81,11 @@ problemData.fluxEdge = ...
                                      @(x1, x2, c) problemData.fluxCont( problemData.timeRK, x1 ,x2, c), ...
                                      problemData.cEdge, problemData.Nmu);
                                
-% Term III.4
+% Evaluate Dirichlet boundary condition for the first equation.
 problemData.globFphiD = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, ...
     problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
-% Term III.6
-% problemData.globCd = assembleVecEdgePhiIntVal( problemData.g, problemData.N, ...
-%                                                problemData.cEdge, problemData.g.markE0TbdrD, ...
-%                                                problemData.basesOnQuad );
 
-% Term II
+% 
 problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
                
 % Evaluate advection velocity on every element
