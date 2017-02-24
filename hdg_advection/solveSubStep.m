@@ -53,7 +53,7 @@ function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
 Kedge = problemData.g.numE;
 N = problemData.N;
-Nlambda = problemData.Nlambda;
+Nlambda = problemData.Nmu;
 stab = problemData.stab;
 
 diagRK = problemData.tabRK.A( nSubStep, nSubStep );
@@ -116,5 +116,5 @@ problemData.lambdaDisc = mldivide( sysMatA, sysRhs );
 %% Reconstructing local solutions from updated lambda
 problemData.cDisc = LinvQ - LinvM * problemData.lambdaDisc;
 problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
-problemData.lambdaDisc = reshape( problemData.lambdaDisc, problemData.Nlambda, problemData.g.numE )';
+problemData.lambdaDisc = reshape( problemData.lambdaDisc, problemData.Nmu, problemData.g.numE )';
 end % function

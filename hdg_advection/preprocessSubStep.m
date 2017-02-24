@@ -67,19 +67,19 @@ end
 
 %% HDG stuff
 %Evaluate u (=transport velocities) on every element
-problemData.uEval = evalFuncContAtEveryIntPoint2(problemData.g, @(x1,x2) problemData.fluxCont( problemData.timeRK, x1 ,x2, 1.), ...
-                                     problemData.N, problemData.basesOnQuad);
+problemData.uEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fluxCont( problemData.timeRK, x1 ,x2, 1.), ...
+                                     problemData.N);
                                  
 %Evaluate c (=solution) on every edge
 problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(  problemData.timeRK, x1 ,x2), ...
-                                         problemData.Nlambda);
+                                         problemData.Nmu);
                                      
 %Evaluate the flux on every edge
 problemData.fluxEdge = ...
     evalFluxContAtEveryEdgeIntPoint( problemData.g, ...
                                      problemData.g.markE0TbdrD, ...
                                      @(x1, x2, c) problemData.fluxCont( problemData.timeRK, x1 ,x2, c), ...
-                                     problemData.cEdge, problemData.Nlambda);
+                                     problemData.cEdge, problemData.Nmu);
                                
 % Term III.4
 problemData.globFphiD = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, ...
@@ -94,7 +94,7 @@ problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, pr
                
 % Evaluate advection velocity on every element
 problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2) problemData.fluxCont( problemData.timeRK, x1 ,x2, 1.), ...
-                                    problemData.Nlambda);
+                                    problemData.Nmu);
 
 % Flux on interior edges
 problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0Tint, ...
@@ -106,7 +106,7 @@ problemData.globSout = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!
 problemData.globKmuD = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
-    @(x1,x2) problemData.cDCont( problemData.timeRK, x1, x2), problemData.Nlambda, problemData.basesOnGamma );
+    @(x1,x2) problemData.cDCont( problemData.timeRK, x1, x2), problemData.Nmu, problemData.basesOnGamma );
 
 % Reshape cDisc to have a vector
 % problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );

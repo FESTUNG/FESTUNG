@@ -1,6 +1,5 @@
-function dataEval = evalFuncContAtEveryIntPoint2(g, funcCont, N, basesOnQuad)
+function dataEval = evalFuncContAtEveryIntPoint(g, funcCont, N)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
-validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad');
 K = g.numT;
 p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [Q1, Q2, ~] = quadRule2D(qOrd);
 

@@ -55,7 +55,7 @@ problemData.cDiscRK = cell( problemData.tabRK.s, 1);
 %% Globally constant parameters.
 problemData.K           = problemData.g.numT;  % number of triangles
 problemData.N           = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
-problemData.Nlambda     = problemData.p + 1; % number of local DOFs on Faces
+problemData.Nmu     = problemData.p + 1; % number of local DOFs on Faces
 problemData.tau         = problemData.tEnd / problemData.numSteps;  % time step size
 
 % [K x 3] arrays that mark local edges (E0T) or vertices (V0T) that are
@@ -87,22 +87,22 @@ end
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
 problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct);
-problemData.basesOnGamma = computeBasesOnGamma(problemData.Nlambda, struct);
+problemData.basesOnGamma = computeBasesOnGamma(problemData.Nmu, struct);
 
 %% Computation of matrices on the reference triangle.
 problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
 
 %% Computation of HDG matrices on the reference triangle.
 %Hybrid mass matrix
-problemData.hatMmu = integrateRefEdgeMuMu(problemData.Nlambda, problemData.basesOnGamma);
+problemData.hatMmu = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnGamma);
 
 % Integrals on edges
-problemData.hatRmu = integrateRefEdgePhiIntMu(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+problemData.hatRmu = integrateRefEdgePhiIntMu(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
 problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
 % Precomputations for term II
 problemData.hatGbarOnQuad = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
 % Precomputations for III.1
-problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemData.Nlambda, problemData.basesOnQuad, problemData.basesOnGamma);
+problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
 
 %% Assembly of time-independent global matrices.
 problemData.globMphi = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
