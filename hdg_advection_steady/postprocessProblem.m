@@ -45,7 +45,7 @@ function problemData = postprocessProblem(problemData)
 if problemData.isVisSol
   cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
   visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, ...
-                    problemData.numSteps, problemData.outputTypes);
+                    1, problemData.outputTypes);
   
 %   cLagrangeEdge = projectDataDisc2DataLagr1D(problemData.lamDisc);
 %   visualizeDataLagrGnuplot1D(problemData.g, cLagrangeEdge, 'lambda_h', problemData.outputBasename, ...
@@ -55,12 +55,11 @@ end % if
 if (problemData.showWaitBar == true)
     close( problemData.waitBar);
 end
-fprintf('Finished simulation at t_end = %g\n', problemData.t);
 %% Error evaluation
 % fprintf('L2 error w.r.t. the exact solution: %g\n', ...
 %   computeL2ErrorAtTime(problemData.g, problemData.t, problemData.cDisc, problemData.getRGSol, 2*problemData.p, problemData.basesOnQuad));
-fprintf('L2 error w.r.t. the exact solution: %g\n', ...
-  computeL2ErrorAtTime(problemData.g, problemData.t, problemData.cDisc, problemData.getLinearAdvectionSol, 2*problemData.p, problemData.basesOnQuad));
+% fprintf('L2 error w.r.t. the exact solution: %g\n', ...
+%   computeL2ErrorAtTime(problemData.g, 0., problemData.cDisc, problemData.getLinearAdvectionSol, 2*problemData.p, problemData.basesOnQuad));
 fprintf('norm(cDisc, 1) = %g\n', norm(problemData.cDisc(:), 1));
 fprintf('norm(cDisc, 2) = %g\n', norm(problemData.cDisc(:), 2));
 fprintf('norm(cDisc, inf) = %g\n', norm(problemData.cDisc(:), inf));

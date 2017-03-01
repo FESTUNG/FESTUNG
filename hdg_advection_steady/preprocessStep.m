@@ -56,13 +56,5 @@
 %> @endparblock
 %
 function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
-% problemData.stepRK = 0;
-K = problemData.K;
-N = problemData.N;
-
-problemData.globMcDisc = problemData.globMphi * reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
-
-for i = 1:problemData.tabRK.s
-    problemData.cDiscRK{i} = zeros( K*N, 1 );
-end
+%Nothing to do here
 end % function

@@ -50,8 +50,6 @@ function problemData = preprocessProblem(problemData)
 problemData.g = problemData.generateGridData(problemData.hmax);
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 
-problemData.cDiscRK = cell( problemData.tabRK.s, 1);
-
 %% Globally constant parameters.
 problemData.K     = problemData.g.numT;  % number of triangles
 problemData.N    = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs

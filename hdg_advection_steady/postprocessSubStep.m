@@ -53,21 +53,9 @@
 %> @endparblock
 %
 function problemData = postprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
-% problemData.isSubSteppingFinished = nSubStep >= length(problemData.omega);
 
-stab = problemData.stab;
-diagRK = 1.;
-
-
-problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
+problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globRphi, 1), 1 );
 problemData.lambdaDiscReshaped = reshape( problemData.lambdaDisc', size(problemData.globP, 1), 1 );
-
-problemData.cDiscRK{nSubStep} = problemData.vecBphi ...
-                                - problemData.matLbar * problemData.cDiscReshaped ...
-                                - problemData.matMbar * problemData.lambdaDiscReshaped;
-
                             
-if (nSubStep == problemData.tabRK.s)
-    problemData.isSubSteppingFinished = true;
-end
+problemData.isSubSteppingFinished = true;
 end % function

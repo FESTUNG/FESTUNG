@@ -49,15 +49,6 @@ problemData.isFinished = false;
 problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 2*problemData.p+1, ...
     problemData.hatM, problemData.basesOnQuad);
 
-problemData.t = 0.;
-
-% if (problemData.isInTesting == true)
-%     warning('Setting dt to zero for testing')
-%     problemData.dt = 0;
-% else
-problemData.dt = problemData.tEnd / problemData.numSteps;
-% end
-
 fprintf('L2 error w.r.t. the initial condition: %g\n', ...
     computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
 
@@ -72,6 +63,4 @@ if problemData.isVisSol
     cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
     visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
 end
-fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
-    problemData.tEnd, problemData.dt, problemData.numSteps)
 end % function

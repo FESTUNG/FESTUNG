@@ -23,7 +23,7 @@ lambda = 0.5 * (2. - sqrt(2.) );
 
 A = [ 1 ];
 B = A(end,:);
-C(:) = sum( A, 2);
+C = sum( A, 2);
 
 %s
 s = 1;
@@ -39,7 +39,7 @@ A = [ lambda       ,  0;
       (1 - lambda) , lambda
     ];
 B = A(end,:);
-C(:) = sum( A, 2);
+C = sum( A, 2);
 
 %s
 s = 2;
@@ -58,7 +58,7 @@ A = [ alpha       ,  0, 0;
       tau - alpha , alpha, 0
       b1, b2, alpha];
 B = A(end,:);
-C(:) = sum( A, 2);
+C = sum( A, 2);
 
 %s
 s = 3;
@@ -76,7 +76,7 @@ A = [     gamma,           0,        0,        0,     0;
         25./24.,    -49./48., 125./16., -85./12., gamma
       ];
 B = A(end,:);
-C(:) = sum( A, 2);
+C = sum( A, 2 );
 %s
 s = 5;
 %Order of accuracy of the method

@@ -56,19 +56,16 @@ N = problemData.N;
 Nmu = problemData.Nmu;
 stab = problemData.stab;
 
-diagRK = problemData.tabRK.A( nSubStep, nSubStep );
-
 %% Actual HDG
 problemData.matLbar = - problemData.globG{1} - problemData.globG{2} ...
                       + stab * problemData.globRphi;
-matL = problemData.globMphi ./ problemData.dt + diagRK .* problemData.matLbar; % Here goes the time discretization
-problemData.vecBphi = - problemData.globFphiD;
-vecQ =  problemData.globMcDisc ./ problemData.dt ...
-      + diagRK .* problemData.vecBphi + problemData.cDiscRkRHS; % Add here source terms if needed
+matL = problemData.matLbar; % Here goes the time discretization
+problemData.vecBphi = -problemData.globFphiD;
+vecQ = problemData.vecBphi; % Add here source terms if needed
 problemData.matMbar =   problemData.globS{1} + problemData.globS{2} ...
                       + problemData.globSout{1} + problemData.globSout{2} ...
                       - stab * problemData.globRmu;
-matM = diagRK .* problemData.matMbar;
+matM = problemData.matMbar;
 %% Computing local solves
 % There are two options.
 % 1. Invert the block diagonal matrix L locally, i.e. each block is 

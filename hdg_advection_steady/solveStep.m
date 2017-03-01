@@ -61,11 +61,4 @@ N = problemData.N;
 % Carry out RK steps
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);
-
-if (problemData.showWaitBar == true)
-    waitbar( nStep/problemData.numSteps, problemData.waitBar, sprintf('Simulation progress at %3.0f%% (Step %d)', 100*nStep/problemData.numSteps, nStep));
-end
-if (problemData.showFprintfProgress == true)
-    fprintf('Simulation progress at %3.0f%% (Step %d)\n', 100*nStep/problemData.numSteps, nStep);
-end
 end % function
