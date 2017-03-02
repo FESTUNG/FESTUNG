@@ -62,7 +62,7 @@ function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
 problemData.hmax        = 2^-2; % maximum edge length of triangle
-problemData.p           =4; % local polynomial degree
+problemData.p           =1; % local polynomial degree
 
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution
@@ -90,12 +90,23 @@ assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 problemData.getLinearAdvectionSol = @(X1, X2) sin( 2. * pi .* (X1 - 1. * 0) ) .* sin( 2. * pi .* (X2 - 1. * 0)  );
 
 
-problemData.c0Cont = @(x1, x2) problemData.getLinearAdvectionSol(x1, x2);
-problemData.fCont = @(x1,x2) zeros(size(x1));
-problemData.cDCont = @(x1,x2) problemData.getLinearAdvectionSol(x1, x2);
-problemData.gNCont = @(x1,x2) zeros(size(x1));
+problemData.cCont  = @(t,x1,x2) cos(7*x1).*cos(7*x2);
+problemData.c0Cont = @(x1,x2) problemData.cCont(0,x1,x2);
+problemData.cDCont = @(x1,x2) problemData.cCont(0,x1,x2);
+% u1Cont = @(t,x1,x2) exp((x1+x2)/2);
+% u2Cont = @(t,x1,x2) exp((x1-x2)/2);
+problemData.fCont  = @(x1,x2) -7*sin(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
+                    -7*cos(7*x1).*sin(7*x2).*exp((x1-x2)/2) ...
+                    + 0.5*cos(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
+                    - 0.5*cos(7*x1).*cos(7*x2).*exp((x1-x2)/2);
+% 
+% problemData.c0Cont = @(x1, x2) problemData.getLinearAdvectionSol(x1, x2);
+% problemData.fCont = @(x1,x2) zeros(size(x1)); %source
+% problemData.cDCont = @(x1,x2) problemData.getLinearAdvectionSol(x1, x2);
+% problemData.gNCont = @(x1,x2) zeros(size(x1));
 
-problemData.fluxCont = @( x1, x2, c ) evalLinearAdvectionFlux(0, x1, x2, c);
+% problemData.fluxCont = @( x1, x2, c ) evalLinearAdvectionFlux(0, x1, x2, c);
+problemData.fluxCont = @( x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
 
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
