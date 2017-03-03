@@ -14,8 +14,10 @@ validateattributes(sourceEval, {'numeric'}, {'size', [K R]}, mfilename, 'fluxEva
 % fluxNu = fluxEval( :, :, 1, :) .* repmat( g.nuE0T( :, :, 1 ) , 1, 1, 1, R) ...
 %          + fluxEval( :, :, 2, :) .* repmat( g.nuE0T( :, :, 2 ) , 1, 1, 1, R );
      
-ret = W .*  basesOnQuad.phi2D{qOrd}( :, :);
-ret = W' .* basesOnQuad.phi2D{qOrd}( :, :)
+% ret = W .*  basesOnQuad.phi2D{qOrd}( :, :);
+% ret = W' .* basesOnQuad.phi2D{qOrd}( :, :)
+
+ret = reshape( (sourceEval * (W' .* basesOnQuad.phi2D{qOrd}( :, :)))', N*K, 1);
 % for n=1:3
 %     tmp = zeros( K*N, 1 );
 %     for r=1:R

@@ -61,8 +61,8 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
-problemData.hmax        = 2^-2; % maximum edge length of triangle
-problemData.p           =1; % local polynomial degree
+problemData.hmax        = 2^-1; % maximum edge length of triangle
+problemData.p           = 1; % local polynomial degree
 
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution
@@ -87,8 +87,6 @@ problemData.showFprintfProgress = true;
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 %% Coefficients and boundary data (rotating Gaussian).
-problemData.getLinearAdvectionSol = @(X1, X2) sin( 2. * pi .* (X1 - 1. * 0) ) .* sin( 2. * pi .* (X2 - 1. * 0)  );
-
 
 problemData.cCont  = @(t,x1,x2) cos(7*x1).*cos(7*x2);
 problemData.c0Cont = @(x1,x2) problemData.cCont(0,x1,x2);
@@ -111,7 +109,7 @@ problemData.fluxCont = @( x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
 
-problemData.generateGridData = @(hmax) domainArbitrarySquare( -0.5, 0.5, hmax );
+problemData.generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
 % problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
 % if license('checkout','PDE_Toolbox')
 %   problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
@@ -121,8 +119,8 @@ problemData.generateGridData = @(hmax) domainArbitrarySquare( -0.5, 0.5, hmax );
 % end % if
 % Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-% problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
-problemData.generateMarkE0TbdrN = @(g) generateLinearAdvectionBoundary(g);
+problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
+% problemData.generateMarkE0TbdrN = @(g) generateSteadyOutflowBoundary(g);
 problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 
 end % function
