@@ -17,7 +17,7 @@ validateattributes(sourceEval, {'numeric'}, {'size', [K R]}, mfilename, 'fluxEva
 % ret = W .*  basesOnQuad.phi2D{qOrd}( :, :);
 % ret = W' .* basesOnQuad.phi2D{qOrd}( :, :)
 
-ret = reshape( (sourceEval * (W' .* basesOnQuad.phi2D{qOrd}( :, :)))', N*K, 1);
+ret = reshape( (2 * g.areaT .* sourceEval * (W' .* basesOnQuad.phi2D{qOrd}( :, :)))', N*K, 1);
 % for n=1:3
 %     tmp = zeros( K*N, 1 );
 %     for r=1:R

@@ -62,7 +62,8 @@ diagRK = problemData.tabRK.A( nSubStep, nSubStep );
 problemData.matLbar = - problemData.globG{1} - problemData.globG{2} ...
                       + stab * problemData.globRphi;
 matL = problemData.globMphi ./ problemData.dt + diagRK .* problemData.matLbar; % Here goes the time discretization
-problemData.vecBphi = - problemData.globFphiD;
+% problemData.vecBphi = - problemData.globFphiD;
+problemData.vecBphi = problemData.globFphiSrc - problemData.globFphiD;
 vecQ =  problemData.globMcDisc ./ problemData.dt ...
       + diagRK .* problemData.vecBphi + problemData.cDiscRkRHS; % Add here source terms if needed
 problemData.matMbar =   problemData.globS{1} + problemData.globS{2} ...

@@ -61,8 +61,8 @@ problemData.matLbar = - problemData.globG{1} - problemData.globG{2} ...
                       + stab * problemData.globRphi;
 matL = problemData.matLbar; % Here goes the time discretization
 % problemData.vecBphi = -problemData.globFphiD;
-% problemData.vecBphi = problemData.globFphiSrc - problemData.globFphiD;
-problemData.vecBphi = - problemData.globFphiD;
+problemData.vecBphi = problemData.globFphiSrc - problemData.globFphiD;
+% problemData.vecBphi = - problemData.globFphiD;
 vecQ = problemData.vecBphi; % Add here source terms if needed
 problemData.matMbar =   problemData.globS{1} + problemData.globS{2} ...
                       + problemData.globSout{1} + problemData.globSout{2} ...
@@ -70,6 +70,9 @@ problemData.matMbar =   problemData.globS{1} + problemData.globS{2} ...
 matM = problemData.matMbar;
 
 res1 = matL * reshape( problemData.cDisc', K*N, 1) + matM * reshape( problemData.lambdaDisc', Kedge*Nmu, 1) - problemData.vecBphi;
+
+% problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
+% problemData.lambdaDiscReshaped = reshape( problemData.lambdaDisc', size(problemData.globP, 1), 1 );
 
 %% Computing local solves
 % There are two options.
