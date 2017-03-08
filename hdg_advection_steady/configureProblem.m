@@ -61,7 +61,7 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
-problemData.hmax        = 2^-1; % maximum edge length of triangle
+problemData.hmax        = 2^-2; % maximum edge length of triangle
 problemData.p           = 1; % local polynomial degree
 
 problemData.isVisGrid   = false; % visualization of grid
@@ -103,25 +103,33 @@ assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 % problemData.cDCont = @(x1,x2) problemData.getLinearAdvectionSol(x1, x2);
 % problemData.gNCont = @(x1,x2) zeros(size(x1));
 
-problemData.c0Cont = @(x1, x2) x1;
-problemData.fCont = @(x1,x2) ones(size(x1)); %source
-problemData.cDCont = @(x1,x2) x1;
-problemData.gNCont = @(x1,x2) zeros(size(x1));
+% problemData.c0Cont = @(x1, x2) x1;
+% problemData.fCont = @(x1,x2) ones(size(x1)); %source
+% problemData.cDCont = @(x1,x2) x1;
+% problemData.gNCont = @(x1,x2) zeros(size(x1));
+% 
+% problemData.fluxCont = @( x1, x2, c ) evalLinearAdvectionFlux(0, x1, x2, c);
 
-problemData.fluxCont = @( x1, x2, c ) evalLinearAdvectionFlux(0, x1, x2, c);
-% problemData.fluxCont = @( x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
+problemData.cCont  = @(t,x1,x2) cos(7*x1).*cos(7*x2);
+problemData.c0Cont = @(x1,x2) problemData.cCont(0,x1,x2);
+problemData.cDCont = @(x1,x2) problemData.cCont(0,x1,x2);
+problemData.fCont  = @(x1,x2) -7*sin(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
+                    -7*cos(7*x1).*sin(7*x2).*exp((x1-x2)/2) ...
+                    + 0.5*cos(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
+                    - 0.5*cos(7*x1).*cos(7*x2).*exp((x1-x2)/2);
+problemData.fluxCont = @( x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
 
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
 
-problemData.generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
+% problemData.generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
 % problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
-% if license('checkout','PDE_Toolbox')
-%   problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
-% else
-%   fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
-%   problemData.generateGridData = @domainSquare;
-% end % if
+if license('checkout','PDE_Toolbox')
+  problemData.generateGridData = @(hmax) domainPolygon([0.0 1.0 1.0 0.0], [0.0 0.0 1.0 1.0], hmax);
+else
+  fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
+  problemData.generateGridData = @domainSquare;
+end % if
 % Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
 % problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);

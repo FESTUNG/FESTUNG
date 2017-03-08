@@ -21,5 +21,5 @@ for n=1:3
     end
     fac = g.areaE0T( :, n ) .* markE0Tbdr(:, n);
     ret(:) = ret(:) + sum( kron( fac, speye(N) ), 2) .* tmp;
-end
-end
+end %for
+end %function

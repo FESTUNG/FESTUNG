@@ -61,11 +61,11 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
-problemData.hmax        = 2^-2; % maximum edge length of triangle
-problemData.p           =2; % local polynomial degree
-problemData.ordRK       = 1; % order of Runge Kutta time stepper.
+problemData.hmax        = 2^-3; % maximum edge length of triangle
+problemData.p           = 2; % local polynomial degree
+problemData.ordRK       = 3; % order of Runge Kutta time stepper.
 % problemData.ordRK       = min(problemData.p+1,4); % order of Runge Kutta time stepper.
-problemData.numSteps    = 10; % number of time steps
+problemData.numSteps    = 40; % number of time steps
 problemData.tEnd        = 1; % end time
 
 problemData.isVisGrid   = false; % visualization of grid
@@ -94,18 +94,15 @@ assert(problemData.ordRK >= 1 && problemData.ordRK <= 4, 'Order of Runge Kutta m
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 %% Coefficients and boundary data (rotating Gaussian).
-% problemData.getLinearAdvectionSol = @(t, X1, X2) sin( 2. * pi .* (X1 - 1. * t) ) .* sin( 2. * pi .* (X2 - 1. * t)  );
-
-problemData.getLinearAdvectionSol = @(t, X1, X2) X1;
-
-
-% problemData.c0Cont = @(x1, x2) problemData.getLinearAdvectionSol(0, x1, x2);
-% problemData.fCont = @(t,x1,x2) zeros(size(x1));
-% problemData.cDCont = @(t,x1,x2) problemData.getLinearAdvectionSol(t, x1, x2);
-% problemData.gNCont = @(t,x1,x2) zeros(size(x1));
-% % problemData.fluxCont = @( t, x1, x2, c ) evalLinearAdvectionFlux(t, x1, x2, c);
+problemData.getLinearAdvectionSol = @(t, X1, X2) sin( 2. * pi .* (X1 - 1. * t) ) .* sin( 2. * pi .* (X2 - 1. * t)  );
+problemData.c0Cont = @(x1, x2) problemData.getLinearAdvectionSol(0, x1, x2);
+problemData.fCont = @(t,x1,x2) zeros(size(x1));
+problemData.cDCont = @(t,x1,x2) problemData.getLinearAdvectionSol(t, x1, x2);
+problemData.gNCont = @(t,x1,x2) zeros(size(x1));
+problemData.fluxCont = @( t, x1, x2, c ) evalLinearAdvectionFlux(t, x1, x2, c);
 % 
 % 
+% problemData.getLinearAdvectionSol = @(t, x1, x2) cos(7*x1).*cos(7*x2);
 % problemData.cCont  = @(t,x1,x2) cos(7*x1).*cos(7*x2);
 % problemData.c0Cont = @(x1,x2) problemData.cCont(0,x1,x2);
 % problemData.cDCont = @(t,x1,x2) problemData.cCont(0,x1,x2);
@@ -116,10 +113,10 @@ problemData.getLinearAdvectionSol = @(t, X1, X2) X1;
 % problemData.fluxCont = @(t,  x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
 
 
-problemData.c0Cont = @(x1, x2) x1;
-problemData.fCont = @(x1,x2) ones(size(x1)); %source
-problemData.cDCont = @(t, x1,x2) x1;
-problemData.fluxCont = @( t, x1, x2, c ) evalLinearAdvectionFlux(t, x1, x2, c);
+% problemData.c0Cont = @(x1, x2) x1;
+% problemData.fCont = @(x1,x2) ones(size(x1)); %source
+% problemData.cDCont = @(t, x1,x2) x1;
+% problemData.fluxCont = @( t, x1, x2, c ) evalLinearAdvectionFlux(t, x1, x2, c);
 
 
 %% Domain and triangulation configuration.

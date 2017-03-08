@@ -69,7 +69,7 @@ problemData.matMbar =   problemData.globS{1} + problemData.globS{2} ...
                       - stab * problemData.globRmu;
 matM = problemData.matMbar;
 
-res1 = matL * reshape( problemData.cDisc', K*N, 1) + matM * reshape( problemData.lambdaDisc', Kedge*Nmu, 1) - problemData.vecBphi;
+% res1 = matL * reshape( problemData.cDisc', K*N, 1) + matM * reshape( problemData.lambdaDisc', Kedge*Nmu, 1) - problemData.vecBphi;
 
 % problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
 % problemData.lambdaDiscReshaped = reshape( problemData.lambdaDisc', size(problemData.globP, 1), 1 );
@@ -109,7 +109,7 @@ matP = problemData.globP;
 
 vecR = problemData.globKmuD;
 
-res2 = matN * reshape( problemData.cDisc', K*N, 1) + matP * reshape( problemData.lambdaDisc', Kedge*Nmu, 1)- vecR;
+% res2 = matN * reshape( problemData.cDisc', K*N, 1) + matP * reshape( problemData.lambdaDisc', Kedge*Nmu, 1)- vecR;
 
 sysMatA = -matN * LinvM + matP;
 sysRhs = vecR - matN * LinvQ;
