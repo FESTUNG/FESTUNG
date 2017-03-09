@@ -51,7 +51,7 @@ problemData.g.g1D.markV0TbdrUH = problemData.g.g1D.markV0TbdrRiv;
 % AR: -------------------------------------------------------------------------------------------------------------
 % problemData.g.g1D.markV0TbdrR = problemData.g.g1D.idV0T == 2; % right boundaries
 % problemData.g.g1D.markV0TbdrL = problemData.g.g1D.idV0T == 4; % left boundaries
-problemData.g.g1D.prescUHindex = [4; 4];
+% problemData.g.g1D.prescUHindex = [4; 4];
 % problemData.g.g1D.markV0TfreeUH = problemData.g.g1D.markV0Tbdr ...
 %     .* (problemData.g.g1D.idV0T ~= problemData.g.g1D.prescUHindex(1)) ...
 %     .* (problemData.g.g1D.idV0T ~= problemData.g.g1D.prescUHindex(2));

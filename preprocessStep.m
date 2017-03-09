@@ -79,7 +79,7 @@ hDCont = @(x1) problemData.hDCont(t,x1);
 u1DCont = @(x1,x2) problemData.u1DCont(t,x1,x2);
 u2DCont = @(x1,x2) problemData.u2DCont(t,x1,x2);
 qDCont = @(x1,x2) problemData.qDCont(t,x1,x2);
-uhDCont = @(x1, xi, z_b) problemData.uhDCont(t, x1, xi, z_b);
+uhDCont = @(x1) problemData.uhDCont(t, x1);
 
 % Diffusion boundary terms in momentum equation
 problemData.globRbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
@@ -118,11 +118,8 @@ problemData.barGlobJuh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 for n = 1 : 2
   markV0TbdrUH = problemData.g.g1D.markV0TbdrUH(:, n);
   markV0TbdrUHrep = logical(kron(markV0TbdrUH, true(problemData.barN, 1)));
-  idT1DbdrUH = find(markV0TbdrUH);
   x1V0T = problemData.g.g1D.coordV0T(markV0TbdrUH, n, 1);
-  xiV0T = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(idT1DbdrUH, end), 5 - n, 2);
-  zbV0T = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(idT1DbdrUH, 1), n, 2);
-  problemData.barGlobJuh(markV0TbdrUHrep) = ( uhDCont(x1V0T, xiV0T, zbV0T) .* problemData.g.g1D.nuV0T(markV0TbdrUH, n) ) * problemData.basesOnQuad1D.phi0D(:, n)';
+  problemData.barGlobJuh(markV0TbdrUHrep) = ( uhDCont(x1V0T) .* problemData.g.g1D.nuV0T(markV0TbdrUH, n) ) * problemData.basesOnQuad1D.phi0D(:, n)';
 end % for n
 % problemData.globLhPterms = evalExactUHNu(problemData.g.g1D, t, problemData.g.g1D.prescUHindex, problemData.UHexact, problemData.basesOnQuad1D);
 % problemData.globLhPterms = evalExactUHNu(problemData.g.g1D, t, problemData.g.g1D.prescUHindex, @(t,x1) problemData.hDCont(t,x1) .* problemData.u1DCont(t,x1,problemData.hDCont(t,x1)./2), problemData.basesOnQuad1D);
