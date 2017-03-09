@@ -41,17 +41,20 @@ for s = 1 : 2
 end % for s
 
 %% Assembly of time-dependent global matrices.
+% Advection and diffusion element integrals in momentum equation
 problemData.globE = problemData.fn_assembleMatElemTrapDphiPhiFuncDisc(problemData.g, problemData.hatG, problemData.cDisc(2:3));
 problemData.globE = problemData.globE{1} + problemData.globE{2};
 problemData.globG = problemData.fn_assembleMatElemTrapDphiPhiFuncDisc(problemData.g, problemData.hatG, DDisc);
 
+% Advection and diffusion interior edge integrals in momentum equation
 problemData.globR = problemData.fn_assembleMatEdgeTrapPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
 problemData.globP = problemData.fn_assembleMatEdgeTrapPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDisc(2:3));
 problemData.globP = problemData.globP{1} + problemData.globP{2};
 
-problemData.globJu = zeros(problemData.g.numT * problemData.N, 1);
-problemData.globJh = zeros(problemData.g.numT * problemData.N, 1);
-problemData.barGlobJh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
+% Jump term in Lax-Friedrichs solver
+problemData.globKu = zeros(problemData.g.numT * problemData.N, 1);
+problemData.globKh = zeros(problemData.g.numT * problemData.N, 1);
+problemData.barGlobKh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 for n = 3 : 4
   hAvgE0T = 0.5 * problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,5-n) + problemData.g.g1D.markV0TV0T{5-n} * problemData.hV0T1D(:,5-mapE0E(n)) );
   hJmpE0T = problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,5-n) - problemData.g.g1D.markV0TV0T{5-n} * problemData.hV0T1D(:,5-mapE0E(n)) );
@@ -59,37 +62,68 @@ for n = 3 : 4
   lambdaQ0E0T = 0.75 * abs(u1AvgQ0E0T) + 0.25 * sqrt( u1AvgQ0E0T .* u1AvgQ0E0T + 4 * problemData.gConst * kron(hAvgE0T, ones(numQuad1D,1)) );
   hJmpLambdaE0T = lambdaQ0E0T .* kron(hJmpE0T, ones(numQuad1D,1));
     
-  problemData.globJu = problemData.globJu + problemData.globS{n} * ( lambdaQ0E0T .* (u1Q0E0Tint{n} - u1Q0E0TE0T{n}) );
-  problemData.globJh = problemData.globJh + problemData.globS{n} * hJmpLambdaE0T;
-  problemData.barGlobJh = problemData.barGlobJh + (problemData.barGlobS{n} * hJmpLambdaE0T) ./ kron(heightV0T1D(:, 5-n), ones(problemData.barN, 1));
+  problemData.globKu = problemData.globKu + problemData.globS{n} * ( lambdaQ0E0T .* (u1Q0E0Tint{n} - u1Q0E0TE0T{n}) );
+  problemData.globKh = problemData.globKh + problemData.globS{n} * hJmpLambdaE0T;
+  problemData.barGlobKh = problemData.barGlobKh + (problemData.barGlobS{n} * hJmpLambdaE0T) ./ kron(heightV0T1D(:, 5-n), ones(problemData.barN, 1));
 end % for n
 
+% Interior edge flux in continuity and free surface equation
 problemData.tildeGlobP = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
 problemData.barGlobP = assembleMatEdge1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, heightV0T1D, problemData.g.g1D.markV0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
+
+% Advection element integral in free surface equation
 problemData.barGlobG = assembleMatElem1DDphiPhiFuncDiscHeight(barU1Disc, heightQ0T1D, problemData.barHatG);
 
 %% Assembly of boundary contributions.
-u1Cont = @(x1,x2) problemData.u1Cont(t,x1,x2);
+hDCont = @(x1) problemData.hDCont(t,x1);
+u1DCont = @(x1,x2) problemData.u1DCont(t,x1,x2);
+u2DCont = @(x1,x2) problemData.u2DCont(t,x1,x2);
+qDCont = @(x1,x2) problemData.qDCont(t,x1,x2);
+uhDCont = @(x1, xi, z_b) problemData.uhDCont(t, x1, xi, z_b);
 
-% AR: -------------------------------------------------------------------------------------------------------------
-problemData.globRbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr .* ~(problemData.g.markE0TprescDiffusion), problemData.hatRdiag, DDisc);
-globLuRterms = evaluateExactDiffusion(problemData.g, t, problemData.g.markE0TprescDiffusion, problemData.diffusiveFluxExact, problemData.qOrd, problemData.basesOnQuad2D);
-globLuTildeQterms = evaluateExactGHNu(problemData.g, t, problemData.gravityConst, problemData.g.markE0TprescH, problemData.hExact, problemData.qOrd, problemData.basesOnQuad2D);
-% AR: -------------------------------------------------------------------------------------------------------------
+% Diffusion boundary terms in momentum equation
+problemData.globRbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
+problemData.globJq = problemData.fn_assembleVecEdgeTrapPhiIntFuncCont(problemData.g, problemData.g.markE0TbdrQ .* problemData.g.areaE0T, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+% globLuRterms = evaluateExactDiffusion(problemData.g, t, problemData.g.markE0TbdrQ, problemData.diffusiveFluxExact, problemData.qOrd, problemData.basesOnQuad2D);
 
-problemData.globJD = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0Tbdr, u1Cont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-
-% AR: -------------------------------------------------------------------------------------------------------------
-problemData.globPbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr .* ~(problemData.g.markE0TprescU), problemData.hatRdiag, problemData.cDisc(2:3));
-globLuPterms = evaluateExactUsquareNu1(problemData.g, t, problemData.g.markE0TprescU, problemData.uExact, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.globLqTerms = evaluateExactUNu(problemData.g, t, problemData.g.markE0TprescU, problemData.uExact, problemData.qOrd, problemData.basesOnQuad2D);
-% AR: -------------------------------------------------------------------------------------------------------------
-
+% Advection boundary terms in momentum equation
+problemData.globJh = assembleVecEdgeTrapPhiIntFuncCont1DNu(problemData.g, problemData.g.markE0TbdrH, hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJh = problemData.gConst * problemData.globJh{1};
+% globLuTildeQterms = evaluateExactGHNu(problemData.g, t, problemData.gConst, problemData.g.markE0TbdrH, problemData.hExact, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globPbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDisc(2:3));
 problemData.globPbdr = problemData.globPbdr{1} + problemData.globPbdr{2};
+% globLuPterms = evaluateExactUsquareNu1(problemData.g, t, problemData.g.markE0TbdrU, problemData.uExact, problemData.qOrd, problemData.basesOnQuad2D);
 
-% AR: -------------------------------------------------------------------------------------------------------------
-problemData.barGlobPbdr = assembleMatEdge1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, heightV0T1D, problemData.g.g1D.markV0TfreeUH, problemData.barHatPdiag);
-problemData.globLhPterms = evalExactUHNu(problemData.g.g1D, t, problemData.g.g1D.prescUHindex, problemData.UHexact, problemData.basesOnQuad1D);
-problemData.globLubdrTerms = globLuRterms + globLuTildeQterms + globLuPterms;
-% AR: -------------------------------------------------------------------------------------------------------------
+problemData.globJuu = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, @(x1,x2) u1DCont(x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJuu = problemData.globJuu{1};
+globQPerQuad = assembleMatEdgeTrapPhiIntFuncDiscIntNuPerQuad(problemData.g, problemData.g.markE0TbdrU, problemData.cDisc{3}, problemData.hatQPerQuad);
+problemData.globJuu = zeros(problemData.g.numT * problemData.N,1);
+for n = 1 : 4
+  [Q1, Q2] = execin('darcyVert/gammaMapTrap', n, Q);
+  u1DContQ0E0T = u1DCont(problemData.g.mapRef2Phy(1, Q1, Q2), problemData.g.mapRef2Phy(2, Q1, Q2));
+  problemData.globJuu = problemData.globJuu + globQPerQuad{n,2} * reshape(u1DContQ0E0T.', [], 1);
+end % for n
+
+% problemData.globLqTerms = evaluateExactUNu(problemData.g, t, problemData.g.markE0TprescU, problemData.uExact, problemData.qOrd, problemData.basesOnQuad2D);
+
+% Dirichlet boundary for horizontal velocity in continuity and flux equation
+problemData.globJu = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+
+% Dirichlet boundary for vertical velocity in continuity equation
+problemData.globJw = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrW, u2DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+
+% Boundary terms in free surface equation
+problemData.barGlobPbdr = assembleMatEdge1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, heightV0T1D, problemData.g.g1D.markV0Tbdr & ~problemData.g.g1D.markV0TbdrUH, problemData.barHatPdiag);
+problemData.barGlobJuh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
+for n = 1 : 2
+  markV0TbdrUH = problemData.g.g1D.markV0TbdrUH(:, n);
+  markV0TbdrUHrep = logical(kron(markV0TbdrUH, true(problemData.barN, 1)));
+  idT1DbdrUH = find(markV0TbdrUH);
+  x1V0T = problemData.g.g1D.coordV0T(markV0TbdrUH, n, 1);
+  xiV0T = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(idT1DbdrUH, end), 5 - n, 2);
+  zbV0T = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(idT1DbdrUH, 1), n, 2);
+  problemData.barGlobJuh(markV0TbdrUHrep) = ( uhDCont(x1V0T, xiV0T, zbV0T) .* problemData.g.g1D.nuV0T(markV0TbdrUH, n) ) * problemData.basesOnQuad1D.phi0D(:, n)';
+end % for n
+% problemData.globLhPterms = evalExactUHNu(problemData.g.g1D, t, problemData.g.g1D.prescUHindex, problemData.UHexact, problemData.basesOnQuad1D);
+% problemData.globLhPterms = evalExactUHNu(problemData.g.g1D, t, problemData.g.g1D.prescUHindex, @(t,x1) problemData.hDCont(t,x1) .* problemData.u1DCont(t,x1,problemData.hDCont(t,x1)./2), problemData.basesOnQuad1D);
 end % function
