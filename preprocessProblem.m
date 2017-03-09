@@ -5,29 +5,56 @@ problemData.g = problemData.generateGrid(problemData.numElem);
 problemData.g.g1D = problemData.generateGrid1D(problemData.numElem(1), problemData.g);
 
 %% Additional mesh data
-problemData.g.markE0Tint = problemData.g.idE0T == 0; % [K x 3] mark local edges that are interior
-problemData.g.markE0Tbdr = ~problemData.g.markE0Tint; % all boundaries
-problemData.g.markE0TbdrL = problemData.g.idE0T == 4; % left boundaries
-problemData.g.markE0TbdrR = problemData.g.idE0T == 2; % right boundaries
-problemData.g.markE0TbdrF = problemData.g.idE0T == 3; % free boundary
-problemData.g.markE0TbdrB = problemData.g.idE0T == 1; % bottom boundary
+% [K x 4] mark local edges that are interior or have a certain boundary type
+problemData.g.markE0Tint = problemData.generateMarkE0Tint(problemData.g); 
+problemData.g.markE0Tbdr = ~problemData.g.markE0Tint; 
+problemData.g.markE0Tint = problemData.generateMarkE0Tint(problemData.g);
+problemData.g.markE0TbdrBot = problemData.generateMarkE0TbdrBot(problemData.g);
+problemData.g.markE0TbdrTop = problemData.generateMarkE0TbdrTop(problemData.g);
+problemData.g.markE0TbdrLand = problemData.generateMarkE0TbdrLand(problemData.g);
+problemData.g.markE0TbdrOS = problemData.generateMarkE0TbdrOS(problemData.g);
+problemData.g.markE0TbdrRiv = problemData.generateMarkE0TbdrRiv(problemData.g);
+problemData.g.markE0TbdrRad = problemData.generateMarkE0TbdrRad(problemData.g);
 
-% AR: -------------------------------------------------------------------------------------------------------------
-problemData.g.markE0TprescDiffusion = problemData.g.idE0T == -1;
-problemData.g.markE0TprescH = problemData.g.idE0T == -1;
-problemData.g.markE0TprescU = problemData.g.idE0T == -1;
-% AR: -------------------------------------------------------------------------------------------------------------
+% problemData.g.markE0TbdrL = problemData.g.idE0T == 4; % left boundaries
+% problemData.g.markE0TbdrR = problemData.g.idE0T == 2; % right boundaries
+% problemData.g.markE0TbdrF = problemData.g.idE0T == 3; % free boundary
+% problemData.g.markE0TbdrB = problemData.g.idE0T == 1; % bottom boundary
 
-problemData.g.g1D.markV0Tint = problemData.g.g1D.idV0T == 0;
+% [barK x 2] mark local vertices that are interior or have a certain boundary type
+problemData.g.g1D.markV0Tint = problemData.generateMarkV0T1Dint(problemData.g.g1D);
 problemData.g.g1D.markV0Tbdr = ~problemData.g.g1D.markV0Tint;
+problemData.g.g1D.markV0TbdrLand = problemData.generateMarkV0T1DbdrLand(problemData.g.g1D);
+problemData.g.g1D.markV0TbdrOS = problemData.generateMarkV0T1DbdrOS(problemData.g.g1D);
+problemData.g.g1D.markV0TbdrRiv = problemData.generateMarkV0T1DbdrRiv(problemData.g.g1D);
+problemData.g.g1D.markV0TbdrRad = problemData.generateMarkV0T1DbdrRad(problemData.g.g1D);
+
+% prescribed horizontal velocity
+problemData.g.markE0TbdrU = problemData.g.markE0TbdrLand | problemData.g.markE0TbdrBot;
+% prescribed vertical velocity
+problemData.g.markE0TbdrW = problemData.g.markE0TbdrBot;
+% prescribed water height
+problemData.g.markE0TbdrH = problemData.g.markE0TbdrOS | problemData.g.markE0TbdrRiv;
+% prescribed diffusion
+problemData.g.markE0TbdrQ = problemData.g.markE0TbdrTop | problemData.g.markE0TbdrOS | problemData.g.markE0TbdrRad;
+% prescribed flow rate
+problemData.g.markE0TbdrUH = problemData.g.markE0TbdrRiv;
+problemData.g.g1D.markV0TbdrUH = problemData.g.g1D.markV0TbdrRiv;
 
 % AR: -------------------------------------------------------------------------------------------------------------
-problemData.g.g1D.markV0TbdrR = problemData.g.g1D.idV0T == 2; % right boundaries
-problemData.g.g1D.markV0TbdrL = problemData.g.g1D.idV0T == 4; % left boundaries
-problemData.g.g1D.prescUHindex = [-1; -1];
-problemData.g.g1D.markV0TfreeUH = problemData.g.g1D.markV0Tbdr ...
-    .* (problemData.g.g1D.idV0T ~= problemData.g.g1D.prescUHindex(1)) ...
-    .* (problemData.g.g1D.idV0T ~= problemData.g.g1D.prescUHindex(2));
+% problemData.g.markE0TprescDiffusion = problemData.g.idE0T == -1;
+% problemData.g.markE0TprescH = problemData.g.idE0T == -1;
+% problemData.g.markE0TprescU = problemData.g.idE0T == -1;
+% AR: -------------------------------------------------------------------------------------------------------------
+
+
+% AR: -------------------------------------------------------------------------------------------------------------
+% problemData.g.g1D.markV0TbdrR = problemData.g.g1D.idV0T == 2; % right boundaries
+% problemData.g.g1D.markV0TbdrL = problemData.g.g1D.idV0T == 4; % left boundaries
+problemData.g.g1D.prescUHindex = [4; 4];
+% problemData.g.g1D.markV0TfreeUH = problemData.g.g1D.markV0Tbdr ...
+%     .* (problemData.g.g1D.idV0T ~= problemData.g.g1D.prescUHindex(1)) ...
+%     .* (problemData.g.g1D.idV0T ~= problemData.g.g1D.prescUHindex(2));
 % AR: -------------------------------------------------------------------------------------------------------------
 
 %% Globally constant parameters.
@@ -51,6 +78,7 @@ problemData.hatQoffdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiExt', p
 problemData.hatRdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiIntPhiInt', problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.hatRoffdiag = execin('darcyVert/integrateRefEdgeTrapPhiIntPhiExtPhiExt', problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.hatSdiag = integrateRefEdgeTrapPhiIntPerQuad(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.hatQPerQuad = integrateRefEdgeTrapPhiIntPhiIntPerQuad(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 problemData.barHatM = integrateRefElem1DPhiPhi(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 problemData.barHatG = integrateRefElem1DDphiPhiPhiPerQuad(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
@@ -76,8 +104,10 @@ problemData.fn_projectFuncCont2DataDiscTrap = getFunctionHandle('darcyVert/proje
 problemData.fn_assembleMatElemTrapDphiPhiFuncDisc = getFunctionHandle('darcyVert/assembleMatElemTrapDphiPhiFuncDisc');
 
 problemData.fn_assembleMatEdgeTrapPhiPhiNu = getFunctionHandle('darcyVert/assembleMatEdgeTrapPhiPhiNu');
+problemData.fn_assembleMatEdgeTrapPhiIntPhiIntNu = getFunctionHandle('darcyVert/assembleMatEdgeTrapPhiIntPhiIntNu');
 problemData.fn_assembleMatEdgeTrapPhiPhiFuncDiscNu = getFunctionHandle('darcyVert/assembleMatEdgeTrapPhiPhiFuncDiscNu');
 problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu = getFunctionHandle('darcyVert/assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu');
 
+problemData.fn_assembleVecEdgeTrapPhiIntFuncCont = getFunctionHandle('darcyVert/assembleVecEdgeTrapPhiIntFuncCont');
 problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu = getFunctionHandle('darcyVert/assembleVecEdgeTrapPhiIntFuncContNu');
 end % function

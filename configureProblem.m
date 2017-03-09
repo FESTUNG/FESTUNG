@@ -14,12 +14,12 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 1);  % end time
+problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
 problemData = setdefault(problemData, 'numSteps', 10);  % number of time steps
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
-problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
+problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
 problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'solution_sweVert' ]); % Basename of output files
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });
@@ -29,7 +29,6 @@ assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero 
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
-
 if license('checkout', 'Symbolic_Toolbox')
   syms x z t
   
@@ -47,299 +46,31 @@ if license('checkout', 'Symbolic_Toolbox')
   u2Sym(t,x,z) = -0.5 * deltaSym^1.5 * z^2 * cos(deltaSym * (t + x));
   
   [problemData, h0Const, zBotConst] = analyticalData(problemData, hSym, u1Sym, u2Sym, gSym, zBotSym, DSym, domainWidth);
+else
+  error('Symbolic Toolbox required to derive problem formulation!')
 end % if
 
-% AR: -------------------------------------------------------------------------------------------------------------
-deltaMat =          0.01;
-rhoMat  =           0.1;
-hMat    = @(t,x)    deltaMat * sin( rhoMat * ( t + x ) ) + 2;
-u1Mat   = @(t,x,z) sqrt(deltaMat) * z .* sin( deltaMat * ( t + x ) );
-problemData.gravityConst = 10;
-problemData.diffusiveFluxExact = @(t,x,z) x-x - 0.001 * 0.001 * z .* cos(0.01*(t+x)) .* (2 * (x > 50) - 1);
-problemData.UHexact = @(t,x) x-x + hMat(t,x) .* u1Mat(t,x,hMat(t,x)./2);
-problemData.hExact = @(t,x) hMat(t,x);
-problemData.uExact = @(t,x,z) u1Mat(t,x,z);
-% AR: -------------------------------------------------------------------------------------------------------------
-
-%
-% Constant solution
-%
-% z_bot = 0;
-% h_0 = 1;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% % Analytical solution
-% problemData.hCont = @(t,x1) ones(size(x1));
-% problemData.u1Cont = @(t,x1,x2) ones(size(x1));
-% problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q1Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) zeros(size(x1));
-% problemData.fuCont = @(t,x1,x2) zeros(size(x1));
-           
-% 
-% Linear height
-%
-% z_bot = 0;
-% h_0 = 1;
-% h_var = 0.05;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% % Analytical solution
-% problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1;
-% problemData.u1Cont = @(t,x1,x2) ones(size(x1));
-% problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q1Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) ones(size(x1))*h_var;
-% problemData.fuCont = @(t,x1,x2)  problemData.gConst*h_var * ones(size(x1));
-%    
-% 
-% z-Linear velocity
-%
-% z_bot = 0;
-% h_0 = 1;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% % Analytical solution
-% problemData.hCont = @(t,x1) ones(size(x1));
-% problemData.u1Cont = @(t,x1,x2) x2;
-% problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q1Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q2Cont = @(t,x1,x2) -ones(size(x1));
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) zeros(size(x1));
-% problemData.fuCont = @(t,x1,x2) zeros(size(x1));
-                 
-% 
-% x-Linear velocity
-%
-% z_bot = 0;
-% h_0 = 1;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% % Analytical solution
-% problemData.hCont = @(t,x1) ones(size(x1));
-% problemData.u1Cont = @(t,x1,x2) x1;
-% problemData.u2Cont = @(t,x1,x2) -x2;
-% problemData.q1Cont = @(t,x1,x2) -ones(size(x1));
-% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) ones(size(x1));
-% problemData.fuCont = @(t,x1,x2) x1;
-                       
-% 
-% linear velocity and height
-%
-% z_bot = 0;
-% h_0 = 1;
-% h_var = 0.05;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% % Analytical solution
-% problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1;
-% problemData.u1Cont = @(t,x1,x2) x1;
-% problemData.u2Cont = @(t,x1,x2) -x2;
-% problemData.q1Cont = @(t,x1,x2) -ones(size(x1));
-% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + h_var * x1;
-% problemData.fuCont = @(t,x1,x2) x1 + problemData.gConst * h_var;
-   
-% 
-% Quadratic height
-%
-% z_bot = -0.5;
-% h_0 = 1;
-% h_var = 0.1;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% % Analytical solution
-% problemData.hCont = @(t,x1) (x1.^2-0.5)*h_var + 1;
-% problemData.u1Cont = @(t,x1,x2) ones(size(x1));
-% problemData.u2Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q1Cont = @(t,x1,x2) zeros(size(x1));
-% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) 2*h_var*x1;
-% problemData.fuCont = @(t,x1,x2)  2*problemData.gConst*h_var * x1;
-   
-
-% 
-% quadratic velocity
-%
-% z_bot = 0;
-% h_0 = 1;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) ones(size(x1));
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) ones(size(x1));
-% % Analytical solution
-% problemData.hCont = @(t,x1) ones(size(x1));
-% problemData.u1Cont = @(t,x1,x2) x1 - x2.^2;
-% problemData.u2Cont = @(t,x1,x2) -x2;
-% problemData.q1Cont = @(t,x1,x2) ones(size(x1));
-% problemData.q2Cont = @(t,x1,x2) -2*x2;
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) problemData.hCont(t,x1);
-% problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + 2;
-                  
-% 
-% quadratic velocity and linear height
-%
-% z_bot = 0;
-% h_0 = 1;
-% h_var = 0.05;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) ones(size(x1));
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) ones(size(x1));
-% % Analytical solution
-% problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1;
-% problemData.u1Cont = @(t,x1,x2) x1 - x2.^2;
-% problemData.u2Cont = @(t,x1,x2) -x2;
-% problemData.q1Cont = @(t,x1,x2) ones(size(x1));
-% problemData.q2Cont = @(t,x1,x2) -2*x2;
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + h_var * x1 - h_var * (problemData.hCont(t,x1) + z_bot).^2;
-% problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + 2 + problemData.gConst * h_var;
-                     
-% 
-% quadratic velocity and linear height and linear diffusion
-%
-% z_bot = 0;
-% h_0 = 1;
-% h_var = 0.05;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) x1 + 1;
-% problemData.DCont{1,2} = @(t,x1,x2) ones(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) ones(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) x2 + 1;
-% % Analytical solution
-% problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1;
-% problemData.u1Cont = @(t,x1,x2) x1 - x2.^2;
-% problemData.u2Cont = @(t,x1,x2) -x2;
-% problemData.q1Cont = @(t,x1,x2) ones(size(x1));
-% problemData.q2Cont = @(t,x1,x2) -2*x2;
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + h_var * x1 - h_var * (problemData.hCont(t,x1) + z_bot).^2;
-% problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + problemData.gConst * h_var + 1 + 4 * x2;
-                              
-% 
-% piecewise linear velocity and height
-%
-% z_bot = 0;
-% h_0 = 1;
-% h_var = 0.05;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% % Analytical solution
-% problemData.hCont = @(t,x1) (x1-0.5)*h_var + 1 + (x1>0.5)*0.05;
-% problemData.u1Cont = @(t,x1,x2) (1+x1>0.5).*x1;
-% problemData.u2Cont = @(t,x1,x2) -(1+x1>0.5).*x2;
-% problemData.q1Cont = @(t,x1,x2) -(1+x1>0.5).*ones(size(x1));
-% problemData.q2Cont = @(t,x1,x2) zeros(size(x1));
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) (1+x1>0.5).*(problemData.hCont(t,x1) + h_var * x1);
-% problemData.fuCont = @(t,x1,x2) (1+x1>0.5).*x1 + problemData.gConst * h_var;
-             
-% 
-% quadratic velocity and quadratic height
-%
-% z_bot = 0;
-% h_0 = 1;
-% h_var = 0.05;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) x1 + 1;
-% problemData.DCont{1,2} = @(t,x1,x2) ones(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) ones(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) x2 + 1;
-% % Analytical solution
-% problemData.hCont = @(t,x1) (x1.^2-0.5)*h_var + 1;
-% problemData.u1Cont = @(t,x1,x2) x1 - x2.^2;
-% problemData.u2Cont = @(t,x1,x2) -x2;
-% problemData.q1Cont = @(t,x1,x2) ones(size(x1));
-% problemData.q2Cont = @(t,x1,x2) -2*x2;
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) problemData.hCont(t,x1) + 2 * h_var * x1 - 2 * h_var * x1 .* (problemData.hCont(t,x1) + z_bot).^2;
-% problemData.fuCont = @(t,x1,x2) x1 + x2.^2 + 2 * problemData.gConst * h_var * x1 + 1 + 4 * x2;
-                       
-% z_bot = 2;
-% h_0 = 2;
-% paramE = 0.01;
-% problemData.gConst = 10;
-% % Diffusion matrix
-% problemData.DCont = cell(2,2);
-% problemData.DCont{1,1} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% problemData.DCont{1,2} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,1} = @(t,x1,x2) zeros(size(x1));
-% problemData.DCont{2,2} = @(t,x1,x2) zeros(size(x1)) + 1.e-3;
-% % Analytical solution
-% problemData.hCont = @(t,x1) paramE * sin(paramE * (t + x1)) + h_0;
-% problemData.u1Cont = @(t,x1,x2) sqrt(paramE) * (x2 - z_bot) .* sin(paramE * (t + x1));
-% problemData.u2Cont = @(t,x1,x2) -0.5 * sqrt(paramE) * paramE * (x2 - z_bot).^2 .* cos(paramE * (t + x1));
-% problemData.q1Cont = @(t,x1,x2) sqrt(paramE) * paramE * (x2 - z_bot) .* cos(paramE * (t + x1));
-% problemData.q2Cont = @(t,x1,x2) sqrt(paramE) * sin(paramE * (t + x1));
-% % Analytical right hand side
-% problemData.fhCont = @(t,x1) paramE * paramE * cos(paramE * (t + x1)) - ...
-%                       0.5 * sqrt(paramE) * paramE * cos(paramE * (t + x1)) .* problemData.hCont(t,x1) .* ...
-%                         ( problemData.hCont(t,x1) + 2 * paramE * sin(paramE * (t + x1)) );
-% problemData.fuCont = @(t,x1,x2) sqrt(paramE) * paramE * (x2 - z_bot) .* cos(paramE * (t + x1)) .* ...
-%                         ( 1 + 0.5 * sqrt(paramE) * (x2 - z_bot) .* sin(paramE * (t + x1)) ) + ...
-%                        problemData.gConst * paramE * paramE * cos(paramE * (t + x1)) + ...
-%                        1.e-3 .* paramE * paramE * sqrt(paramE) * (x2 - z_bot) .* sin(paramE * (t + x1));
-%                      
 %% Domain and triangulation.
 fn_domainRectTrap = getFunctionHandle('darcyVert/domainRectTrap');
 problemData.generateGrid = @(numElem) fn_domainRectTrap([0, domainWidth], [zBotConst, zBotConst + h0Const], numElem);
 problemData.generateGrid1D = @(numElem, g2D) generateGridData1D([0, domainWidth], zBotConst + h0Const, numElem, g2D);
+
+% Boundary parts (0 = int, 1 = bot, 2 = right, 3 = top, 4 = left)
+idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
+
+problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
+problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1;
+problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
+problemData.generateMarkE0TbdrLand = @(g) g.idE0T == idLand;
+problemData.generateMarkE0TbdrOS = @(g) g.idE0T == idOS;
+problemData.generateMarkE0TbdrRiv = @(g) g.idE0T == idRiv;
+problemData.generateMarkE0TbdrRad = @(g) g.idE0T == idRad;
+
+problemData.generateMarkV0T1Dint = @(g) g.idV0T == 0;
+problemData.generateMarkV0T1DbdrLand = @(g) g.idV0T == idLand;
+problemData.generateMarkV0T1DbdrOS = @(g) g.idV0T == idOS;
+problemData.generateMarkV0T1DbdrRiv = @(g) g.idV0T == idRiv;
+problemData.generateMarkV0T1DbdrRad = @(g) g.idV0T == idRad;
 end % function
 
 function [problemData, h0Const, zBotConst] = analyticalData(problemData, hSym, u1Sym, u2Sym, gConst, zBotSym, DSym, domainWidth)
@@ -352,6 +83,11 @@ dzU2Sym = diff(u2Sym, z);
 
 %% Check continuity
 assert(isequal(dxU1Sym + dzU2Sym, symfun(0, [t x z])), 'u1 and u2 do not fulfill continuity equation')
+
+%% Compute boundary conditions
+qDSym = -sign(x - 0.5 * domainWidth) * (DSym{1,1} * dxU1Sym + DSym{1,2} * dzU1Sym);
+depthIntU1Sym = int(u1Sym, z);
+depthIntU1Cont = matlabFunction(depthIntU1Sym, 'Vars', [t x z]);
 
 %% Compute right hand sides
 fhSym = diff(hSym, t) + diff(int(u1Sym, z, zBotSym, zBotSym + hSym), x);
@@ -369,11 +105,12 @@ problemData.fhCont = matlabFunction(fhSym, 'Vars', [t x]);
 problemData.fuCont = matlabFunction(fuSym, 'Vars', [t x z]);
 
 problemData.DCont = cellfun(@(c) matlabFunction(c, 'Vars', [t x z]), DSym, 'UniformOutput', false);
-% for i = 1 : 2
-%   for j = 1 : 2
-%     problemData.DCont{i, j} = matlabFunction(DSym(i, j), 'Vars', [t x z]);
-%   end % for j
-% end % for i
+
+problemData.hDCont = problemData.hCont;
+problemData.u1DCont = problemData.u1Cont;
+problemData.u2DCont = problemData.u2Cont;
+problemData.qDCont = matlabFunction(qDSym, 'Vars', [t x z]);
+problemData.uhDCont = @(t, x, xi, zb) problemData.hDCont(t, x) .* (depthIntU1Cont(t, x, xi) - depthIntU1Cont(t, x, zb)) ./ (xi - zb);
 
 %% Determine constants
 problemData.gConst = double(gConst);
