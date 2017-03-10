@@ -84,15 +84,12 @@ uhDCont = @(x1) problemData.uhDCont(t, x1);
 % Diffusion boundary terms in momentum equation
 problemData.globRbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
 problemData.globJq = problemData.fn_assembleVecEdgeTrapPhiIntFuncCont(problemData.g, problemData.g.markE0TbdrQ .* problemData.g.areaE0T, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-% globLuRterms = evaluateExactDiffusion(problemData.g, t, problemData.g.markE0TbdrQ, problemData.diffusiveFluxExact, problemData.qOrd, problemData.basesOnQuad2D);
 
 % Advection boundary terms in momentum equation
 problemData.globJh = assembleVecEdgeTrapPhiIntFuncCont1DNu(problemData.g, problemData.g.markE0TbdrH, hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJh = problemData.gConst * problemData.globJh{1};
-% globLuTildeQterms = evaluateExactGHNu(problemData.g, t, problemData.gConst, problemData.g.markE0TbdrH, problemData.hExact, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globPbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDisc(2:3));
 problemData.globPbdr = problemData.globPbdr{1} + problemData.globPbdr{2};
-% globLuPterms = evaluateExactUsquareNu1(problemData.g, t, problemData.g.markE0TbdrU, problemData.uExact, problemData.qOrd, problemData.basesOnQuad2D);
 
 problemData.globJuu = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, @(x1,x2) u1DCont(x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJuu = problemData.globJuu{1};
@@ -104,10 +101,9 @@ for n = 1 : 4
   problemData.globJuu = problemData.globJuu + globQPerQuad{n,2} * reshape(u1DContQ0E0T.', [], 1);
 end % for n
 
-% problemData.globLqTerms = evaluateExactUNu(problemData.g, t, problemData.g.markE0TprescU, problemData.uExact, problemData.qOrd, problemData.basesOnQuad2D);
-
-% Dirichlet boundary for horizontal velocity in continuity and flux equation
+% Boundary terms for horizontal velocity in continuity and flux equation
 problemData.globJu = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.tildeGlobPbdr = assembleMatEdgeTrapPhiIntPhiIntFuncDisc1DIntNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.tildeHatPdiag);
 
 % Dirichlet boundary for vertical velocity in continuity equation
 problemData.globJw = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrW, u2DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
@@ -121,6 +117,4 @@ for n = 1 : 2
   x1V0T = problemData.g.g1D.coordV0T(markV0TbdrUH, n, 1);
   problemData.barGlobJuh(markV0TbdrUHrep) = ( uhDCont(x1V0T) .* problemData.g.g1D.nuV0T(markV0TbdrUH, n) ) * problemData.basesOnQuad1D.phi0D(:, n)';
 end % for n
-% problemData.globLhPterms = evalExactUHNu(problemData.g.g1D, t, problemData.g.g1D.prescUHindex, problemData.UHexact, problemData.basesOnQuad1D);
-% problemData.globLhPterms = evalExactUHNu(problemData.g.g1D, t, problemData.g.g1D.prescUHindex, @(t,x1) problemData.hDCont(t,x1) .* problemData.u1DCont(t,x1,problemData.hDCont(t,x1)./2), problemData.basesOnQuad1D);
 end % function

@@ -1,10 +1,10 @@
-function ret = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(g2D, g1D, dataDisc1D, heightV0T1D, markE0Tint, refEdgePhiIntPhiIntPhi1DInt, refEdgePhiIntPhiExtPhi1DExt)
+function ret = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(g2D, g1D, dataDisc1D, heightV0T1D, markE0T, refEdgePhiIntPhiIntPhi1DInt, refEdgePhiIntPhiExtPhi1DExt)
 K = g2D.numT;
 [N, ~, barN, ~] = size(refEdgePhiIntPhiIntPhi1DInt);
 ret = sparse(K*N, K*N);
 dataDisc2D = g1D.markT2DT * dataDisc1D;
 for n = 3 : 4
-  areaNuE0Tint = 0.5 * markE0Tint(:,n) .* g2D.areaE0T(:,n) .* g2D.nuE0T(:,n,1);
+  areaNuE0Tint = 0.5 * markE0T(:,n) .* g2D.areaE0T(:,n) .* g2D.nuE0T(:,n,1);
   areaNuE0THeightint = areaNuE0Tint ./ (g1D.markT2DT * heightV0T1D(:,5-n));
   for l = 1 : barN
     ret = ret + ...
