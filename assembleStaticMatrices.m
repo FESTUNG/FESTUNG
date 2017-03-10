@@ -4,7 +4,7 @@ problemData.globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
 problemData.globQ = problemData.fn_assembleMatEdgeTrapPhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
 problemData.globQbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
 
-globQAvg = problemData.fn_assembleMatEdgeTrapPhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag, 1:2, 1);
+globQAvg = problemData.fn_assembleMatEdgeTrapPhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
 problemData.globQavg = globQAvg{1};
 problemData.globQup = assembleMatEdgeTrapPhiPhiNuBottomUp(problemData.g, problemData.g.markE0Tint | problemData.g.markE0TbdrTop, problemData.hatQdiag, problemData.hatQoffdiag);
 

@@ -22,7 +22,7 @@ cSys{2} = cSys{2} + problemData.tau * ( problemData.globM \ (problemData.globLu 
             (problemData.tildeGlobH{1} - problemData.tildeGlobQ{1} - problemData.tildeGlobQbdr{1}) * cSys{1}) );
 % Vertical velocity
 cSys{3} = (problemData.globH{2} - problemData.globQup) \ (problemData.globJu{1} + problemData.globJw{2} + problemData.globKh + ...
-                          (-problemData.globH{1} + problemData.globQavg + problemData.tildeGlobP) * cSys{2} );
+                          (-problemData.globH{1} + problemData.globQavg + problemData.tildeGlobP + problemData.tildeGlobPbdr) * cSys{2} );
 %% Convert representation vector to representation matrix
 problemData.cDisc{1} = reshape(hSys, barN, barK).';
 problemData.cDisc(2:3) = cellfun(@(c) reshape(c, N, K).', cSys(2:3), 'UniformOutput', false);                        
