@@ -1,6 +1,6 @@
 function ret = assembleVecElemPhiSource( g, N, sourceEval, basesOnQuad )
 K = g.numT;
-p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  [~, ~, W] = quadRule2D(qOrd);
+p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p,1);  [~, ~, W] = quadRule2D(qOrd);
 [~,R] = size(sourceEval); %needed for assertion
 %Assert
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')

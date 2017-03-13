@@ -1,6 +1,6 @@
 function dataEval = evalFuncContAtEveryEdgeIntPoint(g, funcCont, Nmu)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
-p = Nmu-1;  qOrd = max(2*p, 1);  [Q1,~] = quadRule1D(qOrd);
+p = Nmu-1;  qOrd = max(2*p+1, 1);  [Q1,~] = quadRule1D(qOrd);
 K = g.numT;
 dataEval = zeros( K, size(Q1,2), 3 );
 
