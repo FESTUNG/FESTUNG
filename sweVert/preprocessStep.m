@@ -78,12 +78,13 @@ problemData.barGlobG = assembleMatElem1DDphiPhiFuncDiscHeight(barU1Disc, heightQ
 hDCont = @(x1) problemData.hDCont(t,x1);
 u1DCont = @(x1,x2) problemData.u1DCont(t,x1,x2);
 u2DCont = @(x1,x2) problemData.u2DCont(t,x1,x2);
-qDCont = @(x1,x2) problemData.qDCont(t,x1,x2);
+qDCont = { @(x1,x2) problemData.q1DCont(t,x1,x2); @(x1,x2) problemData.q2DCont(t,x1,x2) };
 uhDCont = @(x1) problemData.uhDCont(t, x1);
 
 % Diffusion boundary terms in momentum equation
 problemData.globRbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
-problemData.globJq = problemData.fn_assembleVecEdgeTrapPhiIntFuncCont(problemData.g, problemData.g.markE0TbdrQ .* problemData.g.areaE0T, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJq = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrQ, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJq = problemData.globJq{1} + problemData.globJq{2};
 
 % Advection boundary terms in momentum equation
 problemData.globJh = assembleVecEdgeTrapPhiIntFuncCont1DNu(problemData.g, problemData.g.markE0TbdrH, hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
@@ -94,16 +95,15 @@ problemData.globPbdr = problemData.globPbdr{1} + problemData.globPbdr{2};
 problemData.globJuu = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, @(x1,x2) u1DCont(x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJuu = problemData.globJuu{1};
 globQPerQuad = assembleMatEdgeTrapPhiIntFuncDiscIntNuPerQuad(problemData.g, problemData.g.markE0TbdrU, problemData.cDisc{3}, problemData.hatQPerQuad);
-problemData.globJuu = zeros(problemData.g.numT * problemData.N,1);
+problemData.globJuw = zeros(problemData.g.numT * problemData.N,1);
 for n = 1 : 4
   [Q1, Q2] = execin('darcyVert/gammaMapTrap', n, Q);
   u1DContQ0E0T = u1DCont(problemData.g.mapRef2Phy(1, Q1, Q2), problemData.g.mapRef2Phy(2, Q1, Q2));
-  problemData.globJuu = problemData.globJuu + globQPerQuad{n,2} * reshape(u1DContQ0E0T.', [], 1);
+  problemData.globJuw = problemData.globJuw + globQPerQuad{n,2} * reshape(u1DContQ0E0T.', [], 1);
 end % for n
 
 % Boundary terms for horizontal velocity in continuity and flux equation
 problemData.globJu = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.tildeGlobPbdr = assembleMatEdgeTrapPhiIntPhiIntFuncDisc1DIntNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.tildeHatPdiag);
 
 % Dirichlet boundary for vertical velocity in continuity equation
 problemData.globJw = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrW, u2DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);

@@ -46,6 +46,7 @@ problemData.barN = problemData.p + 1;  % number of local DOFs on intervals
 problemData.tau = (problemData.tEnd - problemData.t0) / problemData.numSteps;  % time step size
 
 %% Configuration output.
+fprintf('Running testcase "%s".\n', problemData.testcase);
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d trapezoidals.\n', problemData.p, problemData.N, problemData.g.numT)
 
 %% Lookup table for basis function.

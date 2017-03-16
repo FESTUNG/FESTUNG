@@ -21,7 +21,8 @@ switch name
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
     problemData.u2DCont = problemData.u2Cont;
-    problemData.qDCont = @(t,x,z) zeros(size(x));
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
     problemData.uhDCont = @(t,x) ones(size(x));
 
   case 'linear h'
@@ -46,7 +47,8 @@ switch name
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
     problemData.u2DCont = problemData.u2Cont;
-    problemData.qDCont = @(t,x,z) zeros(size(x));
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
     problemData.uhDCont = @(t,x) problemData.hCont(t,x);
 
   case 'z-linear u'
@@ -70,8 +72,9 @@ switch name
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
     problemData.u2DCont = problemData.u2Cont;
-    problemData.qDCont = @(t,x,z) zeros(size(x));
-    problemData.uhDCont = @(t,x) 0.5 * (problemData.hCont(t,x).^2 - zBotConst.^2);
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) -ones(size(x));
+    problemData.uhDCont = @(t,x) 0.5 * ((problemData.hCont(t,x) + zBotConst).^2 - zBotConst.^2);
   
   case 'x-linear u'
     domainWidth = 1;
@@ -85,7 +88,7 @@ switch name
     problemData.u1Cont = @(t,x,z) x;
     problemData.u2Cont = @(t,x,z) -z;
     
-    problemData.fhCont = @(t,x) ones(size(x));
+    problemData.fhCont = @(t,x) problemData.hCont(t,x);
     problemData.fuCont = @(t,x,z) x;
     
     problemData.DCont = { @(t,x,z) ones(size(x)), @(t,x,z) zeros(size(x)); 
@@ -94,8 +97,9 @@ switch name
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
     problemData.u2DCont = problemData.u2Cont;
-    problemData.qDCont = @(t,x,z) zeros(size(x));
-    problemData.uhDCont = @(t,x) problemData.hCont(t,x) .* problemData.u1Cont(t,x,0);
+    problemData.q1DCont = @(t,x,z) -ones(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
+    problemData.uhDCont = @(t,x) problemData.hCont(t,x) .* x;
 
   case 'linear'
     domainWidth = 1;
@@ -111,6 +115,32 @@ switch name
     problemData.u2Cont = @(t,x,z) -z;
     
     problemData.fhCont = @(t,x) problemData.hCont(t,x) + hVar * x;
+    problemData.fuCont = @(t,x,z) x + problemData.gConst * hVar;
+    
+    problemData.DCont = { @(t,x,z) ones(size(x)), @(t,x,z) zeros(size(x)); 
+                          @(t,x,z) zeros(size(x)), @(t,x,z) ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) -ones(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
+    problemData.uhDCont = @(t,x) problemData.hCont(t,x) .* x;
+    
+  case 'linear h, quadratic u'
+    domainWidth = 1;
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
+    
+    problemData.gConst = 10;
+    h0Const = 1;
+    zBotConst = 0;
+    hVar = 0.05;
+    
+    problemData.hCont = @(t,x) 1 + (x - domainWidth/2) * hVar;
+    problemData.u1Cont = @(t,x,z) x - z.^2;
+    problemData.u2Cont = @(t,x,z) -z;
+    
+    problemData.fhCont = @(t,x) problemData.hCont(t,x) + hVar * x - problemData.hCont(t,x).^2 * hVar;
     problemData.fuCont = @(t,x,z) x + z.^2 + problemData.gConst * hVar + 2;
     
     problemData.DCont = { @(t,x,z) ones(size(x)), @(t,x,z) zeros(size(x)); 
@@ -119,8 +149,86 @@ switch name
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
     problemData.u2DCont = problemData.u2Cont;
-    problemData.qDCont = @(t,x,z) zeros(size(x));
-    problemData.uhDCont = @(t,x) problemData.hCont(t,x) .* problemData.u1Cont(t,x,0);
+    problemData.q1DCont = @(t,x,z) -ones(size(x));
+    problemData.q2DCont = @(t,x,z) 2 * z;
+    problemData.uhDCont = @(t,x) problemData.hCont(t,x) .* x - problemData.hCont(t,x).^3 / 3;
+
+  case 'quadratic h'
+    domainWidth = 1;
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
+    
+    problemData.gConst = 10;
+    h0Const = 1;
+    zBotConst = 0;
+    hVar = 0.05;
+    
+    problemData.hCont = @(t,x) 1 + (x.^2 - domainWidth/2) * hVar;
+    problemData.u1Cont = @(t,x,z) ones(size(x));
+    problemData.u2Cont = @(t,x,z) zeros(size(x));
+    
+    problemData.fhCont = @(t,x) 2 * hVar * x;
+    problemData.fuCont = @(t,x,z) 2 * problemData.gConst * hVar * x;
+    
+    problemData.DCont = { @(t,x,z) ones(size(x)), @(t,x,z) zeros(size(x)); 
+                          @(t,x,z) zeros(size(x)), @(t,x,z) ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
+    problemData.uhDCont = @(t,x) problemData.hCont(t,x);
+
+  case 'quadratic u'
+    domainWidth = 1;
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
+    
+    problemData.gConst = 10;
+    h0Const = 1;
+    zBotConst = 0;
+    
+    problemData.hCont = @(t,x) ones(size(x));
+    problemData.u1Cont = @(t,x,z) x - z.^2;
+    problemData.u2Cont = @(t,x,z) -z;
+    
+    problemData.fhCont = @(t,x) ones(size(x));
+    problemData.fuCont = @(t,x,z) x + z.^2 + 2;
+    
+    problemData.DCont = { @(t,x,z) ones(size(x)), @(t,x,z) zeros(size(x)); 
+                          @(t,x,z) zeros(size(x)), @(t,x,z) ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) -ones(size(x));
+    problemData.q2DCont = @(t,x,z) 2 * z;
+    problemData.uhDCont = @(t,x) x - 1/3;
+
+  case 'quadratic'
+    domainWidth = 1;
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
+    
+    problemData.gConst = 10;
+    h0Const = 1;
+    zBotConst = 0;
+    hVar = 0.05;
+    
+    problemData.hCont = @(t,x) 1 + (x.^2 - domainWidth/2) * hVar;
+    problemData.u1Cont = @(t,x,z) x - z.^2;
+    problemData.u2Cont = @(t,x,z) -z;
+    
+    problemData.fhCont = @(t,x) 2 * hVar * x.^2 + problemData.hCont(t,x) .* (1 - 2 * hVar * x .* problemData.hCont(t,x));
+    problemData.fuCont = @(t,x,z) (1 + 2 * problemData.gConst * hVar) * x + z.^2 + 2;
+    
+    problemData.DCont = { @(t,x,z) ones(size(x)), @(t,x,z) zeros(size(x)); 
+                          @(t,x,z) zeros(size(x)), @(t,x,z) ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) -ones(size(x));
+    problemData.q2DCont = @(t,x,z) 2 * z;
+    problemData.uhDCont = @(t,x) (x - 1/3) .* problemData.hCont(t,x);
 
   case 'convergence'
     if license('checkout', 'Symbolic_Toolbox')
@@ -163,7 +271,8 @@ assert(isequal(dxU1Sym + dzU2Sym, symfun(0, [t x z])), 'u1 and u2 do not fulfill
 depthIntU1Sym = int(u1Sym, z, zBotSym, zBotSym + hSym);
 
 %% Compute boundary conditions
-qDSym = -sign(x - 0.5 * domainWidth) * (DSym{1,1} * dxU1Sym + DSym{1,2} * dzU1Sym);
+q1DSym = DSym{1,1} * dxU1Sym + DSym{1,2} * dzU1Sym;
+q2DSym = DSym{2,1} * dxU1Sym + DSym{2,2} * dzU1Sym;
 
 %% Compute right hand sides
 fhSym = diff(hSym, t) + diff(depthIntU1Sym, x);
@@ -185,7 +294,9 @@ problemData.DCont = cellfun(@(c) matlabFunction(c, 'Vars', [t x z]), DSym, 'Unif
 problemData.hDCont = problemData.hCont;
 problemData.u1DCont = problemData.u1Cont;
 problemData.u2DCont = problemData.u2Cont;
-problemData.qDCont = matlabFunction(qDSym, 'Vars', [t x z]);
+
+problemData.q1DCont = matlabFunction(q1DSym, 'Vars', [t x z]);
+problemData.q2DCont = matlabFunction(q2DSym, 'Vars', [t x z]);
 problemData.uhDCont = matlabFunction(depthIntU1Sym, 'Vars', [t x]);
 
 %% Determine constants
