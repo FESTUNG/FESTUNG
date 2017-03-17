@@ -2,10 +2,10 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'convergence');
+problemData = setdefault(problemData, 'testcase', 'linear h, quadratic u');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [6, 6]);
+problemData = setdefault(problemData, 'numElem', [2, 2]);
 
 % Local polynomial approximation order (0 to 4)
 problemData = setdefault(problemData, 'p', 2);
@@ -27,7 +27,7 @@ problemData = setdefault(problemData, 'outputBasename', ...  % Basename of outpu
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
 
 %% Parameter check.
-assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
+assert(problemData.p >= 0 && problemData.p <= 5, 'Polynomial order must be zero to five.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
