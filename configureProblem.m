@@ -2,24 +2,24 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'linear h, quadratic u');
+problemData = setdefault(problemData, 'testcase', 'convergence2');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [2, 2]);
+problemData = setdefault(problemData, 'numElem', [2, 1]);
 
 % Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 2);
+problemData = setdefault(problemData, 'p', 0);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
-problemData = setdefault(problemData, 'numSteps', 1);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 10);  % end time
+problemData = setdefault(problemData, 'numSteps', 2);  % number of time steps
 
 % Visualization settings
-problemData = setdefault(problemData, 'isVisGrid', true);  % visualization of grid
+problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
 problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
@@ -32,12 +32,15 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
 
-[problemData, domainWidth, h0Const, zBotConst, idLand, idOS, idRiv, idRad] = getTestcase(problemData, problemData.testcase);
+[problemData, domainWidth, xi0Cont, zBotCont, idLand, idOS, idRiv, idRad] = getTestcase(problemData, problemData.testcase);
 
 %% Domain and triangulation.
 fn_domainRectTrap = getFunctionHandle('darcyVert/domainRectTrap');
-problemData.generateGrid = @(numElem) fn_domainRectTrap([0, domainWidth], [zBotConst, zBotConst + h0Const], numElem);
-problemData.generateGrid1D = @(numElem, g2D) generateGridData1D([0, domainWidth], zBotConst + h0Const, numElem, g2D);
+generateX = @(numElem) (0:numElem(1)) * domainWidth / numElem(1);
+generateZbot = @(numElem) zBotCont(generateX(numElem));
+generateXi0 = @(numElem) xi0Cont(generateX(numElem));
+problemData.generateGrid = @(numElem) fn_domainRectTrap(generateX(numElem), [generateZbot(numElem); generateXi0(numElem)], numElem);
+problemData.generateGrid1D = @(numElem, g2D) generateGridData1D(generateX(numElem), generateXi0(numElem), numElem, g2D);
 
 % Boundary parts (0 = int, 1 = bot, 2 = right, 3 = top, 4 = left)
 checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));

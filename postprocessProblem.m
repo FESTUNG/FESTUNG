@@ -52,5 +52,6 @@ if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))
 
   fprintf('L2 errors of cDisc w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
 end % if
+if problemData.isVisGrid, execin('darcyVert/visualizeGridTrap', problemData.g); end
 end % function
 

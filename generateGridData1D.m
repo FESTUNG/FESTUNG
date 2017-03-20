@@ -2,8 +2,6 @@ function g1D = generateGridData1D(X1, X2, numElem, g2D)
 %% Check input arguments and expand them, if necessary.
 validateattributes(numElem, {'numeric'}, {'nonnegative', 'numel', 1}, mfilename, 'numElem')
 %
-validateattributes(X1, {'numeric'}, {'numel', 2}, mfilename, 'X1')
-%
 if length(X1) == 2
   validateattributes(X1, {'numeric'}, {'numel', 2}, mfilename, 'X1')
   dX1 = (X1(2) - X1(1)) / numElem;

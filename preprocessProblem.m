@@ -79,6 +79,12 @@ problemData.tildeHatPoffdiag = integrateRefEdgeTrapPhiIntPhiExtPhi1DExt([problem
 %% Computation of time-independent 1D matrices.
 problemData.barGlobM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.barHatM);
 
+%% Computation of bathymetry gradient.
+dXzBot = problemData.g.g1D.markT2DT * ( problemData.gConst * ( ...
+          problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 2, 2) - ...
+          problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 2, 2) ));
+problemData.globLzBot = kron(dXzBot .* problemData.g.areaT, eye(problemData.N, 1));
+
 %% Function handles
 problemData.fn_mapTensorProductIndex = getFunctionHandle('darcyVert/mapTensorProductIndex');
 problemData.fn_visualizeDataLagrTrap = getFunctionHandle('darcyVert/visualizeDataLagrTrap');
