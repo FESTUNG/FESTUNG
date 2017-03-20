@@ -12,8 +12,6 @@ else
   g.numElem = reshape(numElem, 1, 2);
 end % if
 %
-validateattributes(X1, {'numeric'}, {'numel', 2}, mfilename, 'X1')
-%
 if length(X1) == 2
   validateattributes(X1, {'numeric'}, {'numel', 2}, mfilename, 'X1')
   dX1 = (X1(2) - X1(1)) / g.numElem(1);
@@ -54,7 +52,7 @@ g.E0T(g.numElem(1) : g.numElem(1) : end, 3) = g.numE - g.numElem(2) + 1 : g.numE
 %% Mapping Edge -> Vertex (V0E)
 g.V0E = zeros(g.numE, 2);
 g.V0E(1:g.numT, :) = g.V0T(:, 1:2); % lower edges in all elements
-g.V0E(g.numT:g.numT + g.numElem(1),:) = g.V0T((g.numElem(2) - 1) *  g.numElem(1) : end, [4 3]); % upper edges at top boundary
+g.V0E(g.numT + 1:g.numT + g.numElem(1),:) = g.V0T((g.numElem(2) - 1) *  g.numElem(1) + 1: end, [4 3]); % upper edges at top boundary
 g.V0E(g.numElem(1) * (g.numElem(2) + 1) + 1 : g.numE - g.numElem(2), :) = g.V0T(:,[1 4]); % left edges
 g.V0E(g.numE - g.numElem(2) + 1 : end, :) = g.V0T(g.numElem(1) : g.numElem(1) : end, [2 3]); % right edges
 %% Mapping of neighbouring edges (markE0TE0T)
