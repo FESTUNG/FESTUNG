@@ -1,12 +1,12 @@
-function [problemData, domainWidth, h0Const, zBotConst, idLand, idOS, idRiv, idRad] = getTestcase(problemData, name)
+function [problemData, domainWidth, xi0Cont, zBotCont, idLand, idOS, idRiv, idRad] = getTestcase(problemData, name)
 switch name
   case 'constant'
     domainWidth = 1;
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     
     problemData.hCont = @(t,x) ones(size(x));
     problemData.u1Cont = @(t,x,z) ones(size(x));
@@ -30,9 +30,35 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     hVar = 0.05;
+    
+    problemData.hCont = @(t,x) 1 + (x - domainWidth/2) * hVar;
+    problemData.u1Cont = @(t,x,z) ones(size(x));
+    problemData.u2Cont = @(t,x,z) zeros(size(x));
+    
+    problemData.fhCont = @(t,x) hVar * ones(size(x));
+    problemData.fuCont = @(t,x,z) problemData.gConst * hVar * ones(size(x));
+    
+    problemData.DCont = { @(t,x,z) ones(size(x)), @(t,x,z) zeros(size(x)); ...
+                          @(t,x,z) zeros(size(x)), @(t,x,z) ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
+    problemData.uhDCont = @(t,x) problemData.hCont(t,x);
+    
+  case 'linear zb'
+    domainWidth = 1;
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
+    
+    problemData.gConst = 10;
+    hVar = 0.05;
+    xi0Cont = @(x) zeros(size(x));
+    zBotCont = @(x) -(1 + (x - domainWidth/2) * hVar);
     
     problemData.hCont = @(t,x) 1 + (x - domainWidth/2) * hVar;
     problemData.u1Cont = @(t,x,z) ones(size(x));
@@ -56,8 +82,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     
     problemData.hCont = @(t,x) ones(size(x));
     problemData.u1Cont = @(t,x,z) z;
@@ -81,8 +107,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     
     problemData.hCont = @(t,x) ones(size(x));
     problemData.u1Cont = @(t,x,z) x;
@@ -106,8 +132,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     hVar = 0.05;
     
     problemData.hCont = @(t,x) 1 + (x - domainWidth/2) * hVar;
@@ -132,8 +158,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     hVar = 0.05;
     
     problemData.hCont = @(t,x) 1 + (x - domainWidth/2) * hVar;
@@ -158,8 +184,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     hVar = 0.05;
     
     problemData.hCont = @(t,x) 1 + (x - domainWidth/2) * hVar;
@@ -184,8 +210,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     hVar = 0.05;
     
     problemData.hCont = @(t,x) 1 + (x.^2 - domainWidth/2) * hVar;
@@ -210,8 +236,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     hVar = 0.05;
     
     problemData.hCont = @(t,x) 1 + (x.^2 - domainWidth/2) * hVar;
@@ -236,8 +262,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     
     problemData.hCont = @(t,x) ones(size(x));
     problemData.u1Cont = @(t,x,z) x - z.^2;
@@ -261,8 +287,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     hVar = 0.05;
     
     problemData.hCont = @(t,x) 1 + (x.^2 - domainWidth/2) * hVar;
@@ -287,8 +313,8 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    h0Const = 1;
-    zBotConst = 0;
+    xi0Cont = @(x) ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     hVar = 0.05;
     
     problemData.hCont = @(t,x) 1 + (x - domainWidth/2) * hVar;
@@ -313,20 +339,20 @@ switch name
       syms x z t
 
       domainWidth = 100;
-      idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
+      idLand = -1; idOS = -1; idRiv = 2; idRad = 4;
 
       gSym = sym('10');
-      zBotSym = sym('0');
+      zBotSym(x) = sym('0');
 
-      deltaSym = sym('0.01');
-      rhoSym = sym('0.1');
+      deltaSym = sym('0.1');
+      rhoSym = sym('0.2');
 
       hSym(t,x) = deltaSym * sin(rhoSym * (t + x)) + 2;
-      u1Sym(t,x,z) = sqrt(deltaSym) * z * sin(deltaSym * (t + x));
-      u2Sym(t,x,z) = -0.5 * deltaSym^1.5 * z^2 * cos(deltaSym * (t + x));
+      u1Sym(t,x,z) = sqrt(deltaSym) * z * sin(rhoSym * (t + x));
+      u2Sym(t,x,z) = -0.5 * sqrt(deltaSym) * rhoSym * z^2 * cos(rhoSym * (t + x));
       DSym = cellfun(@(c) symfun(c, [t x z]), {0.001, 0; 0, 0.001}, 'UniformOutput', false);
 
-      [problemData, h0Const, zBotConst] = analyticalData(problemData, hSym, u1Sym, u2Sym, gSym, zBotSym, DSym, domainWidth);
+      [problemData, xi0Cont, zBotCont] = analyticalData(problemData, hSym, u1Sym, u2Sym, gSym, zBotSym, DSym, domainWidth);
     else
       error('Symbolic Toolbox required to derive problem formulation!')
     end % if
@@ -335,21 +361,22 @@ switch name
     if license('checkout', 'Symbolic_Toolbox')
       syms x z t
 
-      domainWidth = 16e4;
+      domainWidth = 100;
       idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
 
       gSym = sym('9.81');
-      zBotSym = sym('-5');
+      zBotSym(x) = -2 + 0.005 * x;
 
+      epsSym = sym('0.01');
       deltaSym = sym('0.1');
-      rhoSym = sym('0.0001');
+      omegaSym = sym('0.01');
 
-      hSym(t,x) = deltaSym * sin(rhoSym * (t + x)) + 5;
-      u1Sym(t,x,z) = deltaSym * sin(zBotSym * (zBotSym + z)) * cos(rhoSym * (t + x));
-      u2Sym(t,x,z) = - deltaSym * rhoSym / zBotSym * cos(zBotSym * (zBotSym + z)) * sin(rhoSym * (t + x));
-      DSym = cellfun(@(c) symfun(c, [t x z]), {0.001, 0; 0, 0.001}, 'UniformOutput', false);
+      hSym(t,x) = epsSym * sin(omegaSym * x + t) - zBotSym(x);
+      u1Sym(t,x,z) = deltaSym * (z - zBotSym(x)) * sin(omegaSym * x + t);
+      u2Sym(t,x,z) = deltaSym * (z - zBotSym(x)) * ( diff(zBotSym, x) * sin(omegaSym * x + t) - omegaSym/2 * (z - zBotSym(x)) * cos(omegaSym * x + t) );
+      DSym = cellfun(@(c) symfun(c, [t x z]), {0.1, 0; 0, 0.1}, 'UniformOutput', false);
 
-      [problemData, h0Const, zBotConst] = analyticalData(problemData, hSym, u1Sym, u2Sym, gSym, zBotSym, DSym, domainWidth);
+      [problemData, xi0Cont, zBotCont] = analyticalData(problemData, hSym, u1Sym, u2Sym, gSym, zBotSym, DSym, domainWidth);
     else
       error('Symbolic Toolbox required to derive problem formulation!')
     end % if
@@ -357,7 +384,7 @@ end % switch
 end % function
 
 
-function [problemData, h0Const, zBotConst] = analyticalData(problemData, hSym, u1Sym, u2Sym, gConst, zBotSym, DSym, domainWidth)
+function [problemData, xi0Cont, zBotCont] = analyticalData(problemData, hSym, u1Sym, u2Sym, gConst, zBotSym, DSym, domainWidth)
 syms x z t
 
 %% Partial derivatives of solution
@@ -369,7 +396,7 @@ dzU2Sym = diff(u2Sym, z);
 %assert(isequal(dxU1Sym + dzU2Sym, symfun(0, [t x z])), 'u1 and u2 do not fulfill continuity equation')
 
 %% Depth integrated velocity
-depthIntU1Sym = int(u1Sym, z, zBotSym, zBotSym + hSym);
+depthIntU1Sym = int(u1Sym, z, zBotSym(x), zBotSym(x) + hSym(t,x));
 
 %% Compute boundary conditions
 q1DSym = DSym{1,1} * dxU1Sym + DSym{1,2} * dzU1Sym;
@@ -402,6 +429,8 @@ problemData.uhDCont = matlabFunction(depthIntU1Sym, 'Vars', [t x]);
 
 %% Determine constants
 problemData.gConst = double(gConst);
-zBotConst = double(zBotSym);
-h0Const = double(int(hSym(0, x), x, 0, domainWidth) / domainWidth);
+zBot = matlabFunction(zBotSym, 'Vars', x);
+zBotCont = @(x) zBot(x) .* ones(size(x));
+xi0Sym = int(hSym(0, x) + zBotSym(x), x, 0, domainWidth) / domainWidth;
+xi0Cont = @(x) double(xi0Sym) * ones(size(x));
 end % function
