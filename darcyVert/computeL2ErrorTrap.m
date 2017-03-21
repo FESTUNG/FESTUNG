@@ -7,7 +7,7 @@ N = size(dataDisc,2);
 
 % Evaluate analytical and discrete function
 fExOnQuadPts = funcCont(X1, X2);
-fApprxOnQuadPts = dataDisc * basesOnQuad.phi2D(:,1:N).'; % [K x R] = [K x N] * [N x R]
+fApprxOnQuadPts = dataDisc * basesOnQuad.phi2D{qOrd}(:,1:N).'; % [K x R] = [K x N] * [N x R]
 
 % Compute error
 err = sqrt(dot((fApprxOnQuadPts - fExOnQuadPts).^2 * W.', g.areaT));

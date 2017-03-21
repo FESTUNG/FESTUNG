@@ -17,7 +17,7 @@ for n = 1 : 4
   for m = 1 : 2
     markAreaNuE0T = markE0Tbdr(:, n) .* g.areaE0T(:, n) .* g.nuE0T(:, n, m);
     for i = 1 : N
-      ret{m}(:, i) = ret{m}(:, i) + markAreaNuE0T .* ( funcQ0E{m} * (W.' .* basesOnQuad.phi1D(:, i, n)) );
+      ret{m}(:, i) = ret{m}(:, i) + markAreaNuE0T .* ( funcQ0E{m} * (W.' .* basesOnQuad.phi1D{qOrd}(:, i, n)) );
     end % for i
   end  % for m
 end  % for n
@@ -32,7 +32,7 @@ for n = 1 : 4
   [Q1, Q2] = execin('darcyVert/gammaMapTrap', n, Q);
   funcQ0E = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   for i = 1 : N
-    markAreaIntE0T = markE0Tbdr(:, n) .* g.areaE0T(:, n) .* ( funcQ0E * (W.' .* basesOnQuad.phi1D(:, i, n)) );
+    markAreaIntE0T = markE0Tbdr(:, n) .* g.areaE0T(:, n) .* ( funcQ0E * (W.' .* basesOnQuad.phi1D{qOrd}(:, i, n)) );
     for m = 1 : 2
       ret{m}(:, i) = ret{m}(:, i) + markAreaIntE0T .* g.nuE0T(:, n, m);
     end % for m

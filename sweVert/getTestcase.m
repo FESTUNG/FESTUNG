@@ -453,7 +453,7 @@ switch name
   
   case 'convergence'
     domainWidth = 100;
-    idLand = -1; idOS = -1; idRiv = 2; idRad = 4;
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
     xi0Cont = @(x) ones(size(x));

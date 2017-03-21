@@ -85,6 +85,6 @@ function dataDisc = projectFuncCont2DataDisc1D(g, funcCont, qOrd, refElemPhiPhi,
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad');
 [Q, W] = quadRule1D(max(qOrd,1)); N = size(refElemPhiPhi, 1);
-rhs = funcCont(g.mapRef2Phy(Q)) * (repmat(W.', 1, N) .* basesOnQuad.phi1D(:,1:N));
+rhs = funcCont(g.mapRef2Phy(Q)) * (repmat(W.', 1, N) .* basesOnQuad.phi1D{qOrd}(:,1:N));
 dataDisc = rhs / refElemPhiPhi;
 end % function

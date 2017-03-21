@@ -3,7 +3,7 @@ function ret = integrateRefEdgeTrapPhiIntPerQuad(N, qOrd, basesOnQuad)
 ret = zeros(N, R, 4);
 for n = 1 : 4
   for i = 1 : N
-    ret(i,:,n) = W .* basesOnQuad.phi1D(:,i,n).';
+    ret(i,:,n) = W .* basesOnQuad.phi1D{qOrd}(:,i,n).';
   end  % for i
 end  % for n
 end  % function

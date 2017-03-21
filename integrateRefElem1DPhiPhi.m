@@ -52,7 +52,7 @@ validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 ret = zeros(N); % [N x N]
 for i = 1 : N
   for j = 1 : N
-    ret(i, j) = sum( W' .* basesOnQuad.phi1D(:, i) .* basesOnQuad.phi1D(:, j) );
+    ret(i, j) = sum( W' .* basesOnQuad.phi1D{qOrd}(:, i) .* basesOnQuad.phi1D{qOrd}(:, j) );
   end % for
 end % for
 end % function

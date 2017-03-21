@@ -5,7 +5,7 @@ for n = 1 : 2
   for i = 1 : N(1)
     for j = 1 : N(1)
       for l = 1 : N(2)
-        ret(i,j,l,n) = W * ( basesOnQuad2D.phi1D(:,i,n) .* basesOnQuad2D.phi1D(:,j,n) .* basesOnQuad1D.phi1D(:,l) );
+        ret(i,j,l,n) = W * ( basesOnQuad2D.phi1D{qOrd}(:,i,n) .* basesOnQuad2D.phi1D{qOrd}(:,j,n) .* basesOnQuad1D.phi1D{qOrd}(:,l) );
       end % for l
     end  % for j
   end  % for i
@@ -14,7 +14,7 @@ for n = 3 : 4
   for i = 1 : N(1)
     for j = 1 : N(1)
       for l = 1 : N(2)
-        ret(i,j,l,n) = W * ( basesOnQuad2D.phi1D(:,i,n) .* basesOnQuad2D.phi1D(:,j,n) * basesOnQuad1D.phi0D(l,5-n) );
+        ret(i,j,l,n) = W * ( basesOnQuad2D.phi1D{qOrd}(:,i,n) .* basesOnQuad2D.phi1D{qOrd}(:,j,n) * basesOnQuad1D.phi0D{qOrd}(l,5-n) );
       end % for l
     end  % for j
   end  % for i
