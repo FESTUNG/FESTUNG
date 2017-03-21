@@ -91,6 +91,6 @@ validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad');
 Q1 = Q1(:)'; Q2 = Q2(:)'; W = W(:);
 rhs = (funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2)) .* ...
         (g.detJ0T{1} * ones(size(Q1)) + g.detJ0T{2} * Q1 + g.detJ0T{3} * Q2)) * ...
-      (repmat(W, 1, N) .* basesOnQuad.phi2D(:,1:N));
+      (repmat(W, 1, N) .* basesOnQuad.phi2D{qOrd}(:,1:N));
 dataDisc = reshape(globM \ reshape(rhs.', g.numT * N, 1), N, g.numT).';
 end % function
