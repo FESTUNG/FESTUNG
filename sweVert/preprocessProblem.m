@@ -46,8 +46,12 @@ problemData.barN = problemData.p + 1;  % number of local DOFs on intervals
 problemData.tau = (problemData.tEnd - problemData.t0) / problemData.numSteps;  % time step size
 
 %% Configuration output.
+fprintf('-------------------------------------------------------------------------------------------\n');
 fprintf('Running testcase "%s".\n', problemData.testcase);
-fprintf('Computing with polynomial order %d (%d local DOFs) on %d trapezoidals.\n', problemData.p, problemData.N, problemData.g.numT)
+fprintf('Computing with polynomial order %d (%d local DOFs) on %d x %d (%d) trapezoids.\n', ...
+        problemData.p, problemData.N, problemData.numElem(1), problemData.numElem(2), problemData.g.numT);
+fprintf('%d time steps from t = %g to %g.\n', problemData.numSteps, problemData.t0, problemData.tEnd);
+fprintf('-------------------------------------------------------------------------------------------\n');
 
 %% Lookup table for basis function.
 problemData.basesOnQuad1D = computeBasesOnQuad1D(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);

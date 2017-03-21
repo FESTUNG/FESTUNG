@@ -15,6 +15,12 @@ u20Cont = @(x1,x2) problemData.u2Cont(0,x1,x2);
 problemData.cDisc{2} = problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
 problemData.cDisc{3} = problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, u20Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
 
+%% Computation of bathymetry gradient.
+dZbot1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 2, 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 1, 2);
+dXbot1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 2, 1) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 1, 1);
+dXzBot = problemData.g.g1D.markT2DT * ( problemData.gConst * (dZbot1D ./ dXbot1D) );
+problemData.globLzBot = kron(dXzBot, eye(problemData.N, 1));
+
 %% Error computation and visualization of inital condition.
 if problemData.isVisGrid, execin('darcyVert/visualizeGridTrap', problemData.g); end
 
