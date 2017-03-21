@@ -95,15 +95,15 @@ problemData.globFphiSrc = assembleVecElemPhiSource(problemData.g, problemData.N,
                             problemData.srcEval, problemData.basesOnQuad);
 
 % 
-problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatGbarOnQuad );
+problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatG );
               
 
 % Flux on interior edges
 problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0Tint, ...
-                                                 problemData.uEdge, problemData.hatSbarOnQuad );
+                                                 problemData.uEdge, problemData.hatS );
 % Outflow BC
 problemData.globSout = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0TbdrN, ...
-                                                  problemData.uEdge, problemData.hatSbarOnQuad );
+                                                  problemData.uEdge, problemData.hatS );
 
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!

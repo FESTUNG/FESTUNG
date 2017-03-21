@@ -93,9 +93,9 @@ problemData.hatMmu = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnGa
 problemData.hatRmu = integrateRefEdgePhiIntMu(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
 problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
 % Precomputations for term II
-problemData.hatGbarOnQuad = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
+problemData.hatG = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
 % Precomputations for III.1
-problemData.hatSbarOnQuad = integrateRefEdgeMuPhiIntFlux(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
+problemData.hatS = integrateRefEdgeMuPhiIntFlux(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
 
 %% Assembly of time-independent global matrices.
 problemData.globMphi = assembleMatElemPhiPhi(problemData.g, problemData.hatM);

@@ -62,7 +62,7 @@ function problemData = configureProblem(problemData)
 %% Parameters.
 %problemData.hmax        = 2^-3; % maximum edge length of triangle
 problemData.hmax        = 1/(3*2^4); % maximum edge length of triangle
-problemData.p           = 3; % local polynomial degree
+problemData.p           = 4; % local polynomial degree
 
 problemData.isVisGrid   = false; % visualization of grid
 problemData.isVisSol    = true; % visualization of solution
