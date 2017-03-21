@@ -20,4 +20,10 @@ for m = 1 : 2
   problemData.tildeGlobQ{m} = problemData.gConst * problemData.tildeGlobQ{m};
   problemData.tildeGlobQbdr{m} = problemData.gConst * problemData.tildeGlobQbdr{m};
 end % for m
+
+%% Computation of bathymetry gradient.
+dZbot1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 2, 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 1, 2);
+dXbot1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 2, 1) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 1, 1);
+dXzBot = problemData.g.g1D.markT2DT * ( problemData.gConst * (dZbot1D ./ dXbot1D) );
+problemData.globLzBot = kron(dXzBot, eye(problemData.N, 1));
 end % function

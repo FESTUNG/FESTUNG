@@ -2,21 +2,21 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'convergence2');
+problemData = setdefault(problemData, 'testcase', 'sin u w');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [2, 1]);
+problemData = setdefault(problemData, 'numElem', [8, 4]);
 
-% Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 0);
+% Local polynomial approximation order (0 to 5)
+problemData = setdefault(problemData, 'p', 1);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 10);  % end time
-problemData = setdefault(problemData, 'numSteps', 2);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 0.01);  % end time
+problemData = setdefault(problemData, 'numSteps', 1);  % number of time steps
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid

@@ -16,6 +16,10 @@ end % for n
 % surface elevation in vertices of surface mesh
 xiSmoothV0T1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), [1 2], 2) + hSmoothV0T1D;
 
+if ~isreal(hSmoothV0T1D)
+  error('Complex height');
+end % if
+
 % check for necessity of adaptation
 markModifiedV0T1D = problemData.g.g1D.coordV0T(:, :, 2) ~= xiSmoothV0T1D;
 if force || any(markModifiedV0T1D(:))
