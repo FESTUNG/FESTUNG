@@ -17,15 +17,13 @@ ret{1} = sparse( K*N, KEdge*Nmu);
 ret{2} = sparse( K*N, KEdge*Nmu);
 for iDim = 1:2
     for iE = 1:3
-        Rkn1 = markE0Tbdr(:,iE) .* g.areaE0T(:, iE) .*  g.flipArray(:, iE) .* g.nuE0T( :, iE , iDim);
-        Rkn2 = markE0Tbdr(:,iE) .* g.areaE0T(:, iE) .* ~g.flipArray(:, iE) .* g.nuE0T( :, iE , iDim);
-        for r = 1:R
-            ret{iDim} = ret{iDim} + ...
-                kron( sparse( 1:K, g.E0T(:, iE), ones(K, 1) .* uEdge{iDim}( r, :, iE)' .* Rkn1 , K, KEdge ), ...
-                Sbar{1}( :, :, iE, r) );
-            ret{iDim} = ret{iDim} + ...
-                kron( sparse( 1:K, g.E0T(:, iE), ones(K, 1) .* uEdge{iDim}( r, :, iE)' .* Rkn2 , K, KEdge ), ...
-                Sbar{2}( :, :, iE, r) );
+        for l=1:2
+        Rkn = markE0Tbdr(:,iE) .* g.areaE0T(:, iE) .*  g.markSideE0T(:, iE, l) .* g.nuE0T( :, iE , iDim);
+            for r = 1:R
+                ret{iDim} = ret{iDim} + ...
+                    kron( sparse( 1:K, g.E0T(:, iE), ones(K, 1) .* uEdge{iDim}( r, :, iE)' .* Rkn , K, KEdge ), ...
+                    Sbar{l}( :, :, iE, r) );
+            end
         end
     end
 end

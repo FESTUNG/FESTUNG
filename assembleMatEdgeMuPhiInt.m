@@ -10,11 +10,16 @@ validateattributes(refEdgePhiIntMu, {'numeric'}, {'size', [N, Nmu, 3, 2]}, mfile
 
 ret = sparse(K*N, Kedge*Nmu);
 for iE = 1:3
-    Rkn1 = markE0T(:,iE) .*  g.flipArray(:, iE) .* g.areaE0T(:, iE);
-    Rkn2 = markE0T(:,iE) .* ~g.flipArray(:, iE) .* g.areaE0T(:, iE);
-    ret = ret + kron(sparse( 1:K, g.E0T(:, iE), Rkn1, K, Kedge ), ...
-              refEdgePhiIntMu(:,:,iE, 1));
-    ret = ret + kron(sparse( 1:K, g.E0T(:, iE), Rkn2, K, Kedge ), ...
-              refEdgePhiIntMu(:,:,iE, 2));
+    for l=1:2
+    Rkn = markE0T(:,iE) .*  g.markSideE0T(:, iE, l) .* g.areaE0T(:, iE);
+    ret = ret + kron(sparse( 1:K, g.E0T(:, iE), Rkn, K, Kedge ), ...
+              refEdgePhiIntMu(:,:,iE, l));
+    end
+%     Rkn1 = markE0T(:,iE) .*  g.flipArray(:, iE) .* g.areaE0T(:, iE);
+%     Rkn2 = markE0T(:,iE) .* ~g.flipArray(:, iE) .* g.areaE0T(:, iE);
+%     ret = ret + kron(sparse( 1:K, g.E0T(:, iE), Rkn1, K, Kedge ), ...
+%               refEdgePhiIntMu(:,:,iE, 1));
+%     ret = ret + kron(sparse( 1:K, g.E0T(:, iE), Rkn2, K, Kedge ), ...
+%               refEdgePhiIntMu(:,:,iE, 2));
 end % for
 end % function

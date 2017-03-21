@@ -70,7 +70,7 @@ problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...
 problemData.g = computeDerivedGridData(problemData.g);
 
 %% HDG related configuration
-problemData.g.flipArray = generateFlipArray( problemData.g );
+problemData.g.markSideE0T = generateMarkSideE0T( problemData.g );
 % Choose a block size for the local solves if we want 'true' local solves
 if ( problemData.isTrueLocalSolve  == true )
     problemData.localSolveBlockSize = determineLocalSolveBlockSize( problemData.K );

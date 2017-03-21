@@ -51,7 +51,7 @@ problemData.g = problemData.generateGridData(problemData.hmax);
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 
 %% Globally constant parameters.
-problemData.K     = problemData.g.numT;  % number of triangles
+problemData.K    = problemData.g.numT;  % number of triangles
 problemData.N    = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
 problemData.Nmu  = problemData.p + 1; % number of local DOFs on Faces
 % problemData.tau  = problemData.tEnd / problemData.numSteps;  % time step size
@@ -68,7 +68,7 @@ problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...
 problemData.g = computeDerivedGridData(problemData.g);
 
 %% HDG related configuration
-problemData.g.flipArray = generateFlipArray( problemData.g );
+problemData.g.markSideE0T = generateMarkSideE0T( problemData.g );
 % Choose a block size for the local solves if we want 'true' local solves
 if ( problemData.isTrueLocalSolve  == true )
     problemData.localSolveBlockSize = determineLocalSolveBlockSize( problemData.K );
@@ -83,7 +83,7 @@ problemData.basesOnGamma = computeBasesOnGamma(problemData.Nmu, struct);
 %% Computation of matrices on the reference triangle.
 problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
 
-%% Computation of HDG matrices on the reference triangle.
+%% Computation of HDG matrices on the reference triangle/edge2.
 %Hybrid mass matrix
 problemData.hatMmu = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnGamma);
 
