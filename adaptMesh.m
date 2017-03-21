@@ -4,7 +4,7 @@ if nargin < 2
 end % if
 
 % cDisc{1} in vertices of surface mesh
-problemData.hV0T1D = problemData.cDisc{1} * problemData.basesOnQuad1D.phi0D; 
+problemData.hV0T1D = problemData.cDisc{1} * problemData.basesOnQuad1D.phi0D{problemData.qOrd}; 
 
 % smoothed height in vertices of surface mesh
 hSmoothV0T1D = problemData.hV0T1D;

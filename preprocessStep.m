@@ -22,8 +22,8 @@ heightQ0T1D = heightV0T1D(:,1) * (1-Q) + heightV0T1D(:,2) * Q;
 u1Q0E0Tint = cell(4,1); % cDisc{2} in quad points of edges
 u1Q0E0TE0T = cell(4,1); % cDisc{2} of neighboring element in quad points of edges
 for n = 1 : 4
-  u1Q0E0Tint{n} = reshape(problemData.basesOnQuad2D.phi1D(:,:,n) * problemData.cDisc{2}.', problemData.g.numT * numQuad1D, 1);
-  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D(:,:,mapE0E(n)) * problemData.cDisc{2}.';
+  u1Q0E0Tint{n} = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,n) * problemData.cDisc{2}.', problemData.g.numT * numQuad1D, 1);
+  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,mapE0E(n)) * problemData.cDisc{2}.';
   u1Q0E0TE0T{n} = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{n}.', problemData.g.numT * numQuad1D, 1);
 end % for nn
 
@@ -111,6 +111,6 @@ for n = 1 : 2
   markV0TbdrUH = problemData.g.g1D.markV0TbdrUH(:, n);
   markV0TbdrUHrep = logical(kron(markV0TbdrUH, true(problemData.barN, 1)));
   x1V0T = problemData.g.g1D.coordV0T(markV0TbdrUH, n, 1);
-  problemData.barGlobJuh(markV0TbdrUHrep) = ( uhDCont(x1V0T) .* problemData.g.g1D.nuV0T(markV0TbdrUH, n) ) * problemData.basesOnQuad1D.phi0D(:, n)';
+  problemData.barGlobJuh(markV0TbdrUHrep) = ( uhDCont(x1V0T) .* problemData.g.g1D.nuV0T(markV0TbdrUH, n) ) * problemData.basesOnQuad1D.phi0D{problemData.qOrd}(:, n)';
 end % for n
 end % function

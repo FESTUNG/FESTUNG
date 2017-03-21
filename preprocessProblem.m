@@ -50,8 +50,8 @@ fprintf('Running testcase "%s".\n', problemData.testcase);
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d trapezoidals.\n', problemData.p, problemData.N, problemData.g.numT)
 
 %% Lookup table for basis function.
-problemData.basesOnQuad1D = computeBasesOnQuad1D(problemData.p, problemData.qOrd);
-problemData.basesOnQuad2D = execin('darcyVert/computeBasesOnQuadTrap', problemData.p, problemData.qOrd);
+problemData.basesOnQuad1D = computeBasesOnQuad1D(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
+problemData.basesOnQuad2D = execin('darcyVert/computeBasesOnQuadTrap', problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
 
 %% Computation of matrices on the reference element.
 problemData.hatM = execin('darcyVert/integrateRefElemTrapPhiPhi', problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
@@ -67,8 +67,8 @@ problemData.hatQPerQuad = integrateRefEdgeTrapPhiIntPhiIntPerQuad(problemData.N,
 problemData.barHatM = integrateRefElem1DPhiPhi(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 problemData.barHatG = integrateRefElem1DDphiPhiPhiPerQuad(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 problemData.barHatSdiag = integrateRefEdgeTrapPhi1DIntPerQuad(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
-problemData.barHatPdiag = integrateRefEdge1DPhiIntPhiIntPhiInt(problemData.barN, problemData.basesOnQuad1D);
-problemData.barHatPoffdiag = integrateRefEdge1DPhiIntPhiExtPhiExt(problemData.barN, problemData.basesOnQuad1D);
+problemData.barHatPdiag = integrateRefEdge1DPhiIntPhiIntPhiInt(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
+problemData.barHatPoffdiag = integrateRefEdge1DPhiIntPhiExtPhiExt(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 
 problemData.tildeHatH = integrateRefElemTrapDphiPhi1D([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
 problemData.tildeHatQdiag = integrateRefEdgeTrapPhiIntPhi1DInt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);

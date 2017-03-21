@@ -2,21 +2,21 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'sin u w');
+problemData = setdefault(problemData, 'testcase', 'convergence');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [8, 4]);
+problemData = setdefault(problemData, 'numElem', [32, 16]);
 
 % Local polynomial approximation order (0 to 5)
-problemData = setdefault(problemData, 'p', 1);
+problemData = setdefault(problemData, 'p', 2);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 0.01);  % end time
-problemData = setdefault(problemData, 'numSteps', 1);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 86.4);  % end time
+problemData = setdefault(problemData, 'numSteps', 700);  % number of time steps
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
@@ -31,14 +31,13 @@ assert(problemData.p >= 0 && problemData.p <= 5, 'Polynomial order must be zero 
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
-
 [problemData, domainWidth, xi0Cont, zBotCont, idLand, idOS, idRiv, idRad] = getTestcase(problemData, problemData.testcase);
-
-%% Domain and triangulation.
-fn_domainRectTrap = getFunctionHandle('darcyVert/domainRectTrap');
 generateX = @(numElem) (0:numElem(1)) * domainWidth / numElem(1);
 generateZbot = @(numElem) zBotCont(generateX(numElem));
 generateXi0 = @(numElem) xi0Cont(generateX(numElem));
+
+%% Domain and triangulation.
+fn_domainRectTrap = getFunctionHandle('darcyVert/domainRectTrap');
 problemData.generateGrid = @(numElem) fn_domainRectTrap(generateX(numElem), [generateZbot(numElem); generateXi0(numElem)], numElem);
 problemData.generateGrid1D = @(numElem, g2D) generateGridData1D(generateX(numElem), generateXi0(numElem), numElem, g2D);
 

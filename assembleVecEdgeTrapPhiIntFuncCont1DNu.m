@@ -9,7 +9,7 @@ for n = 1 : 4
   for m = 1 : 2
     markAreaNuE0T = markAreaE0T .* g.nuE0T(:, n, m);
     for i = 1 : N
-      ret{m}(:, i) = ret{m}(:, i) + markAreaNuE0T .* (funcQ0E * (W.' .* basesOnQuad.phi1D(:, i, n)) );
+      ret{m}(:, i) = ret{m}(:, i) + markAreaNuE0T .* (funcQ0E * (W.' .* basesOnQuad.phi1D{qOrd}(:, i, n)) );
     end % for i
   end % for m
 end % for n
