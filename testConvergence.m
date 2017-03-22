@@ -1,22 +1,60 @@
-pAvail = 0 : 2;
-iAvail = 1 : 6;
+problem = 'darcyVert';
+testcase = 'convergence';
 
-err = cell(size(pAvail)); 
-conv = cell(size(pAvail));
-for p = pAvail
-  for i = iAvail
-    pd = main('sweVert', struct('numElem', 2^(i-1) * [2, 1], 'p', p)); 
-    err{p+1}(i,:) = pd.error; 
-    conv{p+1} = [zeros(1,3); log(err{p+1}(1:end-1,:) ./ err{p+1}(2:end,:)) / log(2)];
-    disp(conv{p+1}); 
+pAvail = [0; 1; 2];
+numElemAvail = [16, 16; 24, 24; 36, 36; 54, 54; 81, 81];
+numStepsAvail = [100; 400; 1600; 6400; 25600];
+
+if iscell(numStepsAvail)
+  for ip = pAvail
+    assert(isequal(size(numElemAvail, 1), length(numStepsAvail{ip+1})), 'numElemAvail and numStepsAvail must be same size')
+  end
+else
+  assert(isequal(size(numElemAvail, 1), length(numStepsAvail)), 'numElemAvail and numStepsAvail must be same size')
+end % if
+
+err = {}; 
+conv = {};
+for ip = 1 : size(pAvail, 1)
+  for i = 1 : size(numElemAvail, 1)
+    pd = struct;
+    pd.testcase = testcase;
+    pd.p = pAvail(ip);
+    pd.numElem = numElemAvail(i, :);
+    if iscell(numStepsAvail)
+      pd.numSteps = numStepsAvail{ip}(i);
+    else
+      pd.numSteps = numStepsAvail(i);
+    end % if
+    try
+      pd = main(problem, pd); 
+      err{ip}(i,:) = pd.error;  %#ok<SAGROW>
+      [N, n] = size(err{ip});
+      conv{ip} = [zeros(1,n); ...
+                  log(err{ip}(1:N-1,:) ./ err{ip}(2:N,:)) ./ ...
+                    repmat(log(numElemAvail(2:N,1) ./ numElemAvail(1:N-1,1)), 1, n)];  %#ok<SAGROW>
+      disp(conv{ip}); 
+    catch e
+      warning('%s: %s', e.identifier, e.message);
+    end % try
   end % for i
 end % for p
 
-fprintf('Err(h)     C(h)    Err(u)     C(u)    Err(w)     C(w)\n'); 
-for p = 0 : 2
-  fprintf('------------------------- p = %d ----------------------\n', p); 
-  for i = 1:6
-    fprintf('%6.2e  %6.3f   %6.2e  %6.3f   %6.2e  %6.3f\n', err{p+1}(i,1), conv{p+1}(i,1), err{p+1}(i,2), conv{p+1}(i,2), err{p+1}(i,3), conv{p+1}(i,3))
+for i = 1 : size(err{1}, 2)
+  fprintf('Err(%d)     C(%d)    ', i, i);
+end
+fprintf('\n');
+
+for ip = 1 : length(err)
+  [N, n] = size(err{ip});
+  fprintf(repmat('-', 1, ceil(21 * N/2 - 8)));
+  fprintf('p = %d\n', pAvail(ip)); 
+  fprintf(repmat('-', 1, ceil(21 * N/2 - 8)));
+  for i = 1 : N
+    for j = 1 : n
+      fprintf('%6.2e  %6.3f', err{ip}(i,j), conv{ip}(i,j));
+    end % for j
+    fprintf('\n');
   end % for i
 end % for p
 
