@@ -494,9 +494,9 @@ switch name
     
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
-    problemData.u2DCont = @(t,x,z) zeros(size(x)); %problemData.u2Cont;
-    problemData.q1DCont = @(t,x,z) zeros(size(x)); %-rho * dxU1Cont(t,x,z);
-    problemData.q2DCont = @(t,x,z) zeros(size(x)); %-rho * dzU1Cont(t,x,z);
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) -rho * dxU1Cont(t,x,z);
+    problemData.q2DCont = @(t,x,z) -rho * dzU1Cont(t,x,z);
     problemData.uhDCont = @(t,x) depthIntU1Cont(t,x);
   
   case 'convergence2'

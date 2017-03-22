@@ -1,0 +1,87 @@
+% Compute the solution of the current Runge-Kutta stage.
+
+%===============================================================================
+%> @file sweVert/solveSubStep.m
+%>
+%> @brief Compute the solution of the current Runge-Kutta stage.
+%===============================================================================
+%>
+%> @brief Compute the solution of the current Runge-Kutta stage.
+%>
+%> The routine iterateSubSteps() repeatedly executes three steps until the 
+%> parameter <code>problemData.isSubSteppingFinished</code> becomes 
+%> <code>true</code>.
+%> These three steps are:
+%>
+%>  1. preprocessSubStep()
+%>  2. solveSubStep()
+%>  3. postprocessSubStep()
+%> 
+%> This routine is executed second in each loop iteration.
+%> It assembles the global system, computes the discrete time derivative
+%> and applies slope limiting to it (i.e., applies "selective mass lumping"
+%> as described in @ref RAWFK2016). This is used to compute the solution at
+%> the next Runge-Kutta level, which then is slope-limited itself.
+%>
+%> @param  problemData  A struct with problem parameters, precomputed
+%>                      fields, and solution data structures (either filled
+%>                      with initial data or the solution from the previous
+%>                      loop iteration), as provided by configureProblem()  
+%>                      and preprocessProblem(). @f$[\text{struct}]@f$
+%> @param  nStep        The current iteration number of the main loop. 
+%> @param  nSubStep     The current iteration number of the substepping.
+%>
+%> @retval problemData  The input struct enriched with the new solution
+%>                      for this Runge-Kutta stage. @f$[\text{struct}]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%
+function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
+%% Convert representation matrix to representation vector
+[barK, barN] = size(problemData.cDiscRK{nSubStep, 1});
+[K, N] = size(problemData.cDiscRK{nSubStep, 2});
+cSys = cellfun(@(c) reshape(c.', [], 1), problemData.cDiscRK(nSubStep, :), 'UniformOutput', false);
+%% Solve for next time level
+% Flux variables
+qSys = cell(2,1);
+for m = 1 : 2
+  qSys{m} = problemData.globM \ ( -problemData.globJu{m} + ...
+            (problemData.globH{m} - problemData.globQ{m} - problemData.globQbdr{m}) * cSys{2} );
+end % for m
+% Water height
+hSys = problemData.omega(nSubStep) * reshape(problemData.cDiscRK{1, 1}.', [], 1) + (1 - problemData.omega(nSubStep)) * ( ...
+            cSys{1} + problemData.tau * ( problemData.globLh + problemData.barGlobM \ (-problemData.barGlobJuh - problemData.barGlobKh + ...
+              (problemData.barGlobG - problemData.barGlobP - problemData.barGlobPbdr) * cSys{1}) ) );
+% Horizontal velocity
+cSys{2} = problemData.omega(nSubStep) * reshape(problemData.cDiscRK{1, 2}.', [], 1) + (1 - problemData.omega(nSubStep)) * ( ...
+            cSys{2} + problemData.tau * ( problemData.globLu - problemData.globLzBot + problemData.globM \ (-problemData.globKu - ...
+              problemData.globJh - problemData.globJuu - problemData.globJuw - problemData.globJq + ...
+              (problemData.globE - problemData.globP - problemData.globPbdr) * cSys{2} + ...
+              (problemData.globG{1} - problemData.globR{1} - problemData.globRbdr{1}) * qSys{1} + ...
+              (problemData.globG{2} - problemData.globR{2} - problemData.globRbdr{2}) * qSys{2} + ...
+              (problemData.tildeGlobH{1} - problemData.tildeGlobQ{1} - problemData.tildeGlobQbdr{1}) * cSys{1}) ) );
+% Vertical velocity
+cSys{3} = (problemData.globH{2} - problemData.globQup) \ (problemData.globJu{1} + problemData.globJw{2} + problemData.globKh + ...
+                          (-problemData.globH{1} + problemData.globQavg + problemData.tildeGlobP + problemData.globQbdr{1}) * cSys{2} );
+%% Convert representation vector to representation matrix
+problemData.cDiscRK{nSubStep + 1, 1} = reshape(hSys, barN, barK).';
+problemData.cDiscRK(nSubStep + 1, 2:3) = cellfun(@(c) reshape(c, N, K).', cSys(2:3), 'UniformOutput', false);                        
+end % function
