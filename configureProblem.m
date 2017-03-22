@@ -2,26 +2,29 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'convergence');
+problemData = setdefault(problemData, 'testcase', 'convergence3');
 
 % Number of elements in x- and y-direction
 problemData = setdefault(problemData, 'numElem', [32, 16]);
 
 % Local polynomial approximation order (0 to 5)
-problemData = setdefault(problemData, 'p', 2);
+problemData = setdefault(problemData, 'p', 1);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 86.4);  % end time
-problemData = setdefault(problemData, 'numSteps', 700);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 1);  % end time
+problemData = setdefault(problemData, 'numSteps', 1);  % number of time steps
+
+% Order of Runge-Kutta methode
+problemData = setdefault(problemata, 'ordRK', max(problemData.p + 1, 3));
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep 'solution_sweVert_' problemData.testcase ]); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
@@ -32,6 +35,8 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
 [problemData, domainWidth, xi0Cont, zBotCont, idLand, idOS, idRiv, idRad] = getTestcase(problemData, problemData.testcase);
+problemData.h0Cont = @(x1) problemData.hCont(problemData.t0, x1);
+problemData.u10Cont = @(x1,x2) problemData.u1Cont(problemData.t0, x1, x2);
 generateX = @(numElem) (0:numElem(1)) * domainWidth / numElem(1);
 generateZbot = @(numElem) zBotCont(generateX(numElem));
 generateXi0 = @(numElem) xi0Cont(generateX(numElem));
