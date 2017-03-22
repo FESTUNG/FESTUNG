@@ -115,8 +115,8 @@ problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, ~problemData.g.ma
 problemData.globP = problemData.stab .* problemData.globMmuBar + problemData.globMmuTilde;
 
 %
-problemData.globU = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
-problemData.globU = problemData.globU';
+problemData.globT = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
+problemData.globT = problemData.globT';
 
 if ( problemData.showWaitBar == true )
     problemData.waitBar = waitbar( 0, 'Simulation progress');

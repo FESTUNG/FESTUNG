@@ -100,7 +100,7 @@ else
     LinvM = localSolves(:, 2:end);
 end
 %% Solving global system for lambda
-matN = - stab * problemData.globU - problemData.globKmuOut ;
+matN = - stab * problemData.globT - problemData.globKmuOut ;
 matP = problemData.globP;
 
 vecR = problemData.globKmuD;
