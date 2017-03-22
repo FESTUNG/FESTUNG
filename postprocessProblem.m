@@ -1,7 +1,7 @@
 % Performs all post-processing steps. Error evaluation for analytical problems.
 
 %===============================================================================
-%> @file darcy_vert/postprocessProblem.m
+%> @file darcyVvert/postprocessProblem.m
 %>
 %> @brief Performs all post-processing tasks. Error evaluation for analytical problems.
 %===============================================================================
@@ -38,22 +38,26 @@
 %> @endparblock
 %
 function problemData = postprocessProblem(problemData)
-K = problemData.g.numT;
-N = problemData.N;
+if all(isfield(problemData, { 'hCont', 'q1Cont', 'q2Cont' }))
+  K = problemData.g.numT;
+  N = problemData.N;
 
-q1Cont = @(x1,x2) problemData.q1Cont(problemData.tEnd, x1, x2);
-q1Disc = reshape(problemData.sysY(1 : K*N), N, K)';
-fprintf('L2 error of q1: %.12g\n', ...
-  computeL2ErrorTrap(problemData.g, q1Disc, q1Cont, problemData.qOrd, problemData.basesOnQuad));
+  hCont = @(x1,x2) problemData.hCont(problemData.tEnd, x1, x2);
+  q1Cont = @(x1,x2) problemData.q1Cont(problemData.tEnd, x1, x2);
+  q2Cont = @(x1,x2) problemData.q2Cont(problemData.tEnd, x1, x2);
 
-q2Cont = @(x1,x2) problemData.q2Cont(problemData.tEnd, x1, x2);
-q2Disc = reshape(problemData.sysY(K*N+1 : 2*K*N), N, K)';
-fprintf('L2 error of q2: %.12g\n', ...
-  computeL2ErrorTrap(problemData.g, q2Disc, q2Cont, problemData.qOrd, problemData.basesOnQuad));
+  hDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
+  q1Disc = reshape(problemData.sysY(1 : K*N), N, K)';
+  q2Disc = reshape(problemData.sysY(K*N+1 : 2*K*N), N, K)';
 
-hCont = @(x1,x2) problemData.hCont(problemData.tEnd, x1, x2);
-hDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
-fprintf('L2 error of h: %.12g\n', ...
-  computeL2ErrorTrap(problemData.g, hDisc, hCont, problemData.qOrd, problemData.basesOnQuad));
+  problemData.error = [ computeL2ErrorTrap(problemData.g, hDisc, hCont, ...
+                          problemData.qOrd+1, problemData.basesOnQuad), ...
+                        computeL2ErrorTrap(problemData.g, q1Disc, q1Cont, ...
+                          problemData.qOrd+1, problemData.basesOnQuad), ...
+                        computeL2ErrorTrap(problemData.g, q2Disc, q2Cont, ...
+                          problemData.qOrd+1, problemData.basesOnQuad) ];
+
+  fprintf('L2 errors of h, q1, q2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
+end % if
 end % function
 
