@@ -16,10 +16,10 @@ q2Disc = projectFuncCont2DataDiscTrap(problemData.g, q20Cont, problemData.N, pro
 problemData.sysY = [ reshape(q1Disc', problemData.g.numT * problemData.N, 1) ; ...
                      reshape(q2Disc', problemData.g.numT * problemData.N, 1) ; ...
                      reshape(hDisc', problemData.g.numT * problemData.N, 1) ];
-                   
+
 %% Error computation and visualization of inital condition.
 fprintf('L2 error w.r.t. the initial condition: %g\n', ...
-  computeL2ErrorTrap(problemData.g, hDisc, h0Cont, problemData.qOrd, problemData.basesOnQuad));
+  computeL2ErrorTrap(problemData.g, hDisc, h0Cont, problemData.qOrd+1, problemData.basesOnQuad));
 
 if problemData.isVisSol
   hLagr = projectDataDisc2DataLagrTrap(hDisc);

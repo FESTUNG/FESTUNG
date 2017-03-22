@@ -6,7 +6,7 @@ for n = 1 : 4
   [Q1, Q2] = execin('darcyVert/gammaMapTrap', n, Q);
   funcQ0E = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   for i = 1 : N
-    ret(:, i) = ret(:, i) + markAreaE0Tbdr(:, n) .* ( funcQ0E * ( W.' .* basesOnQuad.phi1D(:, i, n) ) );
+    ret(:, i) = ret(:, i) + markAreaE0Tbdr(:, n) .* ( funcQ0E * ( W.' .* basesOnQuad.phi1D{qOrd}(:, i, n) ) );
   end  % for i
 end  % for n
 ret = reshape(ret.', K*N, 1);

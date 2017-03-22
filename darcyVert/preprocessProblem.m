@@ -9,15 +9,20 @@ problemData.N = (problemData.p + 1)^2;  % number of local DOFs
 problemData.tau = (problemData.tEnd - problemData.t0) / problemData.numSteps;  % time step size
 
 %% Additional mesh data
-problemData.g.markE0Tint = problemData.g.idE0T == 0; % [K x 3] mark local edges that are interior
-problemData.g.markE0TbdrN = problemData.g.idE0T == 2 | problemData.g.idE0T == 4; % [K x 3] mark local edges on the Neumann boundary
-problemData.g.markE0TbdrD = ~(problemData.g.markE0Tint | problemData.g.markE0TbdrN); % [K x 3] mark local edges on the Dirichlet boundary
+% [K x 3] mark local edges that are interior or boundary
+problemData.g.markE0Tint = problemData.generateMarkE0Tint(problemData.g); 
+problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
+problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
 
 %% Configuration output.
-fprintf('Computing with polynomial order %d (%d local DOFs) on %d trapezoidals.\n', problemData.p, problemData.N, problemData.g.numT)
+fprintf('-------------------------------------------------------------------------------------------\n');
+fprintf('Computing with polynomial order %d (%d local DOFs) on %d x %d (%d) trapezoids.\n', ...
+        problemData.p, problemData.N, problemData.numElem(1), problemData.numElem(2), problemData.g.numT);
+fprintf('%d time steps from t = %g to %g.\n', problemData.numSteps, problemData.t0, problemData.tEnd);
+fprintf('-------------------------------------------------------------------------------------------\n');
 
 %% Lookup table for basis function.
-problemData.basesOnQuad = computeBasesOnQuadTrap(problemData.p, problemData.qOrd);
+problemData.basesOnQuad = computeBasesOnQuadTrap(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
 
 %% Computation of matrices on the reference element.
 problemData.hatM = integrateRefElemTrapPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad);
