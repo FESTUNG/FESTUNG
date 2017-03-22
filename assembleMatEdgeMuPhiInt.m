@@ -15,11 +15,5 @@ for iE = 1:3
     ret = ret + kron(sparse( 1:K, g.E0T(:, iE), Rkn, K, Kedge ), ...
               refEdgePhiIntMu(:,:,iE, l));
     end
-%     Rkn1 = markE0T(:,iE) .*  g.flipArray(:, iE) .* g.areaE0T(:, iE);
-%     Rkn2 = markE0T(:,iE) .* ~g.flipArray(:, iE) .* g.areaE0T(:, iE);
-%     ret = ret + kron(sparse( 1:K, g.E0T(:, iE), Rkn1, K, Kedge ), ...
-%               refEdgePhiIntMu(:,:,iE, 1));
-%     ret = ret + kron(sparse( 1:K, g.E0T(:, iE), Rkn2, K, Kedge ), ...
-%               refEdgePhiIntMu(:,:,iE, 2));
 end % for
 end % function

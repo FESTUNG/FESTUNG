@@ -61,7 +61,7 @@ problemData.matLbar = - problemData.globG{1} - problemData.globG{2} ...
                       + stab * problemData.globRphi;
 matL = problemData.matLbar; % Here goes the time discretization
 % problemData.vecBphi = -problemData.globFphiD;
-problemData.vecBphi = problemData.globFphiSrc - problemData.globFphiD;
+problemData.vecBphi = problemData.globH - problemData.globFphiD;
 % problemData.vecBphi = - problemData.globFphiD;
 vecQ = problemData.vecBphi; % Add here source terms if needed
 problemData.matMbar =   problemData.globS{1} + problemData.globS{2} ...
