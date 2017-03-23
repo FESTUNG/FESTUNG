@@ -1,12 +1,12 @@
-function ret = assembleMatEdgeMuPhiIntFlux( g, markE0Tbdr, uEdge, Sbar )
-%Assert that the length of uEval and hatSbarOnQuad is ok
+function ret = assembleMatEdgeMuPhiIntFlux( g, markE0Tbdr, uEdge, Shat )
+%Assert that the length of uEval and hatShatOnQuad is ok
 K = g.numT;
 KEdge = g.numE;
-[N, Nmu, ~, R] = size(Sbar{1});
+[N, Nmu, ~, R] = size(Shat{1});
 validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
-validateattributes(Sbar, {'cell'}, {'size', [2 1]}, mfilename, 'Sbar');
-validateattributes(Sbar{1}, {'numeric'}, {'size', [N Nmu 3 R]}, mfilename, 'Sbar{1}');
-validateattributes(Sbar{2}, {'numeric'}, {'size', [N Nmu 3 R]}, mfilename, 'Sbar{2}');
+validateattributes(Shat, {'cell'}, {'size', [2 1]}, mfilename, 'Shat');
+validateattributes(Shat{1}, {'numeric'}, {'size', [N Nmu 3 R]}, mfilename, 'Shat{1}');
+validateattributes(Shat{2}, {'numeric'}, {'size', [N Nmu 3 R]}, mfilename, 'Shat{2}');
 validateattributes(uEdge, {'cell'}, {'size', [2 1]}, mfilename, 'uEdge');
 validateattributes(uEdge{1}, {'numeric'}, {'size', [R K 3]}, mfilename, 'uEdge{1}');
 validateattributes(uEdge{2}, {'numeric'}, {'size', [R K 3]}, mfilename, 'uEdge{2}');
@@ -22,7 +22,7 @@ for iDim = 1:2
             for r = 1:R
                 ret{iDim} = ret{iDim} + ...
                     kron( sparse( 1:K, g.E0T(:, iE), ones(K, 1) .* uEdge{iDim}( r, :, iE)' .* Rkn , K, KEdge ), ...
-                    Sbar{l}( :, :, iE, r) );
+                    Shat{l}( :, :, iE, r) );
             end
         end
     end
