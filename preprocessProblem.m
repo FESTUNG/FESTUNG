@@ -16,9 +16,14 @@ problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
 
 %% Configuration output.
 fprintf('-------------------------------------------------------------------------------------------\n');
+fprintf('Running testcase "%s".\n', problemData.testcase);
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d x %d (%d) trapezoids.\n', ...
         problemData.p, problemData.N, problemData.numElem(1), problemData.numElem(2), problemData.g.numT);
-fprintf('%d time steps from t = %g to %g.\n', problemData.numSteps, problemData.t0, problemData.tEnd);
+if problemData.isStationary
+  fprintf('Computing stationary solution.\n');
+else
+  fprintf('%d time steps from t = %g to %g.\n', problemData.numSteps, problemData.t0, problemData.tEnd);
+end % if
 fprintf('-------------------------------------------------------------------------------------------\n');
 
 %% Lookup table for basis function.
@@ -41,6 +46,8 @@ problemData.globQN = assembleMatEdgeTrapPhiIntPhiIntNu(problemData.g, problemDat
 problemData.globS = problemData.eta * assembleMatEdgeTrapPhiPhi(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag, ones(problemData.g.numT, 4));
 problemData.globSD = problemData.eta * assembleMatEdgeTrapPhiIntPhiInt(problemData.g, problemData.g.markE0TbdrD, hatSdiag, ones(problemData.g.numT, 4));
 
-problemData.sysW = [ sparse(2 * problemData.g.numT * problemData.N, 3 * problemData.g.numT * problemData.N) ; ...
-                     sparse(problemData.g.numT * problemData.N, 2 * problemData.g.numT * problemData.N), problemData.globM ];
+if ~problemData.isStationary
+  problemData.sysW = [ sparse(2 * problemData.g.numT * problemData.N, 3 * problemData.g.numT * problemData.N) ; ...
+                       sparse(problemData.g.numT * problemData.N, 2 * problemData.g.numT * problemData.N), problemData.globM ];
+end % if
 end % function
