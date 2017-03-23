@@ -333,6 +333,33 @@ switch name
     problemData.q1DCont = @(t,x,z) -x + 2 * z - 1;
     problemData.q2DCont = @(t,x,z) 2 * z .* (z + 1) - 1;
     problemData.uhDCont = @(t,x) x .* problemData.hCont(t,x) - problemData.hCont(t,x).^3 / 3;
+    
+  case 't-linear u'
+    domainWidth = 100;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2, 4]; idRad = -1;
+    
+    problemData.gConst = 10;
+    xi0Cont = @(x) 2 * ones(size(x));
+    zBotCont = @(x) zeros(size(x));
+    omega = 0.1;
+    delta = 1;
+    
+    problemData.hCont = @(t,x) 2 * ones(size(x));
+    problemData.u1Cont = @(t,x,z) omega * t * ones(size(x));
+    problemData.u2Cont = @(t,x,z) zeros(size(x));
+    
+    problemData.fhCont = @(t,x) zeros(size(x));
+    problemData.fuCont = @(t,x,z) omega * ones(size(x));
+    
+    problemData.DCont = { @(t,x,z) delta * ones(size(x)), @(t,x,z) zeros(size(x)); ...
+                          @(t,x,z) zeros(size(x)), @(t,x,z) delta * ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
+    problemData.uhDCont = @(t,x) omega * t * problemData.hCont(t,x);    
 
   case 'z-sin u'
     domainWidth = 100;
@@ -341,25 +368,25 @@ switch name
     problemData.gConst = 10;
     xi0Cont = @(x) 2 * ones(size(x));
     zBotCont = @(x) zeros(size(x));
-    omegaVar = 1;
-    deltaVar = 1;
+    omega = 1;
+    delta = 1;
     
     problemData.hCont = @(t,x) 2 * ones(size(x));
-    problemData.u1Cont = @(t,x,z) sin(omegaVar * z);
+    problemData.u1Cont = @(t,x,z) sin(omega * z);
     problemData.u2Cont = @(t,x,z) zeros(size(x));
     
     problemData.fhCont = @(t,x) zeros(size(x));
-    problemData.fuCont = @(t,x,z) deltaVar * omegaVar * omegaVar * sin(omegaVar * z);
+    problemData.fuCont = @(t,x,z) delta * omega * omega * sin(omega * z);
     
-    problemData.DCont = { @(t,x,z) deltaVar * ones(size(x)), @(t,x,z) zeros(size(x)); ...
-                          @(t,x,z) zeros(size(x)), @(t,x,z) deltaVar * ones(size(x)) };
+    problemData.DCont = { @(t,x,z) delta * ones(size(x)), @(t,x,z) zeros(size(x)); ...
+                          @(t,x,z) zeros(size(x)), @(t,x,z) delta * ones(size(x)) };
     
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
     problemData.u2DCont = problemData.u2Cont;
     problemData.q1DCont = @(t,x,z) zeros(size(x));
-    problemData.q2DCont = @(t,x,z) -deltaVar * omegaVar * cos(omegaVar * z);
-    problemData.uhDCont = @(t,x) -1 / omegaVar * (cos(omegaVar * 2) - 1);
+    problemData.q2DCont = @(t,x,z) -delta * omega * cos(omega * z);
+    problemData.uhDCont = @(t,x) -1 / omega * (cos(omega * 2) - 1);
       
   case 'sin h u'
     domainWidth = 100;
@@ -501,8 +528,8 @@ switch name
   
   case 'convergence2'
     domainWidth = 100;
-%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4];
-    idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1;
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
     xi0Cont = @(x) 2 * ones(size(x));
