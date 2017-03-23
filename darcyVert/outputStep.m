@@ -54,9 +54,14 @@ function problemData = outputStep(problemData, nStep)
 K = problemData.g.numT;
 N = problemData.N;
 %% Visualization
-if problemData.isVisSol
-  hDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
-  hLagr = projectDataDisc2DataLagrTrap(hDisc);
-  visualizeDataLagrTrap(problemData.g, hLagr, 'h', problemData.outputBasename, nStep, problemData.outputTypes);
+if mod(nStep, problemData.outputFrequency) == 0
+  if problemData.isVisSol
+    hDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
+    hLagr = projectDataDisc2DataLagrTrap(hDisc);
+    visualizeDataLagrTrap(problemData.g, hLagr, 'h', problemData.outputBasename, nStep, problemData.outputTypes);
+  elseif nStep > problemData.outputFrequency
+    fprintf(repmat('\b', 1, 11));
+  end % if
+  fprintf('%3.0f %% done\n', nStep / problemData.numSteps * 100);
 end % if
 end % function
