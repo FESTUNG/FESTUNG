@@ -4,7 +4,7 @@ if nargin < 2
 end % if
 
 % cDisc{1} in vertices of surface mesh
-problemData.hV0T1D = problemData.cDisc{1} * problemData.basesOnQuad1D.phi0D{problemData.qOrd}; 
+problemData.hV0T1D = problemData.cDiscRK{1, 1} * problemData.basesOnQuad1D.phi0D{problemData.qOrd}; 
 
 % smoothed height in vertices of surface mesh
 hSmoothV0T1D = problemData.hV0T1D;
@@ -46,6 +46,7 @@ if force || any(markModifiedV0T1D(:))
   % Determine smoothed height
   [Q,~] = quadRule1D(problemData.qOrd);
   problemData.heightV0T1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), [4 3], 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), [1 2], 2);
+  assert(isequal(hSmoothV0T1D, problemData.heightV0T1D));
   problemData.heightQ0T1D = problemData.heightV0T1D(:,1) * (1-Q) + problemData.heightV0T1D(:,2) * Q;
 end % if
 end % function

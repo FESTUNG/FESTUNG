@@ -1,9 +1,11 @@
 function problemData = initializeProblem(problemData)
 problemData.isFinished = false;
-problemData.cDisc = cell(1,3);  % Vector of unknowns (H, U, W)
+
+% Vector of unknowns (H, U, W) for each Runge-Kutta stage
+problemData.cDiscRK = cell(length(rungeKuttaSSP(problemData.ordRK, 0, 0)), 3);
 
 %% Initial height.
-problemData.cDisc{1} = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.h0Cont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
+problemData.cDiscRK{1, 1} = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.h0Cont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
 
 %% Mesh adaptivity and assembly of time-independent global matrices.
 problemData = adaptMesh(problemData, true);
@@ -15,7 +17,7 @@ dXzBot = problemData.g.g1D.markT2DT * ( problemData.gConst * (dZbot1D ./ dXbot1D
 problemData.globLzBot = kron(dXzBot, eye(problemData.N, 1));
 
 %% Initial horizontal velocity.
-problemData.cDisc{2} = problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, problemData.u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
+problemData.cDiscRK{1, 2} = problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, problemData.u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
 
 %% Initial vertical velocity
 u1DCont = @(x1,x2) problemData.u1DCont(problemData.t0,x1,x2);
@@ -30,8 +32,8 @@ mapE0E = [2 1 4 3];
 u1Q0E0Tint = cell(4,1); % cDisc{2} in quad points of edges
 u1Q0E0TE0T = cell(4,1); % cDisc{2} of neighboring element in quad points of edges
 for n = 1 : 4
-  u1Q0E0Tint{n} = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,n) * problemData.cDisc{2}.', problemData.g.numT * numQuad1D, 1);
-  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,mapE0E(n)) * problemData.cDisc{2}.';
+  u1Q0E0Tint{n} = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,n) * problemData.cDiscRK{1, 2}.', problemData.g.numT * numQuad1D, 1);
+  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,mapE0E(n)) * problemData.cDiscRK{1, 2}.';
   u1Q0E0TE0T{n} = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{n}.', problemData.g.numT * numQuad1D, 1);
 end % for nn
 
@@ -46,23 +48,21 @@ for n = 3 : 4
   problemData.globKh = problemData.globKh + problemData.globS{n} * hJmpLambdaE0T;
 end % for n
 
-problemData.tildeGlobP = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDisc{1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
+problemData.tildeGlobP = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{1, 1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
 
-problemData.cDisc{3} = reshape( (problemData.globH{2} - problemData.globQup) \ ( ...
-                          problemData.globJu{1} + problemData.globJw{2} + problemData.globKh + ...
-                          (-problemData.globH{1} + problemData.globQavg + problemData.tildeGlobP + problemData.globQbdr{1}) * ...
-                            reshape(problemData.cDisc{2}.', [], 1) ...
-                       ), problemData.N, problemData.g.numT ).';
+problemData.cDiscRK{1, 3} = reshape( (problemData.globHQup) \ ( problemData.globJu{1} + problemData.globJw{2} + problemData.globKh + ...
+                                (-problemData.globHQavg + problemData.tildeGlobP) * reshape(problemData.cDiscRK{1, 2}.', [], 1) ), ...
+                             problemData.N, problemData.g.numT ).';
 
 %% Error computation and visualization of inital condition.
 if problemData.isVisGrid, execin('darcyVert/visualizeGridTrap', problemData.g); end
 
 fprintf('L2 errors of h, u1 w.r.t. the initial condition: %g, %g\n', ...
-  computeL2Error1D(problemData.g.g1D, problemData.cDisc{1}, problemData.h0Cont, problemData.qOrd+1, problemData.basesOnQuad1D), ...
-  execin('darcyVert/computeL2ErrorTrap', problemData.g, problemData.cDisc{2}, problemData.u10Cont, problemData.qOrd+1, problemData.basesOnQuad2D));
+  computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{1, 1}, problemData.h0Cont, problemData.qOrd+1, problemData.basesOnQuad1D), ...
+  execin('darcyVert/computeL2ErrorTrap', problemData.g, problemData.cDiscRK{1, 2}, problemData.u10Cont, problemData.qOrd+1, problemData.basesOnQuad2D));
 
 if problemData.isVisSol
-  cLagr = cellfun(@(c) execin('darcyVert/projectDataDisc2DataLagrTrap', c), problemData.cDisc(2:3), 'UniformOutput', false);
+  cLagr = cellfun(@(c) execin('darcyVert/projectDataDisc2DataLagrTrap', c), problemData.cDiscRK(1, 2:3), 'UniformOutput', false);
   problemData.fn_visualizeDataLagrTrap(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, 0, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
 end % if
 end % function

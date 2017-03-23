@@ -505,15 +505,15 @@ switch name
     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    xi0Cont = @(x) zeros(size(x));
-    zBotCont = @(x) -2 + 0.005 * x;
+    xi0Cont = @(x) 2 * ones(size(x));
+    zBotCont = @(x) zeros(size(x));
     omega = 0.1;
     delta = 0.1;
     epsilon = 0.01;
     rho = 0.001;
-    dxZb = 0.005;
+    dxZb = 0;
     
-    xiCont = @(t,x) epsilon * sin(omega * (x+t));
+    xiCont = @(t,x) 2 + epsilon * sin(omega * (x+t));
     problemData.hCont = @(t,x) xiCont(t,x) - zBotCont(x);
     problemData.u1Cont = @(t,x,z) delta * (z - zBotCont(x)) .* sin(omega * (x+t));
     problemData.u2Cont = @(t,x,z) delta * dxZb * z .* sin(omega * (x+t)) - 0.5 * delta * omega * (z - zBotCont(x)).^2 .* cos(omega * (x+t));
@@ -542,9 +542,9 @@ switch name
     
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
-    problemData.u2DCont = @(t,x,z) zeros(size(x)); %problemData.u2Cont;
-    problemData.q1DCont = @(t,x,z) zeros(size(x)); %-rho * dxU1Cont(t,x,z);
-    problemData.q2DCont = @(t,x,z) zeros(size(x)); %-rho * dzU1Cont(t,x,z);
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) -rho * dxU1Cont(t,x,z);
+    problemData.q2DCont = @(t,x,z) -rho * dzU1Cont(t,x,z);
     problemData.uhDCont = @(t,x) depthIntU1Cont(t,x);
   
   case 'convergence3'
@@ -590,9 +590,9 @@ switch name
     
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
-    problemData.u2DCont = @(t,x,z) zeros(size(x)); %problemData.u2Cont;
-    problemData.q1DCont = @(t,x,z) zeros(size(x)); %-rho * dxU1Cont(t,x,z);
-    problemData.q2DCont = @(t,x,z) zeros(size(x)); %-rho * dzU1Cont(t,x,z);
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) -rho * dxU1Cont(t,x,z);
+    problemData.q2DCont = @(t,x,z) -rho * dzU1Cont(t,x,z);
     problemData.uhDCont = @(t,x) depthIntU1Cont(t,x);
   
   case 'convergenceSym'
