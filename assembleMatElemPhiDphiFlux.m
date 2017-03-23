@@ -1,4 +1,4 @@
-function ret = assembleMatElemPhiDphiFlux( g, N, uEval, Gbar )
+function ret = assembleMatElemPhiDphiFlux( g, N, uEval, Gbar)
 %Assert that the length of uEval and hatSbarOnQuad is ok
 K = g.numT;
 [~, ~, R] = size(Gbar{1});
