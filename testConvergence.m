@@ -1,24 +1,29 @@
 % problem = 'darcyVert';
+% p = [0; 1; 2];
 % testcase = 'convergence';
-% 
-% pAvail = [0; 1; 2];
 % numElem = [16, 16; 24, 24; 36, 36; 54, 54; 81, 81];
 % numSteps = [100; 400; 1600; 6400; 25600];
+% testcase = 'convergence2';
+% numElem = 3 * 2.^(0:6)' * [1, 1];
+% numSteps = ones(size(numElem,1),1);
 
 problem = 'sweVert';
-pAvail = [0; 1; 2];
+p = [0; 1; 2];
 % testcase = 'convergence';
 % numElem = [2, 1; 4, 2; 8, 4; 16, 8; 32, 16];
 % numSteps = [50; 100; 200; 400; 800];
-testcase = 'convergence2';
-numElem = [16, 16; 24, 24; 36, 36];
-numSteps = [100; 400; 1600];
+% testcase = 'convergence2';
+% numElem = [16, 16; 24, 24; 36, 36];
+% numSteps = [100; 400; 1600];
+testcase = 'convergence3';
+numElem = 3 * 2.^(0:6)' * [1, 1];
+numSteps = ones(size(numElem,1),1);
 % testcase = 'sin h u';
 % numElem = [2, 1; 4, 2; 8, 4; 16, 8; 32, 16];
 % numSteps= [8; 16; 32; 64; 128];
 
 if iscell(numSteps)
-  for ip = pAvail
+  for ip = p
     assert(isequal(size(numElem, 1), length(numSteps{ip+1})), 'numElem and numSteps must be same size')
   end
 else
@@ -27,11 +32,11 @@ end % if
 
 err = {}; 
 conv = {};
-for ip = 1 : size(pAvail, 1)
+for ip = 1 : size(p, 1)
   for i = 1 : size(numElem, 1)
     pd = struct;
     pd.testcase = testcase;
-    pd.p = pAvail(ip);
+    pd.p = p(ip);
     pd.numElem = numElem(i, :);
     if iscell(numSteps)
       pd.numSteps = numSteps{ip}(i);
@@ -60,7 +65,7 @@ fprintf('\n');
 for ip = 1 : length(err)
   [N, n] = size(err{ip});
   fprintf(repmat('-', 1, ceil(21 * n/2 - 8)));
-  fprintf(' p = %d ', pAvail(ip)); 
+  fprintf(' p = %d ', p(ip)); 
   fprintf([repmat('-', 1, ceil(21 * n/2 - 8)), '\n']);
   for i = 1 : N
     for j = 1 : n

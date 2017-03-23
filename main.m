@@ -112,6 +112,7 @@ assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), postpro
 more off % Disable paging of output
 tic % Start time measurement
 diary([problemName '.log']) % Start logging
+fprintf('Computing problem "%s".\n', problemName);
 %% Add problem to search path
 oldpath = addpath(problemName, pwd);
 %% Execute problem
