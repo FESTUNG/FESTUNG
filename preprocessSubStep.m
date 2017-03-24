@@ -167,4 +167,5 @@ for n = 1 : 2
   x1V0T = problemData.g.g1D.coordV0T(markV0TbdrUH, n, 1);
   problemData.barGlobJuh(markV0TbdrUHrep) = ( uhDCont(x1V0T) .* problemData.g.g1D.nuV0T(markV0TbdrUH, n) ) * problemData.basesOnQuad1D.phi0D{problemData.qOrd}(:, n)';
 end % for n
+
 end % function

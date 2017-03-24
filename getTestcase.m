@@ -361,7 +361,119 @@ switch name
     problemData.q2DCont = @(t,x,z) zeros(size(x));
     problemData.uhDCont = @(t,x) omega * t * problemData.hCont(t,x);    
 
-  case 'z-sin u'
+  case 't-linear h'
+    domainWidth = 100;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2, 4]; idRad = -1;
+    
+    problemData.gConst = 10;
+    xi0Cont = @(x) 2 * ones(size(x));
+    zBotCont = @(x) zeros(size(x));
+    omega = 0.1;
+    delta = 1;
+    
+    problemData.hCont = @(t,x) (2 + omega * t) * ones(size(x));
+    problemData.u1Cont = @(t,x,z) ones(size(x));
+    problemData.u2Cont = @(t,x,z) ones(size(x));
+    
+    problemData.fhCont = @(t,x) omega * ones(size(x));
+    problemData.fuCont = @(t,x,z) zeros(size(x));
+    
+    problemData.DCont = { @(t,x,z) delta * ones(size(x)), @(t,x,z) zeros(size(x)); ...
+                          @(t,x,z) zeros(size(x)), @(t,x,z) delta * ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
+    problemData.uhDCont = @(t,x) problemData.hCont(t,x);    
+
+  case 't-sin u'
+    domainWidth = 100;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2, 4]; idRad = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1;
+    
+    problemData.gConst = 10;
+    xi0Cont = @(x) 2 * ones(size(x));
+    zBotCont = @(x) zeros(size(x));
+    omega = 0.1;
+    delta = 1;
+    
+    problemData.hCont = @(t,x) 2 * ones(size(x));
+    problemData.u1Cont = @(t,x,z) sin(omega * t) * ones(size(x));
+    problemData.u2Cont = @(t,x,z) ones(size(x));
+    
+    problemData.fhCont = @(t,x) zeros(size(x));
+    problemData.fuCont = @(t,x,z) omega * cos(omega * t) * ones(size(x));
+    
+    problemData.DCont = { @(t,x,z) delta * ones(size(x)), @(t,x,z) zeros(size(x)); ...
+                          @(t,x,z) zeros(size(x)), @(t,x,z) delta * ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
+    problemData.uhDCont = @(t,x) problemData.u1Cont(t,x,0) .* problemData.hCont(t,x);  
+
+  case 't-sin w'
+    domainWidth = 100;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2, 4]; idRad = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1;
+    
+    problemData.gConst = 10;
+    xi0Cont = @(x) 2 * ones(size(x));
+    zBotCont = @(x) zeros(size(x));
+    omega = 0.1;
+    delta = 1;
+    
+    problemData.hCont = @(t,x) 2 * ones(size(x));
+    problemData.u1Cont = @(t,x,z) ones(size(x));
+    problemData.u2Cont = @(t,x,z) sin(omega * t) * ones(size(x));
+    
+    problemData.fhCont = @(t,x) zeros(size(x));
+    problemData.fuCont = @(t,x,z) zeros(size(x));
+    
+    problemData.DCont = { @(t,x,z) delta * ones(size(x)), @(t,x,z) zeros(size(x)); ...
+                          @(t,x,z) zeros(size(x)), @(t,x,z) delta * ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
+    problemData.uhDCont = @(t,x) problemData.u1Cont(t,x,0) .* problemData.hCont(t,x);  
+
+  case 't-sin h'
+    domainWidth = 100;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2, 4]; idRad = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1;
+    
+    problemData.gConst = 10;
+    xi0Cont = @(x) 2 * ones(size(x));
+    zBotCont = @(x) zeros(size(x));
+    omega = 0.1;
+    epsilon = 0.1;
+    delta = 1;
+    
+    problemData.hCont = @(t,x) 2  + epsilon * sin(omega * t) * ones(size(x));
+    problemData.u1Cont = @(t,x,z) ones(size(x));
+    problemData.u2Cont = @(t,x,z) ones(size(x));
+    
+    problemData.fhCont = @(t,x) epsilon * omega * cos(omega * t) * ones(size(x));
+    problemData.fuCont = @(t,x,z) zeros(size(x));
+    
+    problemData.DCont = { @(t,x,z) delta * ones(size(x)), @(t,x,z) zeros(size(x)); ...
+                          @(t,x,z) zeros(size(x)), @(t,x,z) delta * ones(size(x)) };
+    
+    problemData.hDCont = problemData.hCont;
+    problemData.u1DCont = problemData.u1Cont;
+    problemData.u2DCont = problemData.u2Cont;
+    problemData.q1DCont = @(t,x,z) zeros(size(x));
+    problemData.q2DCont = @(t,x,z) zeros(size(x));
+    problemData.uhDCont = @(t,x) problemData.u1Cont(t,x,0) .* problemData.hCont(t,x);  
+
+  case 'z-sin h'
     domainWidth = 100;
     idLand = [2,4]; idOS = [2,4]; idRiv = [2, 4]; idRad = -1;
     
@@ -435,7 +547,7 @@ switch name
   
   case 'sin u w'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4];
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
     xi0Cont = @(x) 2*ones(size(x));
@@ -480,25 +592,26 @@ switch name
   
   case 'convergence'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1;
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
     xi0Cont = @(x) zeros(size(x));
-    zBotCont = @(x) -2 + 0.005 * x;
+    dxZb = -0.005;
     omega = 0.01;
     delta = 0.1;
     epsilon = 0.01;
     rho = 0.001;
-    dxZb = 0.005;
     
     xiCont = @(t,x) epsilon * sin(omega * (x+t));
+    zBotCont = @(x) -2 + dxZb * x;
+    
     problemData.hCont = @(t,x) xiCont(t,x) - zBotCont(x);
     problemData.u1Cont = @(t,x,z) delta * (z - zBotCont(x)) .* sin(omega * (x+t));
     problemData.u2Cont = @(t,x,z) delta * dxZb * z .* sin(omega * (x+t)) - 0.5 * delta * omega * (z - zBotCont(x)).^2 .* cos(omega * (x+t));
     
-    problemData.DCont = { @(t,x,z) rho * ones(size(x)), @(t,x,z) zeros(size(x)); ...
-                          @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    dxXiCont = @(t,x) epsilon * omega * cos(omega * (x+t));
+    dtHCont = @(t,x) epsilon * omega * cos(omega * (x+t));
     
     dtU1Cont = @(t,x,z) delta * omega * (z - zBotCont(x)) .* cos(omega * (x+t));
     dxU1Cont = @(t,x,z) -delta * dxZb * sin(omega * (x+t)) + delta * omega * (z - zBotCont(x)) .* cos(omega * (x+t));
@@ -506,25 +619,34 @@ switch name
     dzU2Cont = @(t,x,z) delta * dxZb * sin(omega * (x+t)) - delta * omega * (z - zBotCont(x)) .* cos(omega * (x+t));
     
     dxdxU1Cont = @(t,x,z) -delta * omega * ( 2 * dxZb * cos(omega * (x+t)) + omega * (z - zBotCont(x)) .* sin(omega * (x+t)) );
-    dzdzU2Cont = @(t,x,z) zeros(size(x));
+    dxdzU1Cont = @(t,x,z) delta * omega * cos(omega * (x+t));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    dxXiCont = @(t,x) epsilon * omega * cos(omega * (x+t));
-    dtHCont = @(t,x) epsilon * omega * cos(omega * (x+t));
-    depthIntU1Cont = @(t,x) 0.5 * delta * problemData.hCont(t,x).^2 .* sin(omega * (x+t));
-    dxDepthIntU1Cont = @(t,x) delta * problemData.hCont(t,x) .* sin(omega * (x+t)) .* (omega * xiCont(t,x) - dxZb) + ...
-                          0.5 * delta * omega * problemData.hCont(t,x).^2 .* cos(omega * (x+t));
+    u1hCont = @(t,x) 0.5 * delta * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2;
+    dxU1hCont = @(t,x) 0.5 * delta * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
+                        delta * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
+                        
+    problemData.DCont = { @(t,x,z) rho * ones(size(x)), @(t,x,z) zeros(size(x)); ...
+                          @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+                        
+    dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
     
-    problemData.fhCont = @(t,x) dtHCont(t,x) + dxDepthIntU1Cont(t,x);
+    problemData.fhCont = @(t,x) dtHCont(t,x) + dxU1hCont(t,x);
     problemData.fuCont = @(t,x,z) dtU1Cont(t,x,z) + 2 * problemData.u1Cont(t,x,z) .* dxU1Cont(t,x,z) + ...
-                          dzU1Cont(t,x,z) .* problemData.u2Cont(t,x,z) + problemData.u1Cont(t,x,z) .* dzU2Cont(t,x,z) - ...
-                          rho * (dxdxU1Cont(t,x,z) + dzdzU2Cont(t,x,z)) + problemData.gConst * dxXiCont(t,x);
+                            dzU1Cont(t,x,z) .* problemData.u2Cont(t,x,z) + problemData.u1Cont(t,x,z) .* dzU2Cont(t,x,z) - ( ...
+                              problemData.DCont{1,1}(t,x,z) .* dxdxU1Cont(t,x,z) + dxzDCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) + ...
+                              problemData.DCont{1,2}(t,x,z) .* dxdzU1Cont(t,x,z) + dxzDCont{1,2}(t,x,z) .* dzU1Cont(t,x,z) + ...
+                              problemData.DCont{2,1}(t,x,z) .* dxdzU1Cont(t,x,z) + dxzDCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) + ...
+                              problemData.DCont{2,2}(t,x,z) .* dzdzU1Cont(t,x,z) + dxzDCont{2,2}(t,x,z) .* dzU1Cont(t,x,z) ) + ...
+                              problemData.gConst * dxXiCont(t,x);
     
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
     problemData.u2DCont = problemData.u2Cont;
-    problemData.q1DCont = @(t,x,z) -rho * dxU1Cont(t,x,z);
-    problemData.q2DCont = @(t,x,z) -rho * dzU1Cont(t,x,z);
-    problemData.uhDCont = @(t,x) depthIntU1Cont(t,x);
+    problemData.q1DCont = @(t,x,z) -problemData.DCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) - problemData.DCont{1,2}(t,x,z) .* dzU1Cont(t,x,z);
+    problemData.q2DCont = @(t,x,z) -problemData.DCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) - problemData.DCont{2,2}(t,x,z) .* dzU1Cont(t,x,z);
+    problemData.uhDCont = @(t,x) u1hCont(t,x);
   
   case 'convergence2'
     domainWidth = 100;
@@ -532,21 +654,22 @@ switch name
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
-    xi0Cont = @(x) 2 * ones(size(x));
-    zBotCont = @(x) zeros(size(x));
+    xi0Cont = @(x) zeros(size(x));
+    dxZb = 0.005;
     omega = 0.1;
     delta = 0.1;
     epsilon = 0.01;
     rho = 0.001;
-    dxZb = 0;
     
-    xiCont = @(t,x) 2 + epsilon * sin(omega * (x+t));
+    xiCont = @(t,x) epsilon * sin(omega * (x+t));
+    zBotCont = @(x) -2 + dxZb * x;
+    
     problemData.hCont = @(t,x) xiCont(t,x) - zBotCont(x);
     problemData.u1Cont = @(t,x,z) delta * (z - zBotCont(x)) .* sin(omega * (x+t));
     problemData.u2Cont = @(t,x,z) delta * dxZb * z .* sin(omega * (x+t)) - 0.5 * delta * omega * (z - zBotCont(x)).^2 .* cos(omega * (x+t));
     
-    problemData.DCont = { @(t,x,z) rho * ones(size(x)), @(t,x,z) zeros(size(x)); ...
-                          @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    dxXiCont = @(t,x) epsilon * omega * cos(omega * (x+t));
+    dtHCont = @(t,x) epsilon * omega * cos(omega * (x+t));
     
     dtU1Cont = @(t,x,z) delta * omega * (z - zBotCont(x)) .* cos(omega * (x+t));
     dxU1Cont = @(t,x,z) -delta * dxZb * sin(omega * (x+t)) + delta * omega * (z - zBotCont(x)) .* cos(omega * (x+t));
@@ -554,25 +677,34 @@ switch name
     dzU2Cont = @(t,x,z) delta * dxZb * sin(omega * (x+t)) - delta * omega * (z - zBotCont(x)) .* cos(omega * (x+t));
     
     dxdxU1Cont = @(t,x,z) -delta * omega * ( 2 * dxZb * cos(omega * (x+t)) + omega * (z - zBotCont(x)) .* sin(omega * (x+t)) );
-    dzdzU2Cont = @(t,x,z) zeros(size(x));
+    dxdzU1Cont = @(t,x,z) delta * omega * cos(omega * (x+t));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    dxXiCont = @(t,x) epsilon * omega * cos(omega * (x+t));
-    dtHCont = @(t,x) epsilon * omega * cos(omega * (x+t));
-    depthIntU1Cont = @(t,x) 0.5 * delta * problemData.hCont(t,x).^2 .* sin(omega * (x+t));
-    dxDepthIntU1Cont = @(t,x) delta * problemData.hCont(t,x) .* sin(omega * (x+t)) .* (omega * xiCont(t,x) - dxZb) + ...
-                          0.5 * delta * omega * problemData.hCont(t,x).^2 .* cos(omega * (x+t));
+    u1hCont = @(t,x) 0.5 * delta * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2;
+    dxU1hCont = @(t,x) 0.5 * delta * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
+                        delta * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
+                        
+    problemData.DCont = { @(t,x,z) rho * ones(size(x)), @(t,x,z) zeros(size(x)); ...
+                          @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+                        
+    dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
     
-    problemData.fhCont = @(t,x) dtHCont(t,x) + dxDepthIntU1Cont(t,x);
+    problemData.fhCont = @(t,x) dtHCont(t,x) + dxU1hCont(t,x);
     problemData.fuCont = @(t,x,z) dtU1Cont(t,x,z) + 2 * problemData.u1Cont(t,x,z) .* dxU1Cont(t,x,z) + ...
-                          dzU1Cont(t,x,z) .* problemData.u2Cont(t,x,z) + problemData.u1Cont(t,x,z) .* dzU2Cont(t,x,z) - ...
-                          rho * (dxdxU1Cont(t,x,z) + dzdzU2Cont(t,x,z)) + problemData.gConst * dxXiCont(t,x);
+                            dzU1Cont(t,x,z) .* problemData.u2Cont(t,x,z) + problemData.u1Cont(t,x,z) .* dzU2Cont(t,x,z) - ( ...
+                              problemData.DCont{1,1}(t,x,z) .* dxdxU1Cont(t,x,z) + dxzDCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) + ...
+                              problemData.DCont{1,2}(t,x,z) .* dxdzU1Cont(t,x,z) + dxzDCont{1,2}(t,x,z) .* dzU1Cont(t,x,z) + ...
+                              problemData.DCont{2,1}(t,x,z) .* dxdzU1Cont(t,x,z) + dxzDCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) + ...
+                              problemData.DCont{2,2}(t,x,z) .* dzdzU1Cont(t,x,z) + dxzDCont{2,2}(t,x,z) .* dzU1Cont(t,x,z) ) + ...
+                              problemData.gConst * dxXiCont(t,x);
     
     problemData.hDCont = problemData.hCont;
     problemData.u1DCont = problemData.u1Cont;
     problemData.u2DCont = problemData.u2Cont;
-    problemData.q1DCont = @(t,x,z) -rho * dxU1Cont(t,x,z);
-    problemData.q2DCont = @(t,x,z) -rho * dzU1Cont(t,x,z);
-    problemData.uhDCont = @(t,x) depthIntU1Cont(t,x);
+    problemData.q1DCont = @(t,x,z) -problemData.DCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) - problemData.DCont{1,2}(t,x,z) .* dzU1Cont(t,x,z);
+    problemData.q2DCont = @(t,x,z) -problemData.DCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) - problemData.DCont{2,2}(t,x,z) .* dzU1Cont(t,x,z);
+    problemData.uhDCont = @(t,x) u1hCont(t,x);
   
   case 'convergence3'
     domainWidth = 100;
