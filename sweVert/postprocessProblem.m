@@ -38,6 +38,8 @@
 %> @endparblock
 %
 function problemData = postprocessProblem(problemData)
+problemData = adaptMesh(problemData);
+
 u1DCont = @(x1,x2) problemData.u1DCont(problemData.tEnd, x1, x2);
 u2DCont = @(x1,x2) problemData.u2DCont(problemData.tEnd, x1, x2);
 problemData.globJu = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);

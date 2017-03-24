@@ -2,13 +2,13 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 't-linear u');
+problemData = setdefault(problemData, 'testcase', 'convergence2');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [2, 1]);
+problemData = setdefault(problemData, 'numElem', [48, 24]);
 
 % Local polynomial approximation order (0 to 5)
-problemData = setdefault(problemData, 'p', 0);
+problemData = setdefault(problemData, 'p', 1);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
@@ -16,7 +16,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
 problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
-problemData = setdefault(problemData, 'numSteps', 1);  % number of time steps
+problemData = setdefault(problemData, 'numSteps', 400);  % number of time steps
 
 % Order of Runge-Kutta methode
 problemData = setdefault(problemData, 'ordRK', 1);%max(problemData.p + 1, 3));
