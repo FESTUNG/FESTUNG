@@ -17,7 +17,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
+problemData = setdefault(problemData, 'tEnd', 1);  % end time
 problemData = setdefault(problemData, 'numSteps', 40);  % number of time steps
 
 % Discard time derivative and compute stationary solution
