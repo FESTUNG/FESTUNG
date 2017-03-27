@@ -25,8 +25,8 @@ problemData = setdefault(problemData, 'isStationary', false);
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
-problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
+problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
+problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep 'solution_darcy' ]); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')

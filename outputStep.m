@@ -1,7 +1,7 @@
 % Last step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file darcy_vert/outputStep.m
+%> @file darcyVert/outputStep.m
 %>
 %> @brief Last step of the four-part algorithm in the main loop.
 %===============================================================================
@@ -57,8 +57,8 @@ N = problemData.N;
 if mod(nStep, problemData.outputFrequency) == 0
   if problemData.isVisSol
     hDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
-    hLagr = projectDataDisc2DataLagrTrap(hDisc);
-    visualizeDataLagrTrap(problemData.g, hLagr, 'h', problemData.outputBasename, nStep, problemData.outputTypes);
+    hLagr = projectDataDisc2DataLagrTensorProduct(hDisc);
+    visualizeDataLagrTetra(problemData.g, hLagr, 'h', problemData.outputBasename, nStep, problemData.outputTypes);
   elseif nStep > problemData.outputFrequency
     fprintf(repmat('\b', 1, 11));
   end % if

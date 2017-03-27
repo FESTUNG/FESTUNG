@@ -2,7 +2,7 @@ function problemData = preprocessProblem(problemData)
 
 %% Triangulation.
 problemData.g = problemData.generateGrid(problemData.numElem);
-if problemData.isVisGrid, visualizeGridTrap(problemData.g); end
+if problemData.isVisGrid, visualizeGridTetra(problemData.g); end
 
 %% Globally constant parameters.
 problemData.N = (problemData.p + 1)^2;  % number of local DOFs
@@ -27,7 +27,7 @@ end % if
 fprintf('-------------------------------------------------------------------------------------------\n');
 
 %% Lookup table for basis function.
-problemData.basesOnQuad = computeBasesOnQuadTrap(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
+problemData.basesOnQuad = computeBasesOnQuadTensorProduct(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
 
 %% Computation of matrices on the reference element.
 problemData.hatM = integrateRefElemTrapPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad);
