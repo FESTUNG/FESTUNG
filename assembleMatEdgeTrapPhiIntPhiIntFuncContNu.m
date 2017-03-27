@@ -4,7 +4,7 @@ K = g.numT;
 [Q, ~] = quadRule1D(qOrd); R = length(Q);
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 for n = 1 : 4
-  [Q1, Q2] = gammaMapQuad(n, Q);
+  [Q1, Q2] = gammaMapTetra(n, Q);
   funcQ0E = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   for m = 1 : 2
     markAreaNuE0T = markE0T(:, n) .* g.areaE0T(:, n) .* g.nuE0T(:, n, m);
