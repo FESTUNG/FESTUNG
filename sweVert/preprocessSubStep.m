@@ -1,7 +1,7 @@
 % Preprocessing of the Runge-Kutta step.
 
 %===============================================================================
-%> @file advection/preprocessSubStep.m
+%> @file sweVert/preprocessSubStep.m
 %>
 %> @brief Preprocessing of the Runge-Kutta step.
 %===============================================================================
@@ -96,8 +96,6 @@ problemData.globGR = problemData.fn_assembleMatElemTrapDphiPhiFuncDisc(problemDa
 globR = problemData.fn_assembleMatEdgeTrapPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
 problemData.globGR = cellfun(@(g,r) g - r, problemData.globGR, globR, 'UniformOutput', false);
 problemData.globEP = cellfun(@(e,p) e - p, problemData.globEP, problemData.fn_assembleMatEdgeTrapPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDiscRK{nSubStep, 2}), 'UniformOutput', false);
-% globP = problemData.fn_assembleMatEdgeTrapPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDiscRK(nSubStep, 2:3));
-% problemData.globEP = problemData.globEP - globP{1} - globP{2};
 
 % Jump term in Lax-Friedrichs solver
 problemData.globKu = zeros(problemData.g.numT * problemData.N, 1);
@@ -139,17 +137,9 @@ problemData.globJ = globJtmp{1} + globJtmp{2};
 globJtmp = assembleVecEdgeTrapPhiIntFuncCont1DNu(problemData.g, problemData.g.markE0TbdrH, hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJ = problemData.globJ + problemData.gConst * globJtmp{1};
 problemData.globEP = cellfun(@(e,p) e - p, problemData.globEP, problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2}), 'UniformOutput', false);
-% globPbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK(nSubStep, 2:3));
-% problemData.globEP = problemData.globEP - globPbdr{1} - globPbdr{2};
 
 globJtmp = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, @(x1,x2) u1DCont(x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJ = problemData.globJ + globJtmp{1};
-% globQPerQuad = assembleMatEdgeTrapPhiIntFuncDiscIntNuPerQuad(problemData.g, problemData.g.markE0TbdrU, problemData.cDiscRK{nSubStep, 3}, problemData.hatQPerQuad);
-% for n = 1 : 4
-%   [Q1, Q2] = execin('darcyVert/gammaMapTrap', n, Q);
-%   u1DContQ0E0T = u1DCont(problemData.g.mapRef2Phy(1, Q1, Q2), problemData.g.mapRef2Phy(2, Q1, Q2));
-%   problemData.globJ = problemData.globJ + globQPerQuad{n,2} * reshape(u1DContQ0E0T.', [], 1);
-% end % for n
 problemData.globSbdr = assembleMatEdgeTrapPhiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.qOrd, problemData.hatQPerQuad);
 
 % Boundary terms for horizontal velocity in continuity and flux equation

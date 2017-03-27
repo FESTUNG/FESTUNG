@@ -109,8 +109,8 @@ assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), stepLis
 assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), postprocessList), 2 * ones(size(postprocessList))), ...
   'Not all the required functions for the postprocessing of the problem found.')
 %% Start logging and time measurements, add problem to search path, and install exit handler
-[tStartup, oldpath, cwd] = festungStartup(problemName);
-cleanupObj = onCleanup(@() festungCleanup(tStartup, oldpath, cwd));
+[tStartup, oldpath, cwd] = startupFestung(problemName);
+cleanupObj = onCleanup(@() cleanupFestung(tStartup, oldpath, cwd));
 %% Pre-process and initialize problem
 tPreprocess = tic;
 for nFunc = 1 : length(preprocessList)
@@ -143,7 +143,7 @@ if nargout > 0
 end % if
 end % function
 %
-function [tStartup, oldpath, cwd] = festungStartup(problemName)
+function [tStartup, oldpath, cwd] = startupFestung(problemName)
 more off % Disable paging of output
 tStartup = tic; % Start time measurement
 diaryName = [problemName '_' datestr(now, 'yyyymmdd-HHMMSS') '.log'];
@@ -170,7 +170,7 @@ oldpath = addpath([pwd filesep problemName], pwd);
 cwd = pwd;
 end % function
 %
-function festungCleanup(tStartup, oldpath, cwd)
+function cleanupFestung(tStartup, oldpath, cwd)
 fprintf('Total computation time: %g seconds.\n', toc(tStartup));
 diary off
 path(oldpath);
