@@ -55,7 +55,7 @@ fprintf('-----------------------------------------------------------------------
 
 %% Lookup table for basis function.
 problemData.basesOnQuad1D = computeBasesOnQuad1D(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
-problemData.basesOnQuad2D = execin('darcyVert/computeBasesOnQuadTrap', problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
+problemData.basesOnQuad2D = computeBasesOnQuadTensorProduct(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
 
 %% Computation of matrices on the reference element.
 problemData.hatM = execin('darcyVert/integrateRefElemTrapPhiPhi', problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
@@ -84,11 +84,6 @@ problemData.tildeHatPoffdiag = integrateRefEdgeTrapPhiIntPhiExtPhi1DExt([problem
 problemData.barGlobM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.barHatM);
 
 %% Function handles
-problemData.fn_mapTensorProductIndex = getFunctionHandle('darcyVert/mapTensorProductIndex');
-problemData.fn_visualizeDataLagrTrap = getFunctionHandle('darcyVert/visualizeDataLagrTrap');
-
-problemData.fn_projectFuncCont2DataDiscTrap = getFunctionHandle('darcyVert/projectFuncCont2DataDiscTrap');
-
 problemData.fn_assembleMatElemTrapDphiPhiFuncDisc = getFunctionHandle('darcyVert/assembleMatElemTrapDphiPhiFuncDisc');
 
 problemData.fn_assembleMatEdgeTrapPhiPhiNu = getFunctionHandle('darcyVert/assembleMatEdgeTrapPhiPhiNu');

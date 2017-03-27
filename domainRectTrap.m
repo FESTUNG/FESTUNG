@@ -48,12 +48,15 @@
 %> X2 = [0.0, 0.1, 0.2, 0.1, 0.2; ...
 %>       2.0, 1.8, 1.7, 1.6, 1.5];
 %> g = domainRectTrap(X1, X2, [4, 3]);
+%> visualizeGridTetra(g);
 %> @endcode
 %> Creates a mesh for a domain with x1-values from 0 to 3, 
 %> bottom-boundary between 0 and 0.2, and top-boundary between 1.5 and 2.
 %> The resulting mesh has 12 elements (4 in x1-direction and 3 in
 %> x2-direction. Note that the number of coordinates must match the number
 %> of vertices in x1-direction (i.e., number of elements plus one).
+%> The resulting grid looks like this:
+%> @image html  domainRectTrap.png 
 %> @endparblock
 %>
 %> @param  X1       The @f$x^1@f$ coordinates of the boundary points 
@@ -67,9 +70,6 @@
 %>                  @f$[2 \times 1]@f$ or @f$[1 \times 1]@f$
 %> @retval g        A struct containing the lists that describe the
 %>                  triangulation.
-%>
-%> @note  MATLABs Partial Differential Equation Toolbox or at least the
-%>        function <code>initMesh()</code> is required for this routine.
 %>
 %> This file is part of FESTUNG
 %>
@@ -167,6 +167,15 @@ g.generateCoordDependGridData = @generateCoordDependGridData;
 g = g.generateCoordDependGridData(g);
 end % function
 %
+%===============================================================================
+%>
+%> @brief Helper routine that allows to recreate all coordinate-dependend
+%>        data-structures.
+%>
+%> It can be evaluated using the <code>function_handle</code> in the grid 
+%> data structure: <code>g = g.generateCoordDependGridData(g)</code>.
+%> Useful when adapting the mesh.
+%
 function g = generateCoordDependGridData(g)
 %% Edge lengths and normals (areaE, areaE0T, nuE)
 vecE = g.coordV(g.V0E(:, 2), :) - g.coordV(g.V0E(:, 1), :);
@@ -205,5 +214,3 @@ g.areaT = 0.5 * (g.areaE0T(:, 3) + g.areaE0T(:, 4)) .* g.J0T{1}(:, 1, 1);
 g.mapRef2Phy = @(i,X1,X2) g.J0T{1}(:,i,1) * X1 + g.J0T{1}(:,i,2) * X2 + ...
                           g.J0T{2}(:,i,2) * (X1 .* X2) + g.coordV0T(:,1,i) * ones(size(X1));
 end
-
-

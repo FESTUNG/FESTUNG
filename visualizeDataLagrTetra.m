@@ -1,7 +1,7 @@
 % Write output files in VTK- or Tecplot-format.
 
 %===============================================================================
-%> @file visualizeDataLagrTrap.m
+%> @file visualizeDataLagrTetra.m
 %>
 %> @brief Write output files in VTK- or Tecplot-format.
 %===============================================================================
@@ -22,36 +22,7 @@
 %> The name of the generated file ist <code>fileName.tLvl.vtu</code> or
 %> <code>fileName.tLvl.plt</code>, respectively, where <code>tLvl</code> stands
 %> for time level.
-%>
-%> @note Although the VTK-format supports @f$p=2@f$, Paraview (4.2.0 at the time
-%>       of writing) splits each triangle into four triangles and visualizes
-%>       the function as piecewise linear.
-%>
-%> @note The Tecplot file format doesn't support higher order functions, 
-%>       therefore each triangle is split into four triangles with linear
-%>       representation.
-%>
-%> @par Example
-%> @parblock
-%> @code
-%> g = generateGridData([0, -1; sqrt(3), 0; 0, 1; -sqrt(3), 0], [4,1,3; 1,2,3]);
-%> g.idE = (abs(g.nuE(:,2)) > 0) .* ((g.nuE(:,1)>0) + (g.nuE(:,2)>0)*2+1);
-%> fAlg = @(X1, X2) (X1<0).*(X1.^2 - X2.^2 - 1) + (X1>=0).*(-X1.^2 - X2.^2 + 1);
-%> for N = [1, 3, 6]
-%>   p = (sqrt(8*N+1)-3)/2;
-%>   quadOrd = max(2*p, 1);
-%>   computeBasesOnQuad(N);
-%>   fDisc = projectFuncCont2DataDisc(g, fAlg, quadOrd, integrateRefElemPhiPhi(N));
-%>   fLagr = projectDataDisc2DataLagr(fDisc);
-%>   visualizeDataLagr(g, fLagr, 'funname', ['fDOF', int2str(N)], 1, cellstr(['vtk';'tec']));
-%> end
-%> @endcode
-%> produces the following output using Paraview:
-%> @image html  visP0.png  "fDOF1.1.vtu with range [-2/3,1/3]" width=1cm
-%> @image html  visP1.png  "fDOF3.1.vtu with range [-8/5,6/5]" width=1cm
-%> @image html  visP2.png  "fDOF6.1.vtu with range [-2, 2]" width=1cm
-%> @endparblock
-%>
+
 %> @par Example
 %> @parblock
 %> Assume a grid, <code>g</code>, and a cell array with discontinuous data,
@@ -62,10 +33,10 @@
 %> @code
 %> varName = { 'h', 'u', 'v' };
 %> vecName = struct('velocity', {{'u','v'}});
-%> dataLagr = { projectDataDisc2DataLagr(cDisc{1}), ...
-%>              projectDataDisc2DataLagr(cDisc{2}), ...
-%>              projectDataDisc2DataLagr(cDisc{3}) };
-%> visualizeDataLagr(g, dataLagr, varName, 'solution', 1, {'vtk', 'tec'}), vecName);
+%> dataLagr = { projectDataDisc2DataLagrTensorProduct(cDisc{1}), ...
+%>              projectDataDisc2DataLagrTensorProduct(cDisc{2}), ...
+%>              projectDataDisc2DataLagrTensorProduct(cDisc{3}) };
+%> visualizeDataLagrTetra(g, dataLagr, varName, 'solution', 1, {'vtk', 'tec'}), vecName);
 %> end
 %> @endcode
 %> @endparblock
@@ -93,7 +64,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -111,7 +82,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function visualizeDataLagrTrap(g, dataLagr, varName, fileName, tLvl, fileTypes, vecName)
+function visualizeDataLagrTetra(g, dataLagr, varName, fileName, tLvl, fileTypes, vecName)
 %% Deduce default arguments
 if nargin < 6 || isempty(fileTypes)
   fileTypes = 'vtk';
@@ -241,7 +212,6 @@ end % function
 %
 %> @brief Helper routine to write Tecplot-files.
 function visualizeDataLagrTec(g, dataLagr, varName, fileName, tLvl)
-error('not yet implemented')
 [K, N] = size(dataLagr{1});
 %% Open file.
 fileName = [fileName, '.', num2str(tLvl), '.dat'];
@@ -251,35 +221,35 @@ fprintf(file, 'TITLE="FESTUNG output file"\n');
 fprintf(file, ['VARIABLES=X, Y', repmat(', "%s"', 1, numel(varName)), '\n'], varName{:});
 %% Points and cells.
 switch N
-  case {1, 3}
-    P1          = reshape(g.coordV0T(:, :, 1)', 3*K, 1);
-    P2          = reshape(g.coordV0T(:, :, 2)', 3*K, 1);
+  case {1, 4}
+    P1          = reshape(g.coordV0T(:, :, 1)', 4*K, 1);
+    P2          = reshape(g.coordV0T(:, :, 2)', 4*K, 1);
     numT        = K;
     V0T         = 1:length(P1);
-  case 6
-    P1          = reshape([g.coordV0T(:,:,1), g.baryE0T(:,[3,1,2],1)]',6*K,1);
-    P2          = reshape([g.coordV0T(:,:,2), g.baryE0T(:,[3,1,2],2)]',6*K,1);
+  case 9
+    P1          = reshape([g.coordV0T(:,:,1), g.baryE0T(:,[1,3,2,4],1), sum(g.coordV0T(:,:,1), 2)/4]',9*K,1);
+    P2          = reshape([g.coordV0T(:,:,2), g.baryE0T(:,[1,3,2,4],2), sum(g.coordV0T(:,:,2), 2)/4]',9*K,1);
     numT        = 4*K;
-    V0T         = reshape([ 1:6:6*K; 4:6:6*K; 6:6:6*K;
-                            2:6:6*K; 5:6:6*K; 4:6:6*K;
-                            3:6:6*K; 6:6:6*K; 5:6:6*K;
-                            4:6:6*K; 5:6:6*K; 6:6:6*K ], 3, numT);
+    V0T         = reshape([ 1:9:9*K; 5:9:9*K; 9:9:9*K; 8:9:9*K;
+                            5:9:9*K; 2:9:9*K; 6:9:9*K; 9:9:9*K;
+                            9:9:9*K; 6:9:9*K; 3:9:9*K; 7:9:9*K;
+                            8:9:9*K; 9:9:9*K; 7:9:9*K; 4:9:9*K ], 4, numT);
 end % switch
 %% Data.
 for i = 1 : numel(dataLagr)
   switch N
     case 1 % locally constant
-      dataLagr{i} = kron(dataLagr{i}, [1;1;1])';
-    case 3 % locally linear
+      dataLagr{i} = kron(dataLagr{i}, [1;1;1;1])';
+    case 4 % locally linear
       dataLagr{i} = reshape(dataLagr{i}', 1, K*N);
-    case 6 % locally quadratic (permutation of local edge indices due to TP format)
-      dataLagr{i} = reshape(dataLagr{i}(:, [1,2,3,6,4,5])', 1, K*N);
+    case 9 % locally quadratic
+      dataLagr{i} = reshape(dataLagr{i}', 1, K*N);
   end % switch
 end % for
 %% Zone header.
 fprintf(file, 'ZONE T="Time=%.3e", ', tLvl);
 fprintf(file, 'N=%d, E=%d, ', length(P1), numT);
-fprintf(file, 'ET=TRIANGLE, F=FEBLOCK, ');
+fprintf(file, 'ET=QUADRILATERAL, F=FEBLOCK, ');
 fprintf(file, 'SOLUTIONTIME=%.3e\n\n', tLvl);
 %% Point coordinates and data.
 fprintf(file, '%.12e %.12e %.12e %.12e %.12e\n', P1);
@@ -294,69 +264,3 @@ fprintf(file, '%d %d %d\n', V0T);
 fclose(file);
 disp(['Data written to ' fileName])
 end % function
-% 
-% function visualizeDataSub( g , repLagr , varName, fileName, tLvl )
-% 
-% [K, N] = size(repLagr);
-% %% open file
-% fileName    = [fileName, '.', num2str(tLvl), '.vtu'];
-% file        = fopen(fileName, 'wt');
-% %% header
-% fprintf(file, '<?xml version="1.0"?>\n');
-% fprintf(file, '<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" compressor="vtkZLibDataCompressor">\n');
-% fprintf(file, '  <UnstructuredGrid>\n');
-% %% points & cells
-% switch N
-%     case {1, 4}
-%         P1 = reshape(g.coordV0Tsub(:,:,1)', 4*K, 1);
-%         P2 = reshape(g.coordV0Tsub(:,:,2)', 4*K, 1);
-%         numP = 4;
-%         id = 9;
-%     case 9
-%         P1 = reshape([g.coordV0Tsub(:,:,1), g.baryE0Tsub(:,[1,3,2,4],1)]', 8*K, 1);
-%         P2 = reshape([g.coordV0Tsub(:,:,2), g.baryE0Tsub(:,[1,3,2,4],2)]', 8*K, 1);
-%         numP = 8;
-%         id = 23;
-%         N = 8;
-% end  % switch
-% fprintf(file, '    <Piece NumberOfPoints="%d" NumberOfCells="%d">\n',K*numP,K);
-% fprintf(file, '      <Points>\n');
-% fprintf(file, '        <DataArray type="Float32" NumberOfComponents="3" format="ascii">\n');
-% fprintf(file, '          %.3e %.3e %.3e\n',  [P1, P2, zeros(numP*K, 1)]');
-% fprintf(file, '        </DataArray>\n');
-% fprintf(file, '      </Points>\n');
-% fprintf(file, '      <Cells>\n');
-% fprintf(file, '        <DataArray type="Int32" Name="connectivity" format="ascii">\n');
-% fprintf(file,'           '); fprintf(file,'%d ', 0:K*numP-1);
-% fprintf(file, '\n        </DataArray>\n');
-% fprintf(file, '        <DataArray type="Int32" Name="offsets" format="ascii">\n');
-% fprintf(file,'           %d\n', numP:numP:numP*K);
-% fprintf(file, '        </DataArray>\n');
-% fprintf(file, '        <DataArray type="UInt8" Name="types" format="ascii">\n');
-% fprintf(file,'           %d\n', id*ones(K, 1));
-% fprintf(file, '        </DataArray>\n');
-% fprintf(file, '      </Cells>\n');
-% %% data
-% switch N
-%     case 1 % locally constant
-%         dataLagr = kron(repLagr, [1;1;1;1])';
-%     case 4 % locally quadratic
-%         dataLagr = reshape(repLagr', 1, K*N);
-%     case 8
-%         repLagr = repLagr(:,(1:N));
-%         dataLagr = reshape(repLagr', 1, K*N);
-% end  % switch
-% fprintf(file, '      <PointData Scalars="%s">\n', varName);
-% fprintf(file, '        <DataArray type="Float32" Name="%s" NumberOfComponents="1" format="ascii">\n', varName);
-% fprintf(file, '          %.3e\n', dataLagr);
-% fprintf(file, '        </DataArray>\n');
-% fprintf(file, '      </PointData>\n');
-% %% footer
-% fprintf(file, '    </Piece>\n');
-% fprintf(file, '  </UnstructuredGrid>\n');
-% fprintf(file, '</VTKFile>\n');
-% %% close file
-% fclose(file);
-% disp(['Data written to ' fileName])
-% end
-% 

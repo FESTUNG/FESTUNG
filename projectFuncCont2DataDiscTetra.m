@@ -1,7 +1,7 @@
 % Compute the DG/modal basis representation of an algebraic function.
 
 %===============================================================================
-%> @file darcy_vert/projectFuncCont2DataDisc.m
+%> @file projectFuncCont2DataDiscTetra.m
 %>
 %> @brief Compute the DG/modal basis representation of an algebraic function.
 %===============================================================================
@@ -24,7 +24,7 @@
 %>  \int_{T_k} w_h d_h(t) = \int_{T_k} w_h d(t) \,.
 %> @f]
 %> Choosing @f$w_h = \varphi_{ki} \text{ for } i \in \{1,...,N\}@f$ and using
-%> an affine mapping 
+%> a mapping 
 %> @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$ from 
 %> the reference element @f$\hat{T}@f$ we obtain
 %> @f[
@@ -52,8 +52,7 @@
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  funcCont   A function handle for the continuous function
 %> @param  N          Number of local degrees of freedom
-%> @param  qOrd       The order of the quadrature rule provided by 
-%>                    <code>quadRule2D()</code>
+%> @param  qOrd       The order of the quadrature rule.
 %> @param  globM      Global mass matrix @f$\mathsf{M}@f$ as provided
 %>                    by <code>assembleMatElemPhiPhi()</code>.
 %>                    @f$[KN \times KN]@f$
@@ -65,7 +64,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -83,7 +82,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataDisc = projectFuncCont2DataDiscTrap(g, funcCont, N, qOrd, globM, basesOnQuad)
+function dataDisc = projectFuncCont2DataDiscTetra(g, funcCont, N, qOrd, globM, basesOnQuad)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 validateattributes(globM, {'numeric'}, {'size', [g.numT * N, g.numT * N]}, mfilename, 'globM');
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad');

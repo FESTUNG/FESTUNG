@@ -1,32 +1,31 @@
-% Visualize the triangulation with global and local indices.
+% Visualize the quadrilateral grid with global and local indices.
 
 %===============================================================================
-%> @file visualizeGrid.m
+%> @file visualizeGridTetra.m
 %>
-%> @brief Visualize the triangulation with global and local indices.
+%> @brief Visualize the quadrilateral grid with global and local indices.
 %===============================================================================
 %>
-%> @brief Visualize the triangulation with global and local indices.
+%> @brief Visualize the quadrilateral grid with global and local indices.
 %>
 %> @par Example
 %> @parblock
 %> @code
-%> g = generateGridData([0, -1; sqrt(3), 0; 0, 1; -sqrt(3), 0], [4,1,3; 1,2,3]);
-%> g.idE = (abs(g.nuE(:,2)) > 0) .* ((g.nuE(:,1)>0) + (g.nuE(:,2)>0)*2+1);
-%> visualizeGrid(g)
+%> g = domainRectTrap([0, 1], [0, 1], [4, 2]);
+%> visualizeGridTetra(g)
 %> @endcode
 %> produces the following output:
-%> @image html  generateGridData.png
+%> @image html  visualizeGridTetra.png
 %> @endparblock
 %>
 %> @param  g          The lists describing the geometric and topological 
-%>                    properties of a triangulation (see 
-%>                    <code>generateGridData()</code>) 
+%>                    properties of a quadrilateral grid (see, e.g., 
+%>                    <code>domainRectTrap()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -44,7 +43,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function visualizeGridTrap(g)
+function visualizeGridTetra(g)
 figure('Color', [1, 1, 1]); % white background
 hold('on'),  axis('off')
 % daspect([1, 1, 1]) % adjust aspect ration, requires Octave >= 3.8
@@ -77,7 +76,7 @@ markE0Tbdr = g.idE0T ~= 0;
 [r, c] = find(markE0Tbdr);
 ind1 = sub2ind([g.numT, 4, 2], r, c, 1 * ones(size(r)));
 ind2 = sub2ind([g.numT, 4, 2], r, c, 2 * ones(size(r)));
-textarray(g.baryE0T(ind1) + g.nuE0T(ind1).*g.areaE0T(markE0Tbdr)/8, ...
+textarray(g.baryE0T(ind1) + g.nuE0T(ind1).*g.areaE0T(markE0Tbdr)/16, ...
           g.baryE0T(ind2) + g.nuE0T(ind2).*g.areaE0T(markE0Tbdr)/8, ...
           g.idE0T(markE0Tbdr), 'red')
 end % function

@@ -8,7 +8,7 @@ problemData = setdefault(problemData, 'testcase', 'convergence2');
 problemData = setdefault(problemData, 'numElem', [16, 8]);
 
 % Local polynomial approximation order (0 to 5)
-problemData = setdefault(problemData, 'p', 1);
+problemData = setdefault(problemData, 'p', 2);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
@@ -23,11 +23,11 @@ problemData = setdefault(problemData, 'ordRK', 1);%max(problemData.p + 1, 3));
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
-problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
+problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
+problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep 'solution_sweVert_' problemData.testcase ]); 
-problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
+problemData = setdefault(problemData, 'outputTypes', { 'vtk', 'tec' });  % Type of visualization files ('vtk, 'tec')
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 5, 'Polynomial order must be zero to five.')

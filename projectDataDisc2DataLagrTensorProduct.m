@@ -1,7 +1,7 @@
 % Convert the DG/modal into a Lagrange/nodal basis representation.
 
 %===============================================================================
-%> @file projectDataDisc2DataLagrTrap.m
+%> @file projectDataDisc2DataLagrTensorProduct.m
 %>
 %> @brief Convert the DG/modal into a Lagrange/nodal basis representation.
 %===============================================================================
@@ -22,7 +22,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -40,7 +40,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataLagr = projectDataDisc2DataLagrTrap(dataDisc, p)
+function dataLagr = projectDataDisc2DataLagrTensorProduct(dataDisc, p)
 [K, N] = size(dataDisc);
 if nargin == 1
   p = sqrt(N)-1;

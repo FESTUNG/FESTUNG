@@ -57,9 +57,9 @@ function problemData = preprocessSubStep(problemData, nStep, nSubStep) %#ok<INUS
 t = problemData.t(nSubStep);
 
 %% L2-projections of algebraic coefficients and right hand side.
-DDisc = cellfun(@(c) problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, @(x1,x2) c(t,x1,x2), problemData.N, problemData.qOrd, ...
-        problemData.globM, problemData.basesOnQuad2D), problemData.DCont, 'UniformOutput', false);
-problemData.globLu = reshape(problemData.fn_projectFuncCont2DataDiscTrap(problemData.g, @(x1,x2) problemData.fuCont(t,x1,x2), ...
+DDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x1,x2), problemData.N, problemData.qOrd, ...
+                       problemData.globM, problemData.basesOnQuad2D), problemData.DCont, 'UniformOutput', false);
+problemData.globLu = reshape(projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) problemData.fuCont(t,x1,x2), ...
                              problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D).', [], 1);
 problemData.globLh = reshape(projectFuncCont2DataDisc1D(problemData.g.g1D, @(x1) problemData.fhCont(t,x1), ...
                              problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D).', [], 1);
@@ -81,7 +81,7 @@ end % for nn
 barU1Disc = { zeros(problemData.g.g1D.numT, problemData.barN), zeros(problemData.g.g1D.numT, problemData.barN) };
 for s = 1 : 2
   for j = 1 : problemData.barN
-    i = problemData.fn_mapTensorProductIndex(j, 1);
+    i = mapTensorProductIndex(j, 1);
     barU1Disc{s}(:, j) = problemData.g.g1D.markT2DT.' * (problemData.cDiscRK{nSubStep, 2}(:,i) .* problemData.g.J0T{s}(:,2,2));
   end % for j
 end % for s

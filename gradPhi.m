@@ -1,14 +1,15 @@
-% Evaluates the m-th component of the i-th basis function.
+% Evaluates the m-th component of the gradient of the i-th basis function.
 
 %===============================================================================
 %> @file gradPhi.m
 %>
-%> @brief Evaluates the m-th component of the i-th basis function.
+%> @brief Evaluates the m-th component of the gradient of the i-th basis 
+%>        function.
 %===============================================================================
 %>
-%> @brief Evaluates the @f$m@f$-th component of the @f$i@f$-th basis function on
-%>        thre reference triangle @f$\hat{T}@f$ at points specified by a list of 
-%>        @f$\hat{x}^1@f$ and @f$\hat{x}^2@f$ coordinates .
+%> @brief Evaluates the @f$m@f$-th component of the gradient of the @f$i@f$-th
+%>        basis function on the reference triangle @f$\hat{T}@f$ at points 
+%>        specified by a list of @f$\hat{x}^1@f$ and @f$\hat{x}^2@f$ coordinates .
 %>
 %> @param  i   The index of the basis function.
 %> @param  m   The component of the gradient, @f$m\in\{1,2\}@f$.
