@@ -54,8 +54,8 @@ function problemData = outputStep(problemData, nStep)
 %% Visualization
 if mod(nStep, problemData.outputFrequency) == 0
   if problemData.isVisSol
-    cLagr = cellfun(@(c) execin('darcyVert/projectDataDisc2DataLagrTrap', c), problemData.cDiscRK(end, 2:3), 'UniformOutput', false);
-    problemData.fn_visualizeDataLagrTrap(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nStep, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+    cLagr = cellfun(@(c) projectDataDisc2DataLagrTensorProduct(c), problemData.cDiscRK(end, 2:3), 'UniformOutput', false);
+    visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nStep, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
   elseif nStep > problemData.outputFrequency
     fprintf(repmat('\b', 1, 11));
   end % if
