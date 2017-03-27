@@ -108,52 +108,71 @@ assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), stepLis
   'Not all the required functions for the problem steps found.')
 assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), postprocessList), 2 * ones(size(postprocessList))), ...
   'Not all the required functions for the postprocessing of the problem found.')
-%% Start logging and time measurements
-more off % Disable paging of output
-tic % Start time measurement
-diary([problemName '.log']) % Start logging
-fprintf('Computing problem "%s".\n', problemName);
-%% Add problem to search path
-oldpath = addpath(problemName, pwd);
-%% Execute problem
-try
-  %% Pre-process and initialize problem
-  tPreprocess = tic;
-  for nFunc = 1 : length(preprocessList)
-    problemData = feval(preprocessList{nFunc}, problemData);
+%% Start logging and time measurements, add problem to search path, and install exit handler
+[tStartup, oldpath, cwd] = festungStartup(problemName);
+cleanupObj = onCleanup(@() festungCleanup(tStartup, oldpath, cwd));
+%% Pre-process and initialize problem
+tPreprocess = tic;
+for nFunc = 1 : length(preprocessList)
+  problemData = feval(preprocessList{nFunc}, problemData);
+end % for
+fprintf('Pre-processing time: %g seconds.\n', toc(tPreprocess));
+%% Enter iterative loop
+fprintf('Entering main loop.\n');
+assert(isstruct(problemData) && isfield(problemData, 'isFinished') && islogical(problemData.isFinished), ...
+  'Struct "problemData" must contain a logical variable "isFinished".');
+tLoop = tic;
+nStep = 0;
+while ~problemData.isFinished
+  nStep = nStep + 1;
+  for nFunc = 1 : length(stepList)
+    problemData = feval(stepList{nFunc}, problemData, nStep);
   end % for
-  fprintf('Pre-processing time: %g seconds.\n', toc(tPreprocess));
-  %% Enter iterative loop
-  fprintf('Entering main loop.\n');
-  assert(isstruct(problemData) && isfield(problemData, 'isFinished') && islogical(problemData.isFinished), ...
-    'Struct "problemData" must contain a logical variable "isFinished".');
-  tLoop = tic;
-  nStep = 0;
-  while ~problemData.isFinished
-    nStep = nStep + 1;
-    for nFunc = 1 : length(stepList)
-      problemData = feval(stepList{nFunc}, problemData, nStep);
-    end % for
-  end % while
-  tLoop = toc(tLoop);
-  fprintf('Loop time: %d iterations in %g seconds (on avg. %g seconds per iteration).\n', nStep, tLoop, tLoop/nStep);
-  %% Post-process problem
-  tPostprocess = tic;
-  for nFunc = 1 : length(postprocessList)
-    problemData = feval(postprocessList{nFunc}, problemData);
-  end % for
-  fprintf('Post-processing time: %g seconds.\n', toc(tPostprocess))
-catch e
-  %% End logging and restore original path
-  diary off
-  path(oldpath);
-  rethrow(e)
-end % try/catch
-fprintf('Total computation time: %g seconds.\n', toc);
+end % while
+tLoop = toc(tLoop);
+fprintf('Loop time: %d iterations in %g seconds (on avg. %g seconds per iteration).\n', nStep, tLoop, tLoop/nStep);
+%% Post-process problem
+tPostprocess = tic;
+for nFunc = 1 : length(postprocessList)
+  problemData = feval(postprocessList{nFunc}, problemData);
+end % for
+fprintf('Post-processing time: %g seconds.\n', toc(tPostprocess))
+%% Assign output variable
 if nargout > 0
   varargout{1} = problemData;
 end % if
+end % function
+%
+function [tStartup, oldpath, cwd] = festungStartup(problemName)
+more off % Disable paging of output
+tStartup = tic; % Start time measurement
+diaryName = [problemName '_' datestr(now, 'yyyymmdd-HHMMSS') '.log'];
+diary(diaryName) % Start logging
+fprintf( [ '\n' ...
+'  +--+  +--+  +--+                   +--+  +--+  +--+\n' ...
+'  |  |  |  |  |  |                   |  |  |  |  |  |\n' ...
+'  |  +--+  +--+  |                   |  +--+  +--+  |\n' ...
+'  |              +-------------------+              |\n' ...
+'  |                                                 |\n' ...
+'  |            Welcome to  F E S T U N G            |\n' ...
+'  |                                                 |\n' ...
+'  |                 (c) 2014-%04s                   |\n' ...
+'  | Balthasar Reuter, Florian Frank, Vadym Aizinger |\n' ...
+'  |                                                 |\n' ...
+'  +-------------------------------------------------+\n\n' ...
+'   -------------------------------------------------\n' ...
+'    Running problem "%s".\n' ...
+'    Current date/time: %s.\n' ...
+'    Logging output to "%s".\n' ...
+'   -------------------------------------------------\n\n' ], ...
+datestr(now,'yyyy'), problemName, datestr(now,'yyyy-mm-dd HH:MM:SS'), diaryName);
+oldpath = addpath([pwd filesep problemName], pwd);
+cwd = pwd;
+end % function
+%
+function festungCleanup(tStartup, oldpath, cwd)
+fprintf('Total computation time: %g seconds.\n', toc(tStartup));
 diary off
-%% Restore original search path
 path(oldpath);
+cd(cwd);
 end % function
