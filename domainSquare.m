@@ -1,5 +1,5 @@
 % Generates a mesh for the unit square.
-%
+
 %===============================================================================
 %> @file domainSquare.m
 %>

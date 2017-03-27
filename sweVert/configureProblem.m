@@ -5,7 +5,7 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'convergence2');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [48, 24]);
+problemData = setdefault(problemData, 'numElem', [16, 8]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -16,7 +16,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
 problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
-problemData = setdefault(problemData, 'numSteps', 400);  % number of time steps
+problemData = setdefault(problemData, 'numSteps', 10);  % number of time steps
 
 % Order of Runge-Kutta methode
 problemData = setdefault(problemData, 'ordRK', 1);%max(problemData.p + 1, 3));
@@ -42,8 +42,7 @@ generateZbot = @(numElem) zBotCont(generateX(numElem));
 generateXi0 = @(numElem) xi0Cont(generateX(numElem));
 
 %% Domain and triangulation.
-fn_domainRectTrap = getFunctionHandle('darcyVert/domainRectTrap');
-problemData.generateGrid = @(numElem) fn_domainRectTrap(generateX(numElem), [generateZbot(numElem); generateXi0(numElem)], numElem);
+problemData.generateGrid = @(numElem) domainRectTrap(generateX(numElem), [generateZbot(numElem); generateXi0(numElem)], numElem);
 problemData.generateGrid1D = @(numElem, g2D) generateGridData1D(generateX(numElem), generateXi0(numElem), numElem, g2D);
 
 % Boundary parts (0 = int, 1 = bot, 2 = right, 3 = top, 4 = left)

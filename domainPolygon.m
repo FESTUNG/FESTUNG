@@ -1,5 +1,5 @@
 % Generates a mesh for a polygonal domain with given mesh width.
-%
+
 %===============================================================================
 %> @file domainPolygon.m
 %>

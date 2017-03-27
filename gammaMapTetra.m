@@ -1,7 +1,7 @@
 % Mapping from interval [0,1] to the n-th edge in the reference square.
 
 %===============================================================================
-%> @file gammaMapQuad.m
+%> @file gammaMapTetra.m
 %>
 %> @brief Mapping from interval [0,1] to the n-th edge in the reference square.
 %===============================================================================
@@ -48,7 +48,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function [X1, X2] = gammaMapQuad(n, S)
+function [X1, X2] = gammaMapTetra(n, S)
 S = S(:)';
 switch n
   case 1,  X1 = S;              X2 = zeros(size(S));

@@ -11,7 +11,7 @@ K = g.numT;
 [Q, W] = quadRule1D(qOrd);
 ret = { zeros(K, N), zeros(K, N) };
 for n = 1 : 4
-  [Q1, Q2] = gammaMapQuad(n, Q);
+  [Q1, Q2] = gammaMapTetra(n, Q);
   funcQ0E = { funcCont{1}(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2)), ...
               funcCont{2}(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2)) };
   for m = 1 : 2
@@ -29,7 +29,7 @@ K = g.numT;
 [Q, W] = quadRule1D(qOrd);
 ret = { zeros(K, N), zeros(K, N) };
 for n = 1 : 4
-  [Q1, Q2] = gammaMapQuad(n, Q);
+  [Q1, Q2] = gammaMapTetra(n, Q);
   funcQ0E = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   for i = 1 : N
     markAreaIntE0T = markE0Tbdr(:, n) .* g.areaE0T(:, n) .* ( funcQ0E * (W.' .* basesOnQuad.phi1D{qOrd}(:, i, n)) );

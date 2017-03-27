@@ -1,5 +1,5 @@
 % Generates a mesh for the unit circle with given mesh width.
-%
+
 %===============================================================================
 %> @file domainCircle.m
 %>
