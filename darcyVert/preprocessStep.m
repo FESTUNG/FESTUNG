@@ -9,7 +9,7 @@ fDisc = projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) problemData.fCont(
           problemData.globM, problemData.basesOnQuad);
                              
 %% Assembly of time-dependent global matrices.
-problemData.globG = assembleMatElemTrapDphiPhiFuncDisc(problemData.g, problemData.hatG, KDisc);
+problemData.globG = assembleMatElemTetraDphiPhiFuncDisc(problemData.g, problemData.hatG, KDisc);
 problemData.globR = assembleMatEdgeTetraPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, ...
                     problemData.hatRdiag, problemData.hatRoffdiag, KDisc);
 
@@ -17,16 +17,15 @@ problemData.globR = assembleMatEdgeTetraPhiPhiFuncDiscNu(problemData.g, problemD
 hDCont = @(x1,x2) problemData.hDCont(t,x1,x2);
 problemData.globRD = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, ...
                      problemData.g.markE0TbdrD, problemData.hatRdiag, KDisc);
-problemData.globJD = assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
+problemData.globJD = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
                      hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad);
-problemData.globKD = problemData.eta * assembleVecEdgeTrapPhiIntFuncCont(problemData.g, ...
-                     problemData.g.markE0TbdrD, hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad);
+problemData.globKD = problemData.eta * assembleVecEdgeTetraPhiIntFuncCont(problemData.g, ...
+                     problemData.g.markE0TbdrD, hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad, ones(problemData.g.numT, 4));
                   
 %% Assembly of Neumann boundary contributions.
 gNCont = @(x1,x2) problemData.gNCont(t,x1,x2);
-problemData.globKN = assembleVecEdgeTrapPhiIntFuncCont(problemData.g, ...
-                     problemData.g.markE0TbdrN .* problemData.g.areaE0T, ...
-                     gNCont, problemData.N, problemData.qOrd, problemData.basesOnQuad);
+problemData.globKN = assembleVecEdgeTetraPhiIntFuncCont(problemData.g, ...
+                     problemData.g.markE0TbdrN, gNCont, problemData.N, problemData.qOrd, problemData.basesOnQuad);
                    
 %% Assembly of the source contribution.
 problemData.globL = problemData.globM * reshape(fDisc', problemData.g.numT * problemData.N, 1);

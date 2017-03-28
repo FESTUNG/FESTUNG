@@ -82,10 +82,4 @@ problemData.tildeHatPoffdiag = integrateRefEdgeTrapPhiIntPhiExtPhi1DExt([problem
 
 %% Computation of time-independent 1D matrices.
 problemData.barGlobM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.barHatM);
-
-%% Function handles
-problemData.fn_assembleMatElemTrapDphiPhiFuncDisc = getFunctionHandle('darcyVert/assembleMatElemTrapDphiPhiFuncDisc');
-
-problemData.fn_assembleVecEdgeTrapPhiIntFuncCont = getFunctionHandle('darcyVert/assembleVecEdgeTrapPhiIntFuncCont');
-problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu = getFunctionHandle('darcyVert/assembleVecEdgeTrapPhiIntFuncContNu');
 end % function
