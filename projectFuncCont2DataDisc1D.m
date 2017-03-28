@@ -1,7 +1,7 @@
 % Compute the DG/modal basis representation of an algebraic function.
 
 %===============================================================================
-%> @file sweVert/projectFuncCont2DataDisc1D.m
+%> @file projectFuncCont2DataDisc1D.m
 %>
 %> @brief Compute the DG/modal basis representation of an algebraic function.
 %===============================================================================
@@ -63,7 +63,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
