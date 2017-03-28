@@ -98,15 +98,13 @@ else
   problemData = struct;
 end % if
 %% List of functions making up a problem description
-preprocessList = { 'configureProblem'; 'preprocessProblem'; 'initializeProblem' };
-stepList = { 'preprocessStep'; 'solveStep'; 'postprocessStep'; 'outputStep' };
-postprocessList = { 'postprocessProblem' };
+[preprocessList, stepList, postprocessList] = getStepLists();
 %% Check existence of all required functions
-assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), preprocessList), 2 * ones(size(preprocessList))), ...
+assert(isequal(cellfun(@(fun) exist([problemName filesep fun '.m'], 'file'), preprocessList), 2 * ones(size(preprocessList))), ...
   'Not all the required functions for the preprocessing of the problem found.')
-assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), stepList), 2 * ones(size(stepList))), ...
+assert(isequal(cellfun(@(fun) exist([problemName filesep fun '.m'], 'file'), stepList), 2 * ones(size(stepList))), ...
   'Not all the required functions for the problem steps found.')
-assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), postprocessList), 2 * ones(size(postprocessList))), ...
+assert(isequal(cellfun(@(fun) exist([problemName filesep fun '.m'], 'file'), postprocessList), 2 * ones(size(postprocessList))), ...
   'Not all the required functions for the postprocessing of the problem found.')
 %% Start logging and time measurements, add problem to search path, and install exit handler
 [tStartup, oldpath, cwd] = startupFestung(problemName);
