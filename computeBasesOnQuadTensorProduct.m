@@ -77,7 +77,7 @@ basesOnQuad.gradPhi2D = cell(max(requiredOrders), 1);
 
 for qOrd = requiredOrders
   [Q, ~] = quadRule1D(qOrd);
-  [Q1, Q2] = meshgrid(Q); Q1 = Q1(:)'; Q2 = Q2(:)';
+  [Q1, Q2, ~] = quadRuleTensorProduct(qOrd);
   R1D = length(Q); R2D = length(Q1);
 
   basesOnQuad.phi1D{qOrd} = zeros(R1D, N, 4);
@@ -88,10 +88,9 @@ for qOrd = requiredOrders
     for m = 1 : 2
       basesOnQuad.gradPhi2D{qOrd}(:,i,m) = gradPhiTensorProduct(i, m, Q1, Q2, @phi1D, @phi1D, @gradPhi1D, @gradPhi1D);
     end % for m
-    for n = 1 : 2
-      gamma_n = n - 1;
-      basesOnQuad.phi1D{qOrd}(:,i,n) = phiTensorProduct(i, Q, gamma_n, @phi1D, @phi1D);  % edges 1 (bottom), 2 (top)
-      basesOnQuad.phi1D{qOrd}(:,i,5-n) = phiTensorProduct(i, gamma_n, Q, @phi1D, @phi1D); % edges 3 (right), 4 (left)
+    for n = 1 : 4
+      [QS1, QS2] = gammaMapTetra(n, Q);
+      basesOnQuad.phi1D{qOrd}(:,i,n) = phiTensorProduct(i, QS1, QS2, @phi1D, @phi1D);
     end % for n
   end  % for i
 end % for qOrd
