@@ -33,10 +33,10 @@ problemData.basesOnQuad = computeBasesOnQuadTensorProduct(problemData.p, struct,
 problemData.hatM = integrateRefElemTrapPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad);
 problemData.hatG = integrateRefElemTrapDphiPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad);
 hatH = integrateRefElemTrapDphiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad);
-problemData.hatRdiag = integrateRefEdgeTrapPhiIntPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
-problemData.hatRoffdiag = integrateRefEdgeTrapPhiIntPhiExtPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
-hatSdiag = integrateRefEdgeTrapPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
-hatSoffdiag = integrateRefEdgeTrapPhiIntPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
+problemData.hatRdiag = integrateRefEdgeTetraPhiIntPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
+problemData.hatRoffdiag = integrateRefEdgeTetraPhiIntPhiExtPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
+hatSdiag = integrateRefEdgeTetraPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
+hatSoffdiag = integrateRefEdgeTetraPhiIntPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
 
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
