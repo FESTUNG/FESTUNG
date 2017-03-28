@@ -58,9 +58,9 @@ problemData.basesOnQuad1D = computeBasesOnQuad1D(problemData.p, struct, [problem
 problemData.basesOnQuad2D = computeBasesOnQuadTensorProduct(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
 
 %% Computation of matrices on the reference element.
-problemData.hatM = execin('darcyVert/integrateRefElemTrapPhiPhi', problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.hatG = execin('darcyVert/integrateRefElemTrapDphiPhiPhi', problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.hatH = execin('darcyVert/integrateRefElemTrapDphiPhi', problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.hatM = integrateRefElemTetraPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.hatG = integrateRefElemTetraDphiPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.hatH = integrateRefElemTetraDphiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.hatQdiag = integrateRefEdgeTetraPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.hatQoffdiag = integrateRefEdgeTetraPhiIntPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.hatRdiag = integrateRefEdgeTetraPhiIntPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
