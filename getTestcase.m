@@ -598,9 +598,9 @@ switch name
     problemData.gConst = 10;
     xi0Cont = @(x) zeros(size(x));
     dxZb = -0.005;
-    omega = 0.01;
+    omega = 0.1;
     delta = 0.1;
-    epsilon = 0.01;
+    epsilon = 0.02;
     rho = 0.001;
     
     xiCont = @(t,x) epsilon * sin(omega * (x+t));

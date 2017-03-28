@@ -24,7 +24,7 @@ problemData = setdefault(problemData, 'ordRK', 1);%max(problemData.p + 1, 3));
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep 'solution_sweVert_' problemData.testcase ]); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk', 'tec' });  % Type of visualization files ('vtk, 'tec')
@@ -34,7 +34,7 @@ assert(problemData.p >= 0 && problemData.p <= 5, 'Polynomial order must be zero 
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
-[problemData, domainWidth, xi0Cont, zBotCont, idLand, idOS, idRiv, idRad] = getTestcase(problemData, problemData.testcase);
+[problemData, domainWidth, xi0Cont, zBotCont, idLand, idOS, idRiv, idRad] = execin('sweVert/getTestcase', problemData, problemData.testcase);
 problemData.h0Cont = @(x1) problemData.hCont(problemData.t0, x1);
 problemData.u10Cont = @(x1,x2) problemData.u1Cont(problemData.t0, x1, x2);
 generateX = @(numElem) (0:numElem(1)) * domainWidth / numElem(1);
