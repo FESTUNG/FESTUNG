@@ -86,11 +86,6 @@ problemData.barGlobM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.barH
 %% Function handles
 problemData.fn_assembleMatElemTrapDphiPhiFuncDisc = getFunctionHandle('darcyVert/assembleMatElemTrapDphiPhiFuncDisc');
 
-problemData.fn_assembleMatEdgeTrapPhiPhiNu = getFunctionHandle('darcyVert/assembleMatEdgeTrapPhiPhiNu');
-problemData.fn_assembleMatEdgeTrapPhiIntPhiIntNu = getFunctionHandle('darcyVert/assembleMatEdgeTrapPhiIntPhiIntNu');
-problemData.fn_assembleMatEdgeTrapPhiPhiFuncDiscNu = getFunctionHandle('darcyVert/assembleMatEdgeTrapPhiPhiFuncDiscNu');
-problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu = getFunctionHandle('darcyVert/assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu');
-
 problemData.fn_assembleVecEdgeTrapPhiIntFuncCont = getFunctionHandle('darcyVert/assembleVecEdgeTrapPhiIntFuncCont');
 problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu = getFunctionHandle('darcyVert/assembleVecEdgeTrapPhiIntFuncContNu');
 end % function

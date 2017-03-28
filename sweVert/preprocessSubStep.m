@@ -93,9 +93,9 @@ problemData.globEP = problemData.fn_assembleMatElemTrapDphiPhiFuncDisc(problemDa
 problemData.globGR = problemData.fn_assembleMatElemTrapDphiPhiFuncDisc(problemData.g, problemData.hatG, DDisc);
 
 % Advection and diffusion interior edge integrals in momentum equation
-globR = problemData.fn_assembleMatEdgeTrapPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
+globR = assembleMatEdgeTetraPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
 problemData.globGR = cellfun(@(g,r) g - r, problemData.globGR, globR, 'UniformOutput', false);
-problemData.globEP = cellfun(@(e,p) e - p, problemData.globEP, problemData.fn_assembleMatEdgeTrapPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDiscRK{nSubStep, 2}), 'UniformOutput', false);
+problemData.globEP = cellfun(@(e,p) e - p, problemData.globEP, assembleMatEdgeTetraPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDiscRK{nSubStep, 2}), 'UniformOutput', false);
 
 % Jump term in Lax-Friedrichs solver
 problemData.globKu = zeros(problemData.g.numT * problemData.N, 1);
@@ -128,7 +128,7 @@ qDCont = { @(x1,x2) problemData.q1DCont(t,x1,x2); @(x1,x2) problemData.q2DCont(t
 uhDCont = @(x1) problemData.uhDCont(t, x1);
 
 % Diffusion boundary terms in momentum equation
-globRbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
+globRbdr = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
 problemData.globGR = cellfun(@(g,r) g - r, problemData.globGR, globRbdr, 'UniformOutput', false);
 globJtmp = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrQ, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJ = globJtmp{1} + globJtmp{2};
@@ -136,7 +136,7 @@ problemData.globJ = globJtmp{1} + globJtmp{2};
 % Advection boundary terms in momentum equation
 globJtmp = assembleVecEdgeTrapPhiIntFuncCont1DNu(problemData.g, problemData.g.markE0TbdrH, hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJ = problemData.globJ + problemData.gConst * globJtmp{1};
-problemData.globEP = cellfun(@(e,p) e - p, problemData.globEP, problemData.fn_assembleMatEdgeTrapPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2}), 'UniformOutput', false);
+problemData.globEP = cellfun(@(e,p) e - p, problemData.globEP, assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2}), 'UniformOutput', false);
 
 globJtmp = problemData.fn_assembleVecEdgeTrapPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, @(x1,x2) u1DCont(x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJ = problemData.globJ + globJtmp{1};

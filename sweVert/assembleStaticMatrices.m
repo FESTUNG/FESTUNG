@@ -2,10 +2,10 @@ function problemData = assembleStaticMatrices(problemData)
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
 globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
-globQ = problemData.fn_assembleMatEdgeTrapPhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
-globQbdr = problemData.fn_assembleMatEdgeTrapPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
+globQ = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
+globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
 
-globQAvg = problemData.fn_assembleMatEdgeTrapPhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
+globQAvg = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
 globQup = assembleMatEdgeTrapPhiPhiNuBottomUp(problemData.g, problemData.g.markE0Tint | problemData.g.markE0TbdrTop, problemData.hatQdiag, problemData.hatQoffdiag);
 
 problemData.globHQ = cellfun(@(H, Q, Qbdr) H - Q - Qbdr, globH, globQ, globQbdr, 'UniformOutput', false);

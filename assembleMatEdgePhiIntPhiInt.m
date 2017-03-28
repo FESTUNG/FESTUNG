@@ -1,6 +1,6 @@
 % Assembles a matrix containing integrals over edges of products of two 
 % basis functions from the interior of each element.
-%
+
 %===============================================================================
 %> @file assembleMatEdgePhiIntPhiInt.m
 %>
