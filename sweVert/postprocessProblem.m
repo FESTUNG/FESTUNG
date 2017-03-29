@@ -67,7 +67,7 @@ for n = 3 : 4
   problemData.globKh = problemData.globKh + problemData.globS{n} * hJmpLambdaE0T;
 end % for n
 
-problemData.tildeGlobP = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{1, 1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
+problemData.tildeGlobP = assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{1, 1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
 
 problemData.cDiscRK{1, 3} = reshape( (problemData.globHQup) \ ( problemData.globJu{1} + problemData.globJw{2} + problemData.globKh + ...
                                 (problemData.globHQavg + problemData.tildeGlobP) * reshape(problemData.cDiscRK{1, 2}.', [], 1) ), ...
