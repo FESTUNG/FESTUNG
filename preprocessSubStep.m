@@ -112,11 +112,11 @@ for n = 3 : 4
 end % for n
 
 % Interior edge flux in continuity and free surface equation
-problemData.tildeGlobP = assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
-problemData.barGlobP = assembleMatEdge1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, problemData.heightV0T1D, problemData.g.g1D.markV0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
+problemData.tildeGlobP = problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
+problemData.barGlobP = problemData.fn_assembleMatEdge1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, problemData.heightV0T1D, problemData.g.g1D.markV0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
 
 % Advection element integral in free surface equation
-problemData.barGlobG = assembleMatElem1DDphiPhiFuncDiscHeight(barU1Disc, problemData.heightQ0T1D, problemData.barHatG);
+problemData.barGlobG = problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight(barU1Disc, problemData.heightQ0T1D, problemData.barHatG);
 
 %% Assembly of boundary contributions.
 hDCont = @(x1) problemData.hDCont(t,x1);
@@ -147,7 +147,7 @@ problemData.globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problem
 problemData.globJw = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrW, u2DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 % Boundary terms in free surface equation
-problemData.barGlobPbdr = assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.heightV0T1D, problemData.g.g1D.markV0Tbdr & ~problemData.g.g1D.markV0TbdrUH, problemData.barHatPdiag);
+problemData.barGlobPbdr = problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.heightV0T1D, problemData.g.g1D.markV0Tbdr & ~problemData.g.g1D.markV0TbdrUH, problemData.barHatPdiag);
 problemData.barGlobJuh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 for n = 1 : 2
   markV0TbdrUH = problemData.g.g1D.markV0TbdrUH(:, n);

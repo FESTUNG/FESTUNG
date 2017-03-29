@@ -40,6 +40,14 @@ problemData.g.markE0TbdrQ = problemData.g.markE0TbdrTop | problemData.g.markE0Tb
 problemData.g.markE0TbdrUH = problemData.g.markE0TbdrRiv;
 problemData.g.g1D.markV0TbdrUH = problemData.g.g1D.markV0TbdrRiv;
 
+%% Function handles for problem-specific functions
+problemData.fn_adaptMesh = getFunctionHandle([problemData.problemName filesep 'adaptMesh']);
+problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraHorizPhiPhiNuBottomUp']);
+problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight']);
+problemData.fn_assembleMatEdge1DPhiPhiFuncDiscNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdge1DPhiPhiFuncDiscNuHeight']);
+problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatElem1DDphiPhiFuncDiscHeight']);
+problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight']);
+
 %% Globally constant parameters.
 problemData.N = (problemData.p + 1)^2;  % number of local DOFs on trapezoidals
 problemData.barN = problemData.p + 1;  % number of local DOFs on intervals

@@ -8,7 +8,7 @@ problemData.cDiscRK = cell(length(rungeKuttaSSP(problemData.ordRK, 0, 0)), 3);
 problemData.cDiscRK{1, 1} = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.h0Cont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
 
 %% Mesh adaptivity and assembly of time-independent global matrices.
-problemData = adaptMesh(problemData, true);
+problemData = problemData.fn_adaptMesh(problemData, true);
 
 %% Computation of bathymetry gradient.
 dZbot1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 2, 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), 1, 2);

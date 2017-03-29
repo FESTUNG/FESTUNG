@@ -1,4 +1,4 @@
 function problemData = preprocessStep(problemData, nStep)
 %% Apply mesh adaptation to free surface movement
-problemData = adaptMesh(problemData);
+problemData = problemData.fn_adaptMesh(problemData);
 end % function
