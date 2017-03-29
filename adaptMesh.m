@@ -59,7 +59,7 @@ globQ = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint, pr
 globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
 
 globQAvg = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
-globQup = assembleMatEdgeTrapPhiPhiNuBottomUp(problemData.g, problemData.g.markE0Tint | problemData.g.markE0TbdrTop, problemData.hatQdiag, problemData.hatQoffdiag);
+globQup = assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, problemData.g.markE0Tint | problemData.g.markE0TbdrTop, problemData.hatQdiag, problemData.hatQoffdiag);
 
 problemData.globHQ = cellfun(@(H, Q, Qbdr) H - Q - Qbdr, globH, globQ, globQbdr, 'UniformOutput', false);
 problemData.globHQup = globH{2} - globQup;

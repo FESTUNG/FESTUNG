@@ -1,4 +1,4 @@
-function ret = assembleMatEdgeTrapPhiPhiFuncDisc1DNuHeight(g2D, g1D, dataDisc1D, heightV0T1D, markE0T, refEdgePhiIntPhiIntPhi1DInt, refEdgePhiIntPhiExtPhi1DExt)
+function ret = assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(g2D, g1D, dataDisc1D, heightV0T1D, markE0T, refEdgePhiIntPhiIntPhi1DInt, refEdgePhiIntPhiExtPhi1DExt)
 K = g2D.numT;
 [N, ~, barN, ~] = size(refEdgePhiIntPhiIntPhi1DInt);
 ret = sparse(K*N, K*N);
