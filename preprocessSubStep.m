@@ -132,13 +132,13 @@ globJtmp = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.mar
 problemData.globJ = globJtmp{1} + globJtmp{2};
 
 % Advection boundary terms in momentum equation
-globJtmp = assembleVecEdgeTrapPhiIntFuncCont1DNu(problemData.g, problemData.g.markE0TbdrH, hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+globJtmp = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrH, @(x1,x2) hDCont(x1), problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJ = problemData.globJ + problemData.gConst * globJtmp{1};
 problemData.globEP = cellfun(@(e,p) e - p, problemData.globEP, assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2}), 'UniformOutput', false);
 
 globJtmp = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, @(x1,x2) u1DCont(x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJ = problemData.globJ + globJtmp{1};
-problemData.globSbdr = assembleMatEdgeTrapPhiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.qOrd, problemData.hatQPerQuad);
+problemData.globSbdr = assembleMatEdgeTetraPhiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.qOrd, problemData.hatQPerQuad);
 
 % Boundary terms for horizontal velocity in continuity and flux equation
 problemData.globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
