@@ -62,8 +62,8 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 1);  % end time
-problemData = setdefault(problemData, 'numSteps', 40);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
+problemData = setdefault(problemData, 'numSteps', 10);  % number of time steps
 problemData = setdefault(problemData, 'numSubSteps', 10); % number of free-flow steps per sub-surface step
 
 %% Function handles for steps of the sub-problems
@@ -72,23 +72,25 @@ problemData.sweSteps = getStepHandles('sweVert');
 
 %% Sub-surface problem
 problemData.darcyData = struct;
-problemData.darcyData.numElem = problemData.numElem;
-problemData.darcyData.p = problemData.p;
-problemData.darcyData.qOrd = problemData.qOrd;
-problemData.darcyData.t0 = problemData.t0;
-problemData.darcyData.tEnd = problemData.tEnd;
-problemData.darcyData.numSteps = problemData.numSteps;
+problemData.darcyData.problemName = 'darcyVert';
+% problemData.darcyData.numElem = problemData.numElem;
+% problemData.darcyData.p = problemData.p;
+% problemData.darcyData.qOrd = problemData.qOrd;
+% problemData.darcyData.t0 = problemData.t0;
+% problemData.darcyData.tEnd = problemData.tEnd;
+% problemData.darcyData.numSteps = problemData.numSteps;
 
 problemData.darcyData = problemData.darcySteps.configureProblem(problemData.darcyData);
 
 %% Free-flow problem
 problemData.sweData = struct;
-problemData.sweData.numElem = problemData.numElem;
-problemData.sweData.p = problemData.p;
-problemData.sweData.qOrd = problemData.qOrd;
-problemData.sweData.t0 = problemData.t0;
-problemData.sweData.tEnd = problemData.tEnd;
-problemData.sweData.numSteps = problemData.numSteps * problemData.numSubSteps;
+problemData.sweData.problemName = 'sweVert';
+% problemData.sweData.numElem = problemData.numElem;
+% problemData.sweData.p = problemData.p;
+% problemData.sweData.qOrd = problemData.qOrd;
+% problemData.sweData.t0 = problemData.t0;
+% problemData.sweData.tEnd = problemData.tEnd;
+% problemData.sweData.numSteps = problemData.numSteps * problemData.numSubSteps;
 
 problemData.sweData = problemData.sweSteps.configureProblem(problemData.sweData);
 end % function
