@@ -97,6 +97,7 @@ if nargin == 2
 else
   problemData = struct;
 end % if
+problemData.problemName = problemName;
 %% List of functions making up a problem description
 [preprocessList, stepList, postprocessList] = getStepLists();
 %% Check existence of all required functions
