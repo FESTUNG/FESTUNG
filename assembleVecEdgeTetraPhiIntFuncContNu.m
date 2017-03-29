@@ -67,10 +67,6 @@
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D.
-%> @param areaNuE0Tbdr (optional) argument to provide precomputed values
-%>                    for the products of <code>markE0Tbdr</code>,
-%>                    <code>g.areaE0T</code>, and <code>g.nuE0T</code>
-%>                    @f$[3 \times 2 \text{ cell}]@f$
 %> @retval ret        The assembled vectors @f$2\times1 \text{ cell}@f$
 %>
 %> This file is part of FESTUNG

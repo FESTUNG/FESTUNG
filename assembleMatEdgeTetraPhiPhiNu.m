@@ -90,7 +90,7 @@
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
-%>                    <code>generateGridData()</code>) 
+%>                    <code>domainRectTrap()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  markE0T    <code>logical</code> arrays that mark each triangles
 %>                    edges on which the matrix blocks should be
