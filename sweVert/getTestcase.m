@@ -118,16 +118,16 @@ switch problemName
   
   case 'coupling'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idCoupling = 1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idCoupling = -1;
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     problemData.gConst = 10;
     xi0Cont = @(x) 3 * ones(size(x));
     dxZb = 0;
-    a = 1;
-    b = 0.01;
-    c = 1;
-    d = 0.01;
+    a = 0.1;
+    b = 0.1;
+    c = 0.5;
+    d = 0.1;
     f = 1;
     k = 1;
     

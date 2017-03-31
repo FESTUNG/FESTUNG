@@ -20,7 +20,7 @@ problem = 'darcyVert_sweVert';
 p = [0; 1; 2];
 testcase = 'coupling';
 tEnd = 0.1;
-level = 0:5;
+level = 0:3;
 numElem = 2.^level(:) * [2, 1];
 numSteps = { 1 * 2.^level(:); 4 * 2.^level(:); 16 * 2.^level(:) };
 

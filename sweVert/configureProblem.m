@@ -23,7 +23,7 @@ problemData = setdefault(problemData, 'ordRK', 1);
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
-problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
+problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
 problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep 'solution_sweVert_' problemData.testcase ]); 
