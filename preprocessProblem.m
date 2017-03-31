@@ -52,7 +52,7 @@ problemData.sweData = problemData.sweSteps.preprocessProblem(problemData.sweData
 % Coupling matrices for hydraulic head
 g1D = problemData.generateGrid1D(problemData.darcyData.numElem(1), problemData.darcyData.g);
 problemData.darcyData.tildeGlobQcouple = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.tildeHatQdiag);
-problemData.darcyData.tildeGlobScouple = assembleMatEdgeTetraPhiIntPhi1DInt(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.tildeHatQdiag);
+problemData.darcyData.tildeGlobScouple = assembleMatEdgeTetraPhiIntPhi1DInt(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.tildeHatQdiag, ones(problemData.darcyData.g.numT, 4));
 
 problemData.hatS = integrateRefEdgeTetraPhiIntPhiIntPhiExtPhiExt(problemData.sweData.N, problemData.sweData.qOrd, problemData.sweData.basesOnQuad2D);
 
