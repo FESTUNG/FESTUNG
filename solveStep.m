@@ -51,10 +51,20 @@
 %> @endparblock
 %
 function problemData = solveStep(problemData, nStep)
+%% Solve SWE time steps
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);
 
+%% Solve Darcy time step
 problemData.darcyData = problemData.darcySteps.preprocessStep(problemData.darcyData, nStep);
+
+% Compute coupling terms
+problemData.hSWE = reshape(1 / problemData.darcyData.tau * problemData.hSWE.', [], 1);
+% for m = 1 : 2
+%   problemData.darcyData.globJcouple{m} = problemData.darcyData.tildeGlobQcouple{m} * problemData.hSWE;
+% end % for
+% problemData.darcyData.globKcouple = problemData.darcyData.tildeGlobScouple * problemData.hSWE;
+
 problemData.darcyData = problemData.darcySteps.solveStep(problemData.darcyData, nStep);
 problemData.darcyData = problemData.darcySteps.postprocessStep(problemData.darcyData, nStep);
 end % function

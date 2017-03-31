@@ -48,4 +48,20 @@
 function problemData = preprocessProblem(problemData)
 problemData.darcyData = problemData.darcySteps.preprocessProblem(problemData.darcyData);
 problemData.sweData = problemData.sweSteps.preprocessProblem(problemData.sweData);
+
+% Coupling matrices for hydraulic head
+g1D = problemData.generateGrid1D(problemData.darcyData.numElem(1), problemData.darcyData.g);
+problemData.darcyData.tildeGlobQcouple = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.tildeHatQdiag);
+problemData.darcyData.tildeGlobScouple = assembleMatEdgeTetraPhiIntPhi1DInt(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.tildeHatQdiag);
+
+problemData.hatS = integrateRefEdgeTetraPhiIntPhiIntPhiExtPhiExt(problemData.sweData.N, problemData.sweData.qOrd, problemData.sweData.basesOnQuad2D);
+
+% Grid data structure for coupling terms
+problemData.gCoupling.areaE0T = problemData.sweData.g.areaE0T;
+problemData.gCoupling.nuE0T = problemData.sweData.g.nuE0T;
+% Edge 1 of SWE is coupled to edge 2 of Darcy - identified via the 1D-elements
+problemData.gCoupling.markE0TE0T = cellfun(@(c) sparse(problemData.sweData.g.numT, problemData.darcyData.g.numT), cell(1,4), 'UniformOutput', false);
+problemData.gCoupling.markE0TE0T{1} = bsxfun(@and, problemData.sweData.g.g1D.markT2DT, problemData.sweData.g.markE0TbdrCoupling(:, 1)) * ...
+                                        bsxfun(@times, g1D.markT2DT, problemData.darcyData.g.markE0TbdrCoupling(:,2))';
+problemData.gCoupling.markE0TE0T = cellfun(@(c) logical(c), problemData.gCoupling.markE0TE0T, 'UniformOutput', false);                                      
 end

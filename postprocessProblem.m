@@ -46,5 +46,6 @@
 function problemData = postprocessProblem(problemData)
 problemData.darcyData = problemData.darcySteps.postprocessProblem(problemData.darcyData);
 problemData.sweData = problemData.sweSteps.postprocessProblem(problemData.sweData);
+problemData.error = [ problemData.sweData.error, problemData.darcyData.error ];
 end
 
