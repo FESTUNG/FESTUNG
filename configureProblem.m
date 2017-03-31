@@ -63,7 +63,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
 problemData = setdefault(problemData, 'tEnd', 0.01);  % end time
-problemData = setdefault(problemData, 'numSteps', 10);  % number of time steps
+problemData = setdefault(problemData, 'numSteps', 50);  % number of time steps
 problemData = setdefault(problemData, 'numSubSteps', 10); % number of free-flow steps per sub-surface step
 
 problemData.generateGrid = @(numElem) domainRectTrap([0 100], [0 2], numElem);
