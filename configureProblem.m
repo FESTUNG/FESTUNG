@@ -40,7 +40,7 @@ switch problemData.testcase
   case 'coupling'
     % width and height of computational domain
     domainWidth = [0, 100];
-    domainHeight = [-2, 0];
+    domainHeight = [-5, 0];
     idBdrD = [1, 2, 4]; idBdrN = -1; idBdrCoupling = 3;
     % Analytical solution
     a = 0.1;
@@ -48,15 +48,15 @@ switch problemData.testcase
     c = 0.5;
     d = 0.1;
     k = 1;
-    problemData.hCont = @(t,x,z) a * cos(b*x + c*t) .* cos(d*z) + 3;
+    problemData.hCont = @(t,x,z) a * cos(b*x + c*t) .* cos(d*z) - z + 5;
     problemData.q1Cont = @(t,x,z) a * b * sin(b*x + c*t) .* cos(d*z);
-    problemData.q2Cont = @(t,x,z) a * d * cos(b*x + c*t) .* sin(d*z);
+    problemData.q2Cont = @(t,x,z) a * d * cos(b*x + c*t) .* sin(d*z) + 1;
     % Diffusion matrix
     problemData.KCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {k, 0; 0, k}, 'UniformOutput', false);
     % Derivatives
     dThCont = @(t,x,z) -a * c * sin(b*x + c*t) .* cos(d*z);
     dXhCont = @(t,x,z) -a * b * sin(b*x + c*t) .* cos(d*z);
-    dZhCont = @(t,x,z) -a * d * cos(b*x + c*t) .* sin(d*z);
+    dZhCont = @(t,x,z) -a * d * cos(b*x + c*t) .* sin(d*z) - 1;
     dXdXhCont = @(t,x,z) -a * b^2 * cos(b*x + c*t) .* cos(d*z);
     dZdZhCont = @(t,x,z) -a * d^2 * cos(b*x + c*t) .* cos(d*z);
     dXdZhCont = @(t,x,z) a * b * d * sin(b*x + c*t) .* sin(d*z);
