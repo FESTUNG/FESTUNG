@@ -44,8 +44,8 @@ problemData = problemData.fn_adaptMesh(problemData);
 %% Compute vertical velocity.
 u1DCont = @(x1,x2) problemData.u1DCont(problemData.tEnd, x1, x2);
 u2DCont = @(x1,x2) problemData.u2DCont(problemData.tEnd, x1, x2);
-problemData.globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.globJw = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrW, u2DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU & ~problemData.g.markE0TbdrCoupling, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJw = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrW & ~problemData.g.markE0TbdrCoupling, u2DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 [Q,~] = quadRule1D(problemData.qOrd); numQuad1D = length(Q);
 heightV0T1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), [4 3], 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), [1 2], 2);
@@ -72,6 +72,7 @@ end % for n
 problemData.tildeGlobP = problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{end, 1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
 
 problemData.cDiscRK{end, 3} = reshape( (problemData.globHQup) \ ( problemData.globJu{1} + problemData.globJw{2} + problemData.globKh + ...
+                                problemData.globJuCoupling{1} + problemData.globJwCoupling + ...
                                 (problemData.globHQavg + problemData.tildeGlobP) * reshape(problemData.cDiscRK{end, 2}.', [], 1) ), ...
                              problemData.N, problemData.g.numT ).';
 

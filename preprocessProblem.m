@@ -30,9 +30,9 @@ problemData.g.g1D.markV0TbdrRiv = problemData.generateMarkV0T1DbdrRiv(problemDat
 problemData.g.g1D.markV0TbdrRad = problemData.generateMarkV0T1DbdrRad(problemData.g.g1D);
 
 % prescribed horizontal velocity
-problemData.g.markE0TbdrU = problemData.g.markE0TbdrLand | problemData.g.markE0TbdrBot;
+problemData.g.markE0TbdrU = problemData.g.markE0TbdrLand | problemData.g.markE0TbdrBot | problemData.g.markE0TbdrCoupling;
 % prescribed vertical velocity
-problemData.g.markE0TbdrW = problemData.g.markE0TbdrBot;
+problemData.g.markE0TbdrW = problemData.g.markE0TbdrBot | problemData.g.markE0TbdrCoupling;
 % prescribed water height
 problemData.g.markE0TbdrH = problemData.g.markE0TbdrOS | problemData.g.markE0TbdrRiv;
 % prescribed diffusion
@@ -92,9 +92,10 @@ problemData.tildeHatPoffdiag = integrateRefEdgeTetraPhiIntPhiExtPhi1DExt([proble
 %% Computation of time-independent 1D matrices.
 problemData.barGlobM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.barHatM);
 
-%% Empty vectors for coupled problem
+%% Empty vectors and matrices for coupled problem
 problemData.globJuCoupling = { sparse(problemData.g.numT * problemData.N, 1), sparse(problemData.g.numT * problemData.N, 1) };
 problemData.globJwCoupling = sparse(problemData.g.numT * problemData.N, 1);
 problemData.globJuuCoupling = sparse(problemData.g.numT * problemData.N, 1);
 problemData.globJuwCoupling = sparse(problemData.g.numT * problemData.N, 1);
+problemData.globSCoupling = sparse(problemData.g.numT * problemData.N, problemData.g.numT * problemData.N);
 end % function
