@@ -7,21 +7,38 @@
 % numElem = 3 * 2.^(0:6)' * [1, 1];
 % numSteps = ones(size(numElem,1),1);
 
-problem = 'sweVert';
+% problem = 'sweVert';
+% p = [0; 1; 2];
+% testcase = 'coupling';
+% tEnd = 0.1;
+% level = 0:3;
+% numElem = 2.^level(:) * [2, 1];
+% numSteps = { 10 * 2.^level(:); 40 * 2.^level(:); 160 * 2.^level(:) };
+
+problem = 'darcyVert_sweVert';
+% problem = 'darcyVert';
 p = [0; 1; 2];
+testcase = 'coupling';
+tEnd = 0.1;
+level = 0:5;
+numElem = 2.^level(:) * [2, 1];
+numSteps = { 1 * 2.^level(:); 4 * 2.^level(:); 16 * 2.^level(:) };
+
+% problem = 'sweVert';
+% p = [0; 1; 2];
 % testcase = 'convergence';
 % tEnd = 2;
 % nLevel = 3;
 % numElem = 2.^(0:nLevel-1)' * [2, 1];
 % numSteps = { 2.^(0:nLevel-1)' * 5400; 2.^(0:nLevel-1)' * 10800; 2.^(0:nLevel-1)' * 43200 };
 % numSteps = cellfun(@(c) max(tEnd/86400 * c, 1), numSteps, 'UniformOutput', false);
-testcase = 'convergence';
-tEnd = 0.1;
-level = 0:6;
+% testcase = 'convergence';
+% tEnd = 0.1;
+% level = 0:6;
 % numElem = [16, 16; 24, 24; 36, 36];
 % numSteps = [100; 400; 1600] / 10;
-numElem = 2.^level(:) * [2, 1];
-numSteps = { 10 * 2.^level(:); 40 * 2.^level(:); 160 * 2.^level(:) };
+% numElem = 2.^level(:) * [2, 1];
+% numSteps = { 10 * 2.^level(:); 40 * 2.^level(:); 160 * 2.^level(:) };
 % testcase = 'convergence3';
 % numElem = 3 * 2.^(0:6)' * [1, 1];
 % numSteps = ones(size(numElem,1),1);

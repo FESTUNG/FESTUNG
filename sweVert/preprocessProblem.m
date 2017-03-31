@@ -19,6 +19,7 @@ problemData.g.markE0TbdrLand = problemData.generateMarkE0TbdrLand(problemData.g)
 problemData.g.markE0TbdrOS = problemData.generateMarkE0TbdrOS(problemData.g);
 problemData.g.markE0TbdrRiv = problemData.generateMarkE0TbdrRiv(problemData.g);
 problemData.g.markE0TbdrRad = problemData.generateMarkE0TbdrRad(problemData.g);
+problemData.g.markE0TbdrCoupling = problemData.generateMarkE0TbdrCoupling(problemData.g);
 
 % [barK x 2] mark local vertices that are interior or have a certain boundary type
 problemData.g.g1D.markV0Tint = problemData.generateMarkV0T1Dint(problemData.g.g1D);
@@ -90,4 +91,10 @@ problemData.tildeHatPoffdiag = integrateRefEdgeTetraPhiIntPhiExtPhi1DExt([proble
 
 %% Computation of time-independent 1D matrices.
 problemData.barGlobM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.barHatM);
+
+%% Empty vectors for coupled problem
+problemData.globJuCoupling = { sparse(problemData.g.numT * problemData.N, 1), sparse(problemData.g.numT * problemData.N, 1) };
+problemData.globJwCoupling = sparse(problemData.g.numT * problemData.N, 1);
+problemData.globJuuCoupling = sparse(problemData.g.numT * problemData.N, 1);
+problemData.globJuwCoupling = sparse(problemData.g.numT * problemData.N, 1);
 end % function

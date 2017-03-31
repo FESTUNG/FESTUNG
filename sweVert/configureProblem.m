@@ -5,7 +5,7 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'convergence2');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [32, 16]);
+problemData = setdefault(problemData, 'numElem', [4, 2]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -18,8 +18,8 @@ problemData = setdefault(problemData, 't0', 0);  % start time
 problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
 problemData = setdefault(problemData, 'numSteps', 100);  % number of time steps
 
-% Order of Runge-Kutta methode
-problemData = setdefault(problemData, 'ordRK', 1);%max(problemData.p + 1, 3));
+% Order of Runge-Kutta method
+problemData = setdefault(problemData, 'ordRK', 1);
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
@@ -31,10 +31,11 @@ problemData = setdefault(problemData, 'outputTypes', { 'vtk', 'tec' });  % Type 
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 5, 'Polynomial order must be zero to five.')
+assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge-Kutta method must be one to three.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
-[problemData, domainWidth, xi0Cont, zBotCont, idLand, idOS, idRiv, idRad] = execin('sweVert/getTestcase', problemData, problemData.testcase);
+[problemData, domainWidth, xi0Cont, zBotCont, idLand, idOS, idRiv, idRad, idCoupling] = execin([problemData.problemName filesep 'getTestcase'], problemData, problemData.testcase);
 problemData.h0Cont = @(x1) problemData.hCont(problemData.t0, x1);
 problemData.u10Cont = @(x1,x2) problemData.u1Cont(problemData.t0, x1, x2);
 generateX = @(numElem) (0:numElem(1)) * domainWidth / numElem(1);
@@ -49,12 +50,13 @@ problemData.generateGrid1D = @(numElem, g2D) generateGridData1D(generateX(numEle
 checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1;
-problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
 problemData.generateMarkE0TbdrLand = @(g) checkMultipleIds(g.idE0T, idLand);
 problemData.generateMarkE0TbdrOS = @(g) checkMultipleIds(g.idE0T, idOS);
 problemData.generateMarkE0TbdrRiv = @(g) checkMultipleIds(g.idE0T, idRiv);
 problemData.generateMarkE0TbdrRad = @(g) checkMultipleIds(g.idE0T, idRad);
+problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, idCoupling);
+problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1 & ~problemData.generateMarkE0TbdrCoupling(g);
+problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
 
 problemData.generateMarkV0T1Dint = @(g) g.idV0T == 0;
 problemData.generateMarkV0T1DbdrLand = @(g) checkMultipleIds(g.idV0T, idLand);

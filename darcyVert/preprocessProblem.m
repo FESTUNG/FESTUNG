@@ -13,6 +13,7 @@ problemData.tau = (problemData.tEnd - problemData.t0) / problemData.numSteps;  %
 problemData.g.markE0Tint = problemData.generateMarkE0Tint(problemData.g); 
 problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
 problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
+problemData.g.markE0TbdrCoupling = problemData.generateMarkE0TbdrCoupling(problemData.g);
 
 %% Configuration output.
 fprintf('-------------------------------------------------------------------------------------------\n');
@@ -50,4 +51,8 @@ if ~problemData.isStationary
   problemData.sysW = [ sparse(2 * problemData.g.numT * problemData.N, 3 * problemData.g.numT * problemData.N) ; ...
                        sparse(problemData.g.numT * problemData.N, 2 * problemData.g.numT * problemData.N), problemData.globM ];
 end % if
+
+%% Empty vectors for coupled problem
+problemData.globJcouple = { sparse(problemData.g.numT * problemData.N, 1), sparse(problemData.g.numT * problemData.N, 1) };
+problemData.globKcouple = sparse(problemData.g.numT * problemData.N, 1);
 end % function

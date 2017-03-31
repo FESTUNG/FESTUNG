@@ -1,38 +1,33 @@
-% Assembles two matrices containing integrals over edges of products of
-% a two-dimensional and a one-dimensional basis function with a component of the
-% edge normal.
+% Assembles a matrix containing integrals over edges of products of
+% a two-dimensional and a one-dimensional basis function.
 
 %===============================================================================
-%> @file assembleMatEdgeTetraPhiIntPhi1DIntNu.m
+%> @file assembleMatEdgeTetraPhiIntPhi1DInt.m
 %>
-%> @brief Assembles two matrices containing integrals over edges of 
-%>        products of a two-dimensional and a one-dimensional basis function 
-%>        with a component of the edge normal.
+%> @brief Assembles a matrix containing integrals over edges of 
+%>        products of a two-dimensional and a one-dimensional basis function.
 %===============================================================================
 %>
-%> @brief Assembles two matrices containing integrals over edges of 
-%>        products of a two-dimensional and a one-dimensional basis function 
-%>        with a component of the edge normal.
+%> @brief Assembles a matrix containing integrals over edges of 
+%>        products of a two-dimensional and a one-dimensional basis function.
 %>
-%> The matrices @f$\mathsf{{Q}}^{m,\mathrm{diag}} \in 
-%>      \mathbb{R}^{KN\times \overline{K}\overline{N}}@f$ are defined as 
+%> The matrix @f$\mathsf{{Q}}^{\mathrm{diag}} \in 
+%>      \mathbb{R}^{KN\times \overline{K}\overline{N}}@f$ is defined as 
 %> @f[
-%> [\mathsf{{Q}}^{m,\mathrm{diag}}]_{(k-1)N+i,(\overline{k}-1)\overline{N}+j} = 
+%> [\mathsf{{Q}}^{\mathrm{diag}}]_{(k-1)N+i,(\overline{k}-1)\overline{N}+j} = 
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_\Omega}
-%>  \nu_{kn}^m  \int_{E_{kn}} \varphi_{ki} \phi_{\overline{k}j} \mathrm{d}s \,.
+%>   \int_{E_{kn}} \varphi_{ki} \phi_{\overline{k}j} \mathrm{d}s \,.
 %> @f]
-%> with @f$\nu_{kn}@f$ the @f$m@f$-th component (@f$m\in\{1,2\}@f$) of the edge
-%> normal.
 %> To allow for vectorization, the assembly is reformulated as
-%> \mathsf{{Q}}^{m,\mathrm{diag}} = \sum_{n=1}^4
+%> \mathsf{{Q}}^{\mathrm{diag}} = \sum_{n=1}^4
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\Omega} &   & \\
 %>     & ~\ddots~ & \\
 %>     &          & \delta_{E_{Kn}\in\mathcal{E}_\Omega}
 %>   \end{bmatrix} \circ \begin{bmatrix}
-%>     \nu^m_{1n} | E_{1n} | &   & \\
+%>     | E_{1n} | &   & \\
 %>     & ~\ddots~ & \\
-%>     &          & \nu^m_{Kn} | E_{Kn} |
+%>     &          & | E_{Kn} |
 %>   \end{bmatrix} \otimes [\hat{\mathsf{Q}}^\mathrm{diag}]_{:,:,n}\;,
 %> @f]
 %> where @f$\delta_{E_{kn}\in\mathcal{E}_\Omega} denotes the Kronecker delta, 
@@ -65,7 +60,10 @@
 %>                    @f$\hat{\mathsf{Q}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgeTetraPhiIntPhi1DInt()</code>.
 %>                    @f$[N \times N \times 4]@f$
-%> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
+%> @param coefE0T     (optional) Coefficient to be applied to each edge
+%>                    integral. Defaults to <code>g2D.areaE0T</code>
+%>                    @f$[K\times 4]@f$
+%> @retval ret        The assembled matrix @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
@@ -87,15 +85,14 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgeTetraPhiIntPhi1DIntNu(g2D, g1D, markE0T, refEdgePhiIntPhi1DInt)
+function ret = assembleMatEdgeTetraPhiIntPhi1DInt(g2D, g1D, markE0T, refEdgePhiIntPhi1DInt, coefE0T)
+if nargin < 5
+  coefE0T = g2D.areaE0T;
+end % if
 K = g2D.numT; barK = g1D.numT;
 [N, barN, ~] = size(refEdgePhiIntPhi1DInt);
-ret = { sparse(K*N, barK*barN), sparse(K*N, barK*barN) };
+ret = sparse(K*N, barK*barN);
 for n = 1 : 4
-  areaE0Tint = markE0T(:,n) .* g2D.areaE0T(:,n);
-  for m = 1 : 2
-    areaNuE0Tint = areaE0Tint .* g2D.nuE0T(:,n,m);
-    ret{m} = ret{m} + kron(bsxfun(@times, g1D.markT2DT, areaNuE0Tint), refEdgePhiIntPhi1DInt(:,:,n));
-  end % for m
+  ret = ret + kron(bsxfun(@times, g1D.markT2DT, markE0T(:,n) .* coefE0T(:,n)), refEdgePhiIntPhi1DInt(:,:,n));
 end  % for n
 end  % function

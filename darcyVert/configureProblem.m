@@ -37,10 +37,78 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
 switch problemData.testcase
+  case 'coupling'
+    % width and height of computational domain
+    domainWidth = [0, 100];
+    domainHeight = [-2, 0];
+    idBdrD = [1, 2, 4]; idBdrN = -1; idBdrCoupling = 3;
+    % Analytical solution
+    a = 1;
+    b = 0.01;
+    c = 1;
+    d = 0.01;
+    k = 1;
+    problemData.hCont = @(t,x,z) a * cos(b*x + c*t) .* cos(d*z);
+    problemData.q1Cont = @(t,x,z) a * b * sin(b*x + c*t) .* cos(d*z);
+    problemData.q2Cont = @(t,x,z) a * d * cos(b*x + c*t) .* sin(d*z);
+    % Diffusion matrix
+    problemData.KCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {k, 0; 0, k}, 'UniformOutput', false);
+    % Derivatives
+    dThCont = @(t,x,z) -a * c * sin(b*x + c*t) .* cos(d*z);
+    dXhCont = @(t,x,z) -a * b * sin(b*x + c*t) .* cos(d*z);
+    dZhCont = @(t,x,z) -a * d * cos(b*x + c*t) .* sin(d*z);
+    dXdXhCont = @(t,x,z) -a * b^2 * cos(b*x + c*t) .* cos(d*z);
+    dZdZhCont = @(t,x,z) -a * d^2 * cos(b*x + c*t) .* cos(d*z);
+    dXdZhCont = @(t,x,z) a * b * d * sin(b*x + c*t) .* sin(d*z);
+    dXZKCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
+    % Boundary conditions
+    problemData.hDCont = problemData.hCont;
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    % Right hand side
+    problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
+                          dXZKCont{1,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{1,1}(t,x,z) .* dXdXhCont(t,x,z) - ...
+                          dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
+                        
+  case 'coupling2'
+    % width and height of computational domain
+    domainWidth = [0, 100];
+    domainHeight = [0, 2];
+    idBdrD = [1, 2, 4]; idBdrN = -1; idBdrCoupling = 3;
+    % Analytical solution
+    omega = 0.01;
+    problemData.hCont = @(t,x,z) sin(omega * (t+x)) .* sin(omega * (t+z));
+    problemData.q1Cont = @(t,x,z) -omega * cos(omega * (t+x)) .* sin(omega * (t+z));
+    problemData.q2Cont = @(t,x,z) -omega * sin(omega * (t+x)) .* cos(omega * (t+z));
+    % Diffusion matrix
+    problemData.KCont = { @(t,x,z) exp(z/5) , @(t,x,z) 0.5 * ones(size(x)) ; ...
+                          @(t,x,z) 1/3 * ones(size(x)), @(t,x,z) exp(x/5) };
+    % Derivatives
+    dThCont = @(t,x,z) omega * cos(omega * (t+x)) .* sin(omega * (t+z)) + omega * sin(omega * (t+x)) .* cos(omega * (t+z));
+    dXhCont = @(t,x,z) omega * cos(omega * (t+x)) .* sin(omega * (t+z));
+    dZhCont = @(t,x,z) omega * sin(omega * (t+x)) .* cos(omega * (t+z));
+    dXdXhCont = @(t,x,z) -omega^2 * sin(omega * (t+x)) .* sin(omega * (t+z));
+    dZdZhCont = @(t,x,z) -omega^2 * sin(omega * (t+x)) .* sin(omega * (t+z));
+    dXdZhCont = @(t,x,z) omega * cos(omega * (t+x)) .* cos(omega * (t+z));
+    dXZKCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
+    % Boundary conditions
+    problemData.hDCont = problemData.hCont;
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    % Right hand side
+    problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
+                          dXZKCont{1,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{1,1}(t,x,z) .* dXdXhCont(t,x,z) - ...
+                          dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
+                        
+  
   case 'convergence'
     % width and height of computational domain
-    domainWidth = 10;
-    domainHeight = 10;
+    domainWidth = [0, 10];
+    domainHeight = [0, 10];
+    idBdrD = [1, 2, 3, 4]; idBdrN = -1; idBdrCoupling = -1;
     % Analytical solution
     problemData.hCont = @(t,x,z) cos(x + t) .* cos(z + t);
     problemData.q1Cont = @(t,x,z) sin(x + t) .* cos(z + t);
@@ -69,8 +137,9 @@ switch problemData.testcase
                         
   case 'convergence2'
     % width and height of computational domain
-    domainWidth = 1;
-    domainHeight = 1;
+    domainWidth = [0, 1];
+    domainHeight = [0, 1];
+    idBdrD = [1, 2, 3, 4]; idBdrN = -1; idBdrCoupling = -1;
     % Analytical solution
     problemData.hCont = @(t,x,z) cos(7 * x) .* cos(7 * z);
     problemData.q1Cont = @(t,x,z) 7 * sin(x) .* cos(z);
@@ -95,42 +164,16 @@ switch problemData.testcase
                           dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
                           dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
                           dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
-
-  case 'coupling'
-    % width and height of computational domain
-    domainWidth = 10;
-    domainHeight = 10;
-    S_0    = 1;
-    paramD = 0.01;
-    % Diffusion matrix
-    problemData.KCont = cell(2,2);
-    problemData.KCont{1,1} = @(t,x1,x2) x1-x1 + exp(x2/5) / S_0;
-    problemData.KCont{1,2} = @(t,x1,x2) x1-x1 + 0.5 / S_0;
-    problemData.KCont{2,1} = @(t,x1,x2) x2-x2 + 1/3 / S_0;
-    problemData.KCont{2,2} = @(t,x1,x2) x2-x2 + exp(x1/5) / S_0;
-    % Analytical solution
-    problemData.hCont = @(t,x1,x2) sin(paramD * (t+x1)) .* sin(paramD * (t+x2));
-    problemData.q1Cont = @(t,x1,x2) -paramD * cos(paramD * (t+x1)) .* sin(paramD * (t+x2));
-    problemData.q2Cont = @(t,x1,x2) -paramD * sin(paramD * (t+x1)) .* cos(paramD * (t+x2));
-    % Boundary conditions
-    problemData.gNCont = @(t,x1,x2) (2 * (x1 > 1) - 1) .* ( problemData.q1Cont(t,x1,x2) .* problemData.KCont{1,1}(t,x1,x2) ...
-                           + problemData.q2Cont(t,x1,x2) .* problemData.KCont{1,2}(t,x1,x2) );        % Neumann boundary condition
-    problemData.hDCont = problemData.hCont; % Dirichlet boundary condition
-    % Analytical right hand side
-    problemData.fCont = @(t,x1,x2) ( ...
-                        paramD^2 * problemData.hCont(t,x1,x2) .* ( problemData.KCont{1,1}(t,x1,x2) + problemData.KCont{2,2}(t,x1,x2) ) - ...
-                        paramD^2 * cos(paramD * (t+x1)) .* cos(paramD * (t+x2)) + ...
-                        paramD * cos(paramD * (t+x1)) .* sin(paramD * (t+x2)) + ...
-                        paramD * sin(paramD * (t+x1)) .* cos(paramD * (t+x2)) ) / S_0;
 end % switch
 
 %% Domain and triangulation.
-problemData.generateGrid = @(numElem) domainRectTrap([0, domainWidth], [0, domainHeight], numElem);
+problemData.generateGrid = @(numElem) domainRectTrap(domainWidth, domainHeight, numElem);
 
 % Boundary parts (0 = int, 1 = bot, 2 = right, 3 = top, 4 = left)
 checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, -1);
-problemData.generateMarkE0TbdrD = @(g) checkMultipleIds(g.idE0T, [1 2 3 4]);
+problemData.generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idBdrN);
+problemData.generateMarkE0TbdrD = @(g) checkMultipleIds(g.idE0T, idBdrD);
+problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, idBdrCoupling);
 end % function

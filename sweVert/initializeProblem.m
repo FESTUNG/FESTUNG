@@ -20,15 +20,10 @@ problemData.globLzBot = kron(dXzBot, eye(problemData.N, 1));
 problemData.cDiscRK{1, 2} = projectFuncCont2DataDiscTetra(problemData.g, problemData.u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
 problemData.cDiscRK{1, 3} = zeros(size(problemData.cDiscRK{1, 2}));
 
-%% Error computation and visualization of inital condition.
+%% Initial error computation.
 if problemData.isVisGrid, visualizeGridTetra(problemData.g); end
 
 fprintf('L2 errors of h, u1 w.r.t. the initial condition: %g, %g\n', ...
   computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{1, 1}, problemData.h0Cont, problemData.qOrd+1, problemData.basesOnQuad1D), ...
   computeL2ErrorTetra(problemData.g, problemData.cDiscRK{1, 2}, problemData.u10Cont, problemData.qOrd+1, problemData.basesOnQuad2D));
-
-if problemData.isVisSol
-  cLagr = cellfun(@(c) projectDataDisc2DataLagrTensorProduct(c), problemData.cDiscRK(1, 2:3), 'UniformOutput', false);
-  visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, 0, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
-end % if
 end % function

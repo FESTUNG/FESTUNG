@@ -32,7 +32,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -52,11 +52,12 @@
 %
 function problemData = outputStep(problemData, nStep)
 %% Visualization
-if mod(nStep, problemData.outputFrequency) == 0
+if mod(nStep-1, problemData.outputFrequency) == 0
   if problemData.isVisSol
-    cLagr = cellfun(@(c) projectDataDisc2DataLagrTensorProduct(c), problemData.cDiscRK(end, 2:3), 'UniformOutput', false);
-    visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nStep, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
-  elseif nStep > problemData.outputFrequency
+    cLagr = { projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{1, 2}), ...
+              projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 3}) };
+    visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nStep-1, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+  elseif nStep-1 > problemData.outputFrequency
     fprintf(repmat('\b', 1, 11));
   end % if
   fprintf('%3.0f %% done\n', nStep / problemData.numSteps * 100);

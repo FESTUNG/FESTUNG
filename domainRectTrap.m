@@ -146,9 +146,8 @@ g.V0E(g.numElem(1) * (g.numElem(2) + 1) + 1 : g.numE - g.numElem(2), :) = g.V0T(
 g.V0E(g.numE - g.numElem(2) + 1 : end, :) = g.V0T(g.numElem(1) : g.numElem(1) : end, [2 3]); % right edges
 %% Mapping of neighbouring edges (markE0TE0T)
 g.markE0TE0T = cell(1,4);
-mapE0E = [2 1 4 3];
 for n = 1 : 4
-  g.markE0TE0T{n} = sparse(bsxfun(@eq, g.E0T(:,n), g.E0T(:,mapE0E(n))'));
+  g.markE0TE0T{n} = sparse(bsxfun(@eq, g.E0T(:, n), g.E0T(:, mapLocalEdgeTetra(n))'));
 end % for
 %% Edge IDs (idE, idE0T)
 g.idE = zeros(g.numE, 1);

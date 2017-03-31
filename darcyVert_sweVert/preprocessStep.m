@@ -51,6 +51,33 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
-% First step in each loop iteration.
+function problemData = preprocessStep(problemData, nStep)
+t = nStep * problemData.darcyData.tau;
+
+% Reset water height for coupling
+problemData.hSWE = zeros(size(problemData.sweData.cDiscRK{1, 1}));
+
+% Coupling term for vertical velocity component
+K = problemData.darcyData.g.numT;
+N = problemData.darcyData.N;
+KDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.darcyData.g, @(x1,x2) c(t,x1,x2), problemData.darcyData.N, problemData.darcyData.qOrd, ...
+                       problemData.darcyData.globM, problemData.darcyData.basesOnQuad), problemData.darcyData.KCont, 'UniformOutput', false);
+                     
+% globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+%                     problemData.sweData.hatRoffdiag, KDisc{1,1});
+% globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+%                     problemData.sweData.hatRoffdiag, KDisc{1,2});
+% 
+% problemData.sweData.globJuCoupling = { globRcouple1{1} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{1} * problemData.darcyData.sysY(K*N+1 : 2*K*N), ...
+%                                        globRcouple1{2} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N) };
+                                     
+globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{2,1});
+globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{2,2});
+                  
+problemData.sweData.globJwCoupling = globRcouple1{2} * problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N);
+
+% globRcouple1 = assembleMatEdgeTetraPhiIntPhiIntFuncDiscExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, problemData.hatS, KDisc{1,1}, reshape(problemData.darcyData.sysY(1 : K*N), N, K).');
+% globRcouple2 = assembleMatEdgeTetraPhiIntPhiIntFuncDiscExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, problemData.hatS, KDisc{1,2}, reshape(problemData.darcyData.sysY(K*N+1 : 2*K*N), N, K).');
 end % function
