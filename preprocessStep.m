@@ -19,8 +19,8 @@ problemData.globRD = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g
                      problemData.g.markE0TbdrD, problemData.hatRdiag, KDisc);
 problemData.globJD = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
                      hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad);
-problemData.globKD = problemData.eta * assembleVecEdgeTetraPhiIntFuncCont(problemData.g, ...
-                     problemData.g.markE0TbdrD, hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad, ones(problemData.g.numT, 4));
+problemData.globKD = assembleVecEdgeTetraPhiIntFuncCont(problemData.g, problemData.g.markE0TbdrD, ...
+                     hDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad, ones(problemData.g.numT, 4));
                   
 %% Assembly of Neumann boundary contributions.
 gNCont = @(x1,x2) problemData.gNCont(t,x1,x2);
