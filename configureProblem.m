@@ -2,12 +2,12 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'convergence');
+problemData = setdefault(problemData, 'testcase', 'coupling');
 
 problemData.eta = 1; % penalty parameter (eta>0)
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [32, 16]);
+problemData = setdefault(problemData, 'numElem', [4, 2]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -25,7 +25,7 @@ problemData = setdefault(problemData, 'isStationary', false);
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
-problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
+problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
 problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep 'solution_darcy' ]); 
@@ -43,12 +43,12 @@ switch problemData.testcase
     domainHeight = [-2, 0];
     idBdrD = [1, 2, 4]; idBdrN = -1; idBdrCoupling = 3;
     % Analytical solution
-    a = 1;
-    b = 0.01;
-    c = 1;
-    d = 0.01;
+    a = 0.1;
+    b = 0.1;
+    c = 0.5;
+    d = 0.1;
     k = 1;
-    problemData.hCont = @(t,x,z) a * cos(b*x + c*t) .* cos(d*z);
+    problemData.hCont = @(t,x,z) a * cos(b*x + c*t) .* cos(d*z) + 3;
     problemData.q1Cont = @(t,x,z) a * b * sin(b*x + c*t) .* cos(d*z);
     problemData.q2Cont = @(t,x,z) a * d * cos(b*x + c*t) .* sin(d*z);
     % Diffusion matrix
