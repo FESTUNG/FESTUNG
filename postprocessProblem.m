@@ -19,7 +19,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -38,8 +38,10 @@
 %> @endparblock
 %
 function problemData = postprocessProblem(problemData)
+%% Adapt mesh to final solution.
 problemData = problemData.fn_adaptMesh(problemData);
 
+%% Compute vertical velocity.
 u1DCont = @(x1,x2) problemData.u1DCont(problemData.tEnd, x1, x2);
 u2DCont = @(x1,x2) problemData.u2DCont(problemData.tEnd, x1, x2);
 problemData.globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
@@ -51,8 +53,8 @@ heightV0T1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), [4 3], 2
 u1Q0E0Tint = cell(4,1); % cDisc{2} in quad points of edges
 u1Q0E0TE0T = cell(4,1); % cDisc{2} of neighboring element in quad points of edges
 for n = 1 : 4
-  u1Q0E0Tint{n} = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,n) * problemData.cDiscRK{1, 2}.', problemData.g.numT * numQuad1D, 1);
-  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,mapLocalEdgeTetra(n)) * problemData.cDiscRK{1, 2}.';
+  u1Q0E0Tint{n} = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,n) * problemData.cDiscRK{end, 2}.', problemData.g.numT * numQuad1D, 1);
+  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,mapLocalEdgeTetra(n)) * problemData.cDiscRK{end, 2}.';
   u1Q0E0TE0T{n} = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{n}.', problemData.g.numT * numQuad1D, 1);
 end % for nn
 
@@ -67,26 +69,34 @@ for n = 3 : 4
   problemData.globKh = problemData.globKh + problemData.globS{n} * hJmpLambdaE0T;
 end % for n
 
-problemData.tildeGlobP = problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{1, 1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
+problemData.tildeGlobP = problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{end, 1}, heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
 
-problemData.cDiscRK{1, 3} = reshape( (problemData.globHQup) \ ( problemData.globJu{1} + problemData.globJw{2} + problemData.globKh + ...
-                                (problemData.globHQavg + problemData.tildeGlobP) * reshape(problemData.cDiscRK{1, 2}.', [], 1) ), ...
+problemData.cDiscRK{end, 3} = reshape( (problemData.globHQup) \ ( problemData.globJu{1} + problemData.globJw{2} + problemData.globKh + ...
+                                (problemData.globHQavg + problemData.tildeGlobP) * reshape(problemData.cDiscRK{end, 2}.', [], 1) ), ...
                              problemData.N, problemData.g.numT ).';
 
+%% Evaluate errors (if analytical solution given).
 if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))
   htEndCont = @(x1) problemData.hCont(problemData.tEnd, x1);
   u1tEndCont = @(x1,x2) problemData.u1Cont(problemData.tEnd, x1, x2);
   u2tEndCont = @(x1,x2) problemData.u2Cont(problemData.tEnd, x1, x2);
 
-  problemData.error = [ computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{1, 1}, ...
+  problemData.error = [ computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{end, 1}, ...
                             htEndCont, problemData.qOrd + 1, problemData.basesOnQuad1D), ...
-                        computeL2ErrorTetra(problemData.g, problemData.cDiscRK{1, 2}, ...
+                        computeL2ErrorTetra(problemData.g, problemData.cDiscRK{end, 2}, ...
                             u1tEndCont, problemData.qOrd + 1, problemData.basesOnQuad2D), ...
-                        computeL2ErrorTetra(problemData.g, problemData.cDiscRK{1, 3}, ...
+                        computeL2ErrorTetra(problemData.g, problemData.cDiscRK{end, 3}, ...
                             u2tEndCont, problemData.qOrd + 1, problemData.basesOnQuad2D) ];
 
   fprintf('L2 errors of cDisc w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
 end % if
+
+%% Visualize final state.
 if problemData.isVisGrid, visualizeGridTetra(problemData.g); end
+
+if problemData.isVisSol
+  cLagr = { projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 2}), ...
+            projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 3}) };
+  visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, problemData.numSteps, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
 end % function
 

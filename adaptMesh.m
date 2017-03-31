@@ -46,7 +46,7 @@ if force || any(markModifiedV0T1D(:))
   % Determine smoothed height
   [Q,~] = quadRule1D(problemData.qOrd);
   problemData.heightV0T1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), [4 3], 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), [1 2], 2);
-  assert(isequal(hSmoothV0T1D, problemData.heightV0T1D));
+  assert(max(max(abs(hSmoothV0T1D - problemData.heightV0T1D))) < 1e-12, 'hSmootV0T1D and problemData.heightV0T1D must be the same');
   problemData.heightQ0T1D = problemData.heightV0T1D(:,1) * (1-Q) + problemData.heightV0T1D(:,2) * Q;
 end % if
 end % function

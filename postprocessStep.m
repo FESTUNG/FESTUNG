@@ -51,6 +51,5 @@
 %> @endparblock
 %
 function problemData = postprocessStep(problemData, nStep)
-problemData.cDiscRK(1, :) = problemData.cDiscRK(end, :);
 problemData.isFinished = nStep >= problemData.numSteps;
 end % function
