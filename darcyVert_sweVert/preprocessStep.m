@@ -63,21 +63,32 @@ N = problemData.darcyData.N;
 KDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.darcyData.g, @(x1,x2) c(t,x1,x2), problemData.darcyData.N, problemData.darcyData.qOrd, ...
                        problemData.darcyData.globM, problemData.darcyData.basesOnQuad), problemData.darcyData.KCont, 'UniformOutput', false);
                      
-% globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
-%                     problemData.sweData.hatRoffdiag, KDisc{1,1});
-% globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
-%                     problemData.sweData.hatRoffdiag, KDisc{1,2});
-% 
-% problemData.sweData.globJuCoupling = { globRcouple1{1} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{1} * problemData.darcyData.sysY(K*N+1 : 2*K*N), ...
-%                                        globRcouple1{2} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N) };
-                                     
-% globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
-%                     problemData.sweData.hatRoffdiag, KDisc{2,1});
-% globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
-%                     problemData.sweData.hatRoffdiag, KDisc{2,2});
-%                   
-% problemData.sweData.globJwCoupling = globRcouple1{2} * problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N);
+globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{1,1});
+globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{1,2});
 
-% globRcouple1 = assembleMatEdgeTetraPhiIntPhiIntFuncDiscExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, problemData.hatS, KDisc{1,1}, reshape(problemData.darcyData.sysY(1 : K*N), N, K).');
-% globRcouple2 = assembleMatEdgeTetraPhiIntPhiIntFuncDiscExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, problemData.hatS, KDisc{1,2}, reshape(problemData.darcyData.sysY(K*N+1 : 2*K*N), N, K).');
+problemData.sweData.globJuCoupling = { -(globRcouple1{1} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{1} * problemData.darcyData.sysY(K*N+1 : 2*K*N)), ...
+                                       -(globRcouple1{2} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N)) };
+                                     
+globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{2,1});
+globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{2,2});
+                  
+problemData.sweData.globJwCoupling = globRcouple1{2} * problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N);
+
+% t = (nStep-1) * problemData.sweData.tau;
+% 
+% u1DCont = @(x1,x2) problemData.sweData.u1DCont(t,x1,x2);
+% globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.sweData.g, problemData.sweData.g.markE0TbdrCoupling, u1DCont, problemData.sweData.N, problemData.sweData.qOrd, problemData.sweData.basesOnQuad2D);
+% problemData.sweData.globJuCoupling = globJu;
+% 
+% u2DCont = @(x1,x2) problemData.sweData.u2DCont(t,x1,x2);
+% globJw = assembleVecEdgeTetraPhiIntFuncContNu(problemData.sweData.g, problemData.sweData.g.markE0TbdrCoupling, u2DCont, problemData.sweData.N, problemData.sweData.qOrd, problemData.sweData.basesOnQuad2D);
+% problemData.sweData.globJwCoupling = globJw{2};
+
+globScouple1 = assembleMatEdgeTetraPhiIntPhiIntFuncDiscExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, problemData.hatS, KDisc{1,1}, reshape(problemData.darcyData.sysY(1 : K*N), N, K).');
+globScouple2 = assembleMatEdgeTetraPhiIntPhiIntFuncDiscExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, problemData.hatS, KDisc{1,2}, reshape(problemData.darcyData.sysY(K*N+1 : 2*K*N), N, K).');
+problemData.sweData.globSCoupling = globScouple1{2} + globScouple2{2};
 end % function

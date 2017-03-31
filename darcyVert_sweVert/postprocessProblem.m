@@ -45,6 +45,37 @@
 %
 function problemData = postprocessProblem(problemData)
 problemData.darcyData = problemData.darcySteps.postprocessProblem(problemData.darcyData);
+
+% Coupling term for vertical velocity component
+t = problemData.tEnd;
+K = problemData.darcyData.g.numT;
+N = problemData.darcyData.N;
+KDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.darcyData.g, @(x1,x2) c(t,x1,x2), problemData.darcyData.N, problemData.darcyData.qOrd, ...
+                       problemData.darcyData.globM, problemData.darcyData.basesOnQuad), problemData.darcyData.KCont, 'UniformOutput', false);
+                     
+globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{1,1});
+globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{1,2});
+
+problemData.sweData.globJuCoupling = { -(globRcouple1{1} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{1} * problemData.darcyData.sysY(K*N+1 : 2*K*N)), ...
+                                       -(globRcouple1{2} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N)) };
+                                     
+globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{2,1});
+globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
+                    problemData.sweData.hatRoffdiag, KDisc{2,2});
+                  
+problemData.sweData.globJwCoupling = globRcouple1{2} * problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N);
+
+% u1DCont = @(x1,x2) problemData.sweData.u1DCont(t,x1,x2);
+% globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.sweData.g, problemData.sweData.g.markE0TbdrCoupling, u1DCont, problemData.sweData.N, problemData.sweData.qOrd, problemData.sweData.basesOnQuad2D);
+% problemData.sweData.globJuCoupling = globJu;
+% 
+% u2DCont = @(x1,x2) problemData.sweData.u2DCont(t,x1,x2);
+% globJw = assembleVecEdgeTetraPhiIntFuncContNu(problemData.sweData.g, problemData.sweData.g.markE0TbdrCoupling, u2DCont, problemData.sweData.N, problemData.sweData.qOrd, problemData.sweData.basesOnQuad2D);
+% problemData.sweData.globJwCoupling = globJw{2};
+
 problemData.sweData = problemData.sweSteps.postprocessProblem(problemData.sweData);
 problemData.error = [ problemData.sweData.error, problemData.darcyData.error ];
 end
