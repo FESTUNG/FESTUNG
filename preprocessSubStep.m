@@ -244,7 +244,7 @@ if pd.isCoupling
   pd.uHDisc = pd.cDisc(:,:,2);
   pd.vHDisc = pd.cDisc(:,:,3);
 end % if
-                             
+
 %% Non-linear terms in quadrature points of edges.
 for nn = 1 : 3
   if pd.isCoupling

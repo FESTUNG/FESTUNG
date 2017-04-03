@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'test2');
+pd = setdefault(pd, 'name', 'galv');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -90,7 +90,7 @@ pd = setdefault(pd, 'elevTol', 20); % maximum absolute value for elevation
 %% Visualization parameters
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
 pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
-pd = setdefault(pd, 'outputTypes', 'vtk'); % Output file type
+pd = setdefault(pd, 'outputTypes', cellstr(['vtk';'tec'])); % Output file type
 pd = setdefault(pd, 'outputList', {'elevation', 'velocity'}); % List of variables to visualize
 pd = setdefault(pd, 'isVisStations', false); % Output stations
 

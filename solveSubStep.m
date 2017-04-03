@@ -75,7 +75,7 @@ switch problemData.schemeType
   case 'explicit'
     sysA = [ sparse(K*N,K*max(N,3)); problemData.tidalTerms{1}; problemData.tidalTerms{2} ];
     cDiscDot = problemData.sysW \ (sysV - problemData.linearTerms * problemData.cDiscRK + sysA * hDisc);
-    
+
     % Apply slope limiting to time derivative
     for i = 1 : length(problemData.slopeLimList)
       switch problemData.slopeLimList{i}
