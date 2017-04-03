@@ -114,7 +114,7 @@ switch problemData.configSource
   case 'rotation'
     problemData.isSolutionAvailable = false;
     problemData = setdefault(problemData, 'hmax'      , 2^-6);  % maximum edge length of triangle
-    problemData = setdefault(problemData, 'numSteps'  , 100);  % number of time steps
+    problemData = setdefault(problemData, 'numSteps'  , 3124);  % number of time steps
     problemData = setdefault(problemData, 'tEnd'      , (problemData.numSteps/3142)*2*pi);  % end time
     problemData = configureRotation(problemData);
   case 'analytical'
@@ -158,10 +158,11 @@ problemData = setdefault(problemData, 'uHCont', @(t,x1,x2) problemData.hCont(t,x
 problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) problemData.hCont(t,x1,x2) .* problemData.vCont(t,x1,x2));
 
 %% Coefficients and boundary data (LeVeque's solid body rotation).
-G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
-cH0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
-                    (1-G(x1, x2, 0.5, 0.25)) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.0225) + ...
-                    0.25*(1+cos(pi*G(x1, x2, 0.25, 0.5))).*((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.0225);
+r = 0.0225 / sqrt(2);
+cH0Cont = @(x1, x2) ( ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= r) ...
+                    + ((x1 - 0.25).^2 + (x2 - 0.5).^2 <= r) ...
+                    + ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= r) ...
+                    + ((x1 - 0.75).^2 + (x2 - 0.5).^2 <= r) ) .* problemData.hCont(0,x1,x2);
                   
 for species = 1:problemData.numSpecies
   problemData.isVisSol{species}    = true; % visualization of solution
@@ -170,7 +171,7 @@ for species = 1:problemData.numSpecies
   
   problemData.outputFrequency{species} = 100; % no visualization of every timestep
   problemData.outputBasename{species}  = ['output' filesep 'solution_' num2str(species) '_' problemData.typeSlopeLim{species}]; % Basename of output files
-  problemData.outputTypes{species}     = cellstr('vtk'); % solution output file types
+  problemData.outputTypes{species}     = cellstr(['vtk';'tec']); % solution output file types
   
   %% Parameter check.
   assert(~problemData.isSlopeLim{species} || problemData.p > 0, 'Slope limiting only available for p > 0.')
@@ -181,12 +182,7 @@ for species = 1:problemData.numSpecies
 end % for
 
 problemData.reactions{1} = @(t,x1,x2,c,cH) 0*x1;
-problemData.reactions{2} = @(t,x1,x2,c,cH) 0*x1;
-problemData.reactions{3} = @(t,x1,x2,c,cH) 0*x1;
-
 problemData.fCont{1} = @(t,x1,x2) 0*x1;
-problemData.fCont{2} = @(t,x1,x2) 0*x1;
-problemData.fCont{3} = @(t,x1,x2) 0*x1;
 
 end % function
 
@@ -401,14 +397,14 @@ end % for
 % parameters (Notation as in paper)
 % I0 = 35; % muE / (m s^2)
 Vm = 2.0 / 86400; % 1 / s
-ks = 2.0E-7; % 0.2 mug / l = 0.2E-9 / (0.1m)^3 = 2.0E-7 kg / m^3
+ks = 2.0E-7; % 0.2 mug / l = 0.2E-9 kg / (0.1m)^3 = 2.0E-7 kg / m^3
 Rm = 0.5 / 86400; % 1 / s
 ep1 = 0.1 / 86400; % 1 / s
 ep2 = 0.2 / 86400; % 1 / s
 gamma = 0.7; % no unit
 lambda = 5.0E5; % 0.5 (0.1m)^3 / (mug) = 5.0 1E-4 / 1E-9 m^3 / kg
 h0 = 10; % m
-k = 0.1; % m
+k = 0.1; % 1 / m
 
 I = @(t,x1,x2) -h0 / (1 - exp(-k*h0))  * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
 f = @(t,x1,x2) 1 - exp(-I(t,x1,x2)); % saturating response

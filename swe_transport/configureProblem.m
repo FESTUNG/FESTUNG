@@ -75,7 +75,7 @@ problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3)); % as of 
 switch problemData.configSource
   case 'rotation'
     problemData = setdefault(problemData, 'hmax', 2^-6);
-    problemData = setdefault(problemData, 'numSteps', 100);
+    problemData = setdefault(problemData, 'numSteps', 3124);
     problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/3142)*2*pi);
   case 'biological'
     problemData.isSolutionAvailable = false;

@@ -217,21 +217,23 @@ function ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhi
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
 % Assemble matrices
-ret = sparse(K*N, K*N);
+ret = sparse(K*N, g.numT*N);
+retDiag = sparse(K*N, K*N);
 for nn = 1 : 3
   % Diagonal blocks
   for r = 1 : R
-    ret = ret + kron(spdiags(areaE0Tbdr{nn}(elem) .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
-  end
+    retDiag = retDiag + kron(spdiags(areaE0Tbdr{nn}(elem) .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
+  end % for
   % Off-diagonal blocks
   for np = 1 : 3
     RknTimesVal = sparse(K*N, N);
     for r = 1 : R
       RknTimesVal = RknTimesVal + kron(areaE0Tbdr{nn}(elem) .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
     end
-    ret = ret + kronVec(g.markE0TE0T{nn, np}(elem,elem), RknTimesVal);
+    ret = ret + kronVec(g.markE0TE0T{nn, np}(elem,:), RknTimesVal);
   end % for
 end % for
+ret(:,logical(kron(elem,true(N,1)))) = ret(:,logical(kron(elem,true(N,1)))) + retDiag;
 end % function
 
 function ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, elem)
