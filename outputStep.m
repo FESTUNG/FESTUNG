@@ -53,7 +53,7 @@
 function problemData = outputStep(problemData, nStep)
 %% visualization
 for species = 1:problemData.numSpecies
-  if problemData.isVisSol{species} && mod(nStep, problemData.outputFrequency{species}) == 0
+  if problemData.isVisSol{species} && (mod(nStep, problemData.outputFrequency{species}) == 0 || problemData.isFinished)
     cLagrange = projectDataDisc2DataLagr(problemData.concDisc{species});
     visualizeDataLagr(problemData.g, cLagrange, ['c_' num2str(species) '_h'], ...
                       problemData.outputBasename{species}, ceil(nStep / problemData.outputFrequency{species}), problemData.outputTypes{species});

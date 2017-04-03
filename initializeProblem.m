@@ -91,7 +91,6 @@ for species = 1:problemData.numSpecies
       
       if problemData.isMask(species)
         problemData.mask(:,species) = computeMask(minMaxV0T, problemData.maskTol(species), problemData.maskType);
-        problemData.numElem(species) = sum(problemData.mask(:,species));
       else
         problemData.mask(:,species) = true(problemData.K, 1);
       end % if
@@ -113,6 +112,8 @@ for species = 1:problemData.numSpecies
     problemData.mask(:,species) = true(problemData.K, 1);
   end % if
 end % for
+problemData.numElem = sum(problemData.mask, 1);
+
 %% Initialize time stepping.
 problemData.isFinished = false;
 fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', problemData.tEnd, problemData.tau, problemData.numSteps)
