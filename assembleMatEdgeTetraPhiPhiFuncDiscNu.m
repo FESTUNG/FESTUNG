@@ -159,14 +159,25 @@ function ret = assembleMatEdgeTetraPhiPhiFuncDiscMatrixNu(g, markE0T, refEdgePhi
 [K, N] = size(dataDisc{1,1});
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 for n = 1 : 4
+  areaE0T = 0.5 * g.areaE0T(:,n) .* markE0T(:,n);
   for r = 1 : 2
-    areaNuE0Tint = 0.5 * g.areaE0T(:,n) .* g.nuE0T(:,n,r) .* markE0T(:,n);
+    areaNuE0T = areaE0T .* g.nuE0T(:,n,r);
+    markAreaNuE0T = spdiags(areaNuE0T, 0, K, K) * g.markE0TE0T{n};
     for m = 1 : 2
+      % Off-diagonal blocks
+      RtildeT = zeros(K*N, N);
       for l = 1 : N
-        ret{m} = ret{m} + kron(spdiags(areaNuE0Tint .* dataDisc{r,m}(:,l), 0, K, K), ...
-                               refEdgePhiIntPhiIntPhiInt(:,:,l,n)) + ...
-                          kron(g.markE0TE0T{n} .* (areaNuE0Tint * dataDisc{r,m}(:,l)'), ...
-                               refEdgePhiIntPhiExtPhiExt(:,:,l,n));
+        RtildeT = RtildeT + kron(dataDisc{r,m}(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,n).');
+%         ret{m} = ret{m} + kron(spdiags(areaNuE0T .* dataDisc{r,m}(:,l), 0, K, K), ...
+%                                refEdgePhiIntPhiIntPhiInt(:,:,l,n)) + ...
+%                           kron(g.markE0TE0T{n} .* (areaNuE0T * dataDisc{r,m}(:,l)'), ...
+%                                refEdgePhiIntPhiExtPhiExt(:,:,l,n));
+      end % for l
+      ret{m} = ret{m} + kronVec(markAreaNuE0T.', RtildeT).';
+      % Diagonal blocks
+      for l = 1 : N
+        ret{m} = ret{m} + kron(spdiags(areaNuE0T .* dataDisc{r,m}(:,l), 0, K, K), ...
+                               refEdgePhiIntPhiIntPhiInt(:,:,l,n));
       end % for l
     end  % for m
   end % for r
@@ -177,13 +188,24 @@ function ret = assembleMatEdgeTetraPhiPhiFuncDiscVectorNu(g, markE0T, refEdgePhi
 [K, N] = size(dataDisc{1});
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 for n = 1 : 4
+  areaE0T = 0.5 * g.areaE0T(:,n) .* markE0T(:,n);
   for m = 1 : 2
-    areaNuE0Tint = 0.5 * g.areaE0T(:,n) .* g.nuE0T(:,n,m) .* markE0T(:,n);
+    areaNuE0T = areaE0T .* g.nuE0T(:,n,m);
+    markAreaNuE0T = spdiags(areaNuE0T, 0, K, K) * g.markE0TE0T{n};
+    % Off-diagonal blocks
+    RtildeT = zeros(K*N, N);
     for l = 1 : N
-      ret{m} = ret{m} + kron(spdiags(areaNuE0Tint .* dataDisc{m}(:,l), 0, K, K), ...
-                             refEdgePhiIntPhiIntPhiInt(:,:,l,n)) + ...
-                        kron(g.markE0TE0T{n} .* (areaNuE0Tint * dataDisc{m}(:,l)'), ...
-                             refEdgePhiIntPhiExtPhiExt(:,:,l,n));
+      RtildeT = RtildeT + kron(dataDisc{m}(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,n).');
+%       ret{m} = ret{m} + kron(spdiags(areaNuE0T .* dataDisc{m}(:,l), 0, K, K), ...
+%                              refEdgePhiIntPhiIntPhiInt(:,:,l,n)) + ...
+%                         kron(g.markE0TE0T{n} .* (areaNuE0T * dataDisc{m}(:,l)'), ...
+%                              refEdgePhiIntPhiExtPhiExt(:,:,l,n));
+    end % for l
+    ret{m} = ret{m} + kronVec(markAreaNuE0T.', RtildeT).';
+    % Diagonal blocks
+    for l = 1 : N
+      ret{m} = ret{m} + kron(spdiags(areaNuE0T .* dataDisc{m}(:,l), 0, K, K), ...
+                             refEdgePhiIntPhiIntPhiInt(:,:,l,n));
     end % for l
   end % for m
 end  % for n
@@ -193,13 +215,26 @@ function ret = assembleMatEdgeTetraPhiPhiFuncDiscScalarNu(g, markE0T, refEdgePhi
 [K, N] = size(dataDisc);
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 for n = 1 : 4
+  areaE0T = 0.5 * g.areaE0T(:,n) .* markE0T(:,n);
+  % Off-diagonal blocks
+  RtildeT = zeros(K*N, N);
+  for l = 1 : N
+    RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,n).');
+  end % for l
   for m = 1 : 2
-    areaNuE0Tint = 0.5 * g.areaE0T(:,n) .* g.nuE0T(:,n,m) .* markE0T(:,n);
+    areaNuE0T = areaE0T .* g.nuE0T(:,n,m);
+    markAreaNuE0T = spdiags(areaNuE0T, 0, K, K) * g.markE0TE0T{n};
+%     for l = 1 : N
+%       ret{m} = ret{m} + kron(spdiags(areaNuE0T .* dataDisc(:,l), 0, K, K), ...
+%                              refEdgePhiIntPhiIntPhiInt(:,:,l,n)) + ...
+%                         kron(g.markE0TE0T{n} .* (areaNuE0T * dataDisc(:,l)'), ...
+%                              refEdgePhiIntPhiExtPhiExt(:,:,l,n));
+%     end % for l
+    ret{m} = ret{m} + kronVec(markAreaNuE0T.', RtildeT).';
+    % Diagonal blocks
     for l = 1 : N
-      ret{m} = ret{m} + kron(spdiags(areaNuE0Tint .* dataDisc(:,l), 0, K, K), ...
-                             refEdgePhiIntPhiIntPhiInt(:,:,l,n)) + ...
-                        kron(g.markE0TE0T{n} .* (areaNuE0Tint * dataDisc(:,l)'), ...
-                             refEdgePhiIntPhiExtPhiExt(:,:,l,n));
+      ret{m} = ret{m} + kron(spdiags(areaNuE0T .* dataDisc(:,l), 0, K, K), ...
+                             refEdgePhiIntPhiIntPhiInt(:,:,l,n));
     end % for l
   end % for m
 end  % for n
