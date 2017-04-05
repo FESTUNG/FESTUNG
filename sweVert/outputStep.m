@@ -57,7 +57,7 @@ if mod(nStep-1, problemData.outputFrequency) == 0
     cLagr = { projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{1, 2}), ...
               projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 3}) };
     visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nStep-1, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
-  elseif nStep-1 > problemData.outputFrequency
+  elseif nStep > problemData.outputFrequency
     fprintf(repmat('\b', 1, 11));
   end % if
   fprintf('%3.0f %% done\n', nStep / problemData.numSteps * 100);

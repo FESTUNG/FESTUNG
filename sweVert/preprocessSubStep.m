@@ -67,7 +67,6 @@ problemData.globLh = reshape(projectFuncCont2DataDisc1D(problemData.g.g1D, @(x1)
 [Q,~] = quadRule1D(problemData.qOrd); numQuad1D = length(Q);
       
 %% Create lookup tables for solution on quadrature points
-              
 u1Q0E0Tint = cell(4,1); % cDisc{2} in quad points of edges
 u1Q0E0TE0T = cell(4,1); % cDisc{2} of neighboring element in quad points of edges
 for n = 1 : 4
@@ -100,23 +99,24 @@ problemData.globKu = zeros(problemData.g.numT * problemData.N, 1);
 problemData.globKh = zeros(problemData.g.numT * problemData.N, 1);
 problemData.barGlobKh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 for n = 3 : 4
-  hAvgE0T = 0.5 * problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,5-n) + problemData.g.g1D.markV0TV0T{5-n} * problemData.hV0T1D(:,5-mapLocalEdgeTetra(n)) );
-  hJmpE0T = problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,5-n) - problemData.g.g1D.markV0TV0T{5-n} * problemData.hV0T1D(:,5-mapLocalEdgeTetra(n)) );
+  nn1D = 5 - n; np1D = 5 - mapLocalEdgeTetra(n);
+  hAvgE0T = 0.5 * problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,nn1D) + problemData.g.g1D.markV0TV0T{nn1D} * problemData.hV0T1D(:,np1D) );
+  hJmpE0T = problemData.g.g1D.markT2DT * ( ( problemData.hV0T1D(:,nn1D) - problemData.g.g1D.markV0TV0T{nn1D} * problemData.hV0T1D(:,np1D) ) ./ problemData.hSmoothV0T1D(:,nn1D) );
   u1AvgQ0E0T = 0.5 * (u1Q0E0Tint{n} + u1Q0E0TE0T{n});
   lambdaQ0E0T = 0.75 * abs(u1AvgQ0E0T) + 0.25 * sqrt( u1AvgQ0E0T .* u1AvgQ0E0T + 4 * problemData.gConst * kron(hAvgE0T, ones(numQuad1D,1)) );
   hJmpLambdaE0T = lambdaQ0E0T .* kron(hJmpE0T, ones(numQuad1D,1));
     
   problemData.globKu = problemData.globKu + problemData.globS{n} * ( lambdaQ0E0T .* (u1Q0E0Tint{n} - u1Q0E0TE0T{n}) );
   problemData.globKh = problemData.globKh + problemData.globS{n} * hJmpLambdaE0T;
-  problemData.barGlobKh = problemData.barGlobKh + (problemData.barGlobS{n} * hJmpLambdaE0T) ./ kron(problemData.heightV0T1D(:, 5-n), ones(problemData.barN, 1));
+  problemData.barGlobKh = problemData.barGlobKh + problemData.barGlobS{n} * hJmpLambdaE0T;
 end % for n
 
 % Interior edge flux in continuity and free surface equation
-problemData.tildeGlobP = problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.heightV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
-problemData.barGlobP = problemData.fn_assembleMatEdge1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, problemData.heightV0T1D, problemData.g.g1D.markV0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
+problemData.tildeGlobP = problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.hSmoothV0T1D, problemData.g.markE0Tint, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
+problemData.barGlobP = problemData.fn_assembleMatEdge1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
 
 % Advection element integral in free surface equation
-problemData.barGlobG = problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight(barU1Disc, problemData.heightQ0T1D, problemData.barHatG);
+problemData.barGlobG = problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight(barU1Disc, problemData.hSmoothQ0T1D, problemData.barHatG);
 
 %% Assembly of boundary contributions.
 hDCont = @(x1) problemData.hDCont(t,x1);
@@ -147,7 +147,7 @@ problemData.globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problem
 problemData.globJw = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrW & ~problemData.g.markE0TbdrCoupling, u2DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 % Boundary terms in free surface equation
-problemData.barGlobPbdr = problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.heightV0T1D, problemData.g.g1D.markV0Tbdr & ~problemData.g.g1D.markV0TbdrUH, problemData.barHatPdiag);
+problemData.barGlobPbdr = problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0Tbdr & ~problemData.g.g1D.markV0TbdrUH, problemData.barHatPdiag);
 problemData.barGlobJuh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 for n = 1 : 2
   markV0TbdrUH = problemData.g.g1D.markV0TbdrUH(:, n);
