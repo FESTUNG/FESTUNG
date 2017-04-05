@@ -5,7 +5,7 @@ problemData.isFinished = false;
 problemData.cDiscRK = cell(length(rungeKuttaSSP(problemData.ordRK, 0, 0)), 3);
 
 %% Initial height.
-problemData.cDiscRK{1, 1} = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.h0Cont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
+problemData.cDiscRK{end, 1} = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.h0Cont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
 
 %% Mesh adaptivity and assembly of time-independent global matrices.
 problemData = problemData.fn_adaptMesh(problemData, true);
@@ -17,13 +17,13 @@ dXzBot = problemData.g.g1D.markT2DT * ( problemData.gConst * (dZbot1D ./ dXbot1D
 problemData.globLzBot = kron(dXzBot, eye(problemData.N, 1));
 
 %% Initial velocities.
-problemData.cDiscRK{1, 2} = projectFuncCont2DataDiscTetra(problemData.g, problemData.u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
-problemData.cDiscRK{1, 3} = zeros(size(problemData.cDiscRK{1, 2}));
+problemData.cDiscRK{end, 2} = projectFuncCont2DataDiscTetra(problemData.g, problemData.u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
+problemData.cDiscRK{end, 3} = zeros(size(problemData.cDiscRK{1, 2}));
 
 %% Initial error computation.
 if problemData.isVisGrid, visualizeGridTetra(problemData.g); end
 
 fprintf('L2 errors of h, u1 w.r.t. the initial condition: %g, %g\n', ...
-  computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{1, 1}, problemData.h0Cont, problemData.qOrd+1, problemData.basesOnQuad1D), ...
-  computeL2ErrorTetra(problemData.g, problemData.cDiscRK{1, 2}, problemData.u10Cont, problemData.qOrd+1, problemData.basesOnQuad2D));
+  computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{end, 1}, problemData.h0Cont, problemData.qOrd+1, problemData.basesOnQuad1D), ...
+  computeL2ErrorTetra(problemData.g, problemData.cDiscRK{end, 2}, problemData.u10Cont, problemData.qOrd+1, problemData.basesOnQuad2D));
 end % function
