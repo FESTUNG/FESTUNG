@@ -2,10 +2,10 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'convergence2');
+problemData = setdefault(problemData, 'testcase', 'convergence');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [4, 2]);
+problemData = setdefault(problemData, 'numElem', [16, 8]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -24,10 +24,13 @@ problemData = setdefault(problemData, 'ordRK', 1);
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep 'solution_sweVert_' problemData.testcase ]); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk', 'tec' });  % Type of visualization files ('vtk, 'tec')
+
+% ID of coupling boundary
+problemData = setdefault(problemData, 'idCoupling', -1);
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 5, 'Polynomial order must be zero to five.')
@@ -35,12 +38,12 @@ assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge-Kutta m
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
-[problemData, domainWidth, xi0Cont, zBotCont, idLand, idOS, idRiv, idRad, idCoupling] = execin([problemData.problemName filesep 'getTestcase'], problemData, problemData.testcase);
+problemData = execin([problemData.problemName filesep 'getTestcase'], problemData, problemData.testcase);
 problemData.h0Cont = @(x1) problemData.hCont(problemData.t0, x1);
 problemData.u10Cont = @(x1,x2) problemData.u1Cont(problemData.t0, x1, x2);
-generateX = @(numElem) (0:numElem(1)) * domainWidth / numElem(1);
-generateZbot = @(numElem) zBotCont(generateX(numElem));
-generateXi0 = @(numElem) xi0Cont(generateX(numElem));
+generateX = @(numElem) (0:numElem(1)) * problemData.domainWidth / numElem(1);
+generateZbot = @(numElem) problemData.zBotCont(generateX(numElem));
+generateXi0 = @(numElem) problemData.xi0Cont(generateX(numElem));
 
 %% Domain and triangulation.
 problemData.generateGrid = @(numElem) domainRectTrap(generateX(numElem), [generateZbot(numElem); generateXi0(numElem)], numElem);
@@ -50,17 +53,17 @@ problemData.generateGrid1D = @(numElem, g2D) generateGridData1D(generateX(numEle
 checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrLand = @(g) checkMultipleIds(g.idE0T, idLand);
-problemData.generateMarkE0TbdrOS = @(g) checkMultipleIds(g.idE0T, idOS);
-problemData.generateMarkE0TbdrRiv = @(g) checkMultipleIds(g.idE0T, idRiv);
-problemData.generateMarkE0TbdrRad = @(g) checkMultipleIds(g.idE0T, idRad);
-problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, idCoupling);
+problemData.generateMarkE0TbdrLand = @(g) checkMultipleIds(g.idE0T, problemData.idLand);
+problemData.generateMarkE0TbdrOS = @(g) checkMultipleIds(g.idE0T, problemData.idOS);
+problemData.generateMarkE0TbdrRiv = @(g) checkMultipleIds(g.idE0T, problemData.idRiv);
+problemData.generateMarkE0TbdrRad = @(g) checkMultipleIds(g.idE0T, problemData.idRad);
+problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, problemData.idCoupling);
 problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1 & ~problemData.generateMarkE0TbdrCoupling(g);
 problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
 
 problemData.generateMarkV0T1Dint = @(g) g.idV0T == 0;
-problemData.generateMarkV0T1DbdrLand = @(g) checkMultipleIds(g.idV0T, idLand);
-problemData.generateMarkV0T1DbdrOS = @(g) checkMultipleIds(g.idV0T, idOS);
-problemData.generateMarkV0T1DbdrRiv = @(g) checkMultipleIds(g.idV0T, idRiv);
-problemData.generateMarkV0T1DbdrRad = @(g) checkMultipleIds(g.idV0T, idRad);
+problemData.generateMarkV0T1DbdrLand = @(g) checkMultipleIds(g.idV0T, problemData.idLand);
+problemData.generateMarkV0T1DbdrOS = @(g) checkMultipleIds(g.idV0T, problemData.idOS);
+problemData.generateMarkV0T1DbdrRiv = @(g) checkMultipleIds(g.idV0T, problemData.idRiv);
+problemData.generateMarkV0T1DbdrRad = @(g) checkMultipleIds(g.idV0T, problemData.idRad);
 end % function
