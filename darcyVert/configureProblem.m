@@ -41,14 +41,14 @@ switch problemData.testcase
     % width and height of computational domain
     domainWidth = [0, 100];
     domainHeight = [-5, 0];
-    idBdrD = [1, 2, 4]; idBdrN = -1; idBdrCoupling = 3;
+    idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
     % Analytical solution
-    a = 0.1;
-    b = 0.1;
+    a = 0.01;
+    b = 0.3;
     c = 0.5;
-    d = 0.1;
+    d = 2;
     k = 1;
-    problemData.hCont = @(t,x,z) a * cos(b*x + c*t) .* cos(d*z) - z + 5;
+    problemData.hCont = @(t,x,z) a * cos(b*x + c*t) .* cos(d*z) + 5 - z;
     problemData.q1Cont = @(t,x,z) a * b * sin(b*x + c*t) .* cos(d*z);
     problemData.q2Cont = @(t,x,z) a * d * cos(b*x + c*t) .* sin(d*z) + 1;
     % Diffusion matrix
@@ -70,45 +70,12 @@ switch problemData.testcase
                           dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
                           dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
                           dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
-                        
-  case 'coupling2'
-    % width and height of computational domain
-    domainWidth = [0, 100];
-    domainHeight = [0, 2];
-    idBdrD = [1, 2, 4]; idBdrN = -1; idBdrCoupling = 3;
-    % Analytical solution
-    omega = 0.01;
-    problemData.hCont = @(t,x,z) sin(omega * (t+x)) .* sin(omega * (t+z));
-    problemData.q1Cont = @(t,x,z) -omega * cos(omega * (t+x)) .* sin(omega * (t+z));
-    problemData.q2Cont = @(t,x,z) -omega * sin(omega * (t+x)) .* cos(omega * (t+z));
-    % Diffusion matrix
-    problemData.KCont = { @(t,x,z) exp(z/5) , @(t,x,z) 0.5 * ones(size(x)) ; ...
-                          @(t,x,z) 1/3 * ones(size(x)), @(t,x,z) exp(x/5) };
-    % Derivatives
-    dThCont = @(t,x,z) omega * cos(omega * (t+x)) .* sin(omega * (t+z)) + omega * sin(omega * (t+x)) .* cos(omega * (t+z));
-    dXhCont = @(t,x,z) omega * cos(omega * (t+x)) .* sin(omega * (t+z));
-    dZhCont = @(t,x,z) omega * sin(omega * (t+x)) .* cos(omega * (t+z));
-    dXdXhCont = @(t,x,z) -omega^2 * sin(omega * (t+x)) .* sin(omega * (t+z));
-    dZdZhCont = @(t,x,z) -omega^2 * sin(omega * (t+x)) .* sin(omega * (t+z));
-    dXdZhCont = @(t,x,z) omega * cos(omega * (t+x)) .* cos(omega * (t+z));
-    dXZKCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
-                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
-    % Boundary conditions
-    problemData.hDCont = problemData.hCont;
-    problemData.gNCont = @(t,x,z) zeros(size(x));
-    % Right hand side
-    problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
-                          dXZKCont{1,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{1,1}(t,x,z) .* dXdXhCont(t,x,z) - ...
-                          dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
-                          dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
-                          dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
-                        
-  
+                   
   case 'convergence'
     % width and height of computational domain
     domainWidth = [0, 10];
     domainHeight = [0, 10];
-    idBdrD = [1, 2, 3, 4]; idBdrN = -1; idBdrCoupling = -1;
+    idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
     % Analytical solution
     problemData.hCont = @(t,x,z) cos(x + t) .* cos(z + t);
     problemData.q1Cont = @(t,x,z) sin(x + t) .* cos(z + t);
@@ -139,7 +106,7 @@ switch problemData.testcase
     % width and height of computational domain
     domainWidth = [0, 1];
     domainHeight = [0, 1];
-    idBdrD = [1, 2, 3, 4]; idBdrN = -1; idBdrCoupling = -1;
+    idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
     % Analytical solution
     problemData.hCont = @(t,x,z) cos(7 * x) .* cos(7 * z);
     problemData.q1Cont = @(t,x,z) 7 * sin(x) .* cos(z);
@@ -166,6 +133,10 @@ switch problemData.testcase
                           dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
 end % switch
 
+problemData = setdefault(problemData, 'idNeumann', idNeumann);
+problemData = setdefault(problemData, 'idDirichlet', idDirichlet);
+problemData = setdefault(problemData, 'idCoupling', -1);
+
 %% Domain and triangulation.
 problemData.generateGrid = @(numElem) domainRectTrap(domainWidth, domainHeight, numElem);
 
@@ -173,7 +144,7 @@ problemData.generateGrid = @(numElem) domainRectTrap(domainWidth, domainHeight, 
 checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idBdrN);
-problemData.generateMarkE0TbdrD = @(g) checkMultipleIds(g.idE0T, idBdrD);
-problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, idBdrCoupling);
+problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, problemData.idCoupling);
+problemData.generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, problemData.idNeumann) & ~problemData.generateMarkE0TbdrCoupling(g);
+problemData.generateMarkE0TbdrD = @(g) checkMultipleIds(g.idE0T, problemData.idDirichlet) & ~problemData.generateMarkE0TbdrCoupling(g);
 end % function

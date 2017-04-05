@@ -51,6 +51,13 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
+% Name of testcase
+problemData = setdefault(problemData, 'testcase', 'coupling');
+
+% Enable coupling
+problemData = setdefault(problemData, 'isCouplingDarcy', true);
+problemData = setdefault(problemData, 'isCouplingSWE', true);
+
 % Number of elements in x- and y-direction
 problemData = setdefault(problemData, 'numElem', [4, 2]);
 
@@ -66,8 +73,17 @@ problemData = setdefault(problemData, 'tEnd', 0.01);  % end time
 problemData = setdefault(problemData, 'numSteps', 50);  % number of time steps
 problemData = setdefault(problemData, 'numSubSteps', 10); % number of free-flow steps per sub-surface step
 
-problemData.generateGrid = @(numElem) domainRectTrap([0 100], [0 2], numElem);
-problemData.generateGrid1D = @(numElem, g2D) generateGridData1D([0 100], 2, numElem, g2D);
+% Visualization settings
+problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
+problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
+problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
+
+couplingString = '_';
+if problemData.isCouplingDarcy, couplingString = [couplingString 'couplingDarcy']; end
+if problemData.isCouplingSWE, couplingString = [couplingString 'couplingSWE']; end
+
+problemData = setdefault(problemData, 'outputBasename', [problemData.testcase couplingString]); 
+problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
 
 %% Function handles for steps of the sub-problems
 problemData.darcySteps = getStepHandles('darcyVert');
@@ -76,26 +92,53 @@ problemData.sweSteps = getStepHandles('sweVert');
 %% Sub-surface problem
 problemData.darcyData = struct;
 problemData.darcyData.problemName = 'darcyVert';
-problemData.darcyData.testcase = 'coupling';
+problemData.darcyData.testcase = problemData.testcase;
+
 problemData.darcyData.numElem = problemData.numElem;
 problemData.darcyData.p = problemData.p;
 problemData.darcyData.qOrd = problemData.qOrd;
+
 problemData.darcyData.t0 = problemData.t0;
 problemData.darcyData.tEnd = problemData.tEnd;
 problemData.darcyData.numSteps = problemData.numSteps;
+
+if problemData.isCouplingDarcy
+  problemData.darcyData.idCoupling = 3;
+end % if
+
+problemData.darcyData.isVisGrid = problemData.isVisGrid;
+problemData.darcyData.isVisSol = problemData.isVisSol;
+problemData.darcyData.outputFrequency = problemData.outputFrequency;
+problemData.darcyData.outputBasename = ['output' filesep 'darcyVert_' problemData.outputBasename];
+problemData.darcyData.outputTypes = problemData.outputTypes;
 
 problemData.darcyData = problemData.darcySteps.configureProblem(problemData.darcyData);
 
 %% Free-flow problem
 problemData.sweData = struct;
 problemData.sweData.problemName = 'sweVert';
-problemData.sweData.testcase = 'coupling';
+problemData.sweData.testcase = problemData.testcase;
+
 problemData.sweData.numElem = problemData.numElem;
 problemData.sweData.p = problemData.p;
 problemData.sweData.qOrd = problemData.qOrd;
+
 problemData.sweData.t0 = problemData.t0;
 problemData.sweData.tEnd = problemData.tEnd;
 problemData.sweData.numSteps = problemData.numSteps * problemData.numSubSteps;
 
+if problemData.isCouplingSWE
+  problemData.sweData.idCoupling = 1;
+end % if
+
+problemData.sweData.isVisGrid = problemData.isVisGrid;
+problemData.sweData.isVisSol = problemData.isVisSol;
+problemData.sweData.outputFrequency = problemData.outputFrequency * problemData.numSubSteps;
+problemData.sweData.outputBasename = ['output' filesep 'sweVert_' problemData.outputBasename];
+problemData.sweData.outputTypes = problemData.outputTypes;
+
 problemData.sweData = problemData.sweSteps.configureProblem(problemData.sweData);
+
+%% Extract derived data
+problemData.generateGrid1D = problemData.sweData.generateGrid1D;
 end % function

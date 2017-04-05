@@ -8,19 +8,40 @@
 % numSteps = ones(size(numElem,1),1);
 
 % problem = 'sweVert';
-% p = [0; 1; 2];
-% testcase = 'coupling';
+% p = [0; 1; 2; 3];
+% testcase = 'convergence';
 % tEnd = 0.1;
+% level = 0:4;
+% isCoupling = false;
+% numElem = 2.^level(:) * [2, 1];
+% numSteps = { 10 * 2.^level(:); 40 * 2.^level(:); 160 * 2.^level(:); 640 * 2.^level(:) };
+
+% problem = 'sweVert';
+% p = [0; 1; 2];
+% testcase = 'convergence';
+% tEnd = 0.1;
+% numElem = [16,16;24,24;36,36];
+% numSteps = [100;400;1600];
+
+% problem = 'sweVert';
+% p = [0; 1];
+% testcase = 'utbest';
+% tEnd = 86.4;
 % level = 0:3;
 % numElem = 2.^level(:) * [2, 1];
-% numSteps = { 10 * 2.^level(:); 40 * 2.^level(:); 160 * 2.^level(:) };
+% dt = { [16, 4, 0.96, 0.24]; ...
+%        [0.96, 0.24, 0.06, 0.015]/32 };
+% numSteps = cellfun(@(c) ceil(tEnd ./ c), dt, 'UniformOutput', false);
+
+
+
 
 problem = 'darcyVert_sweVert';
 % problem = 'darcyVert';
 p = [0; 1; 2];
 testcase = 'coupling';
 tEnd = 0.1;
-level = 0:5;
+level = 0:4;
 numElem = 2.^level(:) * [2, 1];
 numSteps = { 1 * 2.^level(:); 4 * 4.^level(:); 16 * 8.^level(:) };
 
@@ -67,9 +88,13 @@ end % if
 
 err = {}; 
 conv = {};
-for ip = 1 : size(p, 1)
+for ip = 1 : length(p)
   for i = 1 : size(numElem, 1)
     pd = struct;
+    pd.isVisSol = false;
+    pd.isVisGrid = false;
+    pd.isCouplingDarcy = isCoupling;
+    pd.isCouplingSWE = isCoupling;
     pd.testcase = testcase;
     pd.tEnd = tEnd;
     pd.p = p(ip);
@@ -86,7 +111,6 @@ for ip = 1 : size(p, 1)
       conv{ip} = [zeros(1,n); ...
                   log(err{ip}(1:N-1,:) ./ err{ip}(2:N,:)) ./ ...
                     repmat(log(numElem(2:N,1) ./ numElem(1:N-1,1)), 1, n)];  %#ok<SAGROW>
-%                     repmat(log(numSteps(2:N) ./ numSteps(1:N-1)), 1, n)];  %#ok<SAGROW>
       disp(conv{ip}); 
     catch e
       warning('%s: %s', e.identifier, e.message);
@@ -111,3 +135,5 @@ for ip = 1 : length(err)
     fprintf('\n');
   end % for i
 end % for p
+
+save([problem '_' testcase '_' num2str(isCoupling) '.mat'], 'err', 'conv');
