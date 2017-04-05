@@ -58,8 +58,10 @@ function problemData = postprocessSubStep(problemData, nStep, nSubStep)
 problemData.sweData = problemData.sweSteps.postprocessStep(problemData.sweData, (nStep - 1) * problemData.numSubSteps + nSubStep);
 problemData.sweData = problemData.sweSteps.outputStep(problemData.sweData, (nStep - 1) * problemData.numSubSteps + nSubStep);
 
-% Integrate water height over time for coupling (using trapezoidal rule)
-problemData.hSWE = problemData.hSWE + 0.5 * problemData.sweData.tau * (problemData.sweData.cDiscRK{1, 1} + problemData.sweData.cDiscRK{end, 1});
+if problemData.isCouplingDarcy
+  % Integrate water height over time for coupling (using trapezoidal rule)
+  problemData.hSWE = problemData.hSWE + 0.5 * problemData.sweData.tau * (problemData.sweData.cDiscRK{1, 1} + problemData.sweData.cDiscRK{end, 1});
+end % if
 
 problemData.isSubSteppingFinished = nSubStep >= problemData.numSubSteps;
 end % function
