@@ -342,9 +342,9 @@ refElemDphiPerQuad = execin('swe/integrateRefElemDphiPerQuad', N, pd.basesOnQuad
 refEdgePhiIntPerQuad = execin('swe/integrateRefEdgePhiIntPerQuad', N, pd.basesOnQuad);
 
 %% L2 projections of time-independent algebraic coefficients.
-fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 3, refElemPhiLinPhiLin, basesOnQuadLin);
-pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 3, refElemPhiLinPhiLin, basesOnQuadLin);
-pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p+1, pd.refElemPhiPhi, pd.basesOnQuad);
+fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
+pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
+pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
 pd.zbLagr = projectDataDisc2DataLagr(pd.zbDiscLin);
 
 % Evaluate zb in each element's quadrature point
@@ -432,7 +432,7 @@ pd.globV = execin('swe/assembleMatEdgePhiPerQuad',pd.g, refEdgePhiIntPerQuad);
 
 % Bottom-friction terms
 if pd.isBottomFrictionVarying
-  bottomFrictionDisc = projectFuncCont2DataDisc(pd.g, pd.bottomFrictionCont, 2*pd.p+1, pd.refElemPhiPhi);
+  bottomFrictionDisc = projectFuncCont2DataDisc(pd.g, pd.bottomFrictionCont, 2*pd.p, pd.refElemPhiPhi);
   if pd.isBottomFrictionNonlinear
     refElemPhiPhiPerQuad = integrateRefElemPhiPhiPerQuad(N, pd.basesOnQuad);
     pd.globE = assembleMatElemPhiFuncDiscPerQuad(pd.g, refElemPhiPhiPerQuad, bottomFrictionDisc);
