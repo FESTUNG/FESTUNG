@@ -365,7 +365,7 @@ problemData = setdefault(problemData, 'vHCont', @(t,x1,x2) 0*x1);
 
 N = nchoosek(problemData.p+2, problemData.p);
 
-problemData.h0Disc = hotstartData.cDisc(:,:,1) - projectFuncCont2DataDisc(problemData.g, zbCont, 2*problemData.p+1, eye(N), computeBasesOnQuad(N, struct));
+problemData.h0Disc = hotstartData.cDisc(:,:,1) - projectFuncCont2DataDisc(problemData.g, zbCont, 2*problemData.p, eye(N), computeBasesOnQuad(N, struct));
 
 aux = false(3397,N,2);
 aux([725 726 727 794 795 796 797 870 871 872 933 934 997 998 999 1000 1585 1586 1587 1625 1626 1627 1628 1629 1670 1671 1672 1673],:,1) = true;
@@ -384,7 +384,7 @@ for species = 1:problemData.numSpecies
   problemData.typeSlopeLim{species} = 'linear'; % Type of slope limiter (linear, hierarch_vert, strict)
   
   problemData.outputFrequency{species} = 8640; % no visualization of every timestep
-  problemData.outputTypes{species}     = cellstr('vtk'); % solution output file types
+  problemData.outputTypes{species}     = cellstr(['vtk';'tec']); % solution output file types
   
   %% Parameter check.
   assert(~problemData.isSlopeLim{species} || problemData.p > 0, 'Slope limiting only available for p > 0.')
@@ -405,9 +405,13 @@ gamma = 0.7; % no unit
 lambda = 5.0E5; % 0.5 (0.1m)^3 / (mug) = 5.0 1E-4 / 1E-9 m^3 / kg
 h0 = 10; % m
 k = 0.1; % 1 / m
+I_0 = 92; % W / m^2
+I_s = 110; % (263+287+277) / 3 * 0.4 W / m^2, April through June
 
-I = @(t,x1,x2) -h0 / (1 - exp(-k*h0))  * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
-f = @(t,x1,x2) 1 - exp(-I(t,x1,x2)); % saturating response
+% I = @(t,x1,x2) -h0 / (1 - exp(-k*h0))  * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
+I = @(t,x1,x2) - I_s / k * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
+% f = @(t,x1,x2) 1 - exp(-I(t,x1,x2)); % saturating response
+f = @(t,x1,x2) I(t,x1,x2) ./ (I(t,x1,x2) + I_0);
 g = @(t,x1,x2,N) Vm * N ./ (ks + N); % Michaelis-Menten uptake
 h = @(t,x1,x2,P) Rm * (1 - exp(-lambda * P)); % saturating (Ivlev)
 i = @(t,x1,x2,P) ep1; % linear death rate

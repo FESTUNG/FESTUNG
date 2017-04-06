@@ -208,7 +208,7 @@ validateattributes(elem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
 if nargin > 5 && ~isequal(areaE0Tbdr, [])
   ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad(elem,:,:), areaE0Tbdr, elem);
 else
-  ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, elem);
+  ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad(elem,:,:), elem);
 end % for
 end % function
 
@@ -229,7 +229,7 @@ for nn = 1 : 3
     RknTimesVal = sparse(K*N, N);
     for r = 1 : R
       RknTimesVal = RknTimesVal + kron(areaE0Tbdr{nn}(elem) .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
-    end
+    end % for
     ret = ret + kronVec(g.markE0TE0T{nn, np}(elem,:), RknTimesVal);
   end % for
 end % for
@@ -241,20 +241,22 @@ function ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdg
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
 
 % Assemble matrices
-ret = sparse(K*N, K*N);
+ret = sparse(K*N, g.numT*N);
+retDiag = sparse(K*N, K*N);
 for nn = 1 : 3
   Rkn = markE0Tbdr(elem,nn) .* g.areaE0T(elem, nn);
   % Diagonal blocks
   for r = 1 : R
-    ret = ret + kron(spdiags(Rkn .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
-  end
+    retDiag = retDiag + kron(spdiags(Rkn .* valOnQuad(:, nn, r) .* (valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
+  end % for
   % Off-diagonal blocks
   for np = 1 : 3
     RknTimesVal = sparse(K*N, N);
     for r = 1 : R
       RknTimesVal = RknTimesVal + kron(Rkn .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
-    end
-    ret = ret + kronVec(g.markE0TE0T{nn, np}(elem,elem), RknTimesVal);
+    end % for
+    ret = ret + kronVec(g.markE0TE0T{nn, np}(elem,:), RknTimesVal);
   end % for
 end % for
+ret(:,logical(kron(elem,true(N,1)))) = ret(:,logical(kron(elem,true(N,1)))) + retDiag;
 end % function
