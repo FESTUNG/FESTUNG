@@ -1,4 +1,4 @@
-function [problemData] = adaptMesh(problemData, force)
+function [problemData] = adaptFreeSurface(problemData, force)
 if nargin < 2
   force = false;
 end % if
