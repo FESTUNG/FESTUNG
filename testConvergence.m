@@ -41,7 +41,7 @@ problem = 'darcyVert_sweVert';
 p = [0; 1; 2];
 testcase = 'coupling';
 tEnd = 0.1;
-level = 0:4;
+level = 0:6;
 numElem = 2.^level(:) * [2, 1];
 numSteps = { 1 * 2.^level(:); 4 * 4.^level(:); 16 * 8.^level(:) };
 
@@ -111,6 +111,7 @@ for ip = 1 : length(p)
       conv{ip} = [zeros(1,n); ...
                   log(err{ip}(1:N-1,:) ./ err{ip}(2:N,:)) ./ ...
                     repmat(log(numElem(2:N,1) ./ numElem(1:N-1,1)), 1, n)];  %#ok<SAGROW>
+      save([problem '_' testcase '_' num2str(isCoupling) '.mat'], 'err', 'conv');
       disp(conv{ip}); 
     catch e
       warning('%s: %s', e.identifier, e.message);
@@ -136,4 +137,3 @@ for ip = 1 : length(err)
   end % for i
 end % for p
 
-save([problem '_' testcase '_' num2str(isCoupling) '.mat'], 'err', 'conv');

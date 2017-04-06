@@ -39,7 +39,7 @@
 %
 function problemData = postprocessProblem(problemData)
 %% Adapt mesh to final solution.
-problemData = problemData.fn_adaptMesh(problemData);
+problemData = problemData.fn_adaptFreeSurface(problemData);
 
 %% Compute vertical velocity.
 u1DCont = @(x1,x2) problemData.u1DCont(problemData.tEnd, x1, x2);
