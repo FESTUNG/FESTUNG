@@ -409,9 +409,10 @@ I_0 = 92; % W / m^2
 I_s = 110; % (263+287+277) / 3 * 0.4 W / m^2, April through June
 
 % I = @(t,x1,x2) -h0 / (1 - exp(-k*h0))  * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
-I = @(t,x1,x2) - I_s / k * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
+% I = @(t,x1,x2) - I_s / k * (1 - exp(k*zbCont(x1,x2))) ./ zbCont(x1,x2); % cf. note
 % f = @(t,x1,x2) 1 - exp(-I(t,x1,x2)); % saturating response
-f = @(t,x1,x2) I(t,x1,x2) ./ (I(t,x1,x2) + I_0);
+% f = @(t,x1,x2) I(t,x1,x2) ./ (I(t,x1,x2) + I_0);
+f = @(t,x1,x2) -1 ./ (k*zbCont(x1,x2)) .* log((I_0 + I_s) ./ (I_0 + I_s * exp(k*zbCont(x1,x2))));
 g = @(t,x1,x2,N) Vm * N ./ (ks + N); % Michaelis-Menten uptake
 h = @(t,x1,x2,P) Rm * (1 - exp(-lambda * P)); % saturating (Ivlev)
 i = @(t,x1,x2,P) ep1; % linear death rate
