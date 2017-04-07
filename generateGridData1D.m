@@ -141,6 +141,13 @@ if nargin == 4
   for n = 1 : 2
     g1D.markV0TE0T{n} = (double(g1D.markT2DT.') * g2D.markE0TE0T{5-n}) > 0;
   end % for
+  % Fix a bug in GNU Octave 4.0.0's implementation of sparse matrix concatenation
+  if exist('OCTAVE_VERSION','builtin')
+    g1D.markT2DT = g1D.markT2DT + 0 * speye(size(g1D.markT2DT, 1), size(g1D.markT2DT, 2));
+    for n = 1 : 2
+      g1D.markV0TE0T{n} = g1D.markV0TE0T{n} + 0 * speye(size(g1D.markV0TE0T{n}, 1), size(g1D.markV0TE0T{n}, 2));
+    end % for
+  end % if
 end % if
 end
 

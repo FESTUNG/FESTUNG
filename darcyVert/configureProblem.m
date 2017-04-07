@@ -1,5 +1,4 @@
 function problemData = configureProblem(problemData)
-
 %% Parameters.
 % Name of testcase
 problemData = setdefault(problemData, 'testcase', 'coupling');
