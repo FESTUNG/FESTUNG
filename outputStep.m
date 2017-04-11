@@ -53,11 +53,34 @@
 function problemData = outputStep(problemData, nStep)
 %% Visualization
 if mod(nStep-1, problemData.outputFrequency) == 0
+  isOutput = false;
+  
   if problemData.isVisSol
-    cLagr = { projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{1, 2}), ...
+    cLagr = { projectDataDisc2DataLagr1D(problemData.cDiscRK{1, 1}), ...
+              projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{1, 2}), ...
               projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 3}) };
-    visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nStep-1, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
-  elseif nStep > problemData.outputFrequency
+    visualizeDataLagr1D(problemData.g.g1D, cLagr{1}, { 'h' }, [ problemData.outputBasename '_h' ], nStep-1, problemData.outputTypes);
+    visualizeDataLagrTetra(problemData.g, cLagr(2:3), {'u1', 'u2'}, problemData.outputBasename, nStep-1, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+    isOutput = true;
+  end % if
+  
+  if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))
+    hCont = @(x1) problemData.hCont(problemData.t(1), x1);
+    u1Cont = @(x1,x2) problemData.u1Cont(problemData.t(1), x1, x2);
+    u2Cont = @(x1,x2) problemData.u2Cont(problemData.t(1), x1, x2);
+
+    problemData.error = [ computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{1, 1}, ...
+                              hCont, problemData.qOrd + 1, problemData.basesOnQuad1D), ...
+                          computeL2ErrorTetra(problemData.g, problemData.cDiscRK{1, 2}, ...
+                              u1Cont, problemData.qOrd + 1, problemData.basesOnQuad2D), ...
+                          computeL2ErrorTetra(problemData.g, problemData.cDiscRK{1, 3}, ...
+                              u2Cont, problemData.qOrd + 1, problemData.basesOnQuad2D) ];
+
+    fprintf('L2 errors of h, u1, u2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
+    isOutput = true;
+  end % if
+  
+  if ~isOutput && nStep > problemData.outputFrequency
     fprintf(repmat('\b', 1, 11));
   end % if
   fprintf('%3.0f %% done\n', nStep / problemData.numSteps * 100);

@@ -55,6 +55,7 @@
 %> @endparblock
 %
 function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
+% problemData.cDiscRK{nSubStep, 3} = projectFuncCont2DataDiscTetra(problemData.g, @(x,z) problemData.u2Cont(problemData.t(nSubStep),x,z), problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
 %% Convert representation matrix to representation vector
 cSys = cellfun(@(c) reshape(c.', [], 1), problemData.cDiscRK(nSubStep, :), 'UniformOutput', false);
 %% Solve for next time level
@@ -66,7 +67,7 @@ for m = 1 : 2
 end % for m
 
 % Vertical velocity
-cSys{3} = problemData.globHQup \ (problemData.globJu{1} + problemData.globJw{2} + problemData.globKh + ...
+cSys{3} = problemData.globHQup \ (problemData.globJCont + problemData.globKh + ...
                                    problemData.globJuCoupling{1} + problemData.globJwCoupling + ...
                                   (problemData.globHQavg + problemData.tildeGlobP) * cSys{2});
                                 
@@ -78,7 +79,9 @@ cSys{2} = problemData.omega(nSubStep) * reshape(problemData.cDiscRK{1, 2}.', [],
               problemData.tildeGlobHQ * cSys{1} + problemData.globEP{1} * cSys{2} + ...
               (problemData.globEP{2} - problemData.globSbdr{2} - problemData.globSCoupling) * cSys{3} + ...
               problemData.globGR{1} * qSys{1} + problemData.globGR{2} * qSys{2} ) ) );
-            
+
+% cSys{2} = reshape(projectFuncCont2DataDiscTetra(problemData.g, @(x,z) problemData.u1Cont(problemData.t(nSubStep),x,z), problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D)', [], 1);
+
 % Water height
 cSys{1} = problemData.omega(nSubStep) * reshape(problemData.cDiscRK{1, 1}.', [], 1) + ...
           (1 - problemData.omega(nSubStep)) * ( cSys{1} + problemData.tau * ( ...
@@ -86,5 +89,7 @@ cSys{1} = problemData.omega(nSubStep) * reshape(problemData.cDiscRK{1, 1}.', [],
               (problemData.barGlobG - problemData.barGlobP - problemData.barGlobPbdr) * cSys{1}) ) );
 %% Convert representation vector to representation matrix
 problemData.cDiscRK(nSubStep + 1, :) = cellfun(@(c, cRK) reshape(c, size(cRK, 2), size(cRK, 1)).', ...
-                                        cSys, problemData.cDiscRK(nSubStep, :), 'UniformOutput', false);                        
+                                        cSys, problemData.cDiscRK(nSubStep, :), 'UniformOutput', false);
+                                      
+% problemData.cDiscRK{nSubStep + 1, 1} = projectFuncCont2DataDisc1D(problemData.g.g1D, @(x) problemData.hCont(problemData.t(nSubStep)+problemData.tau,x), problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
 end % function
