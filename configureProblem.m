@@ -59,7 +59,7 @@ problemData = setdefault(problemData, 'isCouplingDarcy', true);
 problemData = setdefault(problemData, 'isCouplingSWE', true);
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [4, 2]);
+problemData = setdefault(problemData, 'numElem', [128, 64]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
