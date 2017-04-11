@@ -99,9 +99,9 @@
 %>                    properties of a matching 1D triangulation (see 
 %>                    <code>generateGridData1D()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0T    <code>logical</code> arrays that mark each triangles
+%> @param  markE0T    <code>logical</code> arrays that mark each elements
 %>                    edges on which the matrix blocks should be
-%>                    assembled @f$[K \times 3]@f$
+%>                    assembled @f$[K \times 4]@f$
 %> @param refEdgePhiIntPhi1DInt  Local matrix 
 %>                    @f$\hat{\mathsf{Q}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgeTetraPhiIntPhi1DInt()</code>.
@@ -137,12 +137,12 @@ K = g2D.numT; barK = g1D.numT;
 [N, barN, ~] = size(refEdgePhiIntPhi1DInt);
 ret = { sparse(K*N, barK*barN), sparse(K*N, barK*barN) };
 for n = 1 : 4
-  areaE0Tint = 0.5 * markE0T(:,n) .* g2D.areaE0T(:,n);
+  areaE0T = 0.5 * markE0T(:,n) .* g2D.areaE0T(:,n);
   for m = 1 : 2
-    areaNuE0Tint = areaE0Tint .* g2D.nuE0T(:,n,m);
+    areaNuE0T = areaE0T .* g2D.nuE0T(:,n,m);
     ret{m} = ret{m} + ...
-             kron(bsxfun(@times, g1D.markT2DT, areaNuE0Tint), refEdgePhiIntPhi1DInt(:,:,n)) + ...
-             kron(bsxfun(@times, g2D.markE0TE0T{n} * double(g1D.markT2DT), areaNuE0Tint), refEdgePhiIntPhi1DExt(:,:,n));
+             kron(bsxfun(@times, g1D.markT2DT, areaNuE0T), refEdgePhiIntPhi1DInt(:,:,n)) + ...
+             kron(bsxfun(@times, g2D.markE0TE0T{n} * double(g1D.markT2DT), areaNuE0T), refEdgePhiIntPhi1DExt(:,:,n));
   end % for m
 end  % for n
 end  % function

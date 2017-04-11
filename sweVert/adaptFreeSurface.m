@@ -62,14 +62,15 @@ globQAvg = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint 
 globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, problemData.g.markE0Tint | problemData.g.markE0TbdrTop, problemData.hatQdiag, problemData.hatQoffdiag);
 
 problemData.globHQ = cellfun(@(H, Q, Qbdr) H - Q - Qbdr, globH, globQ, globQbdr, 'UniformOutput', false);
-problemData.globHQup = globH{2} - globQup;
+problemData.globHQup = globH{2} - globQup - globQAvg{2};
 problemData.globHQavg = -globH{1} + globQAvg{1} + globQbdr{1};
 
-problemData.globS = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.hatSdiag);
-problemData.barGlobS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, problemData.barHatSdiag);
+problemData.globSu = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0Tint | (problemData.g.markE0TbdrU & problemData.g.markE0TbdrRiem), problemData.hatSdiag);
+problemData.globSh = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0Tint | (problemData.g.markE0TbdrH & problemData.g.markE0TbdrRiem), problemData.hatSdiag);
+problemData.barGlobS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, problemData.g.markE0Tint | (problemData.g.markE0TbdrH & problemData.g.markE0TbdrRiem), problemData.barHatSdiag);
 
 tildeGlobH = assembleMatElemTetraDphiPhi1D(problemData.g, problemData.g.g1D, problemData.tildeHatH);
-tildeGlobQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tint, problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
-tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH, problemData.tildeHatQdiag);
+tildeGlobQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tint | (problemData.g.markE0TbdrH & problemData.g.markE0TbdrRiem), problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
+tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr & ~(problemData.g.markE0TbdrH & problemData.g.markE0TbdrRiem), problemData.tildeHatQdiag);
 problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQbdr{1});
 end % function

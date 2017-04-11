@@ -214,7 +214,7 @@ end % function
 function visualizeDataLagrTec(g, dataLagr, varName, fileName, tLvl)
 [K, N] = size(dataLagr{1});
 %% Open file.
-fileName = [fileName, '.', num2str(tLvl), '.dat'];
+fileName = [fileName, '.', num2str(tLvl), '.plt'];
 file     = fopen(fileName, 'wt'); % if this file exists, then overwrite
 %% Header.
 fprintf(file, 'TITLE="FESTUNG output file"\n');

@@ -23,27 +23,29 @@
 % numElem = [16,16;24,24;36,36];
 % numSteps = [100;400;1600];
 
-% problem = 'sweVert';
-% p = [0; 1];
-% testcase = 'utbest';
-% tEnd = 86.4;
-% level = 0:3;
-% numElem = 2.^level(:) * [2, 1];
-% dt = { [16, 4, 0.96, 0.24]; ...
-%        [0.96, 0.24, 0.06, 0.015]/32 };
-% numSteps = cellfun(@(c) ceil(tEnd ./ c), dt, 'UniformOutput', false);
-
-
-
-
-problem = 'darcyVert_sweVert';
-% problem = 'darcyVert';
-p = [0; 1; 2];
-testcase = 'coupling';
-tEnd = 0.1;
-level = 0:6;
+problem = 'sweVert';
+p = [1];
+testcase = 'utbest_sinus';
+tEnd = 86.4;
+level = 2:3;
 numElem = 2.^level(:) * [2, 1];
-numSteps = { 1 * 2.^level(:); 4 * 4.^level(:); 16 * 8.^level(:) };
+dt = { %[1, 0.5, 0.5, 0.5] }; ...
+        [0.125, 0.25]; ...
+%        [0.5, 0.5, 0.0625, 0.02] 
+     };
+numSteps = cellfun(@(c) ceil(tEnd ./ c), dt, 'UniformOutput', false);
+isCoupling = false;
+
+
+
+% problem = 'darcyVert_sweVert';
+% % problem = 'darcyVert';
+% p = [0; 1; 2];
+% testcase = 'coupling';
+% tEnd = 0.1;
+% level = 0:5;
+% numElem = 2.^level(:) * [2, 1];
+% numSteps = { 1 * 2.^level(:); 4 * 4.^level(:); 16 * 8.^level(:) };
 
 % problem = 'sweVert';
 % p = [0; 1; 2];
@@ -91,10 +93,10 @@ conv = {};
 for ip = 1 : length(p)
   for i = 1 : size(numElem, 1)
     pd = struct;
-    pd.isVisSol = false;
+%     pd.isVisSol = false;
     pd.isVisGrid = false;
-    pd.isCouplingDarcy = isCoupling;
-    pd.isCouplingSWE = isCoupling;
+%     pd.isCouplingDarcy = isCoupling;
+%     pd.isCouplingSWE = isCoupling;
     pd.testcase = testcase;
     pd.tEnd = tEnd;
     pd.p = p(ip);
@@ -137,3 +139,22 @@ for ip = 1 : length(err)
   end % for i
 end % for p
 
+% 
+% for i = 1 : size(err_utbest{1}, 2)
+%   fprintf('Err(%d)     C(%d)    ', i, i);
+% end
+% fprintf('\n');
+% 
+% for ip = 1 : length(err_utbest)
+%   [N, n] = size(err_utbest{ip});
+%   fprintf(repmat('-', 1, ceil(21 * n/2 - 8)));
+%   fprintf(' p = %d ', p(ip)); 
+%   fprintf([repmat('-', 1, ceil(21 * n/2 - 8)), '\n']);
+%   for i = 1 : N
+%     for j = 1 : n
+%       fprintf('%6.2e  %6.3f   ', err_utbest{ip}(i,j), conv_utbest{ip}(i,j));
+%     end % for j
+%     fprintf('\n');
+%   end % for i
+% end % for p
+% 

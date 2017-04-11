@@ -122,24 +122,65 @@ switch problemName
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {D, 0; 0, D}, 'UniformOutput', false);
     dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
         
-  case 'test'
+  case 'utbest_sinus'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; 
+    idLand = [2,4]; idOS = [2,4]; idRiv = -1; idRad = -1;
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; 
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
     dxZb = 0;
+    omega = 0.01;
+    d = 0.1;
+    e = 0.01;
+    t_coef = 0;
+    D = 0.1;
     
-    xiCont = @(t,x) 0.1 * sin(0.01*(x+t));
+    xiCont = @(t,x) e * sin(omega * (x+t_coef*t));
     zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
-    u1Cont = @(t,x,z) ones(size(x)); %sin(z+0.01*t);
+    u1Cont = @(t,x,z) d * (sin(omega * (x+t_coef*t)) + sin(omega * (z+t_coef*t)));
+    u2Cont = @(t,x,z) -d * omega * z .* cos(omega * (x+t_coef*t));
+    
+    dxXiCont = @(t,x) e * omega * cos(omega * (x+t_coef*t));
+    dtHCont = @(t,x)  e * omega * t_coef * cos(omega * (x+t_coef*t));
+    
+    dtU1Cont = @(t,x,z) d * omega * t_coef * (cos(omega * (x+t_coef*t)) + cos(omega * (z+t_coef*t)));
+    dxU1Cont = @(t,x,z) d * omega * cos(omega * (x+t_coef*t));
+    dzU1Cont = @(t,x,z) d * omega * cos(omega * (z+t_coef*t));
+    dzU2Cont = @(t,x,z) -d * omega * cos(omega * (x+t_coef*t));
+    
+    dxdxU1Cont = @(t,x,z) -d * omega^2 * sin(omega * (x+t_coef*t));
+    dxdzU1Cont = @(t,x,z) zeros(size(x));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
+    
+    u1hCont = @(t,x) d * sin(omega * (x+t_coef*t)) .* hCont(t,x) - d/omega * (cos(omega * (xiCont(t,x)+t_coef*t)) - cos(omega * (zBotCont(x)+t_coef*t)));
+    dxU1hCont = @(t,x) d * omega * cos(omega * (x+t_coef*t)) .* hCont(t,x) + d * sin(omega * (x+t_coef*t)) .* dxXiCont(t,x) + ...
+                      d * sin(omega * (xiCont(t,x)+t_coef*t)) .* dxXiCont(t,x);
+                        
+    DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {D, 0; 0, D}, 'UniformOutput', false);
+    dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
+        
+  case 'test'
+    domainWidth = 100;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    
+    gConst = 10;
+    xi0Cont = @(x) zeros(size(x));
+    dxZb = 0;
+    
+    xiCont = @(t,x) 0.005 * x; %0.01 * sin(0.1*(x));
+    zBotCont = @(x) -2 + dxZb * x;
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) zeros(size(x)); %sin(z+0.01*t);
     u2Cont = @(t,x,z) zeros(size(x));
     
-    dxXiCont = @(t,x) 0.1*0.01*cos(0.01*(x+t));
-    dtHCont = @(t,x) 0.1*0.01*cos(0.01*(x+t));
+    dxXiCont = @(t,x) 0.005 * ones(size(x)); %0.1*0.01*cos(0.1*(x));
+    dtHCont = @(t,x) zeros(size(x));
     
     dtU1Cont = @(t,x,z) zeros(size(x));%0.01*cos(z+0.01*t);
     dxU1Cont = @(t,x,z) zeros(size(x));
@@ -150,8 +191,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));%sin(z+0.01*t);
     
-    u1hCont = @(t,x) hCont(t,x);%cos(xiCont(t,x)+0.01*t) - cos(zBotCont(x)+0.01*t);
-    dxU1hCont = @(t,x) dxXiCont(t,x);%-sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);
+    u1hCont = @(t,x) zeros(size(x));%cos(xiCont(t,x)+0.01*t) - cos(zBotCont(x)+0.01*t);
+    dxU1hCont = @(t,x) zeros(size(x));%-sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);
 
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0.01, 0; 0, 0.01}, 'UniformOutput', false);
     dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
@@ -165,6 +206,7 @@ problemData = setdefault(problemData, 'idLand', idLand);
 problemData = setdefault(problemData, 'idOS', idOS);
 problemData = setdefault(problemData, 'idRiv', idRiv);
 problemData = setdefault(problemData, 'idRad', idRad);
+problemData = setdefault(problemData, 'idRiem', idRiem);
 
 problemData = setdefault(problemData, 'gConst', gConst);
 problemData = setdefault(problemData, 'hCont', hCont);

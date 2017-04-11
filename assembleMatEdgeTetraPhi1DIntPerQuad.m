@@ -26,6 +26,9 @@
 %>                    properties of a matching one-dimensional triangulation
 %>                    (see <code>generateGridData1D()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
+%> @param  markE0T    <code>logical</code> arrays that mark each elements
+%>                    edges on which the matrix blocks should be
+%>                    assembled @f$[K \times 4]@f$
 %> @param refEdgePhi1DIntPerQuad  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgeTetraPhi1DIntPerQuad()</code>.
@@ -52,11 +55,11 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgeTetraPhi1DIntPerQuad(g2D, g1D, refEdgePhi1DIntPerQuad)
+function ret = assembleMatEdgeTetraPhi1DIntPerQuad(g2D, g1D, markE0T, refEdgePhi1DIntPerQuad)
 K = g2D.numT; barK = g1D.numT;
 ret = cell(4,1);
 for nn = 1 : 4
-	ret{nn} = kron( spdiags(g1D.markT2DT.' * ( (g2D.markE0TE0T{nn} * ones(K,1)) .* g2D.areaE0T(:,nn) ), 0, barK, K), ...
+	ret{nn} = kron( spdiags(g1D.markT2DT.' * ( markE0T(:,nn) .* g2D.areaE0T(:,nn) ), 0, barK, K), ...
                   refEdgePhi1DIntPerQuad(:,:,nn) );
 end % for nn
 end % function

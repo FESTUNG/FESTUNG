@@ -21,6 +21,9 @@
 %>                    properties of a triangulation (see 
 %>                    <code>domainRectTrap()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
+%> @param  markE0T    <code>logical</code> arrays that mark each elements
+%>                    edges on which the matrix blocks should be
+%>                    assembled @f$[K \times 4]@f$
 %> @param refEdgePhiIntPerQuad  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgeTetraPhiIntPerQuad()</code>.
@@ -47,10 +50,10 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgeTetraPhiIntPerQuad(g, refEdgePhiIntPerQuad)
+function ret = assembleMatEdgeTetraPhiIntPerQuad(g, markE0T, refEdgePhiIntPerQuad)
 K = g.numT;
 ret = cell(4,1);
 for n = 1 : 4
-	ret{n} = kron( spdiags((g.markE0TE0T{n} * ones(K,1)) .* g.areaE0T(:,n), 0, K, K), refEdgePhiIntPerQuad(:,:,n) );
+	ret{n} = kron( spdiags(markE0T(:,n) .* g.areaE0T(:,n), 0, K, K), refEdgePhiIntPerQuad(:,:,n) );
 end % for nn
 end % function
