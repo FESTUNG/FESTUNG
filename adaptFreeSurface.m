@@ -16,8 +16,9 @@ end % for n
 % surface elevation in vertices of surface mesh
 xiSmoothV0T1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), [1 2], 2) + hSmoothV0T1D;
 
-if ~isreal(hSmoothV0T1D)
-  error('Complex height');
+% Check for negative or complex height
+if ~isreal(hSmoothV0T1D) || any(hSmoothV0T1D(:) < 0)
+  error('Negative or complex height');
 end % if
 
 % check for necessity of adaptation
@@ -52,25 +53,63 @@ end % if
 end % function
 %
 function problemData = assembleStaticMatrices(problemData)
+% Mass matrix (I, VIII)
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
+%% Momentum equation
+% Element integral for height-term in momentum equation (III)
+tildeGlobH = assembleMatElemTetraDphiPhi1D(problemData.g, problemData.g.g1D, problemData.tildeHatH);
+
+% Interior edge integral for height-term in momentum equation (VI)
+tildeGlobQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tint, problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
+
+% Boundary edge integral for height term in momentum equation with no prescribed Dirichlet-data (VI)
+tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr & ~(problemData.g.markE0TbdrH | problemData.g.markE0TbdrRiemH), problemData.tildeHatQdiag);
+
+% Boundary edge integral for height term in momentum equation with Riemann solver and prescribed Dirichlet-data (VI)
+tildeGlobQRiem = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiemH, problemData.tildeHatQdiag);
+
+% Combine matrices
+problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQbdr{1} - 0.5 * tildeGlobQRiem{1});
+
+%% Flux and continuity equation
+% Element integral in flux and continuity equation (IX, XI)
 globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
-globQ = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
+
+% Boundary edge integral without Dirichlet data for U in flux and continuity equation (X, XII)
 globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
 
-globQAvg = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
-globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, problemData.g.markE0Tint | problemData.g.markE0TbdrTop, problemData.hatQdiag, problemData.hatQoffdiag);
+%% Flux equation
+% Interior edge integral in flux equation (X)
+globQ = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
 
+% Combine matrices
 problemData.globHQ = cellfun(@(H, Q, Qbdr) H - Q - Qbdr, globH, globQ, globQbdr, 'UniformOutput', false);
+
+%% Continuity equation
+% Horizontal interior edge integral with first normal component in continuity equation (XII)
+globQAvg = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
+
+% Horizontal interior and top boundary edge integral with second normal component in continuity equation (XII)
+globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, (problemData.g.markE0Tint | problemData.g.markE0TbdrTop) & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
+
+% Combine matrices
 problemData.globHQup = globH{2} - globQup - globQAvg{2};
 problemData.globHQavg = -globH{1} + globQAvg{1} + globQbdr{1};
 
-problemData.globSu = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0Tint | (problemData.g.markE0TbdrU & problemData.g.markE0TbdrRiem), problemData.hatSdiag);
-problemData.globSh = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0Tint | (problemData.g.markE0TbdrH & problemData.g.markE0TbdrRiem), problemData.hatSdiag);
-problemData.barGlobS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, problemData.g.markE0Tint | (problemData.g.markE0TbdrH & problemData.g.markE0TbdrRiem), problemData.barHatSdiag);
+%% Helper matrices for assembly of jump terms in Lax-Friedrichs Riemann solver
+% Helper matrix for jumps over vertical interior edges in momentum and continuity equation (VI, XII)
+problemData.globS = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Tv, problemData.hatSdiag);
 
-tildeGlobH = assembleMatElemTetraDphiPhi1D(problemData.g, problemData.g.g1D, problemData.tildeHatH);
-tildeGlobQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tint | (problemData.g.markE0TbdrH & problemData.g.markE0TbdrRiem), problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
-tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH, problemData.tildeHatQdiag);
-problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQbdr{1});
+% Helper matrix for jumps over vertical boundary edges in momentum equation with prescribed Dirichlet data for u and Riemann solver (VI)
+problemData.globSuRiem = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0TbdrRiemU, problemData.hatSdiag);
+
+% Helper matrix for jumps over vertical boundary edges in continuity equation with prescribed Dirichlet data for h and Riemann solver (VI)
+problemData.globShRiem = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0TbdrRiemH, problemData.hatSdiag);
+
+% Helper matrix for jumps over interior vertices in free surface equation (XV)
+problemData.barGlobS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, problemData.g.markE0Tint, problemData.barHatSdiag);
+
+% Helper matrix for jumps over boundary vertices in free surface equation with prescribed Dirichlet data for h and Riemann solver (XV)
+problemData.barGlobSRiem = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiemH, problemData.barHatSdiag);
 end % function

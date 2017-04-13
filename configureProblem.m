@@ -5,7 +5,7 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'test');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [8, 1]);
+problemData = setdefault(problemData, 'numElem', [3, 1]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
