@@ -27,7 +27,7 @@ problemData = setdefault(problemData, 'isVisSol', true);  % visualization of sol
 problemData = setdefault(problemData, 'outputFrequency', 1); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep problemData.problemName '_' problemData.testcase ]); 
-problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
+problemData = setdefault(problemData, 'outputTypes', { 'vtk', 'tec' });  % Type of visualization files ('vtk, 'tec')
 
 % ID of coupling boundary
 problemData = setdefault(problemData, 'idCoupling', -1);
