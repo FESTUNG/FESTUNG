@@ -168,9 +168,7 @@ for i = 1 : numel(dataLagr)
   switch N
     case 1 % locally constant
       dataLagr{i} = kron(dataLagr{i}, [1;1])';
-    case 2 % locally linear
-      dataLagr{i} = reshape(dataLagr{i}', 1, K*N);
-    case 3 % locally quadratic
+    case {2, 3} % locally linear or quadratic
       dataLagr{i} = reshape(dataLagr{i}', 1, K*N);
   end % switch
 end % for
@@ -198,55 +196,36 @@ end % function
 %
 %> @brief Helper routine to write Tecplot-files.
 function visualizeDataLagrTec(g, dataLagr, varName, fileName, tLvl)
-error('not implemented')
 [K, N] = size(dataLagr{1});
 %% Open file.
 fileName = [fileName, '.', num2str(tLvl), '.plt'];
 file     = fopen(fileName, 'wt'); % if this file exists, then overwrite
 %% Header.
 fprintf(file, 'TITLE="FESTUNG output file"\n');
-fprintf(file, ['VARIABLES=X, Y', repmat(', "%s"', 1, numel(varName)), '\n'], varName{:});
+fprintf(file, ['VARIABLES=X', repmat(', "%s"', 1, numel(varName)), '\n'], varName{:});
 %% Points and cells.
 switch N
-  case {1, 3}
-    P1          = reshape(g.coordV0T(:, :, 1)', 3*K, 1);
-    P2          = reshape(g.coordV0T(:, :, 2)', 3*K, 1);
-    numT        = K;
-    V0T         = 1:length(P1);
-  case 6
-    P1          = reshape([g.coordV0T(:,:,1), g.baryE0T(:,[3,1,2],1)]',6*K,1);
-    P2          = reshape([g.coordV0T(:,:,2), g.baryE0T(:,[3,1,2],2)]',6*K,1);
-    numT        = 4*K;
-    V0T         = reshape([ 1:6:6*K; 4:6:6*K; 6:6:6*K;
-                            2:6:6*K; 5:6:6*K; 4:6:6*K;
-                            3:6:6*K; 6:6:6*K; 5:6:6*K;
-                            4:6:6*K; 5:6:6*K; 6:6:6*K ], 3, numT);
+  case {1, 2}
+    P1   = reshape(g.coordV0T(:, :, 1)', 2*K, 1);
+  case 3
+    P1   = reshape([g.coordV0T(:,:,1), 0.5 * (g.coordV0T(:,1,1) + g.coordV0T(:,2,1))]',3*K,1);
 end % switch
 %% Data.
 for i = 1 : numel(dataLagr)
   switch N
     case 1 % locally constant
-      dataLagr{i} = kron(dataLagr{i}, [1;1;1])';
-    case 3 % locally linear
+      dataLagr{i} = kron(dataLagr{i}, [1;1])';
+    case {2, 3} % locally linear or quadratic
       dataLagr{i} = reshape(dataLagr{i}', 1, K*N);
-    case 6 % locally quadratic (permutation of local edge indices due to TP format)
-      dataLagr{i} = reshape(dataLagr{i}(:, [1,2,3,6,4,5])', 1, K*N);
   end % switch
 end % for
 %% Zone header.
 fprintf(file, 'ZONE T="Time=%.3e", ', tLvl);
-fprintf(file, 'N=%d, E=%d, ', length(P1), numT);
-fprintf(file, 'ET=TRIANGLE, F=FEBLOCK, ');
+fprintf(file, 'I=%d, ', length(P1));
+fprintf(file, 'F=POINT, ');
 fprintf(file, 'SOLUTIONTIME=%.3e\n\n', tLvl);
 %% Point coordinates and data.
-fprintf(file, '%.12e %.12e %.12e %.12e %.12e\n', P1);
-fprintf(file, '\n\n');
-fprintf(file, '%.12e %.12e %.12e %.12e %.12e\n', P2);
-fprintf(file, '\n\n');
-fprintf(file, '%.9e %.9e %.9e %.9e %.9e\n', dataLagr{:});
-fprintf(file, '\n');
-%% Connectivity.
-fprintf(file, '%d %d %d\n', V0T);
+fprintf(file, ['%.12e ' repmat('%.9e ', 1, length(dataLagr(:))) '\n'], [P1(:), cell2mat(cellfun(@(c) c(:)', dataLagr, 'UniformOutput', false))']');
 %% Close file.
 fclose(file);
 disp(['Data written to ' fileName])
