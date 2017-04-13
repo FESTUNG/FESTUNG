@@ -124,8 +124,8 @@ switch problemName
         
   case 'utbest_sinus'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = -1; idRad = -1;
-%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; 
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
@@ -133,7 +133,7 @@ switch problemName
     omega = 0.01;
     d = 0.1;
     e = 0.01;
-    t_coef = 0;
+    t_coef = 1;
     D = 0.1;
     
     xiCont = @(t,x) e * sin(omega * (x+t_coef*t));
@@ -164,22 +164,21 @@ switch problemName
         
   case 'test'
     domainWidth = 100;
-%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
-%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [-2,-4];
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
     dxZb = 0;
     
-    xiCont = @(t,x) 0.005 * x; %0.01 * sin(0.1*(x));
+    xiCont = @(t,x) 0.01 * sin(0.01*(x));%0.005 * x; %0.01 * sin(0.1*(x));
     zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
     u1Cont = @(t,x,z) zeros(size(x)); %sin(z+0.01*t);
     u2Cont = @(t,x,z) zeros(size(x));
     
-    dxXiCont = @(t,x) 0.005 * ones(size(x)); %0.1*0.01*cos(0.1*(x));
+    dxXiCont = @(t,x) 0.01*0.01*cos(0.1*(x));%0.005 * ones(size(x)); %0.1*0.01*cos(0.1*(x));
     dtHCont = @(t,x) zeros(size(x));
     
     dtU1Cont = @(t,x,z) zeros(size(x));%0.01*cos(z+0.01*t);

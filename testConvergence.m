@@ -24,14 +24,14 @@
 % numSteps = [100;400;1600];
 
 problem = 'sweVert';
-p = [1];
+p = [0;1;2];
 testcase = 'utbest_sinus';
 tEnd = 86.4;
-level = 2:3;
+level = 0:3;
 numElem = 2.^level(:) * [2, 1];
-dt = { %[1, 0.5, 0.5, 0.5] }; ...
-        [0.125, 0.25]; ...
-%        [0.5, 0.5, 0.0625, 0.02] 
+dt = { [1, 0.5, 0.5, 0.5] ; ...
+        [0.5, 0.25, 0.25, 0.25]; ...
+        [0.25, 0.125, 0.03125, 0.0025] ...
      };
 numSteps = cellfun(@(c) ceil(tEnd ./ c), dt, 'UniformOutput', false);
 isCoupling = false;
@@ -93,7 +93,7 @@ conv = {};
 for ip = 1 : length(p)
   for i = 1 : size(numElem, 1)
     pd = struct;
-%     pd.isVisSol = false;
+    pd.isVisSol = false;
     pd.isVisGrid = false;
 %     pd.isCouplingDarcy = isCoupling;
 %     pd.isCouplingSWE = isCoupling;
