@@ -71,6 +71,6 @@ problemData.barGlobS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, proble
 
 tildeGlobH = assembleMatElemTetraDphiPhi1D(problemData.g, problemData.g.g1D, problemData.tildeHatH);
 tildeGlobQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tint | (problemData.g.markE0TbdrH & problemData.g.markE0TbdrRiem), problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
-tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr & ~(problemData.g.markE0TbdrH & problemData.g.markE0TbdrRiem), problemData.tildeHatQdiag);
+tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH, problemData.tildeHatQdiag);
 problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQbdr{1});
 end % function
