@@ -171,14 +171,14 @@ switch problemName
     xi0Cont = @(x) zeros(size(x));
     dxZb = 0;
     
-    xiCont = @(t,x) 0.01 * sin(0.01*(x));%0.005 * x; %0.01 * sin(0.1*(x));
+    xiCont = @(t,x) 0.005 * x;%0.005 * x; %0.01 * sin(0.01*(100-x));%0.005 * x; %0.01 * sin(0.1*(x));
     zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
     u1Cont = @(t,x,z) zeros(size(x)); %sin(z+0.01*t);
     u2Cont = @(t,x,z) zeros(size(x));
     
-    dxXiCont = @(t,x) 0.01*0.01*cos(0.1*(x));%0.005 * ones(size(x)); %0.1*0.01*cos(0.1*(x));
+    dxXiCont = @(t,x) 0.005 * ones(size(x));%0.005 * ones(size(x)); %-0.01*0.01*cos(0.01*(100-x));%0.005 * ones(size(x)); %0.1*0.01*cos(0.1*(x));
     dtHCont = @(t,x) zeros(size(x));
     
     dtU1Cont = @(t,x,z) zeros(size(x));%0.01*cos(z+0.01*t);
@@ -193,7 +193,7 @@ switch problemName
     u1hCont = @(t,x) zeros(size(x));%cos(xiCont(t,x)+0.01*t) - cos(zBotCont(x)+0.01*t);
     dxU1hCont = @(t,x) zeros(size(x));%-sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);
 
-    DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0.01, 0; 0, 0.01}, 'UniformOutput', false);
+    DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0.0, 0; 0, 0.0}, 'UniformOutput', false);
     dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
 
 end % switch
