@@ -5,13 +5,13 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'test');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [3, 1]);
+problemData = setdefault(problemData, 'numElem', [6, 1]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
 
 % Order of quadrature rule
-problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
+problemData = setdefault(problemData, 'qOrd', 3*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
@@ -27,7 +27,7 @@ problemData = setdefault(problemData, 'isVisSol', true);  % visualization of sol
 problemData = setdefault(problemData, 'outputFrequency', 1); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep problemData.problemName '_' problemData.testcase ]); 
-problemData = setdefault(problemData, 'outputTypes', { 'vtk', 'tec' });  % Type of visualization files ('vtk, 'tec')
+problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
 
 % ID of coupling boundary
 problemData = setdefault(problemData, 'idCoupling', -1);
