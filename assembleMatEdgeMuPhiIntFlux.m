@@ -12,15 +12,13 @@ validateattributes(uEdge{1}, {'numeric'}, {'size', [R K 3]}, mfilename, 'uEdge{1
 validateattributes(uEdge{2}, {'numeric'}, {'size', [R K 3]}, mfilename, 'uEdge{2}');
 
 % Assemble matrix
-ret = cell(2,1);
-ret{1} = sparse( K*N, KEdge*Nmu);
-ret{2} = sparse( K*N, KEdge*Nmu);
+ret = sparse( K*N, KEdge*Nmu);
 for iDim = 1:2
     for iE = 1:3
         for l=1:2
             Rkn = markE0Tbdr(:,iE) .* g.areaE0T(:, iE) .*  g.markSideE0T(:, iE, l) .* g.nuE0T( :, iE , iDim);
             for r = 1:R
-                ret{iDim} = ret{iDim} + ...
+                ret = ret + ...
                     kron( sparse( 1:K, g.E0T(:, iE), ones(K, 1) .* uEdge{iDim}( r, :, iE)' .* Rkn , K, KEdge ), ...
                     Shat{l}( :, :, iE, r) );
             end
