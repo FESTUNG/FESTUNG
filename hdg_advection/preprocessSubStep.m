@@ -57,7 +57,7 @@ function problemData = preprocessSubStep(problemData, nStep, nSubStep) %#ok<INUS
 K = problemData.K;
 N = problemData.N;
 
-problemData.timeRK = problemData.t+ problemData.tabRK.C(nSubStep) * problemData.dt;
+problemData.timeRK = problemData.t + problemData.tabRK.C(nSubStep) * problemData.dt;
 
 problemData.cDiscRkRHS = zeros( K * N, 1 );
 % RK RHS
@@ -89,7 +89,7 @@ problemData.globFphiD = assembleVecEdgePhiIntFlux( problemData.g, problemData.N,
     problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
 
 %Evaluate f (= source term) on every element
-problemData.srcEval = evalSourceContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fCont( x1 ,x2 ), ...
+problemData.srcEval = evalSourceContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fCont( problemData.timeRK, x1 ,x2 ), ...
                                      problemData.N);
 problemData.globH = assembleVecElemPhiSource(problemData.g, problemData.N, ...
                             problemData.srcEval, problemData.basesOnQuad);
