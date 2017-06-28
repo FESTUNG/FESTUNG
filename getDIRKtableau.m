@@ -28,8 +28,8 @@ C = sum( A, 2);
 %s
 s = 1;
 %Order of accuracy of the method
-p = 1;
-tableau = struct('A', A, 'B', B, 'C', C, 's', s, 'p', p);
+q = 1;
+tableau = struct('A', A, 'B', B, 'C', C, 's', s, 'q', q);
 end
 
 function tableau = getDIRK22Tableau
@@ -44,8 +44,8 @@ C = sum( A, 2);
 %s
 s = 2;
 %Order of accuracy of the method
-p = 2;
-tableau = struct('A', A, 'B', B, 'C', C, 's', s, 'p', p);
+q = 2;
+tableau = struct('A', A, 'B', B, 'C', C, 's', s, 'q', q);
 end
 
 function tableau = getDIRK33Tableau
@@ -63,8 +63,8 @@ C = sum( A, 2);
 %s
 s = 3;
 %Order of accuracy of the method
-p = 3;
-tableau = struct('A', A, 'B', B, 'C', C, 's', s, 'p', p);
+q = 3;
+tableau = struct('A', A, 'B', B, 'C', C, 's', s, 'q', q);
 end
 
 function tableau = getDIRK54Tableau
@@ -80,6 +80,6 @@ C = sum( A, 2 );
 %s
 s = 5;
 %Order of accuracy of the method
-p = 4;
-tableau = struct('A', A, 'B', B, 'C', C, 's', s, 'p', p);
+q = 4;
+tableau = struct('A', A, 'B', B, 'C', C, 's', s, 'q', q);
 end
