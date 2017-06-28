@@ -60,20 +60,25 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = iterateSubSteps(problemData, nStep)
-%% List of functions making up a substep
-subStepList = { 'preprocessSubStep'; 'solveSubStep'; 'postprocessSubStep' };
-%% Check existence of all required functions
-assert(isequal(cellfun(@(fun) exist([ fun '.m'], 'file'), subStepList), 2 * ones(size(subStepList))), ...
-  'Not all the required functions for the substepping of the problem steps found.')
+function problemData = iterateSubSteps(problemData, nStep, stepHandles)
+if nargin < 3
+  % List of functions making up a substep
+  [~, ~, ~, subStepList] = getStepLists();
+  % Check existence of all required functions
+  assert(isequal(cellfun(@(fun) exist([ fun '.m'], 'file'), subStepList), 2 * ones(size(subStepList))), ...
+    'Not all the required functions for the substepping of the problem steps found.')
+  % Obtain function handles for steps
+  stepHandles = getStepHandles(problemData.problemName, subStepList);
+end % if
 %% Enter iterative loop
 assert(isstruct(problemData) && isfield(problemData, 'isSubSteppingFinished') && islogical(problemData.isSubSteppingFinished), ...
   'Struct "problemData" must contain a logical variable "isSubSteppingFinished".');
+stepNames = fieldnames(stepHandles);
 nSubStep = 0;
 while ~problemData.isSubSteppingFinished
   nSubStep = nSubStep + 1;
-  for nFunc = 1 : length(subStepList)
-    problemData = feval(subStepList{nFunc}, problemData, nStep, nSubStep);
+  for nFunc = 1 : length(stepNames)
+    problemData = stepHandles.(stepNames{nFunc})(problemData, nStep, nSubStep);
   end % for
 end % while
 end % function
