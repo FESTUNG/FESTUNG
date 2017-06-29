@@ -60,28 +60,26 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
-%problemData.hmax        = 2^-3; % maximum edge length of triangle
-problemData.hmax        = 1/(3*2^4); % maximum edge length of triangle
-problemData.p           = 4; % local polynomial degree
+problemData = setdefault(problemData, 'hmax', 2^-1); % maximum edge length of triangle
+problemData = setdefault(problemData, 'p', 1); % local polynomial degree
 
-problemData.isVisGrid   = false; % visualization of grid
-problemData.isVisSol    = true; % visualization of solution
+problemData = setdefault(problemData, 'isVisGrid', false);
+problemData = setdefault(problemData, 'isVisSol', false);
 
-% problemData.outputFrequency = max(problemData.numSteps/16,1); % no visualization of every timestep
-problemData.outputFrequency = 640; % no visualization of every timestep
-problemData.outputBasename  = ['output' filesep 'solution_hdg_advection_steady']; % Basename of output files
-problemData.outputTypes     = {'vtk'}; % solution output file types
+problemData = setdefault(problemData, 'outputFrequency', 10);
+problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'solution_hdg_advection']);
+problemData = setdefault(problemData, 'outputTypes', {'vtk'});
 
 %% HDG specific parameters
-problemData.stab = 1.0; %stabilization parameter in mod. LF/Rusanov flux
-problemData.isTrueLocalSolve = true;
+problemData = setdefault(problemData, 'stab', 1.0); %stabilization parameter in mod. LF/Rusanov flux
+problemData = setdefault(problemData, 'isTrueLocalSolve', true);
 
 %% HDG related configuration
 
 %% Testing?
-problemData.isInTesting = false;
-problemData.showWaitBar = false;
-problemData.showFprintfProgress = true;
+problemData = setdefault(problemData, 'isInTesting', false);
+problemData = setdefault(problemData, 'showWaitBar', false);
+problemData = setdefault(problemData, 'showFprintfProgress', false);
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
