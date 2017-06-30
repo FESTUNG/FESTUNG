@@ -62,7 +62,7 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Maximum edge length of triangle
-problemData = setdefault(problemData, 'hmax', 2^-4);
+problemData = setdefault(problemData, 'hmax', 2^-5);
 
 % Local polynomial approximation order (0 to 4)
 problemData = setdefault(problemData, 'p', 1);
@@ -99,24 +99,25 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 % problemData.cDCont = @(t,x1,x2) zeros(size(x1));
 % problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 %% Coefficients and boundary data (stationary analytical example).
-problemData.cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2);
+% problemData.cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2);
+% problemData.u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
+% problemData.u2Cont = @(t, x1, x2) exp(0.5 * (x1 - x2));
+% problemData.fCont = @(t, x1, x2) -7 * problemData.u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
+%                             - 7 * problemData.u2Cont(t, x1, x2) .* cos(7 * x1) .* sin(7 * x2) ...
+%                             + 0.5 * (problemData.u1Cont(t, x1, x2) - problemData.u2Cont(t, x1, x2)) .* problemData.cCont(t, x1, x2);
+% problemData.c0Cont = @(x1, x2) problemData.cCont(0, x1, x2);
+% problemData.cDCont = @(t, x1, x2) problemData.cCont(t, x1, x2);
+% problemData.gNCont = @(t, x1, x2) zeros(size(x1));
+%% Coefficients and boundary data (transient analytical example).
+problemData.cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2) + t;
 problemData.u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
 problemData.u2Cont = @(t, x1, x2) exp(0.5 * (x1 - x2));
-problemData.fCont = @(t, x1, x2) -7 * problemData.u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
+problemData.fCont = @(t, x1, x2) 1 - 7 * problemData.u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
                             - 7 * problemData.u2Cont(t, x1, x2) .* cos(7 * x1) .* sin(7 * x2) ...
                             + 0.5 * (problemData.u1Cont(t, x1, x2) - problemData.u2Cont(t, x1, x2)) .* problemData.cCont(t, x1, x2);
 problemData.c0Cont = @(x1, x2) problemData.cCont(0, x1, x2);
 problemData.cDCont = @(t, x1, x2) problemData.cCont(t, x1, x2);
 problemData.gNCont = @(t, x1, x2) zeros(size(x1));
-%% Coefficients and boundary data (transient analytical example).
-% problemData.cCont = @(t, x1, x2) sin(7 * (x1 - t)) .* sin(7 * (x2 - t));
-% problemData.u1Cont = @(t, x1, x2) x2 + t;
-% problemData.u2Cont = @(t, x1, x2) x1 + t;
-% problemData.fCont = @(t, x1, x2) 7 * (x2 + t - 1) .* cos(7 * (x1 - t)) .* sin(7 * (x2 - t)) ...
-%                                 + 7 * (x1 + t - 1) .* sin(7 * (x1 - t)) .* cos(7 * (x2 - t));
-% problemData.c0Cont = @(x1, x2) problemData.cCont(0, x1, x2);
-% problemData.cDCont = @(t, x1, x2) problemData.cCont(t, x1, x2);
-% problemData.gNCont = @(t, x1, x2) zeros(size(x1));
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
 % if license('checkout','PDE_Toolbox')
