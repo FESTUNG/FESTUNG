@@ -60,8 +60,8 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
-problemData = setdefault(problemData, 'hmax', 2^-1); % maximum edge length of triangle
-problemData = setdefault(problemData, 'p', 1); % local polynomial degree
+problemData = setdefault(problemData, 'hmax', 2^-5); % maximum edge length of triangle
+problemData = setdefault(problemData, 'p', 3); % local polynomial degree
 
 problemData = setdefault(problemData, 'isVisGrid', false);
 problemData = setdefault(problemData, 'isVisSol', false);

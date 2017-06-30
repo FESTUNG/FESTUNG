@@ -59,8 +59,8 @@ fprintf('Finished simulation at t_end = %g\n', problemData.t);
 %% Error evaluation
 % fprintf('L2 error w.r.t. the exact solution: %g\n', ...
 %   computeL2ErrorAtTime(problemData.g, problemData.t, problemData.cDisc, problemData.getRGSol, 2*problemData.p, problemData.basesOnQuad));
-fprintf('L2 error w.r.t. the exact solution: %g\n', ...
-  computeL2ErrorAtTime(problemData.g, problemData.t, problemData.cDisc, problemData.getLinearAdvectionSol, 2*problemData.p, problemData.basesOnQuad));
+problemData.L2error = computeL2ErrorAtTime(problemData.g, problemData.t, problemData.cDisc, problemData.getLinearAdvectionSol, 2*problemData.p, problemData.basesOnQuad);
+fprintf('L2 error w.r.t. the exact solution: %g\n', problemData.L2error );
 fprintf('norm(cDisc, 1) = %g\n', norm(problemData.cDisc(:), 1));
 fprintf('norm(cDisc, 2) = %g\n', norm(problemData.cDisc(:), 2));
 fprintf('norm(cDisc, inf) = %g\n', norm(problemData.cDisc(:), inf));
