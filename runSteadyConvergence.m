@@ -4,7 +4,7 @@ problemData.p = 0;
 problemData.h = 1;
 
 pMax = 4;
-jMax = 7;
+jMax = 6;
 
 vecHmax = zeros( jMax+1, 0);
 for j=0:jMax
@@ -44,7 +44,7 @@ end
 
 function writeReportLine( fileID, j, ne, err, ord )
 %   Write line
-  fprintf(fileID, '%d \t%d \t%1.10f \t%1.10f \n', j, ne, err, ord );
+  fprintf(fileID, '%d \t%d \t%1.10e \t%1.10e \n', j, ne, err, ord );
 end
 
 function generateCurrentReport( fileID, p, j, vecHmax, err )
