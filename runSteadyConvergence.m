@@ -1,13 +1,13 @@
-function runSteadyConvergence( fac )
+function runSteadyConvergence( fac, maxLvl, name )
 
 problemData.p = 0;
 problemData.h = 1;
 problemData.isConvergenceRun = true;
 
-pMin = 4;
+pMin = 0;
 pMax = 4;
 jMin = 0;
-jMax = 5;
+jMax = maxLvl;
 
 vecHmax = zeros( jMax+1, 0);
 for j=0:jMax
@@ -19,7 +19,7 @@ err = 1e10 * ones( pMax+1, jMax+1 );
 for p=pMin:pMax
   problemData.p = p;
   
-  filename = strcat('p', num2str(p), '.txt');
+  filename = strcat('p', num2str(p), '_', name, '.txt');
   fileID = fopen(filename,'w');
   writeReportHeader(fileID);
   
@@ -58,17 +58,4 @@ if j>0
   ord = log(err(p+1, j)/err(p+1, j+1))/log(2) ;
 end 
 writeReportLine( fileID, j, 1/vecHmax(j+1)*1/vecHmax(j+1)*2, err(p+1, j+1), ord );
-end
-
-function generateReport( fileID, p, jMax, vecHmax, err )
-%   Write header
-writeReportHeader(fileID, 'lvl \tNel \terr \torder\n');
-for j=0:jMax
-  ord = 0.;
-  if j>0
-    ord = log(err(p+1, j)/err(p+1, j+1))/log(2) ;
-  end 
-  writeReportLine( fileID, j, 1/vecHmax(j+1)*1/vecHmax(j+1)*2, err(p+1, j+1), ord );
-end 
-
 end
