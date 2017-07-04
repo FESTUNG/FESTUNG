@@ -167,7 +167,11 @@ fprintf( [ '\n' ...
 '    Logging output to "%s".\n' ...
 '   --------------------------------------------------\n\n' ], ...
 datestr(now,'yyyy'), problemName, datestr(now,'yyyy-mm-dd HH:MM:SS'), diaryName);
-oldpath = addpath([pwd filesep problemName], pwd);
+if isdeployed
+  oldpath = path;
+else
+  oldpath = addpath([pwd filesep problemName], pwd);
+end
 cwd = pwd;
 end % function
 %
