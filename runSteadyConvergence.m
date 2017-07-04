@@ -1,26 +1,29 @@
-function runSteadyConvergence
+function runSteadyConvergence( fac )
 
 problemData.p = 0;
 problemData.h = 1;
+problemData.isConvergenceRun = true;
 
+pMin = 4;
 pMax = 4;
-jMax = 6;
+jMin = 0;
+jMax = 5;
 
 vecHmax = zeros( jMax+1, 0);
 for j=0:jMax
-  vecHmax(j+1) = 1 / ( 3 * 2^j);
+  vecHmax(j+1) = 1 / ( fac * 2^j);
 end
 
 err = 1e10 * ones( pMax+1, jMax+1 );
 
-for p=0:pMax
+for p=pMin:pMax
   problemData.p = p;
   
   filename = strcat('p', num2str(p), '.txt');
   fileID = fopen(filename,'w');
   writeReportHeader(fileID);
   
-  for j=0:jMax
+  for j=jMin:jMax
     fprintf('Polynomial degree: %d, mesh level: %d \n', p, j );
     problemData.hmax = vecHmax(j+1) ;
     

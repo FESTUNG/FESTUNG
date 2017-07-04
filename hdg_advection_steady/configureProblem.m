@@ -60,7 +60,7 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
-problemData = setdefault(problemData, 'hmax', 2^-5); % maximum edge length of triangle
+problemData = setdefault(problemData, 'hmax', 2^-2); % maximum edge length of triangle
 problemData = setdefault(problemData, 'p', 3); % local polynomial degree
 
 problemData = setdefault(problemData, 'isVisGrid', false);
@@ -80,6 +80,7 @@ problemData = setdefault(problemData, 'isTrueLocalSolve', true);
 problemData = setdefault(problemData, 'isInTesting', false);
 problemData = setdefault(problemData, 'showWaitBar', false);
 problemData = setdefault(problemData, 'showFprintfProgress', false);
+problemData = setdefault(problemData, 'isConvergenceRun', false);
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
@@ -120,13 +121,17 @@ problemData.fluxCont = @( x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
 
-% problemData.generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
-% problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
-if license('checkout','PDE_Toolbox')
-  problemData.generateGridData = @(hmax) domainPolygon([0.0 1.0 1.0 0.0], [0.0 0.0 1.0 1.0], hmax);
-else
-  fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
-  problemData.generateGridData = @domainSquare;
+if problemData.isConvergenceRun==true
+  fprintf('=== Convergence run. Using Friedrichs-Keller triangulation. ===\n');
+  problemData.generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
+  % problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);  
+  else
+  if license('checkout','PDE_Toolbox')
+    problemData.generateGridData = @(hmax) domainPolygon([0.0 1.0 1.0 0.0], [0.0 0.0 1.0 1.0], hmax);
+  else
+    fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
+    problemData.generateGridData = @domainSquare;
+  end % if
 end % if
 % Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
