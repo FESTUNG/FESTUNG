@@ -60,15 +60,17 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
-problemData = setdefault(problemData, 'hmax', 2^-1); % maximum edge length of triangle
-problemData = setdefault(problemData, 'p', 1); % local polynomial degree
+problemData = setdefault(problemData, 'hmax', 2^-4); % maximum edge length of triangle
+problemData = setdefault(problemData, 'p', 3); % local polynomial degree
 % problemData = setdefault(problemData, 'ordRK', 2); % order of Runge-Kutta time stepper.
 problemData.ordRK       = min(problemData.p+1,4); % order of Runge Kutta time stepper.
-problemData = setdefault(problemData, 'numSteps', 20); % number of time steps
-problemData = setdefault(problemData, 'tEnd', 1); % end time
+% problemData.ordRK       = 1; % order of Runge Kutta time stepper.
+problemData = setdefault(problemData, 'numSteps', 160); % number of time steps
+% problemData = setdefault(problemData, 'tEnd', 1); % end time
+problemData = setdefault(problemData, 'tEnd', 2*pi); % end time
 
 problemData = setdefault(problemData, 'isVisGrid', false);
-problemData = setdefault(problemData, 'isVisSol', false);
+problemData = setdefault(problemData, 'isVisSol', true);
 
 problemData = setdefault(problemData, 'outputFrequency', 10);
 problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'solution_hdg_advection']);
@@ -94,12 +96,26 @@ assert(problemData.ordRK >= 1 && problemData.ordRK <= 4, 'Order of Runge Kutta m
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 %% Coefficients and boundary data (rotating Gaussian).
-problemData.getLinearAdvectionSol = @(t, X1, X2) sin( 2. * pi .* (X1 - 1. * t) ) .* sin( 2. * pi .* (X2 - 1. * t)  );
-problemData.c0Cont = @(x1, x2) problemData.getLinearAdvectionSol(0, x1, x2);
+% problemData.getLinearAdvectionSol = @(t, X1, X2) sin( 2. * pi .* (X1 - 1. * t) ) .* sin( 2. * pi .* (X2 - 1. * t)  );
+% problemData.c0Cont = @(x1, x2) problemData.getLinearAdvectionSol(0, x1, x2);
+% problemData.fCont = @(t,x1,x2) zeros(size(x1));
+% problemData.cDCont = @(t,x1,x2) problemData.getLinearAdvectionSol(t, x1, x2);
+% problemData.gNCont = @(t,x1,x2) zeros(size(x1));
+% problemData.fluxCont = @( t, x1, x2, c ) evalLinearAdvectionFlux(t, x1, x2, c);
+
+%% Coefficients and boundary data (LeVeque's solid body rotation).
+G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
+problemData.c0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
+                    (1-G(x1, x2, 0.5, 0.25)) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.0225) + ...
+                    0.25*(1+cos(pi*G(x1, x2, 0.25, 0.5))).*((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.0225);
 problemData.fCont = @(t,x1,x2) zeros(size(x1));
-problemData.cDCont = @(t,x1,x2) problemData.getLinearAdvectionSol(t, x1, x2);
+% problemData.u1Cont = @(t,x1,x2) 0.5 - x2;
+% problemData.u2Cont = @(t,x1,x2) x1 - 0.5;
+problemData.fluxCont = @( t, x1, x2, c ) evalLeVequeFlux(t, x1, x2, c);
+problemData.cDCont = @(t,x1,x2) zeros(size(x1));
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
-problemData.fluxCont = @( t, x1, x2, c ) evalLinearAdvectionFlux(t, x1, x2, c);
+
+problemData.getLinearAdvectionSol = @(t, X1, X2) problemData.c0Cont(X1, X2);
 % 
 % 
 % problemData.getLinearAdvectionSol = @(t, x1, x2) cos(7*x1).*cos(7*x2);
@@ -122,7 +138,10 @@ problemData.fluxCont = @( t, x1, x2, c ) evalLinearAdvectionFlux(t, x1, x2, c);
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
 
-problemData.generateGridData = @(hmax) domainArbitrarySquare( -0.5, 0.5, hmax );
+% problemData.generateGridData = @(hmax) domainArbitrarySquare( -0.5, 0.5, hmax );
+
+problemData.generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
+
 % problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
 % if license('checkout','PDE_Toolbox')
 %   problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
@@ -131,9 +150,14 @@ problemData.generateGridData = @(hmax) domainArbitrarySquare( -0.5, 0.5, hmax );
 %   problemData.generateGridData = @domainSquare;
 % end % if
 % Specify edge ids of boundary conditions
+% problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
+% problemData.generateMarkE0TbdrN = @(g) generateLinearAdvectionBoundary(g);
+% problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
+
+% Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
 % problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
-problemData.generateMarkE0TbdrN = @(g) generateLinearAdvectionBoundary(g);
+problemData.generateMarkE0TbdrN = @(g) generateLeVequeBoundary( g );
 problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 
 end % function
