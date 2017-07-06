@@ -60,6 +60,9 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
+problemData = setdefault(problemData, 'testcase', 'Convergence');
+
+
 problemData = setdefault(problemData, 'hmax', 2^-2); % maximum edge length of triangle
 problemData = setdefault(problemData, 'p', 3); % local polynomial degree
 
@@ -73,8 +76,7 @@ problemData = setdefault(problemData, 'outputTypes', {'vtk'});
 %% HDG specific parameters
 problemData = setdefault(problemData, 'stab', 1.0); %stabilization parameter in mod. LF/Rusanov flux
 problemData = setdefault(problemData, 'isTrueLocalSolve', true);
-
-%% HDG related configuration
+problemData = setdefault(problemData, 'trueLocalSolveSize', 16); % 16 seems to be good in most cases
 
 %% Testing?
 problemData = setdefault(problemData, 'isInTesting', false);
@@ -85,59 +87,31 @@ problemData = setdefault(problemData, 'isConvergenceRun', false);
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
-%% Coefficients and boundary data (rotating Gaussian).
-
-% problemData.cCont  = @(t,x1,x2) cos(7*x1).*cos(7*x2);
-% problemData.c0Cont = @(x1,x2) problemData.cCont(0,x1,x2);
-% problemData.cDCont = @(x1,x2) problemData.cCont(0,x1,x2);
-% % u1Cont = @(t,x1,x2) exp((x1+x2)/2);
-% % u2Cont = @(t,x1,x2) exp((x1-x2)/2);
-% problemData.fCont  = @(x1,x2) -7*sin(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
-%                     -7*cos(7*x1).*sin(7*x2).*exp((x1-x2)/2) ...
-%                     + 0.5*cos(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
-%                     - 0.5*cos(7*x1).*cos(7*x2).*exp((x1-x2)/2);
-% 
-% problemData.c0Cont = @(x1, x2) problemData.getLinearAdvectionSol(x1, x2);
-% problemData.fCont = @(x1,x2) zeros(size(x1)); %source
-% problemData.cDCont = @(x1,x2) problemData.getLinearAdvectionSol(x1, x2);
-% problemData.gNCont = @(x1,x2) zeros(size(x1));
-
-% problemData.c0Cont = @(x1, x2) x1;
-% problemData.fCont = @(x1,x2) ones(size(x1)); %source
-% problemData.cDCont = @(x1,x2) x1;
-% problemData.gNCont = @(x1,x2) zeros(size(x1));
-% 
-% problemData.fluxCont = @( x1, x2, c ) evalLinearAdvectionFlux(0, x1, x2, c);
-
-problemData.cCont  = @(t,x1,x2) cos(7*x1).*cos(7*x2);
-problemData.c0Cont = @(x1,x2) problemData.cCont(0,x1,x2);
-problemData.cDCont = @(x1,x2) problemData.cCont(0,x1,x2);
-problemData.fCont  = @(x1,x2) -7*sin(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
-                    -7*cos(7*x1).*sin(7*x2).*exp((x1-x2)/2) ...
-                    + 0.5*cos(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
-                    - 0.5*cos(7*x1).*cos(7*x2).*exp((x1-x2)/2);
-problemData.fluxCont = @( x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
+%% Coefficients and boundary data.
+problemData = execin([problemData.problemName filesep 'getTestcase'], problemData, problemData.testcase);
 
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
 
-if problemData.isConvergenceRun==true
-  fprintf('=== Convergence run. Using Friedrichs-Keller triangulation. ===\n');
-  problemData.generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
-  % problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);  
-  else
-  if license('checkout','PDE_Toolbox')
-    problemData.generateGridData = @(hmax) domainPolygon([0.0 1.0 1.0 0.0], [0.0 0.0 1.0 1.0], hmax);
-  else
-    fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
-    problemData.generateGridData = @domainSquare;
-  end % if
-end % if
+% At the moment, the mesh will be defined by the test case
+
+
+% if problemData.isConvergenceRun==true
+%   fprintf('=== Convergence run. Using Friedrichs-Keller triangulation. ===\n');
+%   problemData.generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
+%   % problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);  
+%   else
+%   if license('checkout','PDE_Toolbox')
+%     problemData.generateGridData = @(hmax) domainPolygon([0.0 1.0 1.0 0.0], [0.0 0.0 1.0 1.0], hmax);
+%   else
+%     fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
+%     problemData.generateGridData = @domainSquare;
+%   end % if
+% end % if
 % Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
 % problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
-problemData.generateMarkE0TbdrN = @(g) generateSteadyOutflowBoundary(g);
 % problemData.generateMarkE0TbdrN = @(g) generateLinearAdvectionBoundary(g);
-problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
+% problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 
 end % function
