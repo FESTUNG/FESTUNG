@@ -1,15 +1,15 @@
-function runUnsteadyConvergence( fac, maxLvl, name )
+function runUnsteadyConvergence( fac, maxLvl, testname )
 
 problemData.p = 0;
 problemData.h = 1;
-problemData.isConvergenceRun = true;
+problemData.testcase = testname;
 
-pMin = 2;
-pMax = 2;
+pMin = 0;
+pMax = 3;
 jMin = 0;
 jMax = maxLvl;
 
-numStepsLvl0 = 20;
+numStepsLvl0 = 10;
 
 
 vecHmax = zeros( jMax+1, 0);
@@ -22,7 +22,7 @@ err = 1e10 * ones( pMax+1, jMax+1 );
 for p=pMin:pMax
   problemData.p = p;
   
-  filename = strcat('p', num2str(p), '_', name, '.txt');
+  filename = strcat('p', num2str(p), '_', problemData.testcase, '.txt');
   fileID = fopen(filename,'w');
   writeReportHeader(fileID);
   
@@ -35,8 +35,8 @@ for p=pMin:pMax
     err(p+1, j+1) = resultProblemData.L2error;
     
     fprintf('Polynomial degree: %d\n', p);
-    generateCurrentReport( 1, p, j, vecHmax, err );
-    generateCurrentReport( fileID, p, j, vecHmax, err );
+    generateCurrentReportLine( 1, p, j, vecHmax, err );
+    generateCurrentReportLine( fileID, p, j, vecHmax, err );
   end
   fclose(fileID);
 end
@@ -54,9 +54,7 @@ function writeReportLine( fileID, j, ne, err, ord )
   fprintf(fileID, '%d \t%d \t%1.10e \t%1.10e \n', j, ne, err, ord );
 end
 
-function generateCurrentReport( fileID, p, j, vecHmax, err )
-%   Write header
-% writeReportHeader(fileID, 'lvl \tNel \terr \torder\n');
+function generateCurrentReportLine( fileID, p, j, vecHmax, err )
 ord = 0.;
 if j>0
   ord = log(err(p+1, j)/err(p+1, j+1))/log(2) ;

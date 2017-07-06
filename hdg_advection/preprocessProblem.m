@@ -50,6 +50,7 @@ function problemData = preprocessProblem(problemData)
 problemData.g = problemData.generateGridData(problemData.hmax);
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 
+problemData.tabRK = getDIRKtableau( problemData.ordRK );
 problemData.cDiscRK = cell( problemData.tabRK.s, 1);
 
 %% Globally constant parameters.
@@ -73,7 +74,7 @@ problemData.g = computeDerivedGridData(problemData.g);
 problemData.g.markSideE0T = generateMarkSideE0T( problemData.g );
 % Choose a block size for the local solves if we want 'true' local solves
 if ( problemData.isTrueLocalSolve  == true )
-    problemData.localSolveBlockSize = determineLocalSolveBlockSize( problemData.K );
+    problemData.localSolveBlockSize = determineLocalSolveBlockSize( problemData.K, problemData.trueLocalSolveSize );
 end
 
 %% Configuration output.
