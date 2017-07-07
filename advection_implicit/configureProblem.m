@@ -62,24 +62,27 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Maximum edge length of triangle
-problemData = setdefault(problemData, 'hmax', 2^-5);
+problemData = setdefault(problemData, 'hmax', 2^-4);
 
 % Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 1);
+problemData = setdefault(problemData, 'p', 2);
+
+% Order of Runge-Kutta method
+problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,4));
 
 % Order of quadrature rule
-problemData = setdefault(problemData, 'qOrd', 3*problemData.p + 1);
+problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
-% problemData = setdefault(problemData, 'numSteps', 3142);  % number of time steps
-% problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/3142)*2*pi);  % end time
-problemData = setdefault(problemData, 'numSteps', 100);  % number of time steps
-problemData = setdefault(problemData, 'tEnd', 1);  % end time
+problemData = setdefault(problemData, 'numSteps', 160);%3142);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 2*pi);%(problemData.numSteps/3142)*2*pi);  % end time
+% problemData = setdefault(problemData, 'numSteps', 100);  % number of time steps
+% problemData = setdefault(problemData, 'tEnd', 1);  % end time
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 5); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...
                          ['output' filesep 'advection_implicit']); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
@@ -98,7 +101,7 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 % problemData.u2Cont = @(t,x1,x2) x1 - 0.5;
 % problemData.cDCont = @(t,x1,x2) zeros(size(x1));
 % problemData.gNCont = @(t,x1,x2) zeros(size(x1));
-%% Coefficients and boundary data (stationary analytical example).
+%% Coefficients and boundary ndata (stationary analytical example).
 % problemData.cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2);
 % problemData.u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
 % problemData.u2Cont = @(t, x1, x2) exp(0.5 * (x1 - x2));
@@ -113,8 +116,8 @@ problemData.cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2) + t;
 problemData.u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
 problemData.u2Cont = @(t, x1, x2) exp(0.5 * (x1 - x2));
 problemData.fCont = @(t, x1, x2) 1 - 7 * problemData.u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
-                            - 7 * problemData.u2Cont(t, x1, x2) .* cos(7 * x1) .* sin(7 * x2) ...
-                            + 0.5 * (problemData.u1Cont(t, x1, x2) - problemData.u2Cont(t, x1, x2)) .* problemData.cCont(t, x1, x2);
+                           - 7 * problemData.u2Cont(t, x1, x2) .* cos(7 * x1) .* sin(7 * x2) ...
+                           + 0.5 * (problemData.u1Cont(t, x1, x2) - problemData.u2Cont(t, x1, x2)) .* problemData.cCont(t, x1, x2);
 problemData.c0Cont = @(x1, x2) problemData.cCont(0, x1, x2);
 problemData.cDCont = @(t, x1, x2) problemData.cCont(t, x1, x2);
 problemData.gNCont = @(t, x1, x2) zeros(size(x1));
@@ -123,7 +126,7 @@ problemData.gNCont = @(t, x1, x2) zeros(size(x1));
 % if license('checkout','PDE_Toolbox')
 %   problemData.generateGridData = @(hmax) domainPolygon([0 1 1 0], [0 0 1 1], hmax);
 % else
-%   fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
+  fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
   problemData.generateGridData = @domainSquare;
 % end % if
 % Specify edge ids of boundary conditions
@@ -131,3 +134,4 @@ problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
 problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
 problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 end % function
+

@@ -18,7 +18,8 @@
 %>  4. outputStep()
 %> 
 %> This routine is executed third in each loop iteration.
-%> It decides whether the main loop is to be terminated (i.e., the
+%> It brings the linearized new solution back to the representation matrix
+%> form and decides whether the main loop is to be terminated (i.e., the
 %> end of the simulation time is reached).
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
@@ -51,6 +52,11 @@
 %> @endparblock
 %
 function problemData = postprocessStep(problemData, nStep)
+K = problemData.K;
+N = problemData.N;
+
+%% Reshape and store solution in problemData
+problemData.cDisc = reshape(problemData.cDiscRK{end}, N, K)';
 problemData.isFinished = nStep >= problemData.numSteps;
 end % function
 

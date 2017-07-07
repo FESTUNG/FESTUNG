@@ -2,7 +2,7 @@
 % Runge-Kutta steps for a time-step.
 
 %===============================================================================
-%> @file advection/solveStep.m
+%> @file advection_implicit/solveStep.m
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %>        Carries out all Runge-Kutta steps for a time-step.
@@ -20,9 +20,9 @@
 %>  3. postprocessStep()
 %>  4. outputStep()
 %> 
-%> This routine is executed second in each loop iteration.
-%> It assembles the global system and computes the solution at
-%> the next time level.
+%> This routine obtains the parameters of the Runge-Kutta method and
+%> linearizes the DG solution representation vector before calling
+%> iterateSubSteps() to actually carry out the Runge-Kutta method.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
@@ -54,18 +54,20 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = solveStep(problemData, nStep) %#ok<INUSD>
+function problemData = solveStep(problemData, nStep)
 K = problemData.K;
 N = problemData.N;
 
-% Building the system
-sysA = -problemData.globG{1} - problemData.globG{2} + problemData.globR;
-sysV = problemData.globL - problemData.globKD - problemData.globKN;
-sysC = reshape(problemData.cDisc', [K*N 1]);
+% Obtain Runge-Kutta rule
+[problemData.t, problemData.A, problemData.b] = rungeKuttaImplicit(problemData.ordRK, problemData.tau, (nStep - 1) * problemData.tau);
 
-% Compute next step
-sysC = (problemData.globM + problemData.tau * sysA) \ (problemData.globM * sysC + problemData.tau * sysV);
+% Initialize solution vectors for RK steps
+problemData.cDiscRK = cell(length(problemData.t) + 1, 1); 
+problemData.cDiscRK{1} = reshape(problemData.cDisc', [K*N 1]);
 
-% Store solution
-problemData.cDisc = reshape(sysC, N, K)';
+problemData.rhsRK = cell(length(problemData.t), 1);
+
+% Carry out RK steps
+problemData.isSubSteppingFinished = false;
+problemData = iterateSubSteps(problemData, nStep);
 end % function

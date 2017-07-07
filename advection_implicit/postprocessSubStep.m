@@ -1,29 +1,25 @@
-% First step of the four-part algorithm in the main loop. Do-nothing
-% function in the advection solver.
+% Third step of the three-part substepping algorithm for each Runge-Kutta stage.
 
 %===============================================================================
-%> @file advection_implicit/preprocessStep.m
+%> @file advection_implicit/postprocessSubStep.m
 %>
-%> @brief First step of the four-part algorithm in the main loop. 
-%>        Do-nothing function in the advection solver.
+%> @brief Third step of the three-part substepping algorithm for each Runge-Kutta stage.
 %===============================================================================
 %>
-%> @brief First step of the four-part algorithm in the main loop.
-%>        Do-nothing function in the advection solver.
+%> @brief Third step of the three-part substepping algorithm for each Runge-Kutta stage.
 %>
-%> The main loop repeatedly executes four steps until the parameter
-%> <code>problemData.isFinished</code> becomes <code>true</code>.
-%> These four steps are:
+%> The routine iterateSubSteps() repeatedly executes three steps until the 
+%> parameter <code>problemData.isSubSteppingFinished</code> becomes 
+%> <code>true</code>.
+%> These three steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. preprocessSubStep()
+%>  2. solveSubStep()
+%>  3. postprocessSubStep()
 %> 
-%> This routine is executed first in each loop iteration.
-%> The Advection problem requires substepping due to the Runge-Kutta method
-%> (see solveStep() and @ref RAWFK2016 for details). Thus, no terms can be
-%> assembled here and this routine does nothing.
+%> This routine is executed third in each loop iteration.
+%> It decides whether the substepping is finished and updates
+%> <code>problemData.isSubSteppingFinished</code> accordingly.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
@@ -31,9 +27,10 @@
 %>                      loop iteration), as provided by configureProblem()  
 %>                      and preprocessProblem(). @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
+%> @param  nSubStep     The current iteration number of the substepping.
 %>
-%> @retval problemData  The input struct without any modifications.
-%>                      @f$[\text{struct}]@f$
+%> @retval problemData  The input struct enriched with postprocessed data
+%>                      for this loop iteration. @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
 %>
@@ -55,6 +52,6 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
-% No preprocessing necessary.
+function problemData = postprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
+problemData.isSubSteppingFinished = nSubStep >= length(problemData.t);
 end % function

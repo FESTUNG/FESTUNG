@@ -2,7 +2,7 @@
 % Runge-Kutta methods up to order 3.
 
 %===============================================================================
-%> @file rungeKuttaSSP.m
+%> @file rungeKuttaExplicit.m
 %>
 %> @brief Provides weights and time levels for explicit strong stability 
 %>        preserving (SSP) Runge-Kutta methods up to order 3.
@@ -61,7 +61,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function [t, omega] = rungeKuttaSSP(ord, tau, t0)
+function [t, omega] = rungeKuttaExcplicit(ord, tau, t0)
 switch ord
   case 1
     omega = 0;
