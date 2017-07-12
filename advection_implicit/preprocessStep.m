@@ -1,15 +1,15 @@
-% Second step of the four-part algorithm in the main loop. Carries out all
-% Runge-Kutta steps for a time-step.
+% First step of the four-part algorithm in the main loop. Do-nothing
+% function in the advection solver.
 
 %===============================================================================
-%> @file advection/solveStep.m
+%> @file advection_implicit/preprocessStep.m
 %>
-%> @brief Second step of the four-part algorithm in the main loop.
-%>        Carries out all Runge-Kutta steps for a time-step.
+%> @brief First step of the four-part algorithm in the main loop. 
+%>        Do-nothing function in the advection solver.
 %===============================================================================
 %>
-%> @brief Second step of the four-part algorithm in the main loop.
-%>        Carries out all Runge-Kutta steps for a time-step.
+%> @brief First step of the four-part algorithm in the main loop.
+%>        Do-nothing function in the advection solver.
 %>
 %> The main loop repeatedly executes four steps until the parameter
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
@@ -20,9 +20,10 @@
 %>  3. postprocessStep()
 %>  4. outputStep()
 %> 
-%> This routine obtains the parameters of the Runge-Kutta method and
-%> linearizes the DG solution representation vector before calling
-%> iterateSubSteps() to actually carry out the Runge-Kutta method.
+%> This routine is executed first in each loop iteration.
+%> The Advection problem requires substepping due to the Runge-Kutta method
+%> (see solveStep() and @ref RAWFK2016 for details). Thus, no terms can be
+%> assembled here and this routine does nothing.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
@@ -31,12 +32,12 @@
 %>                      and preprocessProblem(). @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
-%> @retval problemData  The input struct enriched with solution data at
-%>                      the next step. @f$[\text{struct}]@f$
+%> @retval problemData  The input struct without any modifications.
+%>                      @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -54,20 +55,6 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = solveStep(problemData, nStep)
-K = problemData.K;
-N = problemData.N;
-
-% Obtain Runge-Kutta rule
-[problemData.t, problemData.omega] = rungeKuttaExplicit(problemData.ordRK, ...
-                                        problemData.tau, ...
-                                        (nStep - 1) * problemData.tau);
-
-% Initialize solution vectors for RK steps
-problemData.cDiscRK = cell(length(problemData.t) + 1, 1);
-problemData.cDiscRK{1} = reshape(problemData.cDisc', [K*N 1]);
-
-% Carry out RK steps
-problemData.isSubSteppingFinished = false;
-problemData = iterateSubSteps(problemData, nStep);
+function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
+% No preprocessing necessary.
 end % function

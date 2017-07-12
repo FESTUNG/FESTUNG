@@ -2,7 +2,7 @@
 % Runge-Kutta steps for a time-step.
 
 %===============================================================================
-%> @file advection/solveStep.m
+%> @file advection_implicit/solveStep.m
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %>        Carries out all Runge-Kutta steps for a time-step.
@@ -36,7 +36,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -59,13 +59,13 @@ K = problemData.K;
 N = problemData.N;
 
 % Obtain Runge-Kutta rule
-[problemData.t, problemData.omega] = rungeKuttaExplicit(problemData.ordRK, ...
-                                        problemData.tau, ...
-                                        (nStep - 1) * problemData.tau);
+[problemData.t, problemData.A, problemData.b] = rungeKuttaImplicit(problemData.ordRK, problemData.tau, (nStep - 1) * problemData.tau);
 
 % Initialize solution vectors for RK steps
-problemData.cDiscRK = cell(length(problemData.t) + 1, 1);
+problemData.cDiscRK = cell(length(problemData.t) + 1, 1); 
 problemData.cDiscRK{1} = reshape(problemData.cDisc', [K*N 1]);
+
+problemData.rhsRK = cell(length(problemData.t), 1);
 
 % Carry out RK steps
 problemData.isSubSteppingFinished = false;

@@ -2,7 +2,7 @@
 % Problem parameters are to be modified inside this routine.
 
 %===============================================================================
-%> @file advection/configureProblem.m
+%> @file advection_implicit/configureProblem.m
 %>
 %> @brief Fills the problemData-struct with all basic configuration options.
 %>        Problem parameters are to be modified inside this routine.
@@ -27,7 +27,8 @@
 %> The velocity @f$\mathbf{u}:J\times\Omega\rightarrow\mathbb{R}^2@f$ and 
 %> right hand side@f$f:J\times\Omega\rightarrow \mathbb{R}@f$
 %> may vary in time and space. 
-%> A detailed description can be found in @ref RAWFK2016.
+%> A detailed description can be found in @ref RAWFK2016. However, this
+%> version uses an implicit discretization in time and no slope limiting.
 %>
 %> Please read the inline-comments in the code for the meaning of each
 %> configuration option.
@@ -40,7 +41,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -60,57 +61,45 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
+% Choose testcase
+problemData = setdefault(problemData, 'testcase', 'solid_body');
+
+% Mark run as convergence test (enforces Friedrichs-Keller triangulation)
+problemData = setdefault(problemData, 'isConvergence', false);
+
 % Maximum edge length of triangle
-problemData = setdefault(problemData, 'hmax', 2^-6);
+problemData = setdefault(problemData, 'hmax', 2^-4);
 
 % Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 2);
+problemData = setdefault(problemData, 'p', 1);
 
 % Order of Runge-Kutta method
-problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3));
+problemData = setdefault(problemData, 'ordRK', min(problemData.p + 1, 4));
 
-% Time stepping parameters
-problemData = setdefault(problemData, 'numSteps', 10);  % number of time steps
-problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/3142)*2*pi);  % end time
+% Order of quadrature rule
+problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
-% Slope limiting settings
-problemData = setdefault(problemData, 'isSlopeLim', true); % enable/disable slope limiting
-problemData = setdefault(problemData, 'typeSlopeLim', 'hierarch_vert'); % Type of slope limiter (linear, hierarch_vert, strict)
+% Load testcase
+problemData = execin([ problemData.problemName filesep 'getTestcase' ], problemData, problemData.testcase);
 
 % Visualization settings
-problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
+problemData = setdefault(problemData, 'isVisGrid', true);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
 problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...
-                         ['output' filesep 'advection_' problemData.typeSlopeLim]); 
+                         ['output' filesep 'advection_implicit']); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
-
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
-assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta must be zero to three.')
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
-assert(~problemData.isSlopeLim || problemData.p > 0, 'Slope limiting only available for p > 0.')
-%% Coefficients and boundary data (LeVeque's solid body rotation).
-G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
-problemData.c0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
-                    (1-G(x1, x2, 0.5, 0.25)) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.0225) + ...
-                    0.25*(1+cos(pi*G(x1, x2, 0.25, 0.5))).*((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.0225);
-problemData.fCont = @(t,x1,x2) zeros(size(x1));
-problemData.u1Cont = @(t,x1,x2) 0.5 - x2;
-problemData.u2Cont = @(t,x1,x2) x1 - 0.5;
-problemData.cDCont = @(t,x1,x2) zeros(size(x1));
-problemData.gNCont = @(t,x1,x2) zeros(size(x1));
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
-if license('checkout','PDE_Toolbox')
+if ~problemData.isConvergence && license('checkout','PDE_Toolbox')
   problemData.generateGridData = @(hmax) domainPolygon([0 1 1 0], [0 0 1 1], hmax);
 else
   fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
   problemData.generateGridData = @domainSquare;
 end % if
-% Specify edge ids of boundary conditions
-problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
-problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 end % function
+
