@@ -1,33 +1,34 @@
-% Assembles a matrix, containing integrals of products of two basis functions
-% of hybrid variable.
+% Assembles a matrix containing integrals of products of two edge basis
+% functions.
 
 %===============================================================================
-%> @file assembleMatElemPhiPhi.m
+%> @file assembleMatEdgeMuMu.m
 %>
-%> @brief Assembles a matrix, containing integrals of products of two basis 
-%>        functions of hybrid variable. This corresponds to a mass matrix.
+%> @brief Assembles a matrix containing integrals of products of two edge basis 
+%>        functions. This corresponds to a mass matrix.
 %===============================================================================
 %>
 %> @brief Assembles a mass matrix @f$M_{\lambda}@f$
-%>        containing integrals of products of two basis functions of hybrid variable.
+%>        containing integrals of products of two edge basis functions.
 %>
-%> This routine is called after the main loop.
+%> TODO
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0T    A marker indicating whether and edge should be 
-%>                    recognized or not.      
-%>                    @f$[N \times 3 \text{ struct}]@f$
-%> @param refElemMuMu Local matrix @f$\hat{\mathsf{M}}_{\lambda}@f$ as provided
+%> @param  markE0T    A marker indicating whether an edge should be 
+%>                    recognized or not. @f$[K \times 3]@f$
+%> @param refElemMuMu Local matrix @f$\hat{\mathsf{M}}_{\mu}@f$ as provided
 %>                    by <code>integrateRefElemMuMu()</code>.
-%>                    @f$[\hat{N} \times \hat{N}]@f$
-%> @retval ret        The assembled matrix @f$[\hat{K}\hat{N} \times \hat{K}\hat{N}]@f$
+%>                    @f$[\bar{N} \times \bar{N}]@f$
+%> @retval ret        The assembled matrix @f$[\bar{K}\bar{N} \times \bar{K}\bar{N}]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017
+%> @author Balthasar Reuter, 2017
 %> 
 %> @par License
 %> @parblock
@@ -53,11 +54,9 @@ function ret = assembleMatEdgeMuMu(g, markE0T, refEdgeMuMu)
 Nmu = size(refEdgeMuMu, 1);
 Kedge = g.numE;
 validateattributes(refEdgeMuMu, {'numeric'}, {'size', [Nmu Nmu]}, mfilename, 'refEdgeMuMu');
-
-%Interior edges
-ret = sparse(Kedge*Nmu, Kedge*Nmu);
-for n = 1:3
-    Kkn = g.areaE0T( :, n ) .*  markE0T(:, n) ;
-    ret = ret + kron( sparse( g.E0T(:, n), g.E0T(:, n), Kkn, Kedge, Kedge ), refEdgeMuMu );
+ret = sparse(Kedge * Nmu, Kedge * Nmu);
+for n = 1 : 3
+  Kkn = g.areaE0T( :, n ) .*  markE0T(:, n) ;
+  ret = ret + kron( sparse( g.E0T(:, n), g.E0T(:, n), Kkn, Kedge, Kedge ), refEdgeMuMu );
 end
 end % function
