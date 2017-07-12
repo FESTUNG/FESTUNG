@@ -48,7 +48,7 @@
 %
 function ret = assembleMatEdgePhiIntMu(g, markE0T, refEdgePhiIntMu)
 K = g.numT;  Kedge = g.numE; 
-[N, Nmu] = size(refEdgePhiIntMu, [1, 2]);
+[N, Nmu, ~, ~] = size(refEdgePhiIntMu);
 
 % Check function arguments that are directly used
 validateattributes(markE0T, {'logical'}, {'size', [K 3]}, mfilename, 'markE0T');

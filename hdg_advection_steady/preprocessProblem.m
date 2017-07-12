@@ -102,7 +102,7 @@ problemData.globMphi = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 %Interior
 problemData.globRmu = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
 %
-problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
+problemData.globRphi = assembleMatEdgePhiIntPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRphi );
 %
 problemData.globKmuOut = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu );
 problemData.globKmuOut = problemData.globKmuOut';
