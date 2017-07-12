@@ -51,12 +51,10 @@
 %
 function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
-Kedge = problemData.g.numE;
 N = problemData.N;
-Nmu = problemData.Nmu;
 stab = problemData.stab;
 
-diagRK = problemData.tabRK.A( nSubStep, nSubStep );
+diagRK = problemData.A(nSubStep, nSubStep);
 
 %% Actual HDG
 problemData.matLbar = - problemData.globG{1} - problemData.globG{2} ...
@@ -79,7 +77,7 @@ matM = diagRK .* problemData.matMbar;
 % 2. We invert the whole mass matrix. This may be very slow and memory
 % consuming for large matrices (=many elements). I guess it may be faster
 % for matrices of moderate size.
-if (problemData.isTrueLocalSolve==true)
+if problemData.isTrueLocalSolve
     blockSize = problemData.localSolveBlockSize;
     matLinvLocal = cell( K/blockSize, 1);
     %Invert every block locally

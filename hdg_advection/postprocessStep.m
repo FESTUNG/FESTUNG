@@ -52,9 +52,6 @@
 %> @endparblock
 %
 function problemData = postprocessStep(problemData, nStep)
-K = problemData.K;
-N = problemData.N;
-
 %% Reshape and store solution in problemData
 
 % No update on cDisc is needed, because the employed DIRK schemes are
@@ -62,7 +59,5 @@ N = problemData.N;
 % is actually the solution C^(n+1) at the next time step.
 
 problemData.isFinished = nStep >= problemData.numSteps;
-problemData.t = problemData.t + problemData.dt;
-
 end % function
 

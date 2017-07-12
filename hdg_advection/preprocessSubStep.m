@@ -57,31 +57,32 @@ function problemData = preprocessSubStep(problemData, nStep, nSubStep) %#ok<INUS
 K = problemData.K;
 N = problemData.N;
 
-problemData.timeRK = problemData.t + problemData.tabRK.C(nSubStep) * problemData.dt;
+% problemData.timeRK = problemData.t + problemData.tabRK.C(nSubStep) * problemData.dt;
+t = problemData.t(nSubStep);
 
 problemData.cDiscRkRHS = zeros( K * N, 1 );
 % RK RHS
 for i=1:nSubStep-1
-    problemData.cDiscRkRHS = problemData.cDiscRkRHS + problemData.tabRK.A(nSubStep,i) .* problemData.cDiscRK{i};
+    problemData.cDiscRkRHS = problemData.cDiscRkRHS + problemData.A(nSubStep,i) .* problemData.cDiscRK{i};
 end
 
 %% HDG stuff
 %Evaluate u (=transport velocities) on every element
-problemData.uEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fluxCont( problemData.timeRK, x1 ,x2, 1.), ...
+problemData.uEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fluxCont(t, x1 ,x2, 1.), ...
                                      problemData.N);
                                  
 %Evaluate c (=solution) on every edge
-problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(  problemData.timeRK, x1 ,x2), ...
+problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(t, x1 ,x2), ...
                                          problemData.Nmu);
 % Evaluate advection velocity on every element
-problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2) problemData.fluxCont( problemData.timeRK, x1 ,x2, 1.), ...
+problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2) problemData.fluxCont(t, x1 ,x2, 1.), ...
                                     problemData.Nmu);
                                 
 %Evaluate the flux on every edge
 problemData.fluxEdge = ...
     evalFluxContAtEveryEdgeIntPoint( problemData.g, ...
                                      problemData.g.markE0TbdrD, ...
-                                     @(x1, x2, c) problemData.fluxCont( problemData.timeRK, x1 ,x2, c), ...
+                                     @(x1, x2, c) problemData.fluxCont(t, x1 ,x2, c), ...
                                      problemData.cEdge, problemData.Nmu);
                                
 % Evaluate Dirichlet boundary condition for the first equation.
@@ -90,7 +91,7 @@ problemData.globFphiD = assembleVecEdgePhiIntFlux( problemData.g, problemData.N,
 
 %Evaluate f (= source term) on every element
 
-problemData.srcEval = evalSourceContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fCont( problemData.timeRK, x1 ,x2 ), ...
+problemData.srcEval = evalSourceContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fCont(t, x1 ,x2 ), ...
                                      problemData.N);
 problemData.globH = assembleVecElemPhiSource(problemData.g, problemData.N, ...
                             problemData.srcEval, problemData.basesOnQuad);
@@ -109,7 +110,7 @@ problemData.globSout = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.m
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!
 problemData.globKmuD = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
-    @(x1,x2) problemData.cDCont( problemData.timeRK, x1, x2), problemData.Nmu, problemData.basesOnGamma );
+    @(x1,x2) problemData.cDCont( t, x1, x2), problemData.Nmu, problemData.basesOnGamma );
 
 % Reshape cDisc to have a vector
 % problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );

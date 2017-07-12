@@ -58,6 +58,12 @@ function problemData = solveStep(problemData, nStep)
 K = problemData.K;
 N = problemData.N;
 
+% Obtain Runge-Kutta rule
+[problemData.t, problemData.A, problemData.b] = rungeKuttaImplicit(problemData.ordRK, problemData.dt, (nStep - 1) * problemData.dt);
+
+% Initialize solution vectors for RK steps
+problemData.cDiscRK = cell(length(problemData.t), 1); 
+
 % Carry out RK steps
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);

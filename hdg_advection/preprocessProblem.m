@@ -50,8 +50,8 @@ function problemData = preprocessProblem(problemData)
 problemData.g = problemData.generateGridData(problemData.hmax);
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 
-problemData.tabRK = getDIRKtableau( problemData.ordRK );
-problemData.cDiscRK = cell( problemData.tabRK.s, 1);
+% problemData.tabRK = getDIRKtableau( problemData.ordRK );
+% problemData.cDiscRK = cell( problemData.tabRK.s, 1);
 
 %% Globally constant parameters.
 problemData.K     = problemData.g.numT;  % number of triangles

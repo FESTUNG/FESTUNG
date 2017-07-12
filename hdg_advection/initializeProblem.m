@@ -49,8 +49,6 @@ problemData.isFinished = false;
 problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 2*problemData.p+1, ...
     problemData.hatM, problemData.basesOnQuad);
 
-problemData.t = 0.;
-
 % if (problemData.isInTesting == true)
 %     warning('Setting dt to zero for testing')
 %     problemData.dt = 0;
