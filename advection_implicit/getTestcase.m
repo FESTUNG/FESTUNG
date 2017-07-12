@@ -50,6 +50,23 @@ switch testcase
     idN = -1;
     numSteps = 10;
     tEnd = 20;    
+    
+  case 'transient2' % Transient analytical example
+    isAnalytical = true;
+    
+    cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2) + sin(t);
+    u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
+    u2Cont = @(t, x1, x2) exp(0.5 * (x1 - x2));
+    fCont = @(t, x1, x2) cos(t) - 7 * u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
+        - 7 * u2Cont(t, x1, x2) .* cos(7 * x1) .* sin(7 * x2) ...
+        + 0.5 * (u1Cont(t, x1, x2) - u2Cont(t, x1, x2)) .* cCont(t, x1, x2);
+    c0Cont = @(x1, x2) cCont(0, x1, x2);
+    cDCont = @(t, x1, x2) cCont(t, x1, x2);
+    gNCont = @(t, x1, x2) -7 * cos(7 * x1) .* sin(7 * x2);
+    
+    idN = -1;
+    numSteps = 10;
+    tEnd = 40;    
 end % switch
 
 fprintf('Loaded testcase "%s"\n', testcase);

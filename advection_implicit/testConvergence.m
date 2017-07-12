@@ -34,7 +34,7 @@ for ip = 1 : length(pLevel)
                         ((hLevel(2:N) - hLevel(1:N-1)) * log(2)) ];
       else
         eoc{ip} = [ 0, log(err{ip}(1:N-1) ./ err{ip}(2:N)) ./ ...
-                        ((tLevel(1:N-1) - tLevel(2:N)) * log(2)) ];
+                        ((tLevel(2:N) - tLevel(1:N-1)) * log(2)) ];
       end % if
       printConvergence(err, eoc, pLevel);
     catch ME

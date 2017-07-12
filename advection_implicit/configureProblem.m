@@ -74,7 +74,7 @@ problemData = setdefault(problemData, 'hmax', 2^-4);
 problemData = setdefault(problemData, 'p', 1);
 
 % Order of Runge-Kutta method
-problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,4));
+problemData = setdefault(problemData, 'ordRK', min(problemData.p + 1, 4));
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
