@@ -19,7 +19,7 @@ switch problemName
     generateMarkE0TbdrN = @(g) generateLeVequeBoundary( g );
     generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
     
-    generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
+    generateGridData = @(hmax) domainSquare(hmax, 0, 1);
 
     tEnd = 2*pi;
     
@@ -51,7 +51,7 @@ switch problemName
     generateMarkE0TbdrN = @(g) generateSteadyOutflowBoundary(g);
     generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
     
-    generateGridData = @(hmax) domainArbitrarySquare( 0.0, 1.0, hmax );
+    generateGridData = @(hmax) domainSquare(hmax, 0, 1);
     
   otherwise
     error('Specified test case is not available. Please check your configuration.');

@@ -100,11 +100,11 @@ problemData.globMphi = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
 %We use the assembly routine above
 %Interior
-problemData.globRmu = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
+problemData.globRmu = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
 %
 problemData.globRphi = assembleMatEdgePhiIntPhiIntHybrid( problemData.g, problemData.hatRphi );
 %
-problemData.globKmuOut = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu );
+problemData.globKmuOut = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu );
 problemData.globKmuOut = problemData.globKmuOut';
 
 %
