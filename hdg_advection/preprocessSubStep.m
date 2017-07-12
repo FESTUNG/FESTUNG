@@ -100,11 +100,11 @@ problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, pr
               
 
 % Flux on interior edges
-problemData.globS = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0Tint, ...
-                                                 problemData.uEdge, problemData.hatS );
+problemData.globS = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0Tint, ...
+                                                 problemData.hatS, problemData.uEdge);
 % Outflow BC
-problemData.globSout = assembleMatEdgeMuPhiIntFlux( problemData.g, problemData.g.markE0TbdrN, ...
-                                                  problemData.uEdge, problemData.hatS );
+problemData.globSout = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0TbdrN, ...
+                                                  problemData.hatS, problemData.uEdge);
 
 % Assembly of Dirichlet boundary contributions
 % This has to be evaluated at t_new = t + dt!!
