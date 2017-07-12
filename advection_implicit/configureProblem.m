@@ -61,11 +61,17 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
+% Choose testcase
+problemData = setdefault(problemData, 'testcase', 'solid_body');
+
+% Mark run as convergence test (enforces Friedrichs-Keller triangulation)
+problemData = setdefault(problemData, 'isConvergence', false);
+
 % Maximum edge length of triangle
 problemData = setdefault(problemData, 'hmax', 2^-4);
 
 % Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 2);
+problemData = setdefault(problemData, 'p', 1);
 
 % Order of Runge-Kutta method
 problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,4));
@@ -73,65 +79,27 @@ problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,4));
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
-% Time stepping parameters
-problemData = setdefault(problemData, 'numSteps', 160);%3142);  % number of time steps
-problemData = setdefault(problemData, 'tEnd', 2*pi);%(problemData.numSteps/3142)*2*pi);  % end time
-% problemData = setdefault(problemData, 'numSteps', 100);  % number of time steps
-% problemData = setdefault(problemData, 'tEnd', 1);  % end time
+% Load testcase
+problemData = execin([ problemData.problemName filesep 'getTestcase' ], problemData, problemData.testcase);
 
 % Visualization settings
-problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
+problemData = setdefault(problemData, 'isVisGrid', true);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
 problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...
                          ['output' filesep 'advection_implicit']); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
-
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
-%% Coefficients and boundary data (LeVeque's solid body rotation).
-% G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
-% problemData.c0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
-%                     (1-G(x1, x2, 0.5, 0.25)) .* ((x1 - 0.5).^2 + (x2 - 0.25).^2 <= 0.0225) + ...
-%                     0.25*(1+cos(pi*G(x1, x2, 0.25, 0.5))).*((x1 - 0.25).^2 + (x2 - 0.5).^2 <= 0.0225);
-% problemData.fCont = @(t,x1,x2) zeros(size(x1));
-% problemData.u1Cont = @(t,x1,x2) 0.5 - x2;
-% problemData.u2Cont = @(t,x1,x2) x1 - 0.5;
-% problemData.cDCont = @(t,x1,x2) zeros(size(x1));
-% problemData.gNCont = @(t,x1,x2) zeros(size(x1));
-%% Coefficients and boundary ndata (stationary analytical example).
-% problemData.cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2);
-% problemData.u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
-% problemData.u2Cont = @(t, x1, x2) exp(0.5 * (x1 - x2));
-% problemData.fCont = @(t, x1, x2) -7 * problemData.u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
-%                             - 7 * problemData.u2Cont(t, x1, x2) .* cos(7 * x1) .* sin(7 * x2) ...
-%                             + 0.5 * (problemData.u1Cont(t, x1, x2) - problemData.u2Cont(t, x1, x2)) .* problemData.cCont(t, x1, x2);
-% problemData.c0Cont = @(x1, x2) problemData.cCont(0, x1, x2);
-% problemData.cDCont = @(t, x1, x2) problemData.cCont(t, x1, x2);
-% problemData.gNCont = @(t, x1, x2) zeros(size(x1));
-%% Coefficients and boundary data (transient analytical example).
-problemData.cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2) + t;
-problemData.u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
-problemData.u2Cont = @(t, x1, x2) exp(0.5 * (x1 - x2));
-problemData.fCont = @(t, x1, x2) 1 - 7 * problemData.u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
-                           - 7 * problemData.u2Cont(t, x1, x2) .* cos(7 * x1) .* sin(7 * x2) ...
-                           + 0.5 * (problemData.u1Cont(t, x1, x2) - problemData.u2Cont(t, x1, x2)) .* problemData.cCont(t, x1, x2);
-problemData.c0Cont = @(x1, x2) problemData.cCont(0, x1, x2);
-problemData.cDCont = @(t, x1, x2) problemData.cCont(t, x1, x2);
-problemData.gNCont = @(t, x1, x2) zeros(size(x1));
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
-% if license('checkout','PDE_Toolbox')
-%   problemData.generateGridData = @(hmax) domainPolygon([0 1 1 0], [0 0 1 1], hmax);
-% else
+if ~problemData.isConvergence && license('checkout','PDE_Toolbox')
+  problemData.generateGridData = @(hmax) domainPolygon([0 1 1 0], [0 0 1 1], hmax);
+else
   fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
   problemData.generateGridData = @domainSquare;
-% end % if
-% Specify edge ids of boundary conditions
-problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
-problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
+end % if
 end % function
 
