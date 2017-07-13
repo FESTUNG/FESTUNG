@@ -1,7 +1,7 @@
 % Preprocessing of the Runge-Kutta step.
 
 %===============================================================================
-%> @file advection/preprocessSubStep.m
+%> @file hdg_advection/preprocessSubStep.m
 %>
 %> @brief Preprocessing of the Runge-Kutta step.
 %===============================================================================
@@ -35,7 +35,8 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017
 %> 
 %> @par License
 %> @parblock
@@ -54,67 +55,38 @@
 %> @endparblock
 %
 function problemData = preprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
-K = problemData.K;
-N = problemData.N;
-
-% problemData.timeRK = problemData.t + problemData.tabRK.C(nSubStep) * problemData.dt;
+% Select time level for current Runge-Kutta step
 t = problemData.t(nSubStep);
+cDCont = @(x1, x2) problemData.cDCont(t, x1 ,x2);
+u1Cont = @(x1, x2) problemData.u1Cont(t, x1, x2);
+u2Cont = @(x1, x2) problemData.u2Cont(t, x1, x2);
+fCont = @(x1,x2) problemData.fCont(t, x1, x2);
 
-problemData.cDiscRkRHS = zeros( K * N, 1 );
-% RK RHS
-for i=1:nSubStep-1
-    problemData.cDiscRkRHS = problemData.cDiscRkRHS + problemData.A(nSubStep,i) .* problemData.cDiscRK{i};
-end
+% Evaluate normal advection velocity on every edge.
+uNormalQ0E0T = computeFuncContNuOnQuadEdge(problemData.g, u1Cont, u2Cont, 2*problemData.p+1);
 
-%% HDG stuff
-%Evaluate u (=transport velocities) on every element
-problemData.uEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fluxCont(t, x1 ,x2, 1.), ...
-                                     problemData.N);
-                                 
-%Evaluate c (=solution) on every edge
-problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont(t, x1 ,x2), ...
-                                         problemData.Nmu);
-% Evaluate advection velocity on every element
-problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2) problemData.fluxCont(t, x1 ,x2, 1.), ...
-                                    problemData.Nmu);
-                                
-%Evaluate the flux on every edge
-problemData.fluxEdge = ...
-    evalFluxContAtEveryEdgeIntPoint( problemData.g, ...
-                                     problemData.g.markE0TbdrD, ...
-                                     @(x1, x2, c) problemData.fluxCont(t, x1 ,x2, c), ...
-                                     problemData.cEdge, problemData.Nmu);
-                               
-% Evaluate Dirichlet boundary condition for the first equation.
-problemData.globFphiD = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, ...
-    problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
+% Assemble source term.
+% srcEval = evalSourceContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fCont(t, x1 ,x2 ), problemData.N);
+% problemData.globH = assembleVecElemPhiSource(problemData.g, problemData.N, srcEval, problemData.basesOnQuad);
+problemData.globH = problemData.globMphi * reshape(projectFuncCont2DataDisc(problemData.g, fCont, ...
+                        max(2*problemData.p, 1), problemData.hatM, problemData.basesOnQuad)', [], 1);
 
-%Evaluate f (= source term) on every element
+% Assemble element integral contributions.
+problemData.globG = assembleMatElemDphiPhiFuncContVec(problemData.g, problemData.hatG, ...
+                        u1Cont, u2Cont);
 
-problemData.srcEval = evalSourceContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fCont(t, x1 ,x2 ), ...
-                                     problemData.N);
-problemData.globH = assembleVecElemPhiSource(problemData.g, problemData.N, ...
-                            problemData.srcEval, problemData.basesOnQuad);
-
-% 
-problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatG );
-              
-
-% Flux on interior edges
+% Assemble flux on interior edges
 problemData.globS = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0Tint, ...
-                                                 problemData.hatS, problemData.uEdge);
-% Outflow BC
+                        problemData.hatS, uNormalQ0E0T);
+
+% Assemble Dirichlet boundary conditions.
+cQ0E0T = computeFuncContOnQuadEdge(problemData.g, cDCont, 2 * problemData.p + 1);
+problemData.globFphiD = assembleVecEdgePhiIntVal(problemData.g, problemData.g.markE0TbdrD, ...
+                            cQ0E0T .* uNormalQ0E0T, problemData.N, problemData.basesOnQuad);
+problemData.globKmuD = assembleVecEdgeMuFuncCont(problemData.g, problemData.g.markE0TbdrD, ...
+                            cDCont, 2 * problemData.p + 1, problemData.basesOnGamma);
+
+% Assemble outflow boundary conditions.
 problemData.globSout = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0TbdrN, ...
-                                                  problemData.hatS, problemData.uEdge);
-
-% Assembly of Dirichlet boundary contributions
-% This has to be evaluated at t_new = t + dt!!
-problemData.globKmuD = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
-    @(x1,x2) problemData.cDCont( t, x1, x2), problemData.Nmu, problemData.basesOnGamma );
-
-% Reshape cDisc to have a vector
-% problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
-% problemData.lambdaDiscReshaped = reshape( problemData.lambdaDisc', size(problemData.globP, 1), 1 );
-% M*cDisc, should I store it?
-
+                                                  problemData.hatS, uNormalQ0E0T);
 end % function

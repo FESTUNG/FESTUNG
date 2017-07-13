@@ -10,6 +10,8 @@ switch problemName
       + 0.5*cos(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
       - 0.5*cos(7*x1).*cos(7*x2).*exp((x1-x2)/2);
     fluxCont = @(x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
+    u1Cont = @(x1,x2) exp((x1+x2)/2);
+    u2Cont = @(x1,x2) exp((x1-x2)/2);
     
     generateMarkE0TbdrN = @(g) generateSteadyOutflowBoundary(g);
     generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
@@ -23,6 +25,8 @@ switch problemName
 end % switch
 
 problemData = setdefault(problemData, 'c0Cont', c0Cont);
+problemData = setdefault(problemData, 'u1Cont', u1Cont);
+problemData = setdefault(problemData, 'u2Cont', u2Cont);
 problemData = setdefault(problemData, 'cCont', cCont);
 problemData = setdefault(problemData, 'fCont', fCont);
 problemData = setdefault(problemData, 'fluxCont', fluxCont);

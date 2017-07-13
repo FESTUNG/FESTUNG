@@ -10,7 +10,9 @@ switch problemName
     %     Source term
     fCont = @(t,x1,x2) zeros(size(x1));
     %     Flux function
-    fluxCont = @( t, x1, x2, c ) evalLeVequeFlux(t, x1, x2, c);
+%     fluxCont = @( t, x1, x2, c ) evalLeVequeFlux(t, x1, x2, c);
+    u1Cont = @(t, x1, x2) 0.5 - x2;
+    u2Cont = @(t, x1, x2) x1 - 0.5;
     %     Dirichlet boundary data
     cDCont = @(t,x1,x2) zeros(size(x1));
     %     Solution
@@ -46,13 +48,14 @@ switch problemName
       -7*cos(7*x1).*sin(7*x2).*exp((x1-x2)/2) ...
       + 0.5*cos(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
       - 0.5*cos(7*x1).*cos(7*x2).*exp((x1-x2)/2);
-    fluxCont = @(t,  x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
+%     fluxCont = @(t,  x1, x2, c ) evalSteadyFlux(0, x1, x2, c);
+    u1Cont = @(t, x1, x2) exp((x1+x2)/2);
+    u2Cont = @(t, x1, x2) exp((x1-x2)/2);
     
     generateMarkE0TbdrN = @(g) generateSteadyOutflowBoundary(g);
     generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
     
     generateGridData = @(hmax) domainSquare(hmax, 0, 1);
-    
   otherwise
     error('Specified test case is not available. Please check your configuration.');
 
@@ -61,7 +64,8 @@ end % switch
 
 problemData = setdefault(problemData, 'c0Cont', c0Cont);
 problemData = setdefault(problemData, 'fCont', fCont);
-problemData = setdefault(problemData, 'fluxCont', fluxCont);
+problemData = setdefault(problemData, 'u1Cont', u1Cont);
+problemData = setdefault(problemData, 'u2Cont', u2Cont);
 problemData = setdefault(problemData, 'cDCont', cDCont);
 problemData = setdefault(problemData, 'getLinearAdvectionSol', getLinearAdvectionSol);
 problemData = setdefault(problemData, 'generateMarkE0TbdrN', generateMarkE0TbdrN);

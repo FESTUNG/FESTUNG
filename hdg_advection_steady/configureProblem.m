@@ -63,7 +63,7 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'Convergence');
 
 
-problemData = setdefault(problemData, 'hmax', 2^-2); % maximum edge length of triangle
+problemData = setdefault(problemData, 'hmax', 2^-6); % maximum edge length of triangle
 problemData = setdefault(problemData, 'p', 3); % local polynomial degree
 
 problemData = setdefault(problemData, 'isVisGrid', false);

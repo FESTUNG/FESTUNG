@@ -60,7 +60,7 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
-problemData = setdefault(problemData, 'testcase', 'LeVeque');
+problemData = setdefault(problemData, 'testcase', 'LeVeque'); % 'SteadyProblem'); % 
 
 problemData = setdefault(problemData, 'hmax', 2^-4); % maximum edge length of triangle
 problemData = setdefault(problemData, 'p', 2); % local polynomial degree
