@@ -2,7 +2,7 @@
 % Problem parameters are to be modified inside this routine.
 
 %===============================================================================
-%> @file advection/configureProblem.m
+%> @file hdg_advection_steady/configureProblem.m
 %>
 %> @brief Fills the problemData-struct with all basic configuration options.
 %>        Problem parameters are to be modified inside this routine.

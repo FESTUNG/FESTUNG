@@ -1,6 +1,7 @@
 function problemData = getTestcase(problemData, problemName)
 switch problemName
   case 'LeVeque'
+    isAnalytical = false;
     
     G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
     %     Initial conditions
@@ -16,7 +17,6 @@ switch problemName
     %     Dirichlet boundary data
     cDCont = @(t,x1,x2) zeros(size(x1));
     %     Solution
-    getLinearAdvectionSol = @(t, X1, X2) c0Cont(X1, X2);
     
     generateMarkE0TbdrN = @(g) generateLeVequeBoundary( g );
     generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
@@ -40,10 +40,11 @@ switch problemName
 %     generateGridData = @(hmax) domainArbitrarySquare( -0.5, 0.5, hmax );
     
   case 'SteadyProblem'
-    getLinearAdvectionSol = @(t, x1, x2) cos(7*x1).*cos(7*x2);
+    isAnalytical = true;
+    
     cCont  = @(t,x1,x2) cos(7*x1).*cos(7*x2);
     c0Cont = @(x1,x2) cCont(0,x1,x2);
-    cDCont = @(t,x1,x2) cCont(0,x1,x2);
+    cDCont = @(t,x1,x2) cCont(t,x1,x2);
     fCont  = @(t, x1,x2) -7*sin(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
       -7*cos(7*x1).*sin(7*x2).*exp((x1-x2)/2) ...
       + 0.5*cos(7*x1).*cos(7*x2).*exp((x1+x2)/2) ...
@@ -67,7 +68,7 @@ problemData = setdefault(problemData, 'fCont', fCont);
 problemData = setdefault(problemData, 'u1Cont', u1Cont);
 problemData = setdefault(problemData, 'u2Cont', u2Cont);
 problemData = setdefault(problemData, 'cDCont', cDCont);
-problemData = setdefault(problemData, 'getLinearAdvectionSol', getLinearAdvectionSol);
+if isAnalytical, problemData = setdefault(problemData, 'cCont', cCont); end
 problemData = setdefault(problemData, 'generateMarkE0TbdrN', generateMarkE0TbdrN);
 problemData = setdefault(problemData, 'generateMarkE0TbdrD', generateMarkE0TbdrD);
 

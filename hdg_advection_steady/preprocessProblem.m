@@ -77,7 +77,7 @@ end
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
-problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct);
+problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct, 2*problemData.p + [0, 1, 2]);
 problemData.basesOnGamma = computeBasesOnGamma(problemData.Nmu, struct);
 
 %% Computation of matrices on the reference triangle.

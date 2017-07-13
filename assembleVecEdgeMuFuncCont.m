@@ -1,5 +1,5 @@
 % TODO
-function ret = assembleVecEdgeMuFuncContVal(g, markE0T, funcCont, qOrd, basesOnGamma)
+function ret = assembleVecEdgeMuFuncCont(g, markE0T, funcCont, qOrd, basesOnGamma)
 K = g.numT; Kedge = g.numE;
 validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma')
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
