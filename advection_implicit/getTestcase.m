@@ -1,4 +1,5 @@
 function problemData = getTestcase(problemData, testcase)
+checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 switch testcase
   case 'solid_body' % LeVeque's solid body rotation
     isAnalytical = false;
@@ -13,7 +14,8 @@ switch testcase
     cDCont = @(t,x1,x2) zeros(size(x1));
     gNCont = @(t,x1,x2) zeros(size(x1));
     
-    idN = -1;
+    generateMarkE0TbdrN = @(g) false(g.numT, 3);
+    
     numSteps = 160;
     tEnd = 2 * pi;
 
@@ -30,7 +32,9 @@ switch testcase
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
     gNCont = @(t, x1, x2) -7 * cos(7 * x1) .* sin(7 * x2);
     
-    idN = -1;
+    idBdrN = [2 3];
+    generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idBdrN);
+    
     numSteps = 1;
     tEnd = 10;
     
@@ -45,9 +49,10 @@ switch testcase
         + 0.5 * (u1Cont(t, x1, x2) - u2Cont(t, x1, x2)) .* cCont(t, x1, x2);
     c0Cont = @(x1, x2) cCont(0, x1, x2);
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
-    gNCont = @(t, x1, x2) -7 * cos(7 * x1) .* sin(7 * x2);
+    gNCont = @(t, x1, x2) zeros(size(x1));
     
-    idN = -1;
+    generateMarkE0TbdrN = @(g) false(g.numT, 3);
+                              
     numSteps = 10;
     tEnd = 20;    
     
@@ -64,7 +69,8 @@ switch testcase
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
     gNCont = @(t, x1, x2) -7 * cos(7 * x1) .* sin(7 * x2);
     
-    idN = -1;
+    generateMarkE0TbdrN = @(g) false(g.numT, 3);
+                              
     numSteps = 10;
     tEnd = 40;    
    
@@ -87,10 +93,8 @@ problemData = setdefault(problemData, 'cDCont', cDCont);
 problemData = setdefault(problemData, 'gNCont', gNCont);
 if isAnalytical, problemData = setdefault(problemData, 'cCont', cCont); end
 
-% Specify edge ids of boundary conditions
-checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
-
-problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idN);
-problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
+% Specify boundary conditions
+problemData = setdefault(problemData, 'generateMarkE0Tint', @(g) g.idE0T == 0);
+problemData = setdefault(problemData, 'generateMarkE0TbdrN', generateMarkE0TbdrN);
+problemData = setdefault(problemData, 'generateMarkE0TbdrD', @(g) ~(g.markE0Tint | g.markE0TbdrN));
 end % function

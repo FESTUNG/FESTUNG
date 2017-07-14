@@ -65,13 +65,13 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'solid_body');
 
 % Mark run as convergence test (enforces Friedrichs-Keller triangulation)
-problemData = setdefault(problemData, 'isConvergence', false);
+problemData = setdefault(problemData, 'isConvergence', true);
 
 % Maximum edge length of triangle
 problemData = setdefault(problemData, 'hmax', 2^-4);
 
 % Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 1);
+problemData = setdefault(problemData, 'p', 2);
 
 % Order of Runge-Kutta method
 problemData = setdefault(problemData, 'ordRK', min(problemData.p + 1, 4));
@@ -83,7 +83,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 problemData = execin([ problemData.problemName filesep 'getTestcase' ], problemData, problemData.testcase);
 
 % Visualization settings
-problemData = setdefault(problemData, 'isVisGrid', true);  % visualization of grid
+problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
 problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...

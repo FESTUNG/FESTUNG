@@ -53,8 +53,9 @@ switch testcase
     c0Cont = @(x1, x2) cCont(0, x1, x2);
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
 
-    idBdrN = -1;
-    generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idBdrN);
+    generateMarkE0TbdrN = @(g) (u1Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 1) + ...
+                                u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
+                                g.idE0T ~= 0;
     
     numSteps = 10;
     tEnd = 20;    
@@ -72,8 +73,9 @@ switch testcase
     c0Cont = @(x1, x2) cCont(0, x1, x2);
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
 
-    idBdrN = -1;
-    generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idBdrN);
+    generateMarkE0TbdrN = @(g) (u1Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 1) + ...
+                                u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
+                                g.idE0T ~= 0;
     
     numSteps = 10;
     tEnd = 40;    
@@ -97,7 +99,7 @@ problemData = setdefault(problemData, 'u2Cont', u2Cont);
 problemData = setdefault(problemData, 'cDCont', cDCont);
 if isAnalytical, problemData = setdefault(problemData, 'cCont', cCont); end
 
-% Specify edge ids of boundary conditions
+% Specify boundary conditions
 problemData = setdefault(problemData, 'generateMarkE0Tint', @(g) g.idE0T == 0);
 problemData = setdefault(problemData, 'generateMarkE0TbdrN', generateMarkE0TbdrN);
 problemData = setdefault(problemData, 'generateMarkE0TbdrD', @(g) ~(g.markE0Tint | g.markE0TbdrN));

@@ -67,7 +67,7 @@ problemData = setdefault(problemData, 'testcase', 'solid_body');
 problemData = setdefault(problemData, 'isConvergence', true);
 
 % Maximum edge length of triangle
-problemData = setdefault(problemData, 'hmax', 2^-6);
+problemData = setdefault(problemData, 'hmax', 2^-4);
 
 % Local polynomial approximation order (0 to 4)
 problemData = setdefault(problemData, 'p', 2);
