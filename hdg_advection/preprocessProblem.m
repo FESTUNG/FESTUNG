@@ -53,7 +53,7 @@ if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
 problemData.K    = problemData.g.numT;  % number of triangles
 problemData.N    = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
 problemData.Nmu  = problemData.p + 1; % number of local DOFs on Faces
-problemData.dt = problemData.tEnd / problemData.numSteps;
+problemData.dt   = problemData.tEnd / problemData.numSteps;
 
 % [K x 3] arrays that mark local edges (E0T) or vertices (V0T) that are
 % interior or have a certain boundary type.
@@ -63,11 +63,11 @@ problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
 
 % Precompute some repeatedly evaluated fields
 problemData.g = computeDerivedGridData(problemData.g);
-problemData.g.markSideE0T = generateMarkSideE0T( problemData.g );
 % Choose a block size for the local solves if we want 'true' local solves
-if ( problemData.isTrueLocalSolve  == true )
-    problemData.localSolveBlockSize = determineLocalSolveBlockSize( problemData.K, problemData.trueLocalSolveSize );
-end
+if problemData.isTrueLocalSolve
+  problemData.localSolveBlockSize = execin([problemData.problemName filesep 'determineLocalSolveBlockSize'], ...
+                                        problemData.K, problemData.trueLocalSolveSize );
+end % if
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.

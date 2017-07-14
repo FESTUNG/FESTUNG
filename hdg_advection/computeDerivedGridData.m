@@ -4,7 +4,7 @@
 % time but used in every step. They are saved as part of the grid.
 
 %===============================================================================
-%> @file advection/computeDerivedGridData.m
+%> @file hdg_advection/computeDerivedGridData.m
 %>
 %> @brief Computes various additional fields needed throughout the advection
 %>        problem presented in @ref RAWFK2016 . These fields only contain
@@ -54,18 +54,10 @@
 %> @endparblock
 %
 function g = computeDerivedGridData(g)
-g.markV0TT0V = cell(3, 1);
-g.areaE0TbdrD = cell(3, 1);
-g.areaE0TbdrN = g.markE0TbdrN .* g.areaE0T;
-g.areaE0TbdrNotN = cell(3, 1);
+g.markSideE0T = true(g.numT, 3, 2);
 for n = 1 : 3
-  % Mark all elements sharing i-th vertex
-  g.markV0TT0V{n} = g.markV0TV0T{n, 1} | g.markV0TV0T{n, 2} | g.markV0TV0T{n, 3}; 
-  % Fix a bug in GNU Octave 4.0.0's implementation of sparse matrix concatenation
-  if exist('OCTAVE_VERSION','builtin')
-    g.markV0TT0V{n} = g.markV0TT0V{n} + 0 * speye(size(g.markV0TT0V{n}, 1), size(g.markV0TT0V{n}, 2));
-  end % if
-  g.areaE0TbdrD{n} = g.areaE0T(:,n) .* g.markE0TbdrD(:, n);
-  g.areaE0TbdrNotN{n} = g.areaE0T(:,n) .* ~g.markE0TbdrN(:, n);
+  % Mark element to have local id 1 or 2 at the given edge
+  g.markSideE0T(:, n, 1) = g.T0E(g.E0T(:, n), 2) ~= (1:g.numT)';
+  g.markSideE0T(:, n, 2) = ~g.markSideE0T(:, n, 1);
 end % for
 end % function
