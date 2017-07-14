@@ -57,10 +57,4 @@ problemData.isSubSteppingFinished = problemData.isStationary || nSubStep >= leng
 
 problemData.cDiscReshaped = reshape(problemData.cDisc', [], 1);
 problemData.lambdaDiscReshaped = reshape(problemData.lambdaDisc', [], 1);
-
-if ~problemData.isStationary
-  problemData.cDiscRK{nSubStep} = problemData.vecBphi ...
-                                  - problemData.matLbar * problemData.cDiscReshaped ...
-                                  - problemData.matMbar * problemData.lambdaDiscReshaped;
-end % if
 end % function

@@ -116,6 +116,11 @@ problemData.lambdaDisc = mldivide( sysMatA, sysRhs );
 
 %% Reconstructing local solutions from updated lambda
 problemData.cDisc = LinvQ - LinvM * problemData.lambdaDisc;
+
+if ~problemData.isStationary
+  problemData.cDiscRK{nSubStep} = vecBphi - matLbar * problemData.cDisc - matMbar * problemData.lambdaDisc;
+end % if
+
 problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
 problemData.lambdaDisc = reshape( problemData.lambdaDisc, problemData.Nmu, problemData.g.numE )';
 end % function
