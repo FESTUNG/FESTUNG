@@ -13,8 +13,9 @@ switch problemName
     u1Cont = @(x1,x2) exp((x1+x2)/2);
     u2Cont = @(x1,x2) exp((x1-x2)/2);
     
-    generateMarkE0TbdrN = @(g) generateSteadyOutflowBoundary(g);
-    generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
+%     generateMarkE0TbdrN = @(g) generateSteadyOutflowBoundary(g);
+%     generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
+    idBdrN = [2 3];
     
     generateGridData = @(hmax) domainSquare(hmax);
     
@@ -32,10 +33,13 @@ problemData = setdefault(problemData, 'fCont', fCont);
 % problemData = setdefault(problemData, 'fluxCont', fluxCont);
 problemData = setdefault(problemData, 'cDCont', cDCont);
 if isAnalytical, problemData = setdefault(problemData, 'cCont', cCont); end
-problemData = setdefault(problemData, 'generateMarkE0TbdrN', generateMarkE0TbdrN);
-problemData = setdefault(problemData, 'generateMarkE0TbdrD', generateMarkE0TbdrD);
 
+% Specify triangulation and edge ids of boundary conditions
 problemData = setdefault(problemData, 'generateGridData', generateGridData);
 
+checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
+problemData = setdefault(problemData, 'generateMarkE0Tint', @(g) g.idE0T == 0);
+problemData = setdefault(problemData, 'generateMarkE0TbdrN', @(g) checkMultipleIds(g.idE0T, idBdrN));
+problemData = setdefault(problemData, 'generateMarkE0TbdrD', @(g) ~(g.markE0Tint | g.markE0TbdrN));
 
 end % function

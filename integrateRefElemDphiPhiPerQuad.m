@@ -3,7 +3,7 @@
 % I precompute matrices G_bar that allows for an 'easy' evaluation of 
 % u_{m} phi_{kj} \partial_{x_m} phi_{ki}
 %
-function ret = integrateRefElemDphiPhiFlux(N, basesOnQuad)
+function ret = integrateRefElemDphiPhiPerQuad(N, basesOnQuad)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
 p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [~,~,W] = quadRule2D(qOrd);

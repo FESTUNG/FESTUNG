@@ -1,8 +1,9 @@
+% TODO
 % Compute integrals over the edges of the reference triangle, whose integrands 
 % consist of all permutations of two basis functions.
 
 %===============================================================================
-%> @file integrateRefEdgePhiIntPhiInt.m
+%> @file integrateRefEdgeMuMu.m
 %>
 %> @brief Compute integrals over the edges of the reference triangle, whose 
 %>        integrands consist of all permutations of two basis functions.
@@ -50,7 +51,7 @@
 %> @endparblock
 %
 function ret = integrateRefEdgeMuMu(Nmu, basesOnGamma)
-validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesONmuGamma')
+validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma')
 p = Nmu-1;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
 ret = zeros(Nmu, Nmu); % [Nmu x Nmu]
   for i = 1 : Nmu

@@ -18,8 +18,11 @@ switch problemName
     cDCont = @(t,x1,x2) zeros(size(x1));
     %     Solution
     
-    generateMarkE0TbdrN = @(g) generateLeVequeBoundary( g );
-    generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
+%     idBdrN = 
+    generateMarkE0TbdrN = @(g) (u1Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 1) + ...
+                                u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
+                                g.idE0T ~= 0;
+    
     
     generateGridData = @(hmax) domainSquare(hmax, 0, 1);
 
@@ -53,8 +56,10 @@ switch problemName
     u1Cont = @(t, x1, x2) exp((x1+x2)/2);
     u2Cont = @(t, x1, x2) exp((x1-x2)/2);
     
-    generateMarkE0TbdrN = @(g) generateSteadyOutflowBoundary(g);
-    generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
+    idBdrN = [2 3];
+%     generateMarkE0TbdrN = @(g) generateSteadyOutflowBoundary(g);
+    checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
+    generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idBdrN);
     
     generateGridData = @(hmax) domainSquare(hmax, 0, 1);
   otherwise
@@ -69,10 +74,15 @@ problemData = setdefault(problemData, 'u1Cont', u1Cont);
 problemData = setdefault(problemData, 'u2Cont', u2Cont);
 problemData = setdefault(problemData, 'cDCont', cDCont);
 if isAnalytical, problemData = setdefault(problemData, 'cCont', cCont); end
-problemData = setdefault(problemData, 'generateMarkE0TbdrN', generateMarkE0TbdrN);
-problemData = setdefault(problemData, 'generateMarkE0TbdrD', generateMarkE0TbdrD);
 
+% Specify triangulation and edge ids of boundary conditions
 problemData = setdefault(problemData, 'generateGridData', generateGridData);
+
+checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
+problemData = setdefault(problemData, 'generateMarkE0Tint', @(g) g.idE0T == 0);
+problemData = setdefault(problemData, 'generateMarkE0TbdrN', generateMarkE0TbdrN);%@(g) checkMultipleIds(g.idE0T, idbdrN));
+problemData = setdefault(problemData, 'generateMarkE0TbdrD', @(g) ~(g.markE0Tint | g.markE0TbdrN));
+
 
 
 

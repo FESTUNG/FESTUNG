@@ -61,8 +61,6 @@ problemData.Nmu  = problemData.p + 1; % number of local DOFs on Faces
 problemData.g.markE0Tint  = problemData.generateMarkE0Tint(problemData.g);
 problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
 problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
-problemData.g.markV0TbdrD = ismember(problemData.g.V0T, ...
-    problemData.g.V0E(problemData.g.E0T(problemData.g.markE0TbdrD), :));
 
 % Precompute some repeatedly evaluated fields
 problemData.g = computeDerivedGridData(problemData.g);
@@ -91,9 +89,9 @@ problemData.hatMmu = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnGa
 problemData.hatRmu  = integrateRefEdgePhiIntMu(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
 problemData.hatRphi = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
 % Precomputations for term II
-problemData.hatG = integrateRefElemDphiPhiFlux(problemData.N, problemData.basesOnQuad);
+problemData.hatG = integrateRefElemDphiPhiPerQuad(problemData.N, problemData.basesOnQuad);
 % Precomputations for III.1
-problemData.hatS = integrateRefEdgeMuPhiIntFlux(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
+problemData.hatS = integrateRefEdgePhiIntMuPerQuad(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
 
 %% Assembly of time-independent global matrices.
 problemData.globMphi = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
