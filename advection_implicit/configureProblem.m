@@ -91,6 +91,7 @@ problemData = setdefault(problemData, 'outputBasename', ...
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
+assert(problemData.ordRK >= 1 && problemData.ordRK <= 4, 'Order of Runge-Kutta method must be zero to four.')
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 %% Domain and triangulation configuration.

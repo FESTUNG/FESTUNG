@@ -67,9 +67,12 @@ switch testcase
     idN = -1;
     numSteps = 10;
     tEnd = 40;    
+   
+  otherwise
+    error('Invalid testcase "%s".', testcase);
 end % switch
 
-fprintf('Loaded testcase "%s"\n', testcase);
+fprintf('Loaded testcase "%s".\n', testcase);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 'numSteps', numSteps);
