@@ -62,7 +62,7 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Choose testcase
-problemData = setdefault(problemData, 'testcase', 'solid_body');
+problemData = setdefault(problemData, 'testcase', 'stationary');
 
 % Mark run as convergence test (enforces Friedrichs-Keller triangulation)
 problemData = setdefault(problemData, 'isConvergence', true);

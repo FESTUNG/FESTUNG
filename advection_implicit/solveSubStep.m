@@ -53,22 +53,23 @@
 %> @endparblock
 %
 function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
-K = problemData.K;
-N = problemData.N;
-
 % Building the system
 sysA = -problemData.globG{1} - problemData.globG{2} + problemData.globR;
 sysV = problemData.globL - problemData.globKD - problemData.globKN;
 
-% Computing the rhs
-sysR = (problemData.tau * problemData.A(nSubStep, nSubStep)) * sysV + problemData.globM * problemData.cDiscRK{1};
-for j = 1 : nSubStep - 1
-  sysR = sysR + (problemData.tau * problemData.A(nSubStep, j)) * problemData.rhsRK{j};
-end % for
+if problemData.isStationary
+  problemData.cDiscRK{nSubStep + 1} = sysA \ sysV;
+else
+  % Computing the rhs
+  sysR = (problemData.tau * problemData.A(nSubStep, nSubStep)) * sysV + problemData.globM * problemData.cDiscRK{1};
+  for j = 1 : nSubStep - 1
+    sysR = sysR + (problemData.tau * problemData.A(nSubStep, j)) * problemData.rhsRK{j};
+  end % for
 
-% Compute the next step
-problemData.cDiscRK{nSubStep + 1} = (problemData.globM + (problemData.tau * problemData.A(nSubStep, nSubStep)) * sysA) \ sysR; 
+  % Compute the next step
+  problemData.cDiscRK{nSubStep + 1} = (problemData.globM + (problemData.tau * problemData.A(nSubStep, nSubStep)) * sysA) \ sysR; 
 
-% Store the new rhs
-problemData.rhsRK{nSubStep} = sysV - sysA * problemData.cDiscRK{nSubStep + 1};
+  % Store the new rhs
+  problemData.rhsRK{nSubStep} = sysV - sysA * problemData.cDiscRK{nSubStep + 1};
+end % if
 end % function

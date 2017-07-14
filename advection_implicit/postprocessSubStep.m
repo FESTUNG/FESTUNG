@@ -53,5 +53,5 @@
 %> @endparblock
 %
 function problemData = postprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
-problemData.isSubSteppingFinished = nSubStep >= length(problemData.t);
+problemData.isSubSteppingFinished = problemData.isStationary || nSubStep >= length(problemData.t);
 end % function

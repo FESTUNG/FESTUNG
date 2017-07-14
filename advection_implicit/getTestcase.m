@@ -3,6 +3,7 @@ checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 
 switch testcase
   case 'solid_body' % LeVeque's solid body rotation
     isAnalytical = false;
+    isStationary = false;
     
     G = @(x1, x2, x1_0, x2_0) (1/0.15) * sqrt((x1-x1_0).^2 + (x2-x2_0).^2);
     c0Cont = @(x1, x2) ((x1 - 0.5).^2 + (x2 - 0.75).^2 <= 0.0225 & (x1 <= 0.475 | x1 >= 0.525 | x2 >= 0.85)) + ...
@@ -21,6 +22,7 @@ switch testcase
 
   case 'stationary' % Stationary analytical example
     isAnalytical = true;
+    isStationary = true;
     
     cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2);
     u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
@@ -32,7 +34,7 @@ switch testcase
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
     gNCont = @(t, x1, x2) -7 * cos(7 * x1) .* sin(7 * x2);
     
-    idBdrN = [2 3];
+    idBdrN = -1;
     generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idBdrN);
     
     numSteps = 1;
@@ -40,6 +42,7 @@ switch testcase
     
   case 'transient' % Transient analytical example
     isAnalytical = true;
+    isStationary = false;
     
     cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2) + t;
     u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
@@ -58,6 +61,7 @@ switch testcase
     
   case 'transient2' % Transient analytical example
     isAnalytical = true;
+    isStationary = false;
     
     cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2) + sin(t);
     u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
@@ -81,6 +85,7 @@ end % switch
 fprintf('Loaded testcase "%s".\n', testcase);
 
 % Time stepping parameters
+problemData = setdefault(problemData, 'isStationary', isStationary);
 problemData = setdefault(problemData, 'numSteps', numSteps);
 problemData = setdefault(problemData, 'tEnd', tEnd);
 

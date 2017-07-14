@@ -46,15 +46,17 @@
 function problemData = initializeProblem(problemData)
 problemData.isFinished = false;
 %% Initial data.
-problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, problemData.qOrd, ...
-                                             problemData.hatM, problemData.basesOnQuad);
-fprintf('L2 error w.r.t. the initial condition: %g\n', ...
-  computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, problemData.qOrd + 1, problemData.basesOnQuad));
-%% visualization of inital condition.
-if problemData.isVisSol
-  cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
-  visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
-end
-fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
-  problemData.tEnd, problemData.tau, problemData.numSteps)
+if ~problemData.isStationary
+  problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, problemData.qOrd, ...
+                                               problemData.hatM, problemData.basesOnQuad);
+  fprintf('L2 error w.r.t. the initial condition: %g\n', ...
+    computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, problemData.qOrd + 1, problemData.basesOnQuad));
+  %% visualization of inital condition.
+  if problemData.isVisSol
+    cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
+    visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
+  end
+  fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
+    problemData.tEnd, problemData.tau, problemData.numSteps)
+end % if
 end % function

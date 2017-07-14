@@ -59,13 +59,16 @@ K = problemData.K;
 N = problemData.N;
 
 % Obtain Runge-Kutta rule
-[problemData.t, problemData.A, problemData.b] = rungeKuttaImplicit(problemData.ordRK, problemData.tau, (nStep - 1) * problemData.tau);
+if problemData.isStationary
+  problemData.t = 0;
+  problemData.cDiscRK = cell(2,1);
+else 
+  [problemData.t, problemData.A, problemData.b] = rungeKuttaImplicit(problemData.ordRK, problemData.tau, (nStep - 1) * problemData.tau);
+  problemData.cDiscRK = cell(length(problemData.t) + 1, 1); 
+  problemData.cDiscRK{1} = reshape(problemData.cDisc', [K*N 1]);
+  problemData.rhsRK = cell(length(problemData.t), 1);
+end % if
 
-% Initialize solution vectors for RK steps
-problemData.cDiscRK = cell(length(problemData.t) + 1, 1); 
-problemData.cDiscRK{1} = reshape(problemData.cDisc', [K*N 1]);
-
-problemData.rhsRK = cell(length(problemData.t), 1);
 
 % Carry out RK steps
 problemData.isSubSteppingFinished = false;
