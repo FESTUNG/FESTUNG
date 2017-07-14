@@ -58,6 +58,6 @@ function problemData = postprocessStep(problemData, nStep)
 % stiffly accurate (a_{sj} = b_{j}). This means, the stage solution C^(s)
 % is actually the solution C^(n+1) at the next time step.
 
-problemData.isFinished = nStep >= problemData.numSteps;
+problemData.isFinished = problemData.isStationary || nStep >= problemData.numSteps;
 end % function
 

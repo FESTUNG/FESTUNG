@@ -71,7 +71,7 @@ problemData.globH = problemData.globMphi * reshape(projectFuncCont2DataDisc(prob
 
 % Assemble element integral contributions.
 problemData.globG = assembleMatElemDphiPhiFuncContVec(problemData.g, problemData.hatG, ...
-                        problemData.u1Cont, problemData.u2Cont);
+                        problemData.u1Cont, problemData.u2Cont, problemData.qOrd);
 
 % Assemble flux on interior edges
 problemData.globS = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0Tint, ...
@@ -82,56 +82,9 @@ cQ0E0T = computeFuncContOnQuadEdge(problemData.g, problemData.cDCont, 2 * proble
 problemData.globFphiD = assembleVecEdgePhiIntVal(problemData.g, problemData.g.markE0TbdrD, ...
                             cQ0E0T .* uNormalQ0E0T, problemData.N, problemData.basesOnQuad);
 problemData.globKmuD = assembleVecEdgeMuFuncCont(problemData.g, problemData.g.markE0TbdrD, ...
-                            problemData.cDCont, 2 * problemData.p + 1, problemData.basesOnGamma);
+                            problemData.cDCont, problemData.basesOnQuad, problemData.qOrd);
 
 % Assemble outflow boundary conditions.
 problemData.globSout = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0TbdrN, ...
                                                   problemData.hatS, uNormalQ0E0T);
-
-% %% HDG stuff
-% %Evaluate u (=transport velocities) on every element
-% problemData.uEval = evalFuncContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fluxCont( x1 ,x2, 1.), ...
-%                                      problemData.N);
-%                                  
-% %Evaluate c (=solution) on every edge
-% problemData.cEdge = evalFuncContAtEveryEdgeIntPoint( problemData.g, @(x1, x2) problemData.cDCont( x1 ,x2), ...
-%                                          problemData.Nmu);
-% % Evaluate advection velocity on every element
-% problemData.uEdge = evalUContAtEveryEdgeIntPoint(problemData.g, @(x1, x2) problemData.fluxCont( x1 ,x2, 1.), ...
-%                                     problemData.Nmu);
-% %Evaluate f (= source term) on every element
-% problemData.srcEval = evalSourceContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fCont( x1 ,x2 ), ...
-%                                      problemData.N);
-% problemData.globH = assembleVecElemPhiSource(problemData.g, problemData.N, ...
-%                             problemData.srcEval, problemData.basesOnQuad);
-% 
-%                                                                                                 
-% %Evaluate the flux on every edge
-% problemData.fluxEdge = ...
-%     evalFluxContAtEveryEdgeIntPoint( problemData.g, ...
-%                                      problemData.g.markE0TbdrD, ...
-%                                      @(x1, x2, c) problemData.fluxCont( x1 ,x2, c), ...
-%                                      problemData.cEdge, problemData.Nmu);
-%                         
-% % Evaluate Dirichlet boundary condition for the first equation.
-% problemData.globFphiD = assembleVecEdgePhiIntFlux( problemData.g, problemData.N, ...
-%     problemData.fluxEdge, problemData.g.markE0TbdrD, problemData.basesOnQuad );
-% 
-% % 
-% % problemData.globG = assembleMatElemPhiDphiFlux( problemData.g, problemData.N, problemData.uEval, problemData.hatG );
-% u1Cont = @(x1, x2) problemData.u1Cont(x1, x2);
-% u2Cont = @(x1, x2) problemData.u2Cont(x1, x2);
-% problemData.globG = assembleMatElemDphiPhiFuncContVec(problemData.g, problemData.hatG, u1Cont, u2Cont);
-% 
-% % Flux on interior edges
-% problemData.globS = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0Tint, ...
-%                                                  problemData.hatS, problemData.uEdge);
-% % Outflow BC
-% problemData.globSout = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0TbdrN, ...
-%                                                   problemData.hatS, problemData.uEdge);
-% 
-% % Assembly of Dirichlet boundary contributions
-% % This has to be evaluated at t_new = t + dt!!
-% problemData.globKmuD = assembleVecEdgeMuFuncContVal( problemData.g, problemData.g.markE0TbdrD, ...
-%     @(x1,x2) problemData.cDCont( x1, x2), problemData.Nmu, problemData.basesOnGamma );
 end % function

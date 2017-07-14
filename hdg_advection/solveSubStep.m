@@ -53,22 +53,27 @@ function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
 N = problemData.N;
 
-cDiscRkRHS = zeros(K * N, 1);
-% RK RHS
-for i = 1 : nSubStep - 1
-  cDiscRkRHS = cDiscRkRHS + problemData.A(nSubStep, i) .* problemData.cDiscRK{i};
-end
+if problemData.isStationary
+  matL = - problemData.globG{1} - problemData.globG{2} + problemData.stab * problemData.globRphi;
+  vecQ = problemData.globH - problemData.globFphiD;
+  matM = problemData.globS + problemData.globSout - problemData.stab * problemData.globRmu;
+else
+  cDiscRkRHS = zeros(K * N, 1);
+  for i = 1 : nSubStep - 1
+    cDiscRkRHS = cDiscRkRHS + problemData.A(nSubStep, i) .* problemData.cDiscRK{i};
+  end
 
-%% Actual HDG
-problemData.matLbar = - problemData.globG{1} - problemData.globG{2} + problemData.stab * problemData.globRphi;
-matL = problemData.globMphi ./ problemData.dt + problemData.A(nSubStep, nSubStep) .* problemData.matLbar; % Here goes the time discretization
-problemData.vecBphi = problemData.globH - problemData.globFphiD;
-vecQ =  problemData.globMcDisc ./ problemData.dt ...
-      + problemData.A(nSubStep, nSubStep) .* problemData.vecBphi + cDiscRkRHS; % Add here source terms if needed
-problemData.matMbar =   problemData.globS ...
-                      + problemData.globSout ...
-                      - problemData.stab * problemData.globRmu;
-matM = problemData.A(nSubStep, nSubStep) .* problemData.matMbar;
+  matLbar = - problemData.globG{1} - problemData.globG{2} + problemData.stab * problemData.globRphi;
+  matL = problemData.globMphi ./ problemData.dt + problemData.A(nSubStep, nSubStep) .* matLbar; % Here goes the time discretization
+  vecBphi = problemData.globH - problemData.globFphiD;
+  vecQ =  problemData.globMcDisc ./ problemData.dt ...
+        + problemData.A(nSubStep, nSubStep) .* vecBphi + cDiscRkRHS; % Add here source terms if needed
+  matMbar = problemData.globS ...
+                        + problemData.globSout ...
+                        - problemData.stab * problemData.globRmu;
+  matM = problemData.A(nSubStep, nSubStep) .* matMbar;
+end % if
+
 %% Computing local solves
 % There are two options.
 % 1. Invert the block diagonal matrix L locally, i.e. each block is 
@@ -97,7 +102,7 @@ else
     localSolves = mldivide(matL, [vecQ matM]);
     LinvQ = localSolves(:, 1);
     LinvM = localSolves(:, 2:end);
-end
+end % if
 %% Solving global system for lambda
 matN = - problemData.stab * problemData.globT - problemData.globKmuOut ;
 matP = problemData.globP;

@@ -49,15 +49,11 @@ function problemData = preprocessProblem(problemData)
 %% Triangulation.
 problemData.g = problemData.generateGridData(problemData.hmax);
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
-
-% problemData.tabRK = getDIRKtableau( problemData.ordRK );
-% problemData.cDiscRK = cell( problemData.tabRK.s, 1);
-
 %% Globally constant parameters.
 problemData.K    = problemData.g.numT;  % number of triangles
 problemData.N    = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
 problemData.Nmu  = problemData.p + 1; % number of local DOFs on Faces
-% problemData.tau  = problemData.tEnd / problemData.numSteps;  % time step size
+problemData.dt = problemData.tEnd / problemData.numSteps;
 
 % [K x 3] arrays that mark local edges (E0T) or vertices (V0T) that are
 % interior or have a certain boundary type.
@@ -67,60 +63,30 @@ problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
 
 % Precompute some repeatedly evaluated fields
 problemData.g = computeDerivedGridData(problemData.g);
-
-%% HDG related configuration
 problemData.g.markSideE0T = generateMarkSideE0T( problemData.g );
 % Choose a block size for the local solves if we want 'true' local solves
 if ( problemData.isTrueLocalSolve  == true )
     problemData.localSolveBlockSize = determineLocalSolveBlockSize( problemData.K, problemData.trueLocalSolveSize );
 end
-
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
-problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct, 2*problemData.p + [0, 1, 2]);
-problemData.basesOnGamma = computeBasesOnGamma(problemData.Nmu, struct);
-
+problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct, [problemData.qOrd, problemData.qOrd + 1]);
+problemData.basesOnQuad = computeBasesOnQuadEdge(problemData.Nmu, problemData.basesOnQuad, [problemData.qOrd, problemData.qOrd + 1]);
 %% Computation of matrices on the reference triangle.
-problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
-
-%% Computation of HDG matrices on the reference triangle.
-%Hybrid mass matrix
-problemData.hatMmu = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnGamma);
-
-% Integrals on edges
-problemData.hatRmu = integrateRefEdgePhiIntMu(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
-problemData.hatRphi    = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
-% Precomputations for term II
-problemData.hatG = integrateRefElemDphiPhiPerQuad(problemData.N, problemData.basesOnQuad);
-% Precomputations for III.1
-problemData.hatS = integrateRefEdgePhiIntMuPerQuad(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
-
+problemData.hatM    = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+problemData.hatMmu  = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnQuad, problemData.qOrd);
+problemData.hatRmu  = integrateRefEdgePhiIntMu([problemData.N, problemData.Nmu], problemData.basesOnQuad, problemData.qOrd);
+problemData.hatRphi = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+problemData.hatG    = integrateRefElemDphiPhiPerQuad(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+problemData.hatS    = integrateRefEdgePhiIntMuPerQuad([problemData.N, problemData.Nmu], problemData.basesOnQuad, problemData.qOrd);
 %% Assembly of time-independent global matrices.
-problemData.globMphi = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
-
-%We use the assembly routine above
-%Interior
-problemData.globRmu = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
-%
-problemData.globRphi = assembleMatEdgePhiIntPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRphi );
-%
-problemData.globKmuOut = assembleMatEdgePhiIntMu( problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu );
-problemData.globKmuOut = problemData.globKmuOut';
-
-%
-problemData.globMmuBar  = assembleMatEdgeMuMu(problemData.g,  problemData.g.markE0Tint , problemData.hatMmu);
-%
-problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, ~problemData.g.markE0Tint , problemData.hatMmu);
-%
-problemData.globP = problemData.stab .* problemData.globMmuBar + problemData.globMmuTilde;
-
-%
-% problemData.globT = assembleMatEdgeMuPhiInt( problemData.g, problemData.g.markE0Tint, problemData.hatRmu );
-% problemData.globT = problemData.globT';
-problemData.globT = problemData.globRmu';
-
-if ( problemData.showWaitBar == true )
-    problemData.waitBar = waitbar( 0, 'Simulation progress');
-end
+problemData.globMphi      = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
+problemData.globRmu       = assembleMatEdgePhiIntMu(problemData.g, problemData.g.markE0Tint, problemData.hatRmu);
+problemData.globRphi      = assembleMatEdgePhiIntPhiInt(problemData.g, problemData.g.markE0Tint, problemData.hatRphi);
+problemData.globKmuOut    = assembleMatEdgePhiIntMu(problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu)';
+problemData.globMmuBar    = assembleMatEdgeMuMu(problemData.g, problemData.g.markE0Tint, problemData.hatMmu);
+problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, ~problemData.g.markE0Tint, problemData.hatMmu);
+problemData.globP         = problemData.stab .* problemData.globMmuBar + problemData.globMmuTilde;
+problemData.globT         = problemData.globRmu';
 end % function

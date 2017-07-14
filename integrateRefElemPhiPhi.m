@@ -48,9 +48,7 @@
 %
 function ret = integrateRefElemPhiPhi(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-if nargin < 3
-  p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);
-end % if
+if nargin < 3, p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1); end
 [~,~,W] = quadRule2D(qOrd);
 ret = zeros(N); % [N x N]
 for i = 1 : N

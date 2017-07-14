@@ -1,3 +1,4 @@
+% TODO
 % Assembles a matrix containing integrals of products of two edge basis
 % functions.
 
@@ -56,7 +57,7 @@ Kedge = g.numE;
 validateattributes(refEdgeMuMu, {'numeric'}, {'size', [Nmu Nmu]}, mfilename, 'refEdgeMuMu');
 ret = sparse(Kedge * Nmu, Kedge * Nmu);
 for n = 1 : 3
-  Kkn = g.areaE0T( :, n ) .*  markE0T(:, n) ;
-  ret = ret + kron( sparse( g.E0T(:, n), g.E0T(:, n), Kkn, Kedge, Kedge ), refEdgeMuMu );
+  Kkn = g.areaE0T(:, n) .*  markE0T(:, n) ;
+  ret = ret + kron(sparse(g.E0T(:, n), g.E0T(:, n), Kkn, Kedge, Kedge), refEdgeMuMu);
 end
 end % function

@@ -63,28 +63,28 @@ u2Cont = @(x1, x2) problemData.u2Cont(t, x1, x2);
 fCont = @(x1,x2) problemData.fCont(t, x1, x2);
 
 % Evaluate normal advection velocity on every edge.
-uNormalQ0E0T = computeFuncContNuOnQuadEdge(problemData.g, u1Cont, u2Cont, 2*problemData.p+1);
+uNormalQ0E0T = computeFuncContNuOnQuadEdge(problemData.g, u1Cont, u2Cont, problemData.qOrd);
 
 % Assemble source term.
 % srcEval = evalSourceContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fCont(t, x1 ,x2 ), problemData.N);
 % problemData.globH = assembleVecElemPhiSource(problemData.g, problemData.N, srcEval, problemData.basesOnQuad);
 problemData.globH = problemData.globMphi * reshape(projectFuncCont2DataDisc(problemData.g, fCont, ...
-                        max(2*problemData.p, 1), problemData.hatM, problemData.basesOnQuad)', [], 1);
+                        problemData.qOrd, problemData.hatM, problemData.basesOnQuad)', [], 1);
 
 % Assemble element integral contributions.
 problemData.globG = assembleMatElemDphiPhiFuncContVec(problemData.g, problemData.hatG, ...
-                        u1Cont, u2Cont);
+                        u1Cont, u2Cont, problemData.qOrd);
 
 % Assemble flux on interior edges
 problemData.globS = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0Tint, ...
                         problemData.hatS, uNormalQ0E0T);
 
 % Assemble Dirichlet boundary conditions.
-cQ0E0T = computeFuncContOnQuadEdge(problemData.g, cDCont, 2 * problemData.p + 1);
+cQ0E0T = computeFuncContOnQuadEdge(problemData.g, cDCont, problemData.qOrd);
 problemData.globFphiD = assembleVecEdgePhiIntVal(problemData.g, problemData.g.markE0TbdrD, ...
                             cQ0E0T .* uNormalQ0E0T, problemData.N, problemData.basesOnQuad);
 problemData.globKmuD = assembleVecEdgeMuFuncCont(problemData.g, problemData.g.markE0TbdrD, ...
-                            cDCont, 2 * problemData.p + 1, problemData.basesOnGamma);
+                            cDCont, problemData.basesOnQuad, problemData.qOrd);
 
 % Assemble outflow boundary conditions.
 problemData.globSout = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0TbdrN, ...

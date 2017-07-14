@@ -52,19 +52,16 @@ if problemData.isVisSol
 %                     problemData.numSteps, problemData.outputTypes)
 end % if
 
-if (problemData.showWaitBar == true)
-    close( problemData.waitBar);
-end
 fprintf('Finished simulation at t_end = %g\n', problemData.tEnd);
 %% Error evaluation
 if isfield(problemData, 'cCont')
   problemData.error = computeL2Error(problemData.g, problemData.cDisc, ...
     @(x1, x2) problemData.cCont(problemData.tEnd, x1, x2), ...
-    2 * problemData.p, problemData.basesOnQuad);
+    problemData.qOrd, problemData.basesOnQuad);
   fprintf('L2 error w.r.t. the analytical solution: %g\n', problemData.error);
 else
   problemData.error = computeL2Error(problemData.g, problemData.cDisc, ...
-    problemData.c0Cont, 2 * problemData.p, problemData.basesOnQuad);
+    problemData.c0Cont, problemData.qOrd, problemData.basesOnQuad);
   fprintf('L2 error w.r.t. the initial condition: %g\n', problemData.error);
 end % if
 fprintf('norm(cDisc, 1) = %g\n', norm(problemData.cDisc(:), 1));

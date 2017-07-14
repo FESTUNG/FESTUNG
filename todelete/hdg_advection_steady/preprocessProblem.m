@@ -75,8 +75,8 @@ end
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
 %% Lookup table for basis function.
-problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct, 2*problemData.p + [0, 1, 2]);
-problemData.basesOnGamma = computeBasesOnGamma(problemData.Nmu, struct);
+problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct, [problemData.qOrd, problemData.qOrd + 1]);
+problemData.basesOnQuad = computeBasesOnQuadEdge(problemData.Nmu, problemData.basesOnQuad, [problemData.qOrd, problemData.qOrd + 1]);
 
 %% Computation of matrices on the reference triangle.
 problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad);
@@ -86,7 +86,7 @@ problemData.hatM              = integrateRefElemPhiPhi(problemData.N, problemDat
 problemData.hatMmu = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnGamma);
 
 % Integrals on edges
-problemData.hatRmu  = integrateRefEdgePhiIntMu(problemData.N, problemData.Nmu, problemData.basesOnQuad, problemData.basesOnGamma);
+problemData.hatRmu  = integrateRefEdgePhiIntMu([problemData.N, problemData.Nmu], problemData.basesOnQuad, problemData.basesOnGamma);
 problemData.hatRphi = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad);
 % Precomputations for term II
 problemData.hatG = integrateRefElemDphiPhiPerQuad(problemData.N, problemData.basesOnQuad);

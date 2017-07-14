@@ -1,5 +1,5 @@
 % TODO
-function ret = assembleMatElemDphiPhiFuncContVec(g, refElemDphiPhiPerQuad, funcCont1, funcCont2)
+function ret = assembleMatElemDphiPhiFuncContVec(g, refElemDphiPhiPerQuad, funcCont1, funcCont2, qOrd)
 K = g.numT;
 [N, ~, R] = size(refElemDphiPhiPerQuad{1});
 validateattributes(refElemDphiPhiPerQuad, {'cell'}, {'size', [2 1]}, mfilename, 'refElemDphiPhiPerQuad');
@@ -8,7 +8,8 @@ validateattributes(refElemDphiPhiPerQuad{2}, {'numeric'}, {'size', [N N R]}, mfi
 validateattributes(funcCont1, {'function_handle'}, {'size', [1 1]}, mfilename, 'funcCont1');
 validateattributes(funcCont2, {'function_handle'}, {'size', [1 1]}, mfilename, 'funcCont2');
 
-p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  [Q1, Q2, ~] = quadRule2D(qOrd);
+if nargin < 5, p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1); end
+[Q1, Q2, ~] = quadRule2D(qOrd);
 
 % Assemble matrix
 ret = { sparse(K*N, K*N); sparse(K*N, K*N) };

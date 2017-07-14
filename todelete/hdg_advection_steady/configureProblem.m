@@ -65,6 +65,7 @@ problemData = setdefault(problemData, 'testcase', 'Convergence');
 
 problemData = setdefault(problemData, 'hmax', 2^-6); % maximum edge length of triangle
 problemData = setdefault(problemData, 'p', 3); % local polynomial degree
+problemData = setdefault(problemData, 'qOrd', 2 * problemData.p + 1);
 
 problemData = setdefault(problemData, 'isVisGrid', false);
 problemData = setdefault(problemData, 'isVisSol', false);

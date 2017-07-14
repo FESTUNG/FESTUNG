@@ -50,13 +50,14 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgeMuMu(Nmu, basesOnGamma)
-validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma')
-p = Nmu-1;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
-ret = zeros(Nmu, Nmu); % [Nmu x Nmu]
-  for i = 1 : Nmu
-    for j = 1 : Nmu
-      ret(i, j) = sum( W' .* basesOnGamma.phi1D{qOrd}(:,i) .* basesOnGamma.phi1D{qOrd}(:,j) );
+function ret = integrateRefEdgeMuMu(N, basesOnQuadEdge, qOrd)
+validateattributes(basesOnQuadEdge, {'struct'}, {}, mfilename, 'basesOnGamma')
+if nargin < 3, p = N-1;  qOrd = 2*p+1;  end
+[~, W] = quadRule1D(qOrd);
+ret = zeros(N, N); % [N x N]
+  for i = 1 : N
+    for j = 1 : N
+      ret(i, j) = sum( W' .* basesOnQuadEdge.mu{qOrd}(:,i) .* basesOnQuadEdge.mu{qOrd}(:,j) );
     end % for
   end % for
 end % function

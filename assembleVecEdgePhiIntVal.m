@@ -1,3 +1,4 @@
+% TODO
 % Assembles a vector containing integrals over edges of products of a basis 
 % function with a value given for each quadrature point.
 
@@ -106,10 +107,7 @@
 %
 function ret = assembleVecEdgePhiIntVal(g, markE0T, valOnQuad, N, basesOnQuad, qOrd)
 % Determine quadrature rule
-if nargin < 6
-  p = (sqrt(8*N+1)-3)/2;
-  qOrd = 2*p+1;  
-end % if
+if nargin < 6,  p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1; end
 [~, W] = quadRule1D(qOrd);
 
 % Check function arguments that are directly used
@@ -126,6 +124,6 @@ for n = 1 : 3
   end % for
 end % for
 
-ret = reshape(ret',g.numT*N,1);
+ret = reshape(ret', [], 1);
 end % function
 

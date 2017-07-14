@@ -1,25 +1,24 @@
 % TODO
-function ret = assembleVecEdgeMuFuncCont(g, markE0T, funcCont, qOrd, basesOnGamma)
-K = g.numT; Kedge = g.numE;
-validateattributes(basesOnGamma, {'struct'}, {}, mfilename, 'basesOnGamma')
+function ret = assembleVecEdgeMuFuncCont(g, markE0T, funcCont, basesOnQuad, qOrd)
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
-validateattributes(markE0T, {'logical'}, {'size', [K 3]}, mfilename, 'markE0T');
+validateattributes(markE0T, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0T');
 
 % Determine quadrature rule
 [Q, W] = quadRule1D(qOrd);
-[R, Nmu] = size(basesOnGamma.phi1D{qOrd});
+[R, Nmu] = size(basesOnQuad.mu{qOrd});
 
 % Assemble vector
-ret = zeros(Kedge, Nmu);
+ret = zeros(g.numE, Nmu);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   funcOnQuad = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   Kkn = markE0T(:, n) .* g.areaE0T(:,n);
   ret(g.E0T(:, n), :) = ret(g.E0T(:, n), :) + (repmat(Kkn, 1, R) .* funcOnQuad) ...
-                          * ( repmat(W', 1, Nmu) .* basesOnGamma.phi1D{qOrd}(:, :) );
+                          * ( repmat(W', 1, Nmu) .* basesOnQuad.mu{qOrd} );
 end % for
 
-ret = reshape(ret', Kedge * Nmu, 1);
+ret = reshape(ret', [], 1);
 end
 
 

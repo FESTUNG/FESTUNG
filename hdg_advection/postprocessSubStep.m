@@ -1,7 +1,7 @@
 % Third step of the three-part substepping algorithm for each Runge-Kutta stage.
 
 %===============================================================================
-%> @file advection/postprocessSubStep.m
+%> @file hdg_advection/postprocessSubStep.m
 %>
 %> @brief Third step of the three-part substepping algorithm for each Runge-Kutta stage.
 %===============================================================================
@@ -53,12 +53,14 @@
 %> @endparblock
 %
 function problemData = postprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
-problemData.isSubSteppingFinished = nSubStep >= length(problemData.t);
+problemData.isSubSteppingFinished = problemData.isStationary || nSubStep >= length(problemData.t);
 
-problemData.cDiscReshaped = reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
-problemData.lambdaDiscReshaped = reshape( problemData.lambdaDisc', size(problemData.globP, 1), 1 );
+problemData.cDiscReshaped = reshape(problemData.cDisc', [], 1);
+problemData.lambdaDiscReshaped = reshape(problemData.lambdaDisc', [], 1);
 
-problemData.cDiscRK{nSubStep} = problemData.vecBphi ...
-                                - problemData.matLbar * problemData.cDiscReshaped ...
-                                - problemData.matMbar * problemData.lambdaDiscReshaped;
+if ~problemData.isStationary
+  problemData.cDiscRK{nSubStep} = problemData.vecBphi ...
+                                  - problemData.matLbar * problemData.cDiscReshaped ...
+                                  - problemData.matMbar * problemData.lambdaDiscReshaped;
+end % if
 end % function

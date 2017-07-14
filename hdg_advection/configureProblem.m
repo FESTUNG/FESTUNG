@@ -2,7 +2,7 @@
 % Problem parameters are to be modified inside this routine.
 
 %===============================================================================
-%> @file advection/configureProblem.m
+%> @file hdg_advection/configureProblem.m
 %>
 %> @brief Fills the problemData-struct with all basic configuration options.
 %>        Problem parameters are to be modified inside this routine.
@@ -60,57 +60,51 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
-problemData = setdefault(problemData, 'testcase', 'LeVeque'); % 'SteadyProblem'); % 
+% Choose testcase
+problemData = setdefault(problemData, 'testcase', 'stationary'); 
 
-problemData = setdefault(problemData, 'hmax', 2^-4); % maximum edge length of triangle
-problemData = setdefault(problemData, 'p', 2); % local polynomial degree
-problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,4)); % order of Runge-Kutta time stepper.
-problemData = setdefault(problemData, 'numSteps', 160); % number of time steps
-problemData = setdefault(problemData, 'tEnd', 2*pi); % end time
+% Mark run as convergence test (enforces Friedrichs-Keller triangulation)
+problemData = setdefault(problemData, 'isConvergence', true);
 
-problemData = setdefault(problemData, 'isVisGrid', false);
-problemData = setdefault(problemData, 'isVisSol', false);
+% Maximum edge length of triangle
+problemData = setdefault(problemData, 'hmax', 2^-6);
 
-problemData = setdefault(problemData, 'outputFrequency', 20);
-problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'solution_hdg_advection']);
-problemData = setdefault(problemData, 'outputTypes', {'vtk'});
+% Local polynomial approximation order (0 to 4)
+problemData = setdefault(problemData, 'p', 2);
 
-%% HDG specific parameters
-problemData = setdefault(problemData, 'stab', 1.0);
-problemData = setdefault(problemData, 'isTrueLocalSolve', true);
+% Order of Runge-Kutta method
+problemData = setdefault(problemData, 'ordRK', min(problemData.p + 1, 4));
+
+% Order of quadrature rule
+problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
+
+% Load testcase
+problemData = execin([ problemData.problemName filesep 'getTestcase' ], problemData, problemData.testcase);
+
+% Visualization settings
+problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
+problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
+problemData = setdefault(problemData, 'outputFrequency', 20); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputBasename', ...
+                         ['output' filesep 'hdg_advection']); 
+problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
+
+% HDG specific settings
+problemData = setdefault(problemData, 'stab', 1.0); % HDG stabilization parameter
+problemData = setdefault(problemData, 'isTrueLocalSolve', true); % Use true local solves
 problemData = setdefault(problemData, 'trueLocalSolveSize', 16); % 16 seems to be good in most cases
-
-%% Testing?
-problemData = setdefault(problemData, 'isInTesting', false);
-problemData = setdefault(problemData, 'showWaitBar', false);
-problemData = setdefault(problemData, 'showFprintfProgress', true);
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
-assert(problemData.ordRK >= 1 && problemData.ordRK <= 4, 'Order of Runge Kutta must be zero to three.')
+assert(problemData.ordRK >= 1 && problemData.ordRK <= 4, 'Order of Runge-Kutta method must be zero to four.')
 assert(problemData.hmax > 0, 'Maximum edge length must be positive.')
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
-
-%% Coefficients and boundary data
-problemData = execin([problemData.problemName filesep 'getTestcase'], problemData, problemData.testcase);
-
-
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
-
-% At the moment, the mesh will be defined by the test case
-
-% if license('checkout','PDE_Toolbox')
-%   problemData.generateGridData = @(hmax) domainPolygon([-0.5 0.5 0.5 -0.5], [-0.5 -0.5 0.5 0.5], hmax);
-% else
-%   fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
-%   problemData.generateGridData = @domainSquare;
-% end % if
-% Specify edge ids of boundary conditions
-
-% Specify edge ids of boundary conditions
-problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-% Neumannboundaries are defined by test case
-% problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
-
+if ~problemData.isConvergence && license('checkout','PDE_Toolbox')
+  problemData.generateGridData = @(hmax) domainPolygon([0 1 1 0], [0 0 1 1], hmax);
+else
+  fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
+  problemData.generateGridData = @domainSquare;
+end % if
 end % function

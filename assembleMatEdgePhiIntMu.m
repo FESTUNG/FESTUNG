@@ -1,3 +1,4 @@
+% TODO
 % Assembles a matrix containing integrals of products of an interior basis
 % with an edge basis function.
 
@@ -11,7 +12,6 @@
 %> @brief Assembles a matrix containing integrals of products of an interior
 %>        basis with an edge basis function.
 %>
-%> TODO
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 

@@ -2,7 +2,7 @@
 % Runge-Kutta steps for a time-step.
 
 %===============================================================================
-%> @file advection/solveStep.m
+%> @file hdg_advection/solveStep.m
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %>        Carries out all Runge-Kutta steps for a time-step.
@@ -55,23 +55,19 @@
 %> @endparblock
 %
 function problemData = solveStep(problemData, nStep)
-K = problemData.K;
-N = problemData.N;
+if problemData.isStationary
+  problemData.t = 0;
+else
+  % Obtain Runge-Kutta rule
+  [problemData.t, problemData.A, problemData.b] = rungeKuttaImplicit(problemData.ordRK, problemData.dt, (nStep - 1) * problemData.dt);
 
-% Obtain Runge-Kutta rule
-[problemData.t, problemData.A, problemData.b] = rungeKuttaImplicit(problemData.ordRK, problemData.dt, (nStep - 1) * problemData.dt);
-
-% Initialize solution vectors for RK steps
-problemData.cDiscRK = cell(length(problemData.t), 1); 
+  % Initialize solution vectors for RK steps
+  problemData.cDiscRK = cell(length(problemData.t), 1);
+end % if
 
 % Carry out RK steps
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);
 
-if (problemData.showWaitBar == true)
-    waitbar( nStep/problemData.numSteps, problemData.waitBar, sprintf('Simulation progress at %3.0f%% (Step %d)', 100*nStep/problemData.numSteps, nStep));
-end
-if (problemData.showFprintfProgress == true)
-    fprintf('Simulation progress at %3.0f%% (Step %d)\n', 100*nStep/problemData.numSteps, nStep);
-end
+fprintf('Simulation progress at %3.0f%% (Step %d)\n', 100*nStep/problemData.numSteps, nStep);
 end % function
