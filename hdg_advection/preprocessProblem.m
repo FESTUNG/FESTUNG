@@ -49,6 +49,7 @@ function problemData = preprocessProblem(problemData)
 %% Triangulation.
 problemData.g = problemData.generateGridData(problemData.hmax);
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
+
 %% Globally constant parameters.
 problemData.K    = problemData.g.numT;  % number of triangles
 problemData.N    = nchoosek(problemData.p + 2, problemData.p); % number of local DOFs
@@ -63,16 +64,14 @@ problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
 
 % Precompute some repeatedly evaluated fields
 problemData.g = computeDerivedGridData(problemData.g);
-% Choose a block size for the local solves if we want 'true' local solves
-if problemData.isTrueLocalSolve
-  problemData.localSolveBlockSize = execin([problemData.problemName filesep 'determineLocalSolveBlockSize'], ...
-                                        problemData.K, problemData.trueLocalSolveSize );
-end % if
+
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
+
 %% Lookup table for basis function.
 problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct, [problemData.qOrd, problemData.qOrd + 1]);
 problemData.basesOnQuad = computeBasesOnQuadEdge(problemData.Nmu, problemData.basesOnQuad, [problemData.qOrd, problemData.qOrd + 1]);
+
 %% Computation of matrices on the reference triangle.
 problemData.hatM    = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 problemData.hatMmu  = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnQuad, problemData.qOrd);
@@ -80,6 +79,7 @@ problemData.hatRmu  = integrateRefEdgePhiIntMu([problemData.N, problemData.Nmu],
 problemData.hatRphi = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 problemData.hatG    = integrateRefElemDphiPhiPerQuad(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 problemData.hatS    = integrateRefEdgePhiIntMuPerQuad([problemData.N, problemData.Nmu], problemData.basesOnQuad, problemData.qOrd);
+
 %% Assembly of time-independent global matrices.
 problemData.globMphi      = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 problemData.globRmu       = assembleMatEdgePhiIntMu(problemData.g, problemData.g.markE0Tint, problemData.hatRmu);

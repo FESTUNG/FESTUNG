@@ -76,7 +76,7 @@ problemData.globG = assembleMatElemDphiPhiFuncContVec(problemData.g, problemData
                         u1Cont, u2Cont, problemData.qOrd);
 
 % Assemble flux on interior edges
-problemData.globS = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0Tint, ...
+problemData.globS = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0Tint | problemData.g.markE0TbdrN, ...
                         problemData.hatS, uNormalQ0E0T);
 
 % Assemble Dirichlet boundary conditions.
@@ -87,6 +87,6 @@ problemData.globKmuD = assembleVecEdgeMuFuncCont(problemData.g, problemData.g.ma
                             cDCont, problemData.basesOnQuad, problemData.qOrd);
 
 % Assemble outflow boundary conditions.
-problemData.globSout = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0TbdrN, ...
-                                                  problemData.hatS, uNormalQ0E0T);
+% problemData.globSout = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0TbdrN, ...
+%                                                   problemData.hatS, uNormalQ0E0T);
 end % function
