@@ -82,24 +82,12 @@ end % if
 % consuming for large matrices (=many elements). I guess it may be faster
 % for matrices of moderate size.
 if problemData.isBlockSolve
-    numBlocks = ceil(K / problemData.blockSolveSize);
-    blockSize = problemData.blockSolveSize * N;
-    
-    % Invert every block locally
-    matLinvLocal = cell(numBlocks, 1);
-    for idxBlock = 1 : numBlocks - 1
-      idxLocal = (idxBlock - 1) * blockSize + 1 : idxBlock * blockSize;
-      matLinvLocal{idxBlock} = matL(idxLocal, idxLocal) \ speye(blockSize);
-    end
-    matLinvLocal{numBlocks} = matL((numBlocks - 1) * blockSize + 1 : end, (numBlocks - 1) * blockSize + 1 : end) \ speye(size(matL, 1) - (numBlocks - 1) * blockSize);
-    
-    % Construct inverse matrix and apply to Q and M
-    matLinv = blkdiag(matLinvLocal{:});
-    LinvQ = matLinv * vecQ;
-    LinvM = matLinv * matM;
+  matLinv = blkinv(matL, problemData.blockSolveSize * N);
+  LinvQ = matLinv * vecQ;
+  LinvM = matLinv * matM;
 else
-    LinvQ = matL \ vecQ;
-    LinvM = matL \ matM;
+  LinvQ = matL \ vecQ;
+  LinvM = matL \ matM;
 end % if
 
 %% Solving global system for lambda
