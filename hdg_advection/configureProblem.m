@@ -89,10 +89,12 @@ problemData = setdefault(problemData, 'outputBasename', ...
                          ['output' filesep 'hdg_advection']); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk', 'tec' });  % Type of visualization files ('vtk, 'tec')
 
-% HDG specific settings
-problemData = setdefault(problemData, 'stab', 1.0); % HDG stabilization parameter
-problemData = setdefault(problemData, 'isTrueLocalSolve', true); % Use true local solves
-problemData = setdefault(problemData, 'trueLocalSolveSize', floor(128 / 2^problemData.p)); % 16 seems to be good in most cases
+% HDG stabilization parameter
+problemData = setdefault(problemData, 'stab', 1.0); 
+
+% Enable blockwise local solves and specify block size
+problemData = setdefault(problemData, 'isBlockSolve', true);
+problemData = setdefault(problemData, 'blockSolveSize', floor(128 / 2^problemData.p));
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')

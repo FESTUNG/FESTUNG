@@ -69,5 +69,5 @@ end % if
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);
 
-fprintf('Simulation progress at %3.0f%% (Step %d)\n', 100*nStep/problemData.numSteps, nStep);
+% fprintf('Simulation progress at %3.0f%% (Step %d)\n', 100*nStep/problemData.numSteps, nStep);
 end % function

@@ -56,7 +56,7 @@ N = problemData.N;
 if problemData.isStationary
   matL = - problemData.globG{1} - problemData.globG{2} + problemData.stab * problemData.globRphi;
   vecQ = problemData.globH - problemData.globFphiD;
-  matM = problemData.globS + problemData.globSout - problemData.stab * problemData.globRmu;
+  matM = problemData.globS - problemData.stab * problemData.globRmu;
 else
   cDiscRkRHS = zeros(K * N, 1);
   for i = 1 : nSubStep - 1
@@ -68,9 +68,7 @@ else
   vecBphi = problemData.globH - problemData.globFphiD;
   vecQ =  problemData.globMcDisc ./ problemData.dt ...
         + problemData.A(nSubStep, nSubStep) .* vecBphi + cDiscRkRHS; % Add here source terms if needed
-  matMbar = problemData.globS ...
-                        + problemData.globSout ...
-                        - problemData.stab * problemData.globRmu;
+  matMbar = problemData.globS - problemData.stab * problemData.globRmu;
   matM = problemData.A(nSubStep, nSubStep) .* matMbar;
 end % if
 
@@ -83,44 +81,39 @@ end % if
 % 2. We invert the whole mass matrix. This may be very slow and memory
 % consuming for large matrices (=many elements). I guess it may be faster
 % for matrices of moderate size.
-if problemData.isTrueLocalSolve
-    blockSize = problemData.localSolveBlockSize;
-    matLinvLocal = cell( K/blockSize, 1);
-    %Invert every block locally
-    for iE=1:K/blockSize
-        iEs = (iE-1)*N*blockSize + 1; %index Element start
-        iEe =  iE*N*blockSize; %index Element end
-        matLinvLocal{iE} =  mldivide(matL(iEs:iEe,iEs:iEe), speye(N*blockSize,N*blockSize) );
+if problemData.isBlockSolve
+    numBlocks = ceil(K / problemData.blockSolveSize);
+    blockSize = problemData.blockSolveSize * N;
+    
+    % Invert every block locally
+    matLinvLocal = cell(numBlocks, 1);
+    for idxBlock = 1 : numBlocks - 1
+      idxLocal = (idxBlock - 1) * blockSize + 1 : idxBlock * blockSize;
+      matLinvLocal{idxBlock} = matL(idxLocal, idxLocal) \ speye(blockSize);
     end
-    %Construct inverse matrix
-    matLinv = blkdiag(  matLinvLocal{:} );
-    %Solve L x = [vecQ matM]
-    localSolves = matLinv * [vecQ matM];
-    LinvQ = localSolves(:, 1);
-    LinvM = localSolves(:, 2:end);
+    matLinvLocal{numBlocks} = matL((numBlocks - 1) * blockSize + 1 : end, (numBlocks - 1) * blockSize + 1 : end) \ speye(size(matL, 1) - (numBlocks - 1) * blockSize);
+    
+    % Construct inverse matrix and apply to Q and M
+    matLinv = blkdiag(matLinvLocal{:});
+    LinvQ = matLinv * vecQ;
+    LinvM = matLinv * matM;
 else
-    localSolves = mldivide(matL, [vecQ matM]);
-    LinvQ = localSolves(:, 1);
-    LinvM = localSolves(:, 2:end);
+    LinvQ = matL \ vecQ;
+    LinvM = matL \ matM;
 end % if
+
 %% Solving global system for lambda
 matN = - problemData.stab * problemData.globT - problemData.globKmuOut ;
 matP = problemData.globP;
 
-vecR = problemData.globKmuD;
-
-sysMatA = -matN * LinvM + matP;
-sysRhs = vecR - matN * LinvQ;
-
-problemData.lambdaDisc = mldivide( sysMatA, sysRhs );
+lambdaDisc = (-matN * LinvM + matP) \ (problemData.globKmuD - matN * LinvQ);
 
 %% Reconstructing local solutions from updated lambda
-problemData.cDisc = LinvQ - LinvM * problemData.lambdaDisc;
+problemData.cDisc = LinvQ - LinvM * lambdaDisc;
 
 if ~problemData.isStationary
-  problemData.cDiscRK{nSubStep} = vecBphi - matLbar * problemData.cDisc - matMbar * problemData.lambdaDisc;
+  problemData.cDiscRK{nSubStep} = vecBphi - matLbar * problemData.cDisc - matMbar * lambdaDisc;
 end % if
 
-problemData.cDisc = reshape( problemData.cDisc, problemData.N, problemData.g.numT )';
-problemData.lambdaDisc = reshape( problemData.lambdaDisc, problemData.Nmu, problemData.g.numE )';
+problemData.cDisc = reshape(problemData.cDisc, N, K)';
 end % function
