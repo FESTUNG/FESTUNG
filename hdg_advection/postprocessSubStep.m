@@ -54,7 +54,4 @@
 %
 function problemData = postprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 problemData.isSubSteppingFinished = problemData.isStationary || nSubStep >= length(problemData.t);
-
-problemData.cDiscReshaped = reshape(problemData.cDisc', [], 1);
-problemData.lambdaDiscReshaped = reshape(problemData.lambdaDisc', [], 1);
 end % function
