@@ -17,7 +17,7 @@ switch testcase
     
     generateMarkE0TbdrN = @(g) false(g.numT, 3);
     
-    numSteps = 160;
+    numSteps = 320;
     tEnd = 2 * pi;
 
   case 'stationary' % Stationary analytical example

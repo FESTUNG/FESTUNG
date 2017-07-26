@@ -62,13 +62,13 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Choose testcase
-problemData = setdefault(problemData, 'testcase', 'stationary');
+problemData = setdefault(problemData, 'testcase', 'solid_body');
 
 % Mark run as convergence test (enforces Friedrichs-Keller triangulation)
-problemData = setdefault(problemData, 'isConvergence', true);
+problemData = setdefault(problemData, 'isConvergence', false);
 
 % Maximum edge length of triangle
-problemData = setdefault(problemData, 'hmax', 2^-4);
+problemData = setdefault(problemData, 'hmax', 2^-6);
 
 % Local polynomial approximation order (0 to 4)
 problemData = setdefault(problemData, 'p', 2);
@@ -85,10 +85,10 @@ problemData = execin([ problemData.problemName filesep 'getTestcase' ], problemD
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputFrequency', 50); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...
                          ['output' filesep 'advection_implicit']); 
-problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
+problemData = setdefault(problemData, 'outputTypes', { 'vtk', 'tec' });  % Type of visualization files ('vtk, 'tec')
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.ordRK >= 1 && problemData.ordRK <= 4, 'Order of Runge-Kutta method must be zero to four.')

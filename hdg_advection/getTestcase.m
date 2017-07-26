@@ -18,7 +18,7 @@ switch testcase
                                 u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
                                 g.idE0T ~= 0;
 
-    numSteps = 160;
+    numSteps = 320;
     tEnd = 2 * pi;
 
   case 'stationary' % Stationary analytical example

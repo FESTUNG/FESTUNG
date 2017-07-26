@@ -64,13 +64,13 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'solid_body'); 
 
 % Mark run as convergence test (enforces Friedrichs-Keller triangulation)
-problemData = setdefault(problemData, 'isConvergence', true);
+problemData = setdefault(problemData, 'isConvergence', false);
 
 % Maximum edge length of triangle
-problemData = setdefault(problemData, 'hmax', 2^-4);
+problemData = setdefault(problemData, 'hmax', 2^-6);
 
 % Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 2);
+problemData = setdefault(problemData, 'p', 4);
 
 % Order of Runge-Kutta method
 problemData = setdefault(problemData, 'ordRK', min(problemData.p + 1, 4));
@@ -83,16 +83,16 @@ problemData = execin([ problemData.problemName filesep 'getTestcase' ], problemD
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
-problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 20); % no visualization of every timestep
+problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
+problemData = setdefault(problemData, 'outputFrequency', 50); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...
                          ['output' filesep 'hdg_advection']); 
-problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
+problemData = setdefault(problemData, 'outputTypes', { 'vtk', 'tec' });  % Type of visualization files ('vtk, 'tec')
 
 % HDG specific settings
 problemData = setdefault(problemData, 'stab', 1.0); % HDG stabilization parameter
 problemData = setdefault(problemData, 'isTrueLocalSolve', true); % Use true local solves
-problemData = setdefault(problemData, 'trueLocalSolveSize', 16); % 16 seems to be good in most cases
+problemData = setdefault(problemData, 'trueLocalSolveSize', floor(128 / 2^problemData.p)); % 16 seems to be good in most cases
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
