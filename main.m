@@ -86,14 +86,18 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function varargout = main(problemName, problemData)
+function varargout = main(problemName, varargin)
 %% Check given problem
-narginchk(1, 2)
+narginchk(1, inf)
 nargoutchk(0, 1)
 validateattributes(problemName, {'char'},{'nonempty'}, mfilename, 'problemName')
 assert(isdir(problemName), 'No directory for specified problem found.')
 if nargin == 2
+  problemData = varargin{1};
   validateattributes(problemData, {'struct'}, {}, mfilename, 'problemData')
+elseif nargin > 2
+  assert(mod(nargin, 2) == 1, 'Optional arguments must take the form "key, value"')
+  problemData = struct(varargin{:});
 else
   problemData = struct;
 end % if
