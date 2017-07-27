@@ -64,12 +64,12 @@ else
   end
 
   matLbar = - problemData.globG{1} - problemData.globG{2} + problemData.stab * problemData.globRphi;
-  matL = problemData.globMphi ./ problemData.dt + problemData.A(nSubStep, nSubStep) .* matLbar; % Here goes the time discretization
+  matL = problemData.globMphi + (problemData.dt * problemData.A(nSubStep, nSubStep)) .* matLbar;
   vecBphi = problemData.globH - problemData.globFphiD;
-  vecQ =  problemData.globMcDisc ./ problemData.dt ...
-        + problemData.A(nSubStep, nSubStep) .* vecBphi + cDiscRkRHS; % Add here source terms if needed
+  vecQ =  problemData.globMcDisc + problemData.dt * ( ...
+        + problemData.A(nSubStep, nSubStep) .* vecBphi + cDiscRkRHS );
   matMbar = problemData.globS - problemData.stab * problemData.globRmu;
-  matM = problemData.A(nSubStep, nSubStep) .* matMbar;
+  matM = (problemData.dt * problemData.A(nSubStep, nSubStep)) .* matMbar;
 end % if
 
 %% Computing local solves
