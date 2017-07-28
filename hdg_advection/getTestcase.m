@@ -1,5 +1,5 @@
 function problemData = getTestcase(problemData, testcase)  
-checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
+% checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 switch testcase
   case 'solid_body' % LeVeque's solid body rotation
     isAnalytical = false;
@@ -14,9 +14,9 @@ switch testcase
     u2Cont = @(t,x1,x2) x1 - 0.5;
     cDCont = @(t,x1,x2) zeros(size(x1));
     
-    generateMarkE0TbdrN = @(g) (u1Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 1) + ...
-                                u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
-                                g.idE0T ~= 0;
+%     generateMarkE0TbdrN = @(g) (u1Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 1) + ...
+%                                 u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
+%                                 g.idE0T ~= 0;
 
     numSteps = 320;
     tEnd = 2 * pi;
@@ -34,8 +34,8 @@ switch testcase
     c0Cont = @(x1, x2) cCont(0, x1, x2);
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
 
-    idBdrN = [2 3];
-    generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idBdrN);
+%     idBdrN = [2 3];
+%     generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, idBdrN);
     
     numSteps = 1;
     tEnd = 10;
@@ -53,9 +53,9 @@ switch testcase
     c0Cont = @(x1, x2) cCont(0, x1, x2);
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
 
-    generateMarkE0TbdrN = @(g) (u1Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 1) + ...
-                                u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
-                                g.idE0T ~= 0;
+%     generateMarkE0TbdrN = @(g) (u1Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 1) + ...
+%                                 u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
+%                                 g.idE0T ~= 0;
     
     numSteps = 10;
     tEnd = 20;    
@@ -73,9 +73,9 @@ switch testcase
     c0Cont = @(x1, x2) cCont(0, x1, x2);
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
 
-    generateMarkE0TbdrN = @(g) (u1Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 1) + ...
-                                u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
-                                g.idE0T ~= 0;
+%     generateMarkE0TbdrN = @(g) (u1Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 1) + ...
+%                                 u2Cont(0, g.baryE0T(:, :, 1), g.baryE0T(:, :, 2)) .* g.nuE0T(:, :, 2)) > 0 & ...
+%                                 g.idE0T ~= 0;
     
     numSteps = 10;
     tEnd = 40;    
@@ -101,8 +101,9 @@ if isAnalytical, problemData = setdefault(problemData, 'cCont', cCont); end
 
 % Specify boundary conditions
 problemData = setdefault(problemData, 'generateMarkE0Tint', @(g) g.idE0T == 0);
-problemData = setdefault(problemData, 'generateMarkE0TbdrN', generateMarkE0TbdrN);
-problemData = setdefault(problemData, 'generateMarkE0TbdrD', @(g) ~(g.markE0Tint | g.markE0TbdrN));
+problemData = setdefault(problemData, 'generateMarkE0Tbdr', @(g) g.idE0T ~= 0);
+% problemData = setdefault(problemData, 'generateMarkE0TbdrN', generateMarkE0TbdrN);
+% problemData = setdefault(problemData, 'generateMarkE0TbdrD', @(g) ~(g.markE0Tint | g.markE0TbdrN));
 % 
 % switch problemName
 %   case 'LeVeque'

@@ -62,9 +62,31 @@
 %> a subfolder and implement all above mentioned routines in this folder.
 %> Then call it as <code>main('folder-name')</code>.
 %>
+%> This function accepts either an optional struct parameter that contains 
+%> configuration values to be used, or an optional sequence of keys and values
+%> that are then used to initialize a struct.
+%>
+%> @par Example
+%> @parblock
+%> The following two uses are identical:
+%> @code
+%> problemData = struct();
+%> problemData.p = 2;
+%> problemData.tEnd = 1;
+%> problemData = main('advection', problemData);
+%> @endcode
+%> @code
+%> problemData = main('advection', 'p', 2, 'tEnd', 1);
+%> @endcode
+%>
 %> @param  problemName  The name of the problem to be solved. A folder with
 %>                      matching name must exist and provide all of the 
 %>                      mentioned routines. @f$[\text{string}]@f$
+%> @param  problemData  (optional) A struct containing configuration values
+%>                      to be used by the solver. Thus, setdefault() should
+%>                      be used in configureProblem() to honor given values.
+%> @param  key          (optional) A string to identify the following value.
+%> @param  value        (optional) The value corresponding to the preceding key.
 %>
 %> This file is part of FESTUNG
 %>
@@ -152,7 +174,7 @@ tStartup = tic; % Start time measurement
 diaryName = [problemName '_' datestr(now, 'yyyymmdd-HHMMSS') '.log'];
 diary(diaryName) % Start logging
 fprintf( [ '\n' ...
-'   __    __    __                      __    __    __\n' ...
+'   __    __    __                      __    __    __ \n' ...
 '  |  |  |  |  |  |                    |  |  |  |  |  |\n' ...
 '  |  |__|  |__|  |                    |  |__|  |__|  |\n' ...
 '  |              |   __    __    __   |              |\n' ...

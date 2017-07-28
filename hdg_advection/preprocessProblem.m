@@ -59,8 +59,9 @@ problemData.dt   = problemData.tEnd / problemData.numSteps;
 % [K x 3] arrays that mark local edges (E0T) or vertices (V0T) that are
 % interior or have a certain boundary type.
 problemData.g.markE0Tint  = problemData.generateMarkE0Tint(problemData.g);
-problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
-problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
+problemData.g.markE0Tbdr  = problemData.generateMarkE0Tbdr(problemData.g);
+% problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
+% problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
 
 % Precompute some repeatedly evaluated fields
 problemData.g = computeDerivedGridData(problemData.g);
@@ -84,7 +85,6 @@ problemData.hatS    = integrateRefEdgePhiIntMuPerQuad([problemData.N, problemDat
 problemData.globMphi      = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 problemData.globRmu       = assembleMatEdgePhiIntMu(problemData.g, problemData.g.markE0Tint, problemData.hatRmu);
 problemData.globRphi      = assembleMatEdgePhiIntPhiInt(problemData.g, problemData.g.markE0Tint, problemData.hatRphi);
-problemData.globKmuOut    = assembleMatEdgePhiIntMu(problemData.g, problemData.g.markE0TbdrN, problemData.hatRmu)';
 problemData.globMmuBar    = assembleMatEdgeMuMu(problemData.g, problemData.g.markE0Tint, problemData.hatMmu);
 problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, ~problemData.g.markE0Tint, problemData.hatMmu);
 problemData.globP         = problemData.stab .* problemData.globMmuBar + problemData.globMmuTilde;

@@ -65,9 +65,12 @@ fCont = @(x1,x2) problemData.fCont(t, x1, x2);
 % Evaluate normal advection velocity on every edge.
 uNormalQ0E0T = computeFuncContNuOnQuadEdge(problemData.g, u1Cont, u2Cont, problemData.qOrd);
 
+% Determine inflow- and outflow edges
+[~, W] = quadRule1D(problemData.qOrd);
+markE0TbdrOut = problemData.g.markE0Tbdr & sum(bsxfun(@times, reshape(W, 1, 1, []), uNormalQ0E0T), 3) > 0;
+markE0TbdrIn = problemData.g.markE0Tbdr & ~markE0TbdrOut;
+
 % Assemble source term.
-% srcEval = evalSourceContAtEveryIntPoint(problemData.g, @(x1,x2) problemData.fCont(t, x1 ,x2 ), problemData.N);
-% problemData.globH = assembleVecElemPhiSource(problemData.g, problemData.N, srcEval, problemData.basesOnQuad);
 problemData.globH = problemData.globMphi * reshape(projectFuncCont2DataDisc(problemData.g, fCont, ...
                         problemData.qOrd, problemData.hatM, problemData.basesOnQuad)', [], 1);
 
@@ -75,18 +78,15 @@ problemData.globH = problemData.globMphi * reshape(projectFuncCont2DataDisc(prob
 problemData.globG = assembleMatElemDphiPhiFuncContVec(problemData.g, problemData.hatG, ...
                         u1Cont, u2Cont, problemData.qOrd);
 
-% Assemble flux on interior edges
-problemData.globS = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0Tint | problemData.g.markE0TbdrN, ...
+% Assemble flux on interior and outflow edges
+problemData.globS = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0Tint | markE0TbdrOut, ...
                         problemData.hatS, uNormalQ0E0T);
-
-% Assemble Dirichlet boundary conditions.
+problemData.globKmuOut = assembleMatEdgePhiIntMu(problemData.g, markE0TbdrOut, problemData.hatRmu)';
+                      
+% Assemble inflow boundary conditions.
 cQ0E0T = computeFuncContOnQuadEdge(problemData.g, cDCont, problemData.qOrd);
-problemData.globFphiD = assembleVecEdgePhiIntVal(problemData.g, problemData.g.markE0TbdrD, ...
+problemData.globFphiD = assembleVecEdgePhiIntVal(problemData.g, markE0TbdrIn, ...
                             cQ0E0T .* uNormalQ0E0T, problemData.N, problemData.basesOnQuad);
-problemData.globKmuD = assembleVecEdgeMuFuncCont(problemData.g, problemData.g.markE0TbdrD, ...
+problemData.globKmuD = assembleVecEdgeMuFuncCont(problemData.g, markE0TbdrIn, ...
                             cDCont, problemData.basesOnQuad, problemData.qOrd);
-
-% Assemble outflow boundary conditions.
-% problemData.globSout = assembleMatEdgePhiIntMuVal(problemData.g, problemData.g.markE0TbdrN, ...
-%                                                   problemData.hatS, uNormalQ0E0T);
 end % function

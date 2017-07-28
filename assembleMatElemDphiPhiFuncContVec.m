@@ -24,17 +24,4 @@ for r = 1 : R
 end %for
 ret{1} = kronVec(speye(K,K), ret{1});
 ret{2} = kronVec(speye(K,K), ret{2});
-
-% ret = { sparse(K*N, K*N); sparse(K*N, K*N) };
-% for r = 1 : R
-%   valOnQuad1 = funcCont1(g.mapRef2Phy(1, Q1(r), Q2(r)), g.mapRef2Phy(2, Q1(r), Q2(r)));
-%   ret{1} = ret{1} ...
-%           + kron(spdiags(g.B(:,2,2) .* valOnQuad1, 0, K, K), refElemDphiPhiPerQuad{1}(:, :, r) ) ...
-%           - kron(spdiags(g.B(:,2,1) .* valOnQuad1, 0, K, K), refElemDphiPhiPerQuad{2}(:, :, r) );
-%         
-%   valOnQuad2 = funcCont2(g.mapRef2Phy(1, Q1(r), Q2(r)), g.mapRef2Phy(2, Q1(r), Q2(r)));
-%   ret{2} = ret{2} ...
-%           - kron(spdiags(g.B(:,1,2) .* valOnQuad2, 0, K, K), refElemDphiPhiPerQuad{1}(:, :, r) ) ...
-%           + kron(spdiags(g.B(:,1,1) .* valOnQuad2, 0, K, K), refElemDphiPhiPerQuad{2}(:, :, r) );
-% end %for
 end
