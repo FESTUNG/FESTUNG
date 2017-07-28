@@ -58,18 +58,19 @@ if problemData.isStationary
   vecQ = problemData.globH - problemData.globFphiD;
   matM = problemData.globS - problemData.stab * problemData.globRmu;
 else
+  dtA = problemData.dt * problemData.A;
+  
   cDiscRkRHS = zeros(K * N, 1);
   for i = 1 : nSubStep - 1
-    cDiscRkRHS = cDiscRkRHS + problemData.A(nSubStep, i) .* problemData.cDiscRK{i};
+    cDiscRkRHS = cDiscRkRHS + dtA(nSubStep, i) .* problemData.cDiscRK{i};
   end
 
   matLbar = - problemData.globG{1} - problemData.globG{2} + problemData.stab * problemData.globRphi;
-  matL = problemData.globMphi + (problemData.dt * problemData.A(nSubStep, nSubStep)) .* matLbar;
-  vecBphi = problemData.globH - problemData.globFphiD;
-  vecQ =  problemData.globMcDisc + problemData.dt * ( ...
-        + problemData.A(nSubStep, nSubStep) .* vecBphi + cDiscRkRHS );
+  matL = problemData.globMphi + dtA(nSubStep, nSubStep) .* matLbar;
+  vecBphi = problemData.globH - problemData.globFphiIn;
+  vecQ =  problemData.globMcDisc + dtA(nSubStep, nSubStep) * vecBphi + cDiscRkRHS;
   matMbar = problemData.globS - problemData.stab * problemData.globRmu;
-  matM = (problemData.dt * problemData.A(nSubStep, nSubStep)) .* matMbar;
+  matM = dtA(nSubStep, nSubStep) .* matMbar;
 end % if
 
 %% Computing local solves
@@ -94,7 +95,7 @@ end % if
 matN = - problemData.stab * problemData.globT - problemData.globKmuOut ;
 matP = problemData.globP;
 
-lambdaDisc = (-matN * LinvM + matP) \ (problemData.globKmuD - matN * LinvQ);
+lambdaDisc = (-matN * LinvM + matP) \ (problemData.globKmuIn - matN * LinvQ);
 
 %% Reconstructing local solutions from updated lambda
 problemData.cDisc = LinvQ - LinvM * lambdaDisc;
