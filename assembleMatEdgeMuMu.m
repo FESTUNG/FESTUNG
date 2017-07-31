@@ -47,10 +47,6 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-% TODO Check this
-% Compute global mas matrix of lambda
-% If it is an internal edge, the entry has to be scaled by 2*alpha
-% check the element transformation
 function ret = assembleMatEdgeMuMu(g, markE0T, refEdgeMuMu)
 Nmu = size(refEdgeMuMu, 1);
 Kedge = g.numE;

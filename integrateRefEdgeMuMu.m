@@ -55,9 +55,9 @@ validateattributes(basesOnQuadEdge, {'struct'}, {}, mfilename, 'basesOnGamma')
 if nargin < 3, p = N-1;  qOrd = 2*p+1;  end
 [~, W] = quadRule1D(qOrd);
 ret = zeros(N, N); % [N x N]
-  for i = 1 : N
-    for j = 1 : N
-      ret(i, j) = sum( W' .* basesOnQuadEdge.mu{qOrd}(:,i) .* basesOnQuadEdge.mu{qOrd}(:,j) );
-    end % for
+for i = 1 : N
+  for j = 1 : N
+    ret(i, j) = sum( W' .* basesOnQuadEdge.mu{qOrd}(:,i) .* basesOnQuadEdge.mu{qOrd}(:,j) );
   end % for
+end % for
 end % function

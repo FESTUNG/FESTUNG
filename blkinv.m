@@ -5,6 +5,7 @@ validateattributes(blockSize, {'numeric'}, {'scalar', '>', 0}, 'blockSize')
 
 n = size(A,1);
 numBlocks = ceil(n / blockSize);
+idxEnd = 0;
     
 invA = cell(numBlocks, 1);
 for idxBlock = 1 : numBlocks - 1
