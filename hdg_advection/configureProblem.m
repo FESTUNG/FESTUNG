@@ -67,10 +67,10 @@ problemData = setdefault(problemData, 'testcase', 'solid_body');
 problemData = setdefault(problemData, 'isConvergence', false);
 
 % Maximum edge length of triangle
-problemData = setdefault(problemData, 'hmax', 2^-6);
+problemData = setdefault(problemData, 'hmax', 2^-4/3);
 
 % Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 4);
+problemData = setdefault(problemData, 'p', 2);
 
 % Order of Runge-Kutta method
 problemData = setdefault(problemData, 'ordRK', min(problemData.p + 1, 4));

@@ -86,7 +86,7 @@ problemData.globMphi      = assembleMatElemPhiPhi(problemData.g, problemData.hat
 problemData.globRmu       = assembleMatEdgePhiIntMu(problemData.g, problemData.g.markE0Tint, problemData.hatRmu);
 problemData.globRphi      = assembleMatEdgePhiIntPhiInt(problemData.g, problemData.g.markE0Tint, problemData.hatRphi);
 problemData.globMmuBar    = assembleMatEdgeMuMu(problemData.g, problemData.g.markE0Tint, problemData.hatMmu);
-problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, ~problemData.g.markE0Tint, problemData.hatMmu);
+problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, problemData.g.markE0Tbdr, problemData.hatMmu);
 problemData.globP         = problemData.stab .* problemData.globMmuBar + problemData.globMmuTilde;
 problemData.globT         = problemData.globRmu';
 end % function

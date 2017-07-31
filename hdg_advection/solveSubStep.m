@@ -55,7 +55,7 @@ N = problemData.N;
 
 if problemData.isStationary
   matL = - problemData.globG{1} - problemData.globG{2} + problemData.stab * problemData.globRphi;
-  vecQ = problemData.globH - problemData.globFphiD;
+  vecQ = problemData.globH - problemData.globFphiIn;
   matM = problemData.globS - problemData.stab * problemData.globRmu;
 else
   dtA = problemData.dt * problemData.A;

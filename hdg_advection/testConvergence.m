@@ -9,8 +9,9 @@ if nargin < 4
   tLevel = 1;
 end % if
 
-assert(length(hLevel) == 1 || length(tLevel) == 1, 'Choose either spatial or time convergence!');
-isSpatConv = length(hLevel) > length(tLevel);
+isSpatConv = length(hLevel) > 1 && length(tLevel) == 1;
+isTimeSpatConv = length(hLevel) == length(tLevel);
+assert(xor(isSpatConv, isTimeSpatConv), 'Time and space convergence levels must fit to each other!');
 nLevel = max(length(hLevel), length(tLevel));
 
 err = cell(size(pLevel));
@@ -20,9 +21,10 @@ for ip = 1 : length(pLevel)
   for level = 1 : nLevel
     pd = struct('isVisSol', false, 'isVisGrid', false, 'isConvergence', true, 'testcase', testcase);
     pd.p = pLevel(ip);
-    if isSpatConv
+    if isSpatConv || isTimeSpatConv
       pd.hmax = 2^-hLevel(level) / 3;
-    else
+    end % if
+    if ~isSpatConv
       pd.numSteps = 10 * 2^tLevel(level);
     end % if
     try
