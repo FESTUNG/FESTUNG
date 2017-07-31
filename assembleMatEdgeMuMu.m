@@ -1,4 +1,3 @@
-% TODO
 % Assembles a matrix containing integrals of products of two edge basis
 % functions.
 
@@ -9,11 +8,26 @@
 %>        functions. This corresponds to a mass matrix.
 %===============================================================================
 %>
-%> @brief Assembles a mass matrix @f$M_{\lambda}@f$
+%> @brief Assembles a mass matrix @f$\mathsf{M}_{\mu}@f$
 %>        containing integrals of products of two edge basis functions.
 %>
-%> TODO
+%> The matrix @f$\mathsf{M}_\mu \in \mathbb{R}^{\bar{K}\bar{N}\times \bar{K}\bar{N}}@f$,
+%> with @f$\bar{K}@f$ the number of edges and @f$\bar{N}@f$ the number of local degrees
+%> of freedom on an edge, is block diagonal and defined component-wise by
+%> @f[
+%>   [\mathsf{M}_mu]_{(\bar{k}-1)\bar{N}+i,(\bar{k}-1)\bar{N}+j} = 
+%>      \sum_{E_{kn}\in\mathcal{E}} \int_{E_{kn}} \mu_{kni} \mu_{knj} \mathrm{d}s \,,
+%> @f]
+%> where @f$\mathcal{E}@f$ is the set of edges to be considered.
 %>
+%> The integral is backtransformed to the reference interval @f$[0,1]@f$, defined as
+%> @f[
+%>   \int_{E_{kn}} \varphi_{ki} \mu_{knj} \mathrm{ds} = ...
+%> @f]
+%>
+%> TODO (see assembleMatEdgePhiPhi).
+%> 
+%> All other entries are zero.
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
