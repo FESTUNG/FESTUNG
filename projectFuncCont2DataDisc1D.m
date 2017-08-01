@@ -30,7 +30,7 @@
 %> @f[
 %>  \sum_{j=1}^N D_{kj}(t) \int_0^1 \hat{\phi}_i(\hat{x})
 %>  \hat{\phi}_j(\hat{x}) \mathrm{d}\hat{x} =
-%>  \int_0^1 \hat{\phi}_i(\hat{x}}) d(t, F_k(\hat{x})) \mathrm{d}\hat{x} \,.
+%>  \int_0^1 \hat{\phi}_i(\hat{x}) d(t, F_k(\hat{x})) \mathrm{d}\hat{x} \,.
 %> @f]
 %> Written in matrix form, this is equivalent to
 %> @f[
