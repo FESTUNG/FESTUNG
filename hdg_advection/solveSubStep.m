@@ -77,7 +77,7 @@ end % if
 % There are two options.
 % 1. Invert the block diagonal matrix L locally, i.e. each block is 
 % inverted and then  we construct the inverse matrix L^{-1} from these 
-% blocks. This is usuall quickest for large matrices and also saves a lot 
+% blocks. This is usually quickest for large matrices and also saves a lot 
 % of memory. It may be efficient to invert more than one block at once.
 % 2. We invert the whole mass matrix. This may be very slow and memory
 % consuming for large matrices (=many elements). I guess it may be faster
