@@ -15,7 +15,7 @@
 %> with @f$\bar{K}@f$ the number of edges and @f$\bar{N}@f$ the number of local degrees
 %> of freedom on an edge, is block diagonal and defined component-wise by
 %> @f[
-%>   [\mathsf{M}_mu]_{(\bar{k}-1)\bar{N}+i,(\bar{k}-1)\bar{N}+j} = 
+%>   [\mathsf{M}_{\mu}]_{(\bar{k}-1)\bar{N}+i,(\bar{k}-1)\bar{N}+j} = 
 %>      \sum_{E_{kn}\in\mathcal{E}} \int_{E_{kn}} \mu_{kni} \mu_{knj} \mathrm{d}s \,,
 %> @f]
 %> where @f$\mathcal{E}@f$ is the set of edges to be considered.

@@ -1,7 +1,6 @@
+%
 % TODO
-% Assembles a matrix containing integrals of products of an interior basis
-% with an edge basis function.
-
+%
 %===============================================================================
 %> @file assembleMatEdgePhiIntMu.m
 %>
@@ -12,6 +11,43 @@
 %> @brief Assembles a matrix containing integrals of products of an interior
 %>        basis with an edge basis function.
 %>
+%>
+%> 
+%> 
+%> @f[
+%>   [\mathsf{R}_{\mu}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} = \sum_{E_{kn} \in \partial{{T_{k}}} \cap \ensuremath{\mathcal{E}}_{\text{int}} } \int_{E_{kn}}  \mu_{knj} \, \varphi_{ki} \, \text{d}s
+%> @f]
+%> 
+%> 
+%> @f[
+%>   \mathsf{R}_{\mu,E_{kn}} = \int_{E_{kn}} 
+%>   \begin{bmatrix}
+%>     \mu_{kn1}\,\varphi_{k1} & \ldots & \mu_{kn\bar{N}}\,\varphi_{k1} \\
+%>     \vdots           & \ddots & \vdots \\
+%>     \mu_{kn1}\,\varphi_{kN} & \ldots & \mu_{kn\bar{N}}\,\varphi_{kN} 
+%>   \end{bmatrix}
+%>   \text{d}s.
+%> @f]
+%> 
+%> 
+%> @f[
+%> \int_{E_{kn}}  \varphi_{ki} \, \mu_{knj} \, \text{d}s	=
+%> \ensuremath{|E_{kn}|}
+%> \underbrace{\int_{0}^{1} \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(s) \, \text{d}s}_{\eqqcolon [\mathsf{\hat{R}}_{\mu}]_{i,j,n,l}}\,,
+%> @f]
+%> 
+%> 
+%> @f[
+%> \mathsf{R}_{\mu} 
+%> = \sum_{n=1}^3 \sum_{l=1}^2 \left( \begin{bmatrix}
+%>   \ensuremath{|E_{1n}|}\, \delta_{E_{1n}\in\ensuremath{\mathcal{E}}_{\text{int}}} & & \\
+%>   & \ddots & \\
+%>   & & \ensuremath{|E_{Kn}|}\, \delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{int}}}
+%> \end{bmatrix} \, \Delta_n \right) \otimes [\mathsf{\hat{R}}_{\mu}]_{:,:,n,l} 
+%> = {\mathsf{T}}^\mathrm{T} \,,
+%> @f]
+%> 
+%> 
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
