@@ -1,15 +1,15 @@
-% Provides weights and time levels for diagonally implicit Runge-Kutta methods 
-% up to order 4.
+% Provides weights and time levels for diagonally implicit Runge-Kutta (DIRK) 
+% methods up to order 4.
 
 %===============================================================================
 %> @file rungeKuttaImplicit.m
 %>
 %> @brief Provides weights and time levels for diagonally implicit Runge-Kutta 
-%> methods up to order 4.
+%> (DIRK) methods up to order 4.
 %===============================================================================
 %>
 %> @brief Provides weights and time levels for diagonally implicit Runge-Kutta 
-%> methods up to order 4.
+%> (DIRK) methods up to order 4.
 %>
 %> Given a time-dependent system 
 %> @f[
@@ -24,14 +24,17 @@
 %>  \mathbf{C}^{(i)} &:= \mathbf{C}^n + \Delta t^n \sum_{j=1}^{i} a_{ij} \, \mathbf{S}(\mathbf{C}^{(j)}, t^{(j)}), \quad \mathrm{for} \quad i = 1,\ldots,s \\
 %>  \mathbf{C}^{n+1} &:= \mathbf{C}^n + \Delta t^n \sum_{i=1}^{s} b_{i} \, \mathbf{S}(\mathbf{C}^{(i)}, t^{(i)})\\
 %> @f}
-%> with @f$\mathbf{C}^n = \mathbf{C}(t^n)@f$.
+%> with @f$\mathbf{C}^n = \mathbf{C}(t^n)@f$ and 
+%> @f$t^{(j)} = t^n + c_j \cdot \Delta t^n@f$. Note that the methods are 
+%> diagonally implicit, i.e. the coefficient matrix @f$A@f$ is lower triangular
+%> allowing to solve in each step individually. The formulas stated above
+%> do \textbf{not} hold for fully implicit Runge-Kutta methods.
 %> 
 %> The implemented methods are all @f$A@f$- and @f$L@f$-stable. Furthermore, the 
 %> methods are stiffly accurate, i.e. @f$b_j=a_{sj}@f$ where @f$s@f$ is the 
 %> number of stages. Therefore
 %> @f$\mathbf{C}^{n+1} = \mathbf{C}^{(s)}@f$
 %> holds and the update step does not have to be carried out explicitly.
-%> 
 %> For details refer to
 %> Ernst Hairer and  Gerhard Wanner. "Solving Ordinary Differential 
 %> Equations II". Springer Series in Computational Mathematics (1996).
@@ -40,18 +43,18 @@
 %> 
 %> @param  ord  The order of the time stepping scheme.
 %> 
-%> @param  tau  The time step size.
+%> @param  tau  The time step size @f$\Delta t^n@f$.
 %> 
 %> @param  t0   The current time-level @f$t^n@f$.
 %> 
 %> 
-%> @param  t    The vector of time-levels @f$t^{(i)}@f$. @f$[1 \times s]@f$.
+%> @retval  t    The vector of time-levels @f$t^{(i)}@f$. @f$[1 \times s]@f$.
 %> 
-%> @param  A    TODO
+%> @retval  A    The matrix containing coefficients @f$a_{ij}@f$. @f$[s \times s]@f$
 
-%> @param  b    TODO
+%> @retval  b    The vector containing coefficients @f$b_{i}@f$. @f$[1 \times s]@f$
 %> 
-%> @retval c    TODO
+%> @retval c    The vector containing coefficients @f$c_{i}@f$. @f$[1 \times s]@f$
 %>
 %> This file is part of FESTUNG
 %>
