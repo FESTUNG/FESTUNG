@@ -40,8 +40,8 @@
 %>   &  & \ensuremath{|E_{Kn}|} \,\delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{bc}}}
 %> \end{bmatrix} \, \mathsf{\Delta}_n \right) \otimes  \hat{\mathsf{M}}_\mu
 %> @f]
-%> where @f$\delta_{E_{1n}\in\ensuremath{\mathcal{E}}_{\text{int}}}@f$ and 
-%> @f$\delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{bc}}}@f$ denote the 
+%> where @f$\delta_{E_{kn}\in\ensuremath{\mathcal{E}}_{\text{int}}}@f$ and 
+%> @f$\delta_{E_{kn}\in\ensuremath{\mathcal{E}}_{\text{bc}}}@f$ denote the 
 %> Kronecker delta, @f$\otimes@f$ denotes the Kronecker product and @f$\mathsf{\Delta}_n@f$
 %> is the permutation matrix mapping from the element-based view of the assembly towards the 
 %> edge-based view of the hybrid degrees of freedom (see <code>assembleMatEdgePhiIntMuVal()</code>).
