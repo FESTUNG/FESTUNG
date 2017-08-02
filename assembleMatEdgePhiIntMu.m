@@ -1,5 +1,5 @@
-%
-% ASDF
+% Assembles a matrix containing integrals of products of an interior
+%        basis with an edge basis function.
 
 %===============================================================================
 %> @file assembleMatEdgePhiIntMu.m
@@ -58,7 +58,7 @@
 %> @param refEdgePhiIntMu  Local matrix @f$\hat{\mathsf{R}}_{\mu}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntMu()</code>.
 %>                    @f$[N \times \bar{N}]@f$
-%> @retval ret        The assembled matrix @f[KN \times \bar{K}\bar{N}]@f$
+%> @retval ret        The assembled matrix @f$[KN \times \bar{K}\bar{N}]@f$
 %>
 %> This file is part of FESTUNG
 %>
