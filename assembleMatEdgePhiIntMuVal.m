@@ -11,7 +11,12 @@
 %> @brief Assembles a matrix containing integrals of products of flux and test 
 %> function.
 %> 
-%> The matrix @f$\mathsf{S}\in\ensuremath\mathbb{R}^{KN\times\bar{K}\bar{N}}@f$ consists of two kinds of contributions: blocks from flux over interior edges 
+%> The matrix @f$\mathsf{S}\in\ensuremath\mathbb{R}^{KN\times\bar{K}\bar{N}}@f$
+%> with @f$K@f$ the number of elements, @f$N@f$ the number of local degrees of 
+%> freedom on the element, @f$\bar{K}@f$ the number of edges and @f$\bar{N}@f$ 
+%> the number of local degrees of freedom on an edge 
+%> consists of two kinds of contributions: blocks from flux over interior edges 
+%> 
 %> @f[
 %>   [\mathsf{S}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} =\sum_{E_{kn} \in \partial{{T_{k}}} \cap \ensuremath{\mathcal{E}}_{\text{int}} }  \int_{E_{kn}} ({\boldsymbol{u}}\cdot \boldsymbol{\nu}_{kn}) \,\mu_{knj}\, \varphi_{ki}\,  \text{d}s
 %> @f]
