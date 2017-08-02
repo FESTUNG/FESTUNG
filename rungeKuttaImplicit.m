@@ -11,20 +11,41 @@
 %> @brief Provides weights and time levels for diagonally implicit Runge-Kutta 
 %> methods up to order 4.
 %>
-%> The present methods are all @f$A@f$- and @f$L@f$-stable. Furthermore, the 
+%> Given a time-dependent system 
+%> @f[
+%> \partial_t \mathbf{C}(t) = \mathbf{S}(\mathbf{C}(t),t), \quad t \in J = (0,t^\mathrm{end}).
+%> @f]
+%> Let @f$0 = t^1 < t^2 < \ldots < t^\mathrm{end}@f$ be a not necessarily
+%> equidistant decomposition of the time interval @f$J@f$ and let 
+%> @f$\Delta t^n = t^{n+1} - t^{n}@f$ denote the time step size.
+%> The update-scheme of the @f$s@f$-stage diagonally implicit Runge-Kutta (DIRK)
+%> method is then defined as
+%> @f{align*}
+%>  \mathbf{C}^{(i)} &:= \mathbf{C}^n + \Delta t^n \sum_{j=1}^{i} a_{ij} \, \mathbf{S}(\mathbf{C}^{(j)}, t^{(j)}), \quad \mathrm{for} \quad i = 1,\ldots,s \\
+%>  \mathbf{C}^{n+1} &:= \mathbf{C}^n + \Delta t^n \sum_{i=1}^{s} b_{i} \, \mathbf{S}(\mathbf{C}^{(i)}, t^{(i)})\\
+%> @f}
+%> with @f$\mathbf{C}^n = \mathbf{C}(t^n)@f$.
+%> 
+%> The implemented methods are all @f$A@f$- and @f$L@f$-stable. Furthermore, the 
 %> methods are stiffly accurate, i.e. @f$b_j=a_{sj}@f$ where @f$s@f$ is the 
-%> number of stages.
+%> number of stages. Therefore
+%> @f$\mathbf{C}^{n+1} = \mathbf{C}^{(s)}@f$
+%> holds and the update step does not have to be carried out explicitly.
+%> 
+%> For details refer to
+%> Ernst Hairer and  Gerhard Wanner. "Solving Ordinary Differential 
+%> Equations II". Springer Series in Computational Mathematics (1996).
+%> doi: 10.1007/978-3-642-05221-7.
 %> 
 %> 
-%> All other entries are zero.
-%> @param  ord                TODO
+%> @param  ord  The order of the time stepping scheme.
 %> 
-%> @param  tau  TODO
+%> @param  tau  The time step size.
 %> 
-%> @param  t0   TODO
+%> @param  t0   The current time-level @f$t^n@f$.
 %> 
 %> 
-%> @param  t    TODO
+%> @param  t    The vector of time-levels @f$t^{(i)}@f$. @f$[1 \times s]@f$.
 %> 
 %> @param  A    TODO
 
