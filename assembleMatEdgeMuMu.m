@@ -20,11 +20,44 @@
 %> @f]
 %> where @f$\mathcal{E}@f$ is the set of edges to be considered.
 %>
-%> The integral is backtransformed to the reference interval @f$[0,1]@f$, defined as
+%> Two different mass matrices have to be considered. A mass matrix resulting 
+%> from edges from the interior of the mesh
+%> @f$E_{kn} \in \ensuremath{\mathcal{E}}_{\text{int}}@f$ 
 %> @f[
-%>   \int_{E_{kn}} \varphi_{ki} \mu_{knj} \mathrm{ds} = ...
+%> \mathsf{\bar{M}}_{\mu} = 
+%> \sum_{n=1}^3 \left( {(\mathsf{\Delta}_n)}^\mathrm{T} \, \begin{bmatrix}
+%> \ensuremath{|E_{1n}|}\, \delta_{E_{1n}\in\ensuremath{\mathcal{E}}_{\text{int}}} & & \\
+%>  & \ddots &  \\
+%>   &  & \ensuremath{|E_{Kn}|} \,\delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{int}}}
+%> \end{bmatrix} \, \mathsf{\Delta}_n \right) \otimes  \hat{\mathsf{M}}_\mu
 %> @f]
-%>
+%> and edges representing the domain boundary @f$E_{kn} \in \ensuremath{\mathcal{E}}_{\text{bc}}@f$ 
+%> @f[
+%> \tilde{\mathsf{M}}_{\mu} =
+%> \sum_{n=1}^3 \left( {(\mathsf{\Delta}_n)}^\mathrm{T} \, \begin{bmatrix}
+%> \ensuremath{|E_{1n}|}\, \delta_{E_{1n}\in\ensuremath{\mathcal{E}}_{\text{bc}}} & & \\
+%>  & \ddots &  \\
+%>   &  & \ensuremath{|E_{Kn}|} \,\delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{bc}}}
+%> \end{bmatrix} \, \mathsf{\Delta}_n \right) \otimes  \hat{\mathsf{M}}_\mu
+%> @f]
+%> where @f$\delta_{E_{1n}\in\ensuremath{\mathcal{E}}_{\text{int}}}@f$ and 
+%> @f$\delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{bc}}}@f$ denote the 
+%> Kronecker delta, @f$\otimes@f$ denotes the Kronecker product and @f$\mathsf{\Delta}_n@f$
+%> is the permutation matrix mapping from the element-based view of the assembly towards the 
+%> edge-based view of the hybrid degrees of freedom (see <code>assembleMatEdgePhiIntMuVal()</code>).
+%> Which mass matrix is assembled by the function depends on the edges marked
+%> by \p markE0T.
+%> 
+%> The entries of matrix @f$\hat{\mathsf{M}}_\mu \in \mathbb{R}^{\bar{N}\times\bar{N}}@f$ are given by
+%> @f[
+%> [\hat{\mathsf{M}}_\mu]_{i,j} = \int_0^1 \hat{\mu}_{j}(s) \, \hat{\mu}_{i}(s) \, \text{d}s
+%> @f]
+%%> @f[
+%%> \int_{E_{kn}} \mu_{knj} \, \mu_{kni} \, \text{d}s 
+%%> = \ensuremath{|E_{kn}|} \int_0^1 \hat{\mu}_{j} \circ \hat{\beta}_{kn}(s) \, \hat{\mu}_{i} \circ \hat{\beta}_{kn}(s) \, \text{d}s
+%%> = \ensuremath{|E_{kn}|} \underbrace{\int_0^1 \hat{\mu}_{j}(s) \, \hat{\mu}_{i}(s) \, \text{d}s}_{\eqqcolon [\hat{\mathsf{M}}_\mu]_{i,j}}\,.
+%%> @f]
+%> 
 %> TODO (see assembleMatEdgePhiPhi).
 %> 
 %> All other entries are zero.
