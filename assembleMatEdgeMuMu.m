@@ -58,7 +58,7 @@
 %%> = \ensuremath{|E_{kn}|} \underbrace{\int_0^1 \hat{\mu}_{j}(s) \, \hat{\mu}_{i}(s) \, \text{d}s}_{\eqqcolon [\hat{\mathsf{M}}_\mu]_{i,j}}\,.
 %%> @f]
 %> 
-%> TODO (see assembleMatEdgePhiPhi).
+%> For a similar function working on element basis functions see <code>assembleMatEdgePhiPhi</code>.
 %> 
 %> All other entries are zero.
 %> @param  g          The lists describing the geometric and topological 

@@ -4,11 +4,12 @@
 %===============================================================================
 %> @file assembleMatEdgePhiIntMuVal.m
 %>
-%> @brief TODO
+%> @brief Assembles a matrix containing integrals of products of flux function and test 
+%> function.
 %===============================================================================
 %>
-%> @brief TODO
-%>
+%> @brief Assembles a matrix containing integrals of products of flux function and test 
+%> function.
 %> 
 %> 
 %> @f[
