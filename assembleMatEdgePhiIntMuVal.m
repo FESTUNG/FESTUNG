@@ -1,23 +1,26 @@
-% Assembles a matrix containing integrals of products of flux function and test 
+% Assembles a matrix containing integrals of products of flux and test 
 % function.
 
 %===============================================================================
 %> @file assembleMatEdgePhiIntMuVal.m
 %>
-%> @brief Assembles a matrix containing integrals of products of flux function and test 
+%> @brief Assembles a matrix containing integrals of products of flux and test 
 %> function.
 %===============================================================================
 %>
-%> @brief Assembles a matrix containing integrals of products of flux function and test 
+%> @brief Assembles a matrix containing integrals of products of flux and test 
 %> function.
 %> 
-%> 
+%> The matrix @f$\mathsf{S}\in\ensuremath\mathbb{R}^{KN\times\bar{K}\bar{N}}@f$ consists of two kinds of contributions: blocks from flux over interior edges 
 %> @f[
-%>   [\mathsf{S}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} =\sum_{E_{kn} \in \partial{{T_{k}}} \cap \ensuremath{\mathcal{E}}_{\text{int}} }  \int_{E_{kn}} ({\boldsymbol{u}}\cdot \boldsymbol{\nu}_{kn}) \,\mu_{knj}\, \varphi_{ki}\,  \text{d}s\,.
+%>   [\mathsf{S}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} =\sum_{E_{kn} \in \partial{{T_{k}}} \cap \ensuremath{\mathcal{E}}_{\text{int}} }  \int_{E_{kn}} ({\boldsymbol{u}}\cdot \boldsymbol{\nu}_{kn}) \,\mu_{knj}\, \varphi_{ki}\,  \text{d}s
 %> @f]
-%> 
-%> 
-%> 
+%> and flux on outflow edges
+%> @f[
+%>   [\mathsf{S}_{\text{out}}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} 
+%>   = \sum_{E_{kn}\in\partial{T_{k}}\cap\ensuremath{\mathcal{E}}_{\text{out}}} \int_{E_{kn}} ({\boldsymbol{u}}\cdot\boldsymbol{\nu}_{kn}) \, \mu_{knj} \, \varphi_{ki} \,\text{d}s\,.
+%> @f]
+%> The block of a single edge is given by
 %> @f[
 %> \mathsf{S}_{E_{kn}} = \int_{E_{kn}} ({\boldsymbol{u}} \cdot \boldsymbol{\nu}_{kn})
 %> \begin{bmatrix}
@@ -27,22 +30,8 @@
 %> \end{bmatrix}
 %> \text{d}s\,.
 %> @f]
-%> 
-%> 
-%> 
-%> @f[
-%>   [\mathsf{S}_{\text{out}}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} 
-%>   = \sum_{E_{kn}\in\partial{T_{k}}\cap\ensuremath{\mathcal{E}}_{\text{out}}} \int_{E_{kn}} ({\boldsymbol{u}}\cdot\boldsymbol{\nu}_{kn}) \, \mu_{knj} \, \varphi_{ki} \,\text{d}s\,.
-%> @f]
-%> 
-%> 
-
-%> @f{align*}
-%> \int_{E_{kn}} ({\boldsymbol{u}} \cdot \boldsymbol{\nu}_{kn}) \, \varphi_{ki} \, \mu_{knj} \, \text{d}s 
-%> &= \ensuremath{|E_{kn}|} \int_0^1 \left(({\boldsymbol{u}}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(s)) \cdot \boldsymbol{\nu}_{kn} \right) \, \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(s) \, \text{d}s \\
-%> &\approx \sum_{r=1}^R \underbrace{\left(({\boldsymbol{u}}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r)) \cdot \boldsymbol{\nu}_{kn} \right)}_{\eqqcolon [{\boldsymbol{U}}_{\boldsymbol{\nu}}]_{k,n,r}} \, \underbrace{\omega_{r} \,  \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(\hat{q}_r)}_{\eqqcolon [\mathsf{\hat{S}}]_{i,j,n,r,l}} \,,
-%> @f}
-%> 
+%> For efficient implementation the contribution from interior and outflow edges
+%> are assembled at once resulting in the matrix 
 %> @f[
 %> \mathsf{S} = \sum_{n=1}^3 \underbrace{\begin{bmatrix} 
 %>   \delta_{E_{1n}=E_{1}} & \dots & \delta_{E_{1n}=E_{\bar{K}}} \\
@@ -55,9 +44,43 @@
 %>   \vdots \\
 %>   \delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{int}}\cup\ensuremath{\mathcal{E}}_{\text{out}}} \, \ensuremath{|E_{Kn}|} \, 
 %>     \delta_{\kappa(\rho(K,n),l) = K} \, [{\boldsymbol{U}}_{\boldsymbol{\nu}}]_{1,n,r} 
-%> \end{bmatrix} \otimes [\mathsf{\hat{S}}]_{:,:,n,r,l} \right)\,.
+%> \end{bmatrix} \otimes [\mathsf{\hat{S}}]_{:,:,n,r,l} \right)
 %> @f]
-%> 
+%> with 
+%> @f$\mathsf{\Delta}_n\in\ensuremath\mathbb{R}^{K\times\bar{K}}@f$, @f$n\in\{1,2,3\}@f$, being the permutation matrix that has a single entry per row indicating the correspondence 
+%> @f$E_{kn} = E_{\bar{k}}@f$ for all elements and edges.
+%> It takes care of the necessary permutation from the element-based view of the 
+%> assembly towards the edge-based view of the hybrid degrees of freedom. Further 
+%> symbols used are the Kronecker deltas @f$\delta_{E_{1n}=E_{\bar{k}}}@f$,
+%> @f$\delta_{E_{kn}\in\ensuremath{\mathcal{E}}_{\text{int}}\cup\ensuremath{\mathcal{E}}_{\text{out}}}@f$
+%> @f$\delta_{\kappa(\rho(k,n),l) = k}@f$ and the operation @f$\otimes_\mathrm{V}@f$ defined by <code>kronVec()</code>.
+%>
+%> For an efficient assembly of the integral
+%> @f{align*}
+%> \int_{E_{kn}} ({\boldsymbol{u}} \cdot \boldsymbol{\nu}_{kn}) \, \varphi_{ki} \, \mu_{knj} \, \text{d}s 
+%> &= \ensuremath{|E_{kn}|} \int_0^1 \left(({\boldsymbol{u}}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(s)) \cdot \boldsymbol{\nu}_{kn} \right) \, \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(s) \, \text{d}s \\
+%> &\approx \sum_{r=1}^R \underbrace{\left(({\boldsymbol{u}}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r)) \cdot \boldsymbol{\nu}_{kn} \right)}_{\eqqcolon [{\boldsymbol{U}}_{\boldsymbol{\nu}}]_{k,n,r}} \, \underbrace{\omega_{r} \,  \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(\hat{q}_r)}_{\eqqcolon [\mathsf{\hat{S}}]_{i,j,n,r,l}} \,,
+%> @f}
+%> we precompute the velocity in normal direction at every integration points 
+%> @f[
+%>  [{\boldsymbol{U}}_{\boldsymbol{\nu}}]_{k,n,r} = \left(({\boldsymbol{u}}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r)) \cdot \boldsymbol{\nu}_{kn} \right)
+%> @f]
+%> with 
+%> @f$\mathbf{F}_k: \hat{T} \ni \hat{\mathbf{x}} \rightarrow \mathbf{x} \in T_k@f$
+%> being the affine mapping from reference triangle @f$\hat{T}@f$ to the
+%> physical triangle @f$T_k@f$, and
+%> @f$\hat{\mathbf{\gamma}}_n: [0,1] \ni s \rightarrow \hat{\mathbf{x}} \in \hat{T}@f$
+%> maps from the refence interval to the nth edge in the reference triangle and is
+%> defined in <code>gammaMap()</code>. The velocity vector is given by 
+%> @f${\boldsymbol{u}}(t)@f$, the normal vector by @f$\boldsymbol{\nu}_{kn}@f$ 
+%> and integration weights @f${\omega}_{r}@f$ with associated integration 
+%> points @f$\hat{q}_{r}@f$.
+%> Additionally the pointwise contributions to the local matrix @f$\mathsf{\hat{S}}@f$
+%> are precomputed as
+%> @f[
+%> [\mathsf{\hat{S}}]_{i,j,n,r,l} = \omega_{r} \,  \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(\hat{q}_r) 
+%> @f]
+%> with @f$\hat{\beta}_{kn}(s)@f$ adapting the edge orientation.
 %> 
 %> All other entries are zero.
 %> @param  g          The lists describing the geometric and topological 
@@ -66,10 +89,10 @@
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  markE0T    A marker indicating whether an edge should be 
 %>                    recognized or not. @f$[K \times 3]@f$
-%> @param refEdgePhiIntMuPerQuad TODO
-%> @param valOnQuad TODO
-%>                    @f$[\bar{N} \times \bar{N}]@f$
-%> @retval ret        The assembled matrix @f$[\bar{K}\bar{N} \times \bar{K}\bar{N}]@f$
+%> @param refEdgePhiIntMuPerQuad Contributions to local matrix @f$\hat{\mathsf{S}}\in \mathbb{R}^{N\times\bar{N}\times 3 \times R}@f$ as provided by <code>integrateRefEdgePhiIntMuPerQuad()</code>.  @f$[2 \times 1 \text{ struct}]@f$ 
+%> @param valOnQuad The normal veloctiy evaluated for every edge of every triangle at every integration point as provided by <code>computeFuncContNuOnQuadEdge()</code>
+%>                    @f$[K \times 3 \times R]@f$
+%> @retval ret        The assembled matrix @f$\mathsf{S}@f$. @f$[KN \times \bar{K}\bar{N}]@f$
 %>
 %> This file is part of FESTUNG
 %>
