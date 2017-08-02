@@ -29,7 +29,6 @@
 %>   & \ddots & \\
 %>   & & \ensuremath{|E_{Kn}|}\, \delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{int}}}
 %> \end{bmatrix} \, \Delta_n \right) \otimes [\mathsf{\hat{R}}_{\mu}]_{:,:,n,l} 
-%> = {\mathsf{T}}^\mathrm{T} \,,
 %> @f]
 %> 
 %> where @f$\delta_{E_{kn}\in\ensuremath{\mathcal{E}}_{\text{int}}}@f$ (\p markE0T) denotes
@@ -41,6 +40,12 @@
 %> @f]
 %> are precomputed for all combinations of element and edge test functions and
 %> given to the routine through \p refEdgePhiIntMu.
+%> 
+%> The matrix @f$\mathsf{T}@f$ can be constructed by this routine as
+%> @f[
+%> \mathsf{R}_{\mu} = {\mathsf{T}}^\mathrm{T}
+%> @f]
+%> holds.
 %> 
 % %> @f[
 % %> \int_{E_{kn}}  \varphi_{ki} \, \mu_{knj} \, \text{d}s	=
