@@ -1,38 +1,40 @@
 % TODO
-% Compute integrals over the edges of the reference triangle, whose integrands 
-% consist of all permutations of two basis functions.
+% Compute integrals over the reference edge, whose integrands 
+% consist of all permutations of two edge basis functions.
 
 %===============================================================================
 %> @file integrateRefEdgeMuMu.m
 %>
-%> @brief NEW Compute integrals over the edges of the reference triangle, whose 
-%>        integrands consist of all permutations of two basis functions.
+%> @brief NEW Compute integrals over the reference edge, whose integrands 
+%> consist of all permutations of two edge basis functions.
 %===============================================================================
 %>
-%> @brief Compute integrals over the edges of the reference triangle 
-%>        @f$\hat{T}@f$, whose integrands consist of all permutations of two
-%>        basis functions.
+%> @brief Compute integrals over the edges of the reference edge 
+%>        @f$\hat{E}@f$, whose integrands consist of all permutations of two
+%>        edge basis functions.
 %>
-%> It computes a multidimensional array
-%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
+%> It computes a matrix
+%> @f$\hat{\mathsf{M}}_{\mu}\in\mathbb{R}^{\bar{N}\times \bar{N}}@f$
 %> defined by
 %> @f[
-%> [\hat{\mathsf{{S}}}^\mathrm{diag}]_{i,j,n} =
-%>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(s) 
-%>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_n(s) \mathrm{d}s \,,
+%> [\hat{\mathsf{M}}_{\mu}]_{i,j} =
+%>   \int_{\hat{E}} \hat{\mu}_i \hat{\mu}_j \mathrm{d}\hat{\mathbf{s}} 
+%>   =
+%>   \int_{0}^{1} \hat{\mu}_i \hat{\mu}_j \mathrm{d}{\mathbf{s}} \,.\
 %> @f]
-%> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is given in 
-%> <code>gammaMap()</code>.
 %>
 %> @param  N    The local number of degrees of freedom
-%> @param  basesOnGamma  A struct containing precomputed values of the basis
+%> @param  basesOnQuadEdge  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
-%>                      least phi1D.
-%> @retval ret  The computed array @f$[N\times N\times 3]@f$
+%>                      least mu. @f$[\text{struct}]@f$
+%> @param  qord 	(optional) The order of the quadrature rule to be used.. @f$[\text{scalar}]@f$
+%> @retval ret  The computed matrix @f$[\bar{N} \times \bar{N}]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017
+%> @author Balthasar Reuter, 2017
 %> 
 %> @par License
 %> @parblock
