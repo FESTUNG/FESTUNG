@@ -36,7 +36,7 @@
 %> @f]
 %> on the reference triangle with @f$\omega_{r}@f$ being the integration weights and the evaluated advection velocity
 %> @f[
-%>   [{\boldsymbol{U}}^m]_{k,r} \coloneqq u^m(t, {\boldsymbol{F}}_k({\boldsymbol{q}}_r))\,.
+%>   [{\boldsymbol{U}}^m]_{k,r} \coloneqq u^m(t, {\boldsymbol{F}}_k({\boldsymbol{\hat{q}}}_r))\,.
 %> @f]
 %> at every integration point of the quadrature formula.
 %> Now we can build local matrices

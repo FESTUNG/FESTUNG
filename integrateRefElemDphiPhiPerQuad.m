@@ -1,22 +1,37 @@
-% TODO
+% Compute integral contributions on the reference triangle, whose integrands consist of all
+% permutations of a basis function with one of the (spatial) derivatives of a
+% basis function for every integration point.
+%
 %===============================================================================
 %> @file integrateRefElemDphiPhiPerQuad.m
 %>
-%> @brief NEW TODO
+%> @brief NEW Compute integral contributions on the reference triangle, whose integrands consist 
+%>        of all permutations of a basis function with one of the (spatial)
+%>        derivatives of a basis function  for every integration point.
 %===============================================================================
 %>
-%> @brief TODO
+%> @brief Compute integral contributions on the reference triangle @f$\hat{T}@f$,
+%>        whose integrands consist of all permutations of a basis function with
+%>        one of the (spatial) derivatives of a basis function for every integration point @f$ {\boldsymbol{\hat{q}}}_r @f$.
 %>
-%> TODO
+%> It computes a multidimensional array
+%> @f$\hat{\mathsf{G}} \in \mathbb{R}^{2 \times N \times N \times R}@f$
+%> defined by
+%> @f[
+%> 	[\mathsf{\hat{G}}]_{m,i,j,r} = \omega_{r} \, \partial_{\hat{x}^{m}}{} \, \hat{\varphi}_{ki}({\boldsymbol{\hat{q}}}_r) \, \hat{\varphi}_{kj}({\boldsymbol{\hat{q}}}_r)
+%> @f]
+%> with @f$\omega_{r}@f$ denoting the integration weight. For an efficient access of the array entris it is actually stored as an @f$2 \times 1 \text{ cell}@f$ with each cell storing a @f$N \times N \times R@f$ array.
 %> 
-%> All other entries are zero.
-%> @param  N                TODO
 %> 
-%> @param  basesOnQuadEdge  TODO
+%> @param  N    The local number of degrees of freedom @f$[\text{scalar}]@f$
 %> 
-%> @param  qOrd   TODO
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi2D and gradPhi2D. @f$[\text{scalar}]@f$
 %> 
-%> @retval ret              TODO
+%> @param  qord 	(optional) The order of the quadrature rule to be used.. @f$[\text{scalar}]@f$
+%> 
+%> @retval ret  The computed array @f$2 \times 1 \text{ cell}@f$ 
 %>
 %> This file is part of FESTUNG
 %>
