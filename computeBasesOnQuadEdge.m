@@ -1,23 +1,44 @@
-% TODO
+% Evaluate edge basis functions in quadrature points on the
+% reference edge and stores them in a struct.
 %===============================================================================
 %> @file computeBasesOnQuadEdge.m
 %>
-%> @brief TODO
+%> @brief NEW Evaluate edge basis functions in quadrature points on the
+%> reference edge and stores them in a struct.
 %===============================================================================
 %>
-%> @brief TODO
+%> @brief Evaluate edge basis functions in quadrature points on the
+%> reference edge and stores them in a struct.
 %>
-%> TODO
+%> It evaluates the edge basis functions provided by <code>phi1D()</code> 
+%> in all quadrature points for all required orders 
+%> on the reference edge @f$\hat{E} = [0,1]@f$.
 %> 
-%> All other entries are zero.
-%> @param  N                TODO
+%> The quadrature points @f$q_r@f$ on the reference edge @f$[0,1]@f$ are 
+%> provided by <code>quadRule1D()</code>.
 %> 
-%> @param  basesOnQuadEdge  TODO
+%> All struct variables are @f$\#\mathcal{P} \times 1@f$ <code>cell</code>-arrays, 
+%> with @f$\mathcal{P} = \{2p, 2p+1\}@f$ the set of required polynomial orders. 
+%> Note, for @f$p=0@f$ only order @f$1@f$ is provided.
 %> 
-%> @param  requiredOrders   TODO
+%> This function computes the following struct variables (dimensions given for
+%> each order):
+%> - <code>phi1D</code>: @f$\hat{\mu}_i (q_r)
+%>                           \; [R \times \bar{N}]@f$
+%> - <code>thetaPhi1D</code>: @f$\hat{\mu}_i \circ 
+%>                                
+%>                                \hat{\beta}_{kn}(q_r)
+%>                                \; [R \times \bar{N} \times 2]@f$
 %> 
-%> 
-%> @retval ret              TODO
+%> @param  N          The number of local edge degrees of freedom. For polynomial
+%>                    order @f$p@f$, it is given as @f$\bar{N} = p+1@f$
+%>                    @f$[\text{scalar}]@f$
+%> @param  basesOnQuadEdge A (possibly empty) struct to which the computed
+%>                    arrays are added. @f$[\text{struct}]@f$
+%> @param  requiredOrders (optional) An array providing a list of all
+%>                    required quadrature orders. @f$[\text{scalar}]@f$
+%>
+%> @retval  basesOnQuadEdge A struct with the computed array.  @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
 %>
