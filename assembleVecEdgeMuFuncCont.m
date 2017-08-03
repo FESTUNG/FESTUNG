@@ -1,27 +1,41 @@
-% TODO
+% Assembles a vector containing integrals over edges of products of a edge 
+% basis function with a continuous function.
 
 %===============================================================================
 %> @file assembleVecEdgeMuFuncCont.m
 %>
-%> @brief NEW TODO
+%> @brief NEW Assembles a vector containing integrals over edges of products of a 
+%>        edge basis function with a continuous function.
 %===============================================================================
 %>
-%> @brief TODO
-%>
+%> @brief Assembles a vector @f${\boldsymbol{K}}_{\mu,\mathrm{in}}@f$ containing integrals 
+%>        over edges of products of a edge basis function with a continuous function
+%>        @f$c_\mathrm{D}(t, \mathbf{x})@f$.
 %> 
-%> 
-%> 
+%> The vector @f${\boldsymbol{K}}_{\mu,\mathrm{in}} \in \mathbb{R}^{\bar{K}\bar{N}}@f$, with @f$\bar{K}@f$ being the number of edges and @f$\bar{N}@f$ being the number of edge degrees of freedom, is defined
+%> component-wise by
 %> @f[
 %> [{\boldsymbol{K}}_{\mu,\mathrm{in}}]_{(\bar{k}-1)\bar{N}+i} = \sum_{E_{kn}\in\partial{T_{k}}\cap\ensuremath{\mathcal{E}}_{\text{in}}} \,
-%> \int_{E_{kn}} c_\mathrm{D} \, \mu_{kni}\, \text{d}s\,,
+%> \int_{E_{kn}} c_\mathrm{D}(t) \, \mu_{kni}\, \text{d}s\,.
 %> @f]
+%> 
+%> It is transformed on the unit interval as described in <code>assembleVecEdgePhiIntFuncCont()</code> which gives 
+%>
+%> @f[
+%> \int_{E_{kn}} c_\mathrm{D}\,\mu_{kni} \, \text{d}s 
+%> = \ensuremath{|E_{kn}|} \int_0^1 c_\mathrm{D}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{i}(s) \, \text{d}s \,.
+%> @f]
+%> 
+%> and using a 1D quadrature rule provided by <code>quadRule1D()</code>. The
+%> main difference is the occurence of the special edge basis function 
+%> @f$\hat{\mu}@f$. We eventually obtain
 %> 
 %> @f[
 %> \int_{E_{kn}} c_\mathrm{D}\,\mu_{kni} \, \text{d}s 
-%> = \ensuremath{|E_{kn}|} \int_0^1 c_\mathrm{D}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{i}(s) \, \text{d}s
 %> \approx \ensuremath{|E_{kn}|} \sum_{r=1}^R \omega_{r} \, c_\mathrm{D}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r) \, \hat{\mu}_{i}(\hat{q}_r) \,.
 %> @f]
 %> 
+%> The global vector is then constructed as
 %> 
 %> @f[
 %> {\boldsymbol{K}}_{\mu,\mathrm{in}} = 
@@ -29,16 +43,22 @@
 %> \begin{bmatrix} \delta_{E_{1n}\in\ensuremath{\mathcal{E}}_{\text{in}}} & & \\ & \ddots & \\ & & \delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{in}}} \end{bmatrix} [{\boldsymbol{C}}_\mathrm{D}]_{:,n,r} \,,
 %> @f]
 %> 
+%> with @f$\omega_{r}@f$ denoting the integration weights, @f$\hat{q}_{r}@f$ denoting integration points, @f$\mathsf{\Delta}_n@f$ denoting the permutation matrix from element-based to edge-based view as described in <code>assembleMatEdgePhiIntMuVal()</code> and @f$\delta_{E_{kn}\in\ensuremath{\mathcal{E}}_{\text{in}}}@f$ denoting the Kronecker delta.
 %> 
-%> 
-%> All other entries are zero.
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  markE0T    A marker indicating whether an edge should be 
 %>                    recognized or not. @f$[K \times 3]@f$
-%> @param  TODO TODO
+%> @param  funcCont   A function handle for the continuous function
+%> @param  basesOnQuad    A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least mu.
+%> @param  qOrd    Order of quadrature rule to be used.
+%>
+%> @retval ret        The assembled vector @f$[\bar{K}\bar{N}]@f$
+%>
 %>
 %> This file is part of FESTUNG
 %>
