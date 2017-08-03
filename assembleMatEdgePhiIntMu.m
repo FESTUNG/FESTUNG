@@ -4,7 +4,7 @@
 %===============================================================================
 %> @file assembleMatEdgePhiIntMu.m
 %>
-%> @brief Assembles a matrix containing integrals of products of an interior
+%> @brief NEW Assembles a matrix containing integrals of products of an interior
 %> basis with an edge basis function.
 %===============================================================================
 %>

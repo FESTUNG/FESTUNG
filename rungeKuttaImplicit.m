@@ -4,7 +4,7 @@
 %===============================================================================
 %> @file rungeKuttaImplicit.m
 %>
-%> @brief Provides weights and time levels for diagonally implicit Runge-Kutta 
+%> @brief NEW Provides weights and time levels for diagonally implicit Runge-Kutta 
 %> (DIRK) methods up to order 4.
 %===============================================================================
 %>

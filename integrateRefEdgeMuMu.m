@@ -5,7 +5,7 @@
 %===============================================================================
 %> @file integrateRefEdgeMuMu.m
 %>
-%> @brief Compute integrals over the edges of the reference triangle, whose 
+%> @brief NEW Compute integrals over the edges of the reference triangle, whose 
 %>        integrands consist of all permutations of two basis functions.
 %===============================================================================
 %>

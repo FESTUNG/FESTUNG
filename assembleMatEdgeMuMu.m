@@ -4,7 +4,7 @@
 %===============================================================================
 %> @file assembleMatEdgeMuMu.m
 %>
-%> @brief Assembles a matrix containing integrals of products of two edge basis 
+%> @brief NEW Assembles a matrix containing integrals of products of two edge basis 
 %>        functions. This corresponds to a mass matrix.
 %===============================================================================
 %>

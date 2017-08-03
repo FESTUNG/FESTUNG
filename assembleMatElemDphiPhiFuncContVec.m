@@ -1,92 +1,81 @@
-% TODO
+% Assembles two matrices, each containing integrals of products of the continuous advection velocity, a basis function and a (spatial) derivative of a basis function.
 %===============================================================================
 %> @file assembleMatElemDphiPhiFuncContVec.m
 %>
-%> @brief TODO
+%> @brief NEW Assembles two matrices, each containing integrals of products of the advection velocity, a basis function and a (spatial) derivative of a basis function.
 %===============================================================================
 %>
-%> @brief TODO
+%> @brief Assembles matrices @f$\mathsf{G}^m, m \in \{1,2\}@f$ containing integrals of products of the advection velocity, a basis function and a (spatial) derivative of a basis function.
 %>
 %>
+%> The matrices @f$\mathsf{G}^m \in \mathbb{R}^{KN\times KN}@f$ are block
+%> diagonal and defined component-wise by
 %> 
 %> @f[
-%> [\mathsf{G}^{m}]_{(k-1)N+i,(k-1)N+j} = \int_{T_{k}}^{} u^m \,\varphi_{kj}\, \partial_{x^{m}} \varphi_{ki} \,\text{d}{\boldsymbol{x}}
+%> [\mathsf{G}^{m}]_{(k-1)N+i,(k-1)N+j} = \int_{T_{k}}^{} u^m \,\varphi_{kj}\, \partial_{x^{m}} \varphi_{ki} \,\text{d}{\boldsymbol{x}}.
 %> @f]
-%> 
+%> All other entries are zero.
+%> For the implementation, the element integrals are backtransformed to the
+%> reference triangle as explained in <code>assembleMatElemDphiPhiFuncDisc()</code>. This allows us to write
 %> @f[
-%>   \mathsf{G}^{m}_{T_{K}} \coloneqq
-%>   \int_{T_{k}}^{}
-%>   u^m
-%>   \begin{bmatrix}
-%>     \varphi_{k1} \partial_{x^{m}}\, \varphi_{k1} & \dots & \varphi_{kN}\, \partial_{x^{m}} \varphi_{k1}  \\
-%>     \vdots & \ddots & \vdots  \\
-%>   \varphi_{k1} \,\partial_{x^{m}} \varphi_{kN} & \ldots & \varphi_{kN}\, \partial_{x^{m}} \varphi_{kN}  
-%>   \end{bmatrix}
-%>   \text{d}{\boldsymbol{x}}\,.
-%> @f]
-%> 
-%> 
-%> @f{align*}
 %> \int_{T_{k}}^{} u^1(t, {\boldsymbol{x}}) \, \varphi_{kj} \, \partial_{x^{1}} \varphi_{ki} \, \text{d}{\boldsymbol{x}}
-%> &\approx
-%> \sum_{r=1}^{R} \left(\mathsf{B}^{22}_{k} \, [{\boldsymbol{U}}^1]_{k,r} \, [\mathsf{\hat{G}}]_{1,r,i,j} - \mathsf{B}^{21}_{k} \,[{\boldsymbol{U}}^1]_{k,r}\, [\mathsf{\hat{G}}]_{2,i,j,r}\right) \,, \\
-%> \int_{T_{k}}^{} u^2(t, {\boldsymbol{x}}) \, \varphi_{kj} \, \partial_{x^{2}} \varphi_{ki} \, \text{d}{\boldsymbol{x}}
-%> &\approx
-%> \sum_{r=1}^{R} \left( \mathsf{B}^{11}_{k}\, [{\boldsymbol{U}}^2]_{k,r}\, [\mathsf{\hat{G}}]_{1,r,i,j} - \mathsf{B}^{12}_{k}\, [{\boldsymbol{U}}^2]_{k,r}\, [\mathsf{\hat{G}}]_{2,i,j,r} \right) \,,
-%> @f}
-%> 
-%> 
+%> \approx
+%> \sum_{r=1}^{R} \left(\mathsf{B}^{22}_{k} \, [{\boldsymbol{U}}^1]_{k,r} \, [\mathsf{\hat{G}}]_{1,r,i,j} - \mathsf{B}^{21}_{k} \,[{\boldsymbol{U}}^1]_{k,r}\, [\mathsf{\hat{G}}]_{2,i,j,r}\right) \,,
+%> @f]
+%> and
 %> @f[
-%> 	[\mathsf{\hat{G}}]_{m,i,j,r} \coloneqq \omega_{r} \, \partial_{\hat{x}^{m}}{} \, \hat{\varphi}_{ki} \, \hat{\varphi}_{kj} \,,
-%>   \qquad
+%> \int_{T_{k}}^{} u^2(t, {\boldsymbol{x}}) \, \varphi_{kj} \, \partial_{x^{2}} \varphi_{ki} \, \text{d}{\boldsymbol{x}}
+%> \approx
+%> \sum_{r=1}^{R} \left( \mathsf{B}^{11}_{k}\, [{\boldsymbol{U}}^2]_{k,r}\, [\mathsf{\hat{G}}]_{1,r,i,j} - \mathsf{B}^{12}_{k}\, [{\boldsymbol{U}}^2]_{k,r}\, [\mathsf{\hat{G}}]_{2,i,j,r} \right) \,,
+%> @f]
+%> for the two matrices with @f$R@f$ denoting the number of integration points. Note, that the difference to the formulation in <code>assembleMatElemDphiPhiFuncDisc()</code> results from the fact that we use the continuous advection velocities (in x- and y-direction) instead of its projection.
+%> 
+%> For an efficient implementation we construct the local matrix contributions
+%> @f[
+%> 	[\mathsf{\hat{G}}]_{m,i,j,r} \coloneqq \omega_{r} \, \partial_{\hat{x}^{m}}{} \, \hat{\varphi}_{ki} \, \hat{\varphi}_{kj}
+%> @f]
+%> on the reference triangle with @f$\omega_{r}@f$ being the integration weights and the evaluated advection velocity
+%> @f[
 %>   [{\boldsymbol{U}}^m]_{k,r} \coloneqq u^m(t, {\boldsymbol{F}}_k({\boldsymbol{q}}_r))\,.
 %> @f]
-%> 
-%> 
-%> @f{align*}
+%> at every integration point of the quadrature formula.
+%> Now we can build local matrices
+%> @f[
 %> \mathsf{G}^{1}_{{T_{k}}} 
-%> &= 
-%> \sum_{r=1}^{R} 
-%> \left(
-%> B^{22}_{k}
-%> \begin{bmatrix}
-%> 	\omega_{r} \, u^1(t,{\boldsymbol{F}}_k({\boldsymbol{q}}_r)) \, \partial_{x^{1}} \hat{\varphi}_{1}\, \hat{\varphi}_{1}  & \cdots & \omega_{r} \,\, u^1(t,{\boldsymbol{F}}_k({\boldsymbol{q}}_r)) \, \partial_{x^{1}} \hat{\varphi}_{1}\, \hat{\varphi}_{N} 
-%> 	\\
-%> 	\vdots  & \ddots & \vdots 
-%> 	\\
-%> 	\omega_{r} \, u^1(t,{\boldsymbol{F}}_k({\boldsymbol{q}}_r)) \,   \partial_{x^{1}} \hat{\varphi}_{N}\, \hat{\varphi}_{1}  & \cdots & \omega_{r} \, u^1(t,{\boldsymbol{F}}_k({\boldsymbol{q}}_r)) \,  \partial_{x^{1}} \hat{\varphi}_{N}\, \hat{\varphi}_{N} 
-%> \end{bmatrix}\right.
-%> \\
-%> &\phantom{= \sum_{r=1}^{R} }
-%> \left.
-%> - B^{21}_{k}
-%> \begin{bmatrix}
-%> \omega_{r} \, u^1(t,{\boldsymbol{F}}_k({\boldsymbol{q}}_r)) \, \partial_{x^{2}} \hat{\varphi}_{1} \, \hat{\varphi}_{1}  & \cdots & \omega_{r} \, u^1(t,{\boldsymbol{F}}_k({\boldsymbol{q}}_r)) \,  \partial_{x^{2}} \hat{\varphi}_{1} \,\hat{\varphi}_{N} 
-%> \\
-%> \vdots  & \ddots & \vdots 
-%> \\
-%> \omega_{r} \, u^1(t,{\boldsymbol{F}}_k({\boldsymbol{q}}_r)) \, \partial_{x^{2}} \hat{\varphi}_{N}\,\hat{\varphi}_{1}  & \cdots & \omega_{r} \, u^1(t,{\boldsymbol{F}}_k({\boldsymbol{q}}_r)) \,\partial_{x^{2}} \hat{\varphi}_{N} \,\hat{\varphi}_{N} 
-%> \end{bmatrix}
-%> \right)
-%> \\
-%> &= 
-%> \sum_{r=1}^{R} \left( B^{22}_{k} \,[{\boldsymbol{U}}^1]_{k,r} \,[\mathsf{\hat{G}}]_{1,:,:,r} - B^{21}_{k}\, [{\boldsymbol{U}}^1]_{k,r} \,[\mathsf{\hat{G}}]_{2,:,:,r} \right)\,.
-%> @f}
-%> 
-%> asdf
+%> = 
+%> \sum_{r=1}^{R} \left( B^{22}_{k} \,[{\boldsymbol{U}}^1]_{k,r} \,[\mathsf{\hat{G}}]_{1,:,:,r} - B^{21}_{k}\, [{\boldsymbol{U}}^1]_{k,r} \,[\mathsf{\hat{G}}]_{2,:,:,r} \right)
+%> @f]
+%> and
+%> @f[
+%> \mathsf{G}^{2}_{{T_{k}}} 
+%> = 
+%> \sum_{r=1}^{R} \left( B^{11}_{k} \,[{\boldsymbol{U}}^2]_{k,r} \,[\mathsf{\hat{G}}]_{1,:,:,r} - B^{12}_{k}\, [{\boldsymbol{U}}^2]_{k,r} \,[\mathsf{\hat{G}}]_{2,:,:,r} \right)\,.
+%> @f]
+%> The global matrix is then constructed as
 %> @f[
 %> \mathsf{G}^1 = 
 %> \sum_{r=1}^{R} \mathsf{I}_{K\times K} \otimes_\mathrm{V} \left( 
 %>   \begin{bmatrix} B_1^{22} \, [{\boldsymbol{U}}^1]_{1,r} \\ \vdots \\ B_K^{22} [{\boldsymbol{U}}^1]_{K,r} \end{bmatrix}  \otimes [\mathsf{\hat{G}}]_{1,:,:,r} -
 %>   \begin{bmatrix} B_1^{21} \, [{\boldsymbol{U}}^1]_{1,r} \\ \vdots \\ B_K^{21} [{\boldsymbol{U}}^1]_{K,r} \end{bmatrix}  \otimes [\mathsf{\hat{G}}]_{2,:,:,r}
-%> \right) \,,
+%> \right) 
 %> @f]
+%> with @f$\mathsf{I}_{K\times K}@f$ denoting the @f$K\times@f$ identity matrix, @f$\otimes_\mathrm{V}@f$ denoting the function described in <code>kronVec()</code> and @f$\otimes@f$ denoting the standard Kronecker product. The matrix @f$\mathsf{G}^1@f$ is constructed analogously.
 %>
-%>
-%>
+%> @param  g             		The lists describing the geometric and topological 
+%>		                      properties of a triangulation (see 
+%>      		                <code>generateGridData()</code>) 
+%>      		                @f$[1 \times 1 \text{ struct}]@f$
+%> @param refElemDphiPhiPhi Precomputed contributions to the local matrix 
+%> 						            	@f$\hat{\mathsf{G}}@f$ 
+%>                          as provided by <code>integrateRefElemDphiPhiPerQuad()</code>.
+%>                          @f$[2 \times 1 \text{ cell}]@f$
+%> @param funcCont1        A function handle for the continuous velocity in x-direction.
+%> @param funcCont2        A function handle for the continuous velocity in y-direction.
+%> @param qord		         The order of the quadrature rule.
+%>                    
+%>                    
+%> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %> 
-%> All other entries are zero.
-%> @param  TODO TODO
 %>
 %> This file is part of FESTUNG
 %>
