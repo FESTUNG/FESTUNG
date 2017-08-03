@@ -20,7 +20,7 @@
 %> @f[
 %> 	[\mathsf{\hat{G}}]_{m,i,j,r} = \omega_{r} \, \partial_{\hat{x}^{m}}{} \, \hat{\varphi}_{ki}({\boldsymbol{\hat{q}}}_r) \, \hat{\varphi}_{kj}({\boldsymbol{\hat{q}}}_r)
 %> @f]
-%> with @f$\omega_{r}@f$ denoting the integration weight. For an efficient access of the array entris it is actually stored as an @f$2 \times 1 \text{ cell}@f$ with each cell storing a @f$N \times N \times R@f$ array.
+%> with @f$\omega_{r}@f$ denoting the integration weight. For efficient access of the array entries it is actually stored as an @f$2 \times 1 \text{ cell}@f$ with each cell storing a @f$N \times N \times R@f$ array.
 %> 
 %> 
 %> @param  N    The local number of degrees of freedom @f$[\text{scalar}]@f$
