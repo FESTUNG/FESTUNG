@@ -27,7 +27,7 @@
 %> 
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
-%>                      least phi2D and gradPhi2D. @f$[\text{scalar}]@f$
+%>                      least phi2D and gradPhi2D. @f$[\text{struct}]@f$
 %> 
 %> @param  qord 	(optional) The order of the quadrature rule to be used.. @f$[\text{scalar}]@f$
 %> 
