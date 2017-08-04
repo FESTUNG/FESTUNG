@@ -56,11 +56,6 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-%%TODO 
-%
-% I precompute matrices G_bar that allows for an 'easy' evaluation of 
-% u_{m} phi_{kj} \partial_{x_m} phi_{ki}
-%
 function ret = integrateRefElemDphiPhiPerQuad(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 if nargin < 3, p = (sqrt(8*N+1)-3)/2;  qOrd = max(2*p, 1);  end

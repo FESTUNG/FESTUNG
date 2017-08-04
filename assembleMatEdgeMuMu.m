@@ -102,5 +102,5 @@ ret = sparse(Kedge * Nmu, Kedge * Nmu);
 for n = 1 : 3
   Kkn = g.areaE0T(:, n) .*  markE0T(:, n) ;
   ret = ret + kron(sparse(g.E0T(:, n), g.E0T(:, n), Kkn, Kedge, Kedge), refEdgeMuMu);
-end
+end % for
 end % function

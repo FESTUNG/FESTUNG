@@ -109,6 +109,6 @@ for n = 1 : 3
   for l = 1 : 2
     Rkn = markE0T(:,n) .*  g.markSideE0T(:, n, l) .* g.areaE0T(:, n);
     ret = ret + kron(sparse(1 : K, g.E0T(:, n), Rkn, K, Kedge), refEdgePhiIntMu(:, :, n, l));
-  end
+  end % for
 end % for
 end % function

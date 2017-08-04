@@ -122,7 +122,7 @@ for r = 1 : R
   valOnQuad2 = funcCont2(g.mapRef2Phy(1, Q1(r), Q2(r)), g.mapRef2Phy(2, Q1(r), Q2(r)));
   ret{2} = ret{2} - kron(g.B(:,1,2) .* valOnQuad2, refElemDphiPhiPerQuad{1}(:, :, r)) ...
                   + kron(g.B(:,1,1) .* valOnQuad2, refElemDphiPhiPerQuad{2}(:, :, r));
-end %for
+end % for
 ret{1} = kronVec(speye(K,K), ret{1});
 ret{2} = kronVec(speye(K,K), ret{2});
-end
+end % function

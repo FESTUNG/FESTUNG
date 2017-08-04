@@ -53,4 +53,4 @@ for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   ret(:, n, :) = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
 end % for
-end
+end % function

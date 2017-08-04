@@ -102,6 +102,4 @@ for n = 1 : 3
 end % for
 
 ret = reshape(ret', [], 1);
-end
-
-
+end % function
