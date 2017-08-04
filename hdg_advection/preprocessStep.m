@@ -61,6 +61,6 @@
 %
 function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
 if ~problemData.isStationary
-  problemData.globMcDisc = problemData.globMphi * reshape( problemData.cDisc', size(problemData.globMphi, 1), 1 );
+  problemData.globMcDisc = problemData.globMphi * reshape(problemData.cDisc', [], 1);
 end % if
 end % function

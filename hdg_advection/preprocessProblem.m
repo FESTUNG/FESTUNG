@@ -76,18 +76,18 @@ problemData.basesOnQuad = computeBasesOnQuadEdge(problemData.Nmu, problemData.ba
 
 %% Computation of matrices on the reference triangle.
 problemData.hatM    = integrateRefElemPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
-problemData.hatMmu  = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnQuad, problemData.qOrd);
+hatMmu              = integrateRefEdgeMuMu(problemData.Nmu, problemData.basesOnQuad, problemData.qOrd);
 problemData.hatRmu  = integrateRefEdgePhiIntMu([problemData.N, problemData.Nmu], problemData.basesOnQuad, problemData.qOrd);
-problemData.hatRphi = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+hatRphi             = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 problemData.hatG    = integrateRefElemDphiPhiPerQuad(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 problemData.hatS    = integrateRefEdgePhiIntMuPerQuad([problemData.N, problemData.Nmu], problemData.basesOnQuad, problemData.qOrd);
 
 %% Assembly of time-independent global matrices.
 problemData.globMphi      = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 problemData.globRmu       = assembleMatEdgePhiIntMu(problemData.g, problemData.g.markE0Tint, problemData.hatRmu);
-problemData.globRphi      = assembleMatEdgePhiIntPhiInt(problemData.g, problemData.g.markE0Tint, problemData.hatRphi);
-problemData.globMmuBar    = assembleMatEdgeMuMu(problemData.g, problemData.g.markE0Tint, problemData.hatMmu);
-problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, problemData.g.markE0Tbdr, problemData.hatMmu);
+problemData.globRphi      = assembleMatEdgePhiIntPhiInt(problemData.g, problemData.g.markE0Tint, hatRphi);
+problemData.globMmuBar    = assembleMatEdgeMuMu(problemData.g, problemData.g.markE0Tint, hatMmu);
+problemData.globMmuTilde  = assembleMatEdgeMuMu(problemData.g, problemData.g.markE0Tbdr, hatMmu);
 problemData.globP         = problemData.stab .* problemData.globMmuBar + problemData.globMmuTilde;
 problemData.globT         = problemData.globRmu';
 end % function

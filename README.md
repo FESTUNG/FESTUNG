@@ -16,6 +16,7 @@ Have a look at the implementation of the standard (element-based) DG discretizat
 A hybridized DG discretization of linear advection can be found in the folder `hdg_advection`.
 
 Start the computation for any of these problems using `main(<folder name>)`, for example
+
     $ main('advection')
 
 Output files are written in [VTK format](http://www.vtk.org/VTK/img/file-formats.pdf) or [TecPlot ASCII file format](http://paulbourke.net/dataformats/tp/) and can be visualized, e.g., using [Paraview](http://www.paraview.org/).

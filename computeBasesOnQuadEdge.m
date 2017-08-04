@@ -43,12 +43,12 @@
 %> @param  N          The number of local edge degrees of freedom. For polynomial
 %>                    order @f$p@f$, it is given as @f$\bar{N} = p+1@f$
 %>                    @f$[\text{scalar}]@f$
-%> @param  basesOnQuadEdge A (possibly empty) struct to which the computed
+%> @param  basesOnQuad A (possibly empty) struct to which the computed
 %>                    arrays are added. @f$[\text{struct}]@f$
 %> @param  requiredOrders (optional) An array providing a list of all
 %>                    required quadrature orders. @f$[\text{scalar}]@f$
 %>
-%> @retval  basesOnQuadEdge A struct with the computed array.  @f$[\text{struct}]@f$
+%> @retval  basesOnQuad A struct with the computed arrays.  @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
 %>
@@ -72,8 +72,8 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function basesOnQuadEdge = computeBasesOnQuadEdge(N, basesOnQuadEdge, requiredOrders)
-validateattributes(basesOnQuadEdge, {'struct'}, {}, mfilename, 'basesOnQuadEdge')
+function basesOnQuad = computeBasesOnQuadEdge(N, basesOnQuad, requiredOrders)
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuadEdge')
 
 if nargin < 3
     p = N - 1;
@@ -85,20 +85,20 @@ if nargin < 3
 end % if
 
 % Precompute basis functions
-basesOnQuadEdge.mu = cell(max(requiredOrders),1);
-basesOnQuadEdge.thetaMu = cell(max(requiredOrders),1);
+basesOnQuad.mu = cell(max(requiredOrders),1);
+basesOnQuad.thetaMu = cell(max(requiredOrders),1);
 for it = 1 : length(requiredOrders)
     ord = requiredOrders(it);
     [Q, ~] = quadRule1D(ord);
     R = length(Q);
     
-    basesOnQuadEdge.mu{ord} = zeros(R, N);
+    basesOnQuad.mu{ord} = zeros(R, N);
     for i = 1 : N
-        basesOnQuadEdge.mu{ord}(:, i) = phi1D(i, Q);
+        basesOnQuad.mu{ord}(:, i) = phi1D(i, Q);
     end
     
-    basesOnQuadEdge.thetaMu{ord} = zeros(R, N, 2);
-    basesOnQuadEdge.thetaMu{ord}(:, :, 1) = basesOnQuadEdge.mu{ord};
-    basesOnQuadEdge.thetaMu{ord}(:, :, 2) = flipud(basesOnQuadEdge.mu{ord});
+    basesOnQuad.thetaMu{ord} = zeros(R, N, 2);
+    basesOnQuad.thetaMu{ord}(:, :, 1) = basesOnQuad.mu{ord};
+    basesOnQuad.thetaMu{ord}(:, :, 2) = flipud(basesOnQuad.mu{ord});
 end % for
 end % function

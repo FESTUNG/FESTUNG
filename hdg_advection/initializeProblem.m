@@ -55,8 +55,8 @@ if ~problemData.isStationary
       computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, problemData.qOrd + 1, problemData.basesOnQuad));
   %% visualization of inital condition.
   if problemData.isVisSol
-      cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
-      visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
+    cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
+    visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
   end
   fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
       problemData.tEnd, problemData.dt, problemData.numSteps)

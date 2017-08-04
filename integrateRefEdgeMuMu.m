@@ -23,7 +23,7 @@
 %> @f]
 %>
 %> @param  N    The local number of degrees of freedom
-%> @param  basesOnQuadEdge  A struct containing precomputed values of the basis
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least mu. @f$[\text{struct}]@f$
 %> @param  qOrd 	(optional) The order of the quadrature rule to be used.. @f$[\text{scalar}]@f$
@@ -51,14 +51,14 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgeMuMu(N, basesOnQuadEdge, qOrd)
-validateattributes(basesOnQuadEdge, {'struct'}, {}, mfilename, 'basesOnGamma')
+function ret = integrateRefEdgeMuMu(N, basesOnQuad, qOrd)
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnGamma')
 if nargin < 3, p = N-1;  qOrd = 2*p+1;  end
 [~, W] = quadRule1D(qOrd);
 ret = zeros(N, N); % [N x N]
 for i = 1 : N
   for j = 1 : N
-    ret(i, j) = sum( W' .* basesOnQuadEdge.mu{qOrd}(:,i) .* basesOnQuadEdge.mu{qOrd}(:,j) );
+    ret(i, j) = sum( W' .* basesOnQuad.mu{qOrd}(:,i) .* basesOnQuad.mu{qOrd}(:,j) );
   end % for
 end % for
 end % function
