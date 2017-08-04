@@ -1,4 +1,3 @@
-% TODO
 % Assembles a vector containing integrals over edges of products of a basis 
 % function with a value given for each quadrature point.
 
@@ -10,17 +9,15 @@
 %===============================================================================
 %>
 %> @brief Assembles a vector @f$\mathbf{K}_\mathrm{D}@f$ containing integrals 
-%>        over edges of products of a basis function with a value @f$a(\vec{x})@f$ 
-%>        given for each quadrature point.
+%>        over edges of products of a basis function with a value 
+%>        @f$f(\mathbf{x})@f$ given for each quadrature point.
 %>
-% TODO: UPDATE DESCRIPTION
-%
 %> The vector @f$\mathbf{K}_\mathrm{D} \in \mathbb{R}^{KN}@f$ is defined
 %> component-wise by
 %> @f[
 %> [\mathbf{K}_\mathrm{D}]_{(k-1)N+i} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
-%>  \frac{1}{|E_{kn}|} \int_{E_{kn}} \varphi_{ki} c_\mathrm{D}(t) a \mathrm{d}s\,.
+%>  \frac{1}{|E_{kn}|} \int_{E_{kn}} \varphi_{ki} f \mathrm{d}s\,.
 %> @f]
 %> For the implementation, the integrals are backtransformed to the
 %> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
@@ -36,10 +33,9 @@
 %> @f]
 %> This allows to reformulate 
 %> @f[
-%>   \int_{E_{kn}} \varphi_{ki} c_\mathrm{D}(t) \mathrm{d}s =
+%>   \int_{E_{kn}} \varphi_{ki} f \mathrm{d}s =
 %>   \frac{|E_{kn}|}{|\hat{E}_n|} \int_{\hat{E}_n} \hat{\varphi}_i 
-%>   c_\mathrm{D}(t,\mathbf{F}_k(\hat{\mathbf{x}})) 
-%>   a(\mathbf{F}_k(\hat{\mathbf{x}})) \mathrm{d}\hat{\mathbf{x}}\,.
+%>   f(\mathbf{F}_k(\hat{\mathbf{x}}))\mathrm{d}\hat{\mathbf{x}}\,.
 %> @f]
 %> Further transformation to the unit interval @f$[0,1]@f$ using the mapping 
 %> @f$\hat{\mathbf{\gamma}}_n(s)@f$ as provided by <code>gammaMap()</code>
@@ -48,8 +44,7 @@
 %>  [\mathbf{K}_\mathrm{D}]_{(k-1)N+i} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
 %>  \int_0^1 \hat{\varphi}_{i} \circ \hat{\mathbf{\gamma}}_n(s)
-%>     c_\mathrm{D}(t, \mathbf{F}_k \circ \hat{\mathbf{\gamma}}_n(s))
-%>     a(\mathbf{F}_k \circ \hat{\mathbf{\gamma}}_n(s))
+%>     f(\mathbf{F}_k \circ \hat{\mathbf{\gamma}}_n(s))
 %>     \mathrm{d}s \,.
 %> @f]
 %> This integral is then approximated using a 1D quadrature rule provided by
@@ -58,8 +53,7 @@
 %>  [\mathbf{K}_\mathrm{D}]_{(k-1)N+i} \approx
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
 %>  \sum_{r=1}^R \omega_r \hat{\varphi}_{i} \circ \hat{\mathbf{\gamma}}_n(q_r)
-%>     c_\mathrm{D}(t, \mathbf{F}_k \circ \hat{\mathbf{\gamma}}_n(q_r))
-%>     a(\mathbf{F}_k \circ \hat{\mathbf{\gamma}}_n(q_r))\,,
+%>     f(\mathbf{F}_k \circ \hat{\mathbf{\gamma}}_n(q_r))\,,
 %> @f]
 %> allowing to vectorize over all triangles.
 %>
@@ -67,21 +61,16 @@
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0Tbdr <code>logical</code> arrays that mark each triangles
+%> @param  markE0T    <code>logical</code> arrays that mark each triangles
 %>                    (boundary) edges on which the vector entries should be
 %>                    assembled @f$[K \times 3]@f$
-%> @param  funcCont   A function handle for the continuous function
-%> @param  valOnQuad  Array holding the function value @f$a(q_r)@f$ for all
+%> @param  valOnQuad  Array holding the function values @f$f(q_r)@f$ for all
 %>                    quadrature points on all edges. @f$[K\times3\times R]@f$
 %> @param  N          The number of local degrees of freedom @f$[\text{scalar}]@f$
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D.
-%> @param areaE0Tbdr (optional) argument to provide precomputed values
-%>                    for the products of <code>markE0Tbdr</code>,
-%>                    and <code>g.areaE0T</code>,
-%>                    @f$[3 \text{ cell}]@f$
-%> @param qOrd       (optional) Order of quadrature rule to be used.
+%> @param qOrd        (optional) Order of quadrature rule to be used.
 %> @retval ret        The assembled vector @f$[KN]@f$
 %>
 %> This file is part of FESTUNG

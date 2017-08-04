@@ -20,8 +20,7 @@
 %>  3. postprocessStep()
 %>  4. outputStep()
 %> 
-%> This routine obtains the parameters of the Runge-Kutta method and
-%> linearizes the DG solution representation vector before calling
+%> This routine obtains the parameters of the Runge-Kutta method and calls
 %> iterateSubSteps() to actually carry out the Runge-Kutta method.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
@@ -36,7 +35,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017.
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock
@@ -68,6 +69,4 @@ end % if
 % Carry out RK steps
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);
-
-% fprintf('Simulation progress at %3.0f%% (Step %d)\n', 100*nStep/problemData.numSteps, nStep);
 end % function

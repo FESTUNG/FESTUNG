@@ -27,7 +27,7 @@
 %> The velocity @f$\mathbf{u}:J\times\Omega\rightarrow\mathbb{R}^2@f$ and 
 %> right hand side@f$f:J\times\Omega\rightarrow \mathbb{R}@f$
 %> may vary in time and space. 
-%> A detailed description can be found in @ref RAWFK2016.
+%> A detailed description can be found in @ref JRASK2017.
 %>
 %> Please read the inline-comments in the code for the meaning of each
 %> configuration option.
@@ -40,7 +40,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017.
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock
@@ -67,7 +69,7 @@ problemData = setdefault(problemData, 'testcase', 'solid_body');
 problemData = setdefault(problemData, 'isConvergence', false);
 
 % Maximum edge length of triangle
-problemData = setdefault(problemData, 'hmax', 2^-4/3);
+problemData = setdefault(problemData, 'hmax', 2^-6);
 
 % Local polynomial approximation order (0 to 4)
 problemData = setdefault(problemData, 'p', 2);

@@ -78,6 +78,7 @@
 %> @code
 %> problemData = main('advection', 'p', 2, 'tEnd', 1);
 %> @endcode
+%> @endparblock
 %>
 %> @param  problemName  The name of the problem to be solved. A folder with
 %>                      matching name must exist and provide all of the 

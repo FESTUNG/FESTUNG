@@ -11,7 +11,7 @@
 %> @brief Performs all pre-processing steps, such as grid generation, assembly 
 %>        of stationary blocks, etc. for the problem solution.
 %>
-%> This routine is called after advection/configureProblem.m.
+%> This routine is called after advection_implicit/configureProblem.m.
 %>
 %> This step consists of grid generation, computation of derived
 %> data structures, pre-computation of often needed values (e.g., basis

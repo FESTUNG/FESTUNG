@@ -1,7 +1,7 @@
 % Third step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file advection/postprocessStep.m
+%> @file hdg_advection/postprocessStep.m
 %>
 %> @brief Third step of the four-part algorithm in the main loop.
 %===============================================================================
@@ -18,8 +18,7 @@
 %>  4. outputStep()
 %> 
 %> This routine is executed third in each loop iteration.
-%> It brings the linearized new solution back to the representation matrix
-%> form and decides whether the main loop is to be terminated (i.e., the
+%> It decides whether the main loop is to be terminated (i.e., the
 %> end of the simulation time is reached).
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
@@ -33,7 +32,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017.
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock
@@ -52,12 +53,6 @@
 %> @endparblock
 %
 function problemData = postprocessStep(problemData, nStep)
-%% Reshape and store solution in problemData
-
-% No update on cDisc is needed, because the employed DIRK schemes are
-% stiffly accurate (a_{sj} = b_{j}). This means, the stage solution C^(s)
-% is actually the solution C^(n+1) at the next time step.
-
 problemData.isFinished = problemData.isStationary || nStep >= problemData.numSteps;
 end % function
 

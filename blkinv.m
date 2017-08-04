@@ -1,8 +1,9 @@
 % Computes the inverse of a block diagonal matrix.
+
 %===============================================================================
 %> @file blkinv.m
 %>
-%> @brief NEW Computes the inverse of a block diagonal matrix.
+%> @brief Computes the inverse of a block diagonal matrix.
 %===============================================================================
 %>
 %> @brief Computes the inverse of a block diagonal matrix.
@@ -10,8 +11,11 @@
 %> The function takes a block diagonal matrix @f$\mathsf{A} \in \mathbb{R}^{KN \times KN}@f$ 
 %> with blocks of size @f$N \times N@f$ on the diagonal and computes its 
 %> inverse @f$\mathsf{A}^{-1}@f$. In order to optimize the performance of the
-%> method on can specify a \p blockSize that has to be a mutliple of @f$N@f$. The algorithm extracts blocks of size @f$ \text{blockSize} \times \text{blockSize} @f$ from the diagonal of @f$A@f$ 
-%> to invert several diagonal blocks at once. In our experiments a \p blockSize of @f$\text{blockSize}=128\cdot 2^{-p}@f$, with @f$p@f$ denoting the degree of the polynomials used, was a good choice. However, this may change depending on the problem at hand and the computer used. 
+%> method on can specify a \p blockSize that has to be a mutliple of @f$N@f$. 
+%> The algorithm extracts blocks of size @f$ \text{blockSize} \times \text{blockSize} @f$
+%> from the diagonal of @f$A@f$ to invert several diagonal blocks at once. In our experiments
+%> values for \p blockSize around 128-192, was a good choice.
+%> However, this may change depending on the problem at hand and the computer used. 
 %> 
 %> 
 %> @param  A          A block diagonal matrix @f$\mathsf{A}@f$. 

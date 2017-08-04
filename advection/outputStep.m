@@ -1,7 +1,7 @@
 % Last step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file advection/outputStep.m
+%> @file ./advection/outputStep.m
 %>
 %> @brief Last step of the four-part algorithm in the main loop.
 %===============================================================================

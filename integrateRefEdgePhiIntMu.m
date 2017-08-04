@@ -1,10 +1,10 @@
 % Compute integrals on the reference interval, whose integrands consist of all
 % permutations of a basis function with an edge basis function.
-%
+
 %===============================================================================
 %> @file integrateRefEdgePhiIntMu.m
 %>
-%> @brief NEW Compute integrals on the reference interval, whose integrands 
+%> @brief Compute integrals on the reference interval, whose integrands 
 %> consist of all permutations of a basis function with an edge basis function.
 %===============================================================================
 %>
@@ -19,11 +19,12 @@
 %> [\mathsf{\hat{R}}_{\mu}]_{i,j,n,l} := \int_{0}^{1} \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(s) \, \text{d}s\, ,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is given in 
-%> <code>gammaMap()</code> and @f$\hat{\beta}_{kn} @f$the mapping as described in <code>TODO</code>.
+%> <code>gammaMap()</code> and @f$\hat{\beta}_{kn} @f$the mapping as described in computeBasesOnQuadEdge().
 %> @param  N    The local number of degrees of freedom @f$[2 \text{vector}]@f$
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D, mu and thetaMu.  @f$[\text{struct}]@f$
+%> @param  qOrd 	(optional) The order of the quadrature rule to be used. @f$[\text{scalar}]@f$
 %> @retval ret  The computed array @f$[N\times \bar{N}\times 3 \times 2]@f$
 %>
 %> This file is part of FESTUNG

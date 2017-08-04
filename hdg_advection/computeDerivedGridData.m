@@ -1,28 +1,25 @@
-% Computes various additional fields needed throughout the advection
-% problem presented in @ref RAWFK2016 . These fields only contain
-% information based on the underlying grid and are therefore constant in
-% time but used in every step. They are saved as part of the grid.
+% Computes an additional field needed throughout the advection
+% problem presented in @ref JRASK2017 . This field only contains
+% information based on the underlying grid and is therefore constant in
+% time but used in every step. It is saved as part of the grid.
 
 %===============================================================================
 %> @file hdg_advection/computeDerivedGridData.m
 %>
-%> @brief Computes various additional fields needed throughout the advection
-%>        problem presented in @ref RAWFK2016 . These fields only contain
-%>        information based on the underlying grid and are therefore constant in
-%>        time but used in every step. They are saved as part of the grid.
+%> @brief Computes an additional field needed throughout the advection
+%>        problem presented in @ref JRASK2017 . This field only contains
+%>        information based on the underlying grid and is therefore constant in
+%>        time but used in every step. It is saved as part of the grid.
 %===============================================================================
 %>
-%> @brief Computes various additional fields needed throughout the advection
-%>        problem presented in @ref RAWFK2016 . These fields only contain
-%>        information based on the underlying grid and are therefore constant in
-%>        time but used in every step. They are saved as part of the grid.
+%> @brief Computes an additional field needed throughout the advection
+%>        problem presented in @ref JRASK2017 . This field only contains
+%>        information based on the underlying grid and is therefore constant in
+%>        time but used in every step. It is saved as part of the grid.
 %>
-%> For every vertex of a triangle the columns of g.markV0TT0V indicate which triangle 
-%> corresponds to this vertex.
-%>
-%> g.areaE0TbdrD provides the elementwise products of the vectors 
-%> <code>g.areaE0T</code>, and <code>markE0TbdrD</code>.
-%> @f$[3 \text{ cell}]@f$
+%> For every edge of a triangle the entries of g.markSideE0T indicate
+%> whether the element is the first or second adjacent element with respect
+%> to the edge view. @f$[K \times 3 \times 2]@f$
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
@@ -35,7 +32,8 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Balthasar Reuter, 2017
 %> 
 %> @par License
 %> @parblock

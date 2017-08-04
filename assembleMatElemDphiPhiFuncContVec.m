@@ -1,8 +1,9 @@
 % Assembles two matrices, each containing integrals of products of the continuous advection velocity, a basis function and a (spatial) derivative of a basis function.
+
 %===============================================================================
 %> @file assembleMatElemDphiPhiFuncContVec.m
 %>
-%> @brief NEW Assembles two matrices, each containing integrals of products of the advection velocity, a basis function and a (spatial) derivative of a basis function.
+%> @brief Assembles two matrices, each containing integrals of products of the advection velocity, a basis function and a (spatial) derivative of a basis function.
 %===============================================================================
 %>
 %> @brief Assembles matrices @f$\mathsf{G}^m, m \in \{1,2\}@f$ containing integrals of products of the advection velocity, a basis function and a (spatial) derivative of a basis function.
@@ -65,13 +66,13 @@
 %>		                      properties of a triangulation (see 
 %>      		                <code>generateGridData()</code>) 
 %>      		                @f$[1 \times 1 \text{ struct}]@f$
-%> @param refElemDphiPhiPhi Precomputed contributions to the local matrix 
+%> @param refElemDphiPhiPerQuad Precomputed contributions to the local matrix 
 %> 						            	@f$\hat{\mathsf{G}}@f$ 
 %>                          as provided by <code>integrateRefElemDphiPhiPerQuad()</code>.
 %>                          @f$[2 \times 1 \text{ cell}]@f$
 %> @param funcCont1        A function handle for the continuous velocity in x-direction.
 %> @param funcCont2        A function handle for the continuous velocity in y-direction.
-%> @param qord		         The order of the quadrature rule.
+%> @param qOrd		         The order of the quadrature rule.
 %>                    
 %>                    
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$

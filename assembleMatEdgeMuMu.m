@@ -4,7 +4,7 @@
 %===============================================================================
 %> @file assembleMatEdgeMuMu.m
 %>
-%> @brief NEW Assembles a matrix containing integrals of products of two edge basis 
+%> @brief Assembles a matrix containing integrals of products of two edge basis 
 %>        functions. This corresponds to a mass matrix.
 %===============================================================================
 %>
@@ -67,7 +67,7 @@
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  markE0T    A marker indicating whether an edge should be 
 %>                    recognized or not. @f$[K \times 3]@f$
-%> @param refElemMuMu Local matrix @f$\hat{\mathsf{M}}_{\mu}@f$ as provided
+%> @param refEdgeMuMu Local matrix @f$\hat{\mathsf{M}}_{\mu}@f$ as provided
 %>                    by <code>integrateRefElemMuMu()</code>.
 %>                    @f$[\bar{N} \times \bar{N}]@f$
 %> @retval ret        The assembled matrix @f$[\bar{K}\bar{N} \times \bar{K}\bar{N}]@f$

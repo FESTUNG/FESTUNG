@@ -4,7 +4,7 @@
 %===============================================================================
 %> @file assembleVecEdgeMuFuncCont.m
 %>
-%> @brief NEW Assembles a vector containing integrals over edges of products of a 
+%> @brief Assembles a vector containing integrals over edges of products of a 
 %>        edge basis function with a continuous function.
 %===============================================================================
 %>

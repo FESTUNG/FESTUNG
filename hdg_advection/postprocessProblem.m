@@ -2,7 +2,7 @@
 % solution and output of the final solution.
 
 %===============================================================================
-%> @file advection/postprocessProblem.m
+%> @file hdg_advection/postprocessProblem.m
 %>
 %> @brief Performs all post-processing tasks, such as error estimates of the 
 %>        final solution and output of the final solution.
@@ -22,8 +22,10 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
-%> 
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017.
+%> @author Balthasar Reuter, 2017.
+
 %> @par License
 %> @parblock
 %> This program is free software: you can redistribute it and/or modify
@@ -46,10 +48,6 @@ if problemData.isVisSol
   cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
   visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, ...
                     problemData.numSteps, problemData.outputTypes);
-  
-%   cLagrangeEdge = projectDataDisc2DataLagr1D(problemData.lamDisc);
-%   visualizeDataLagrGnuplot1D(problemData.g, cLagrangeEdge, 'lambda_h', problemData.outputBasename, ...
-%                     problemData.numSteps, problemData.outputTypes)
 end % if
 
 fprintf('Finished simulation at t_end = %g\n', problemData.tEnd);
@@ -64,8 +62,5 @@ else
     problemData.c0Cont, problemData.qOrd, problemData.basesOnQuad);
   fprintf('L2 error w.r.t. the initial condition: %g\n', problemData.error);
 end % if
-fprintf('norm(cDisc, 1) = %g\n', norm(problemData.cDisc(:), 1));
-fprintf('norm(cDisc, 2) = %g\n', norm(problemData.cDisc(:), 2));
-fprintf('norm(cDisc, inf) = %g\n', norm(problemData.cDisc(:), inf));
 end % function
 

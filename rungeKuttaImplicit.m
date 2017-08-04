@@ -4,7 +4,7 @@
 %===============================================================================
 %> @file rungeKuttaImplicit.m
 %>
-%> @brief NEW Provides weights and time levels for diagonally implicit Runge-Kutta 
+%> @brief Provides weights and time levels for diagonally implicit Runge-Kutta 
 %> (DIRK) methods up to order 4.
 %===============================================================================
 %>
@@ -28,7 +28,7 @@
 %> @f$t^{(j)} = t^n + c_j \cdot \Delta t^n@f$. Note that the methods are 
 %> diagonally implicit, i.e. the coefficient matrix @f$A@f$ is lower triangular
 %> allowing to solve in each step individually. The formulas stated above
-%> do \textbf{not} hold for fully implicit Runge-Kutta methods.
+%> do **not** hold for fully implicit Runge-Kutta methods.
 %> 
 %> The implemented methods are all @f$A@f$- and @f$L@f$-stable. Furthermore, the 
 %> methods are stiffly accurate, i.e. @f$b_j=a_{sj}@f$ where @f$s@f$ is the 

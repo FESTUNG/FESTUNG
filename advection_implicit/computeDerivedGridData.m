@@ -17,11 +17,16 @@
 %>        information based on the underlying grid and are therefore constant in
 %>        time but used in every step. They are saved as part of the grid.
 %>
-%> For every vertex of a triangle the columns of g.markV0TT0V indicate which triangle 
-%> corresponds to this vertex.
-%>
 %> g.areaE0TbdrD provides the elementwise products of the vectors 
-%> <code>g.areaE0T</code>, and <code>markE0TbdrD</code>.
+%> <code>g.areaE0T</code>, and <code>g.markE0TbdrD</code>.
+%> @f$[3 \text{ cell}]@f$
+%> 
+%> g.areaE0TbdrN provides the elementwise products of the vectors 
+%> <code>g.areaE0T</code>, and <code>g.markE0TbdrN</code>.
+%> @f$[K \times 3]@f$
+%>
+%> g.areaE0TbdrNotN provides the elementwise products of the vectors 
+%> <code>g.areaE0T</code>, and <code>~g.markE0TbdrN</code>.
 %> @f$[3 \text{ cell}]@f$
 %>
 %> @param  g          The lists describing the geometric and topological 
@@ -35,7 +40,8 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock

@@ -36,7 +36,8 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
-%> @author Alexander Jaust, 2017
+%> @author Alexander Jaust, 2017.
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock
@@ -55,7 +56,7 @@
 %> @endparblock
 %
 function problemData = preprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
-% Select time level for current Runge-Kutta step
+% Select time level for current Runge-Kutta stage
 t = problemData.t(nSubStep);
 cDCont = @(x1, x2) problemData.cDCont(t, x1 ,x2);
 u1Cont = @(x1, x2) problemData.u1Cont(t, x1, x2);

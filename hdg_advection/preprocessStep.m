@@ -1,15 +1,15 @@
-% First step of the four-part algorithm in the main loop. Do-nothing
-% function in the advection solver.
+% First step of the four-part algorithm in the main loop. Applies the mass
+% matrix to the solution at the old time level.
 
 %===============================================================================
-%> @file advection/preprocessStep.m
+%> @file hdg_advection/preprocessStep.m
 %>
 %> @brief First step of the four-part algorithm in the main loop. 
-%>        Do-nothing function in the advection solver.
+%>        Applies the mass matrix to the solution at the old time level.
 %===============================================================================
 %>
 %> @brief First step of the four-part algorithm in the main loop.
-%>        Do-nothing function in the advection solver.
+%>        Applies the mass matrix to the solution at the old time level.
 %>
 %> The main loop repeatedly executes four steps until the parameter
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
@@ -22,8 +22,10 @@
 %> 
 %> This routine is executed first in each loop iteration.
 %> The Advection problem requires substepping due to the Runge-Kutta method
-%> (see solveStep() and @ref RAWFK2016 for details). Thus, no terms can be
-%> assembled here and this routine does nothing.
+%> (see solveStep() and @ref JRASK2017 for details). Thus, no terms can be
+%> assembled here. However, every Runge-Kutta stage requires the solution
+%> at the old time level with the mass matrix applied to it, which is
+%> computed here.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
@@ -37,8 +39,10 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
-%> 
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017.
+%> @author Balthasar Reuter, 2017.
+%>
 %> @par License
 %> @parblock
 %> This program is free software: you can redistribute it and/or modify

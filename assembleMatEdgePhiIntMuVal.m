@@ -4,7 +4,7 @@
 %===============================================================================
 %> @file assembleMatEdgePhiIntMuVal.m
 %>
-%> @brief NEW Assembles a matrix containing integrals of products of flux and test 
+%> @brief Assembles a matrix containing integrals of products of flux and test 
 %> function.
 %===============================================================================
 %>

@@ -2,7 +2,7 @@
 % stationary blocks, etc. for the problem solution.
 
 %===============================================================================
-%> @file advection/preprocessProblem.m
+%> @file hdg_advection/preprocessProblem.m
 %>
 %> @brief Performs all pre-processing tasks, such as grid generation, assembly
 %>        of stationary blocks, etc. for the problem solution.
@@ -11,7 +11,7 @@
 %> @brief Performs all pre-processing steps, such as grid generation, assembly
 %>        of stationary blocks, etc. for the problem solution.
 %>
-%> This routine is called after advection/configureProblem.m.
+%> This routine is called after hdg_advection/configureProblem.m.
 %>
 %> This step consists of grid generation, computation of derived
 %> data structures, pre-computation of often needed values (e.g., basis
@@ -27,7 +27,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017.
+%> @author Balthasar Reuter, 2017.
 %>
 %> @par License
 %> @parblock
@@ -60,14 +62,13 @@ problemData.dt   = problemData.tEnd / problemData.numSteps;
 % interior or have a certain boundary type.
 problemData.g.markE0Tint  = problemData.generateMarkE0Tint(problemData.g);
 problemData.g.markE0Tbdr  = problemData.generateMarkE0Tbdr(problemData.g);
-% problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
-% problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
 
 % Precompute some repeatedly evaluated fields
 problemData.g = computeDerivedGridData(problemData.g);
 
 %% Configuration output.
-fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)
+fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles and %d edges.\n', ...
+        problemData.p, problemData.N, problemData.K, problemData.g.numE)
 
 %% Lookup table for basis function.
 problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct, [problemData.qOrd, problemData.qOrd + 1]);

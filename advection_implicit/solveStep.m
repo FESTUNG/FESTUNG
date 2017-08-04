@@ -69,7 +69,6 @@ else
   problemData.rhsRK = cell(length(problemData.t), 1);
 end % if
 
-
 % Carry out RK steps
 problemData.isSubSteppingFinished = false;
 problemData = iterateSubSteps(problemData, nStep);

@@ -1,0 +1,77 @@
+\documentclass[tikz]{standalone}
+\usetikzlibrary{shapes.geometric, arrows}
+\begin{document}
+\definecolor{faublue}{RGB}{0,56,101}
+\definecolor{faulblue}{RGB}{114,159,207}
+\definecolor{faullblue}{RGB}{221,229,240}
+
+\definecolor{faugrey}{RGB}{150,150,150}
+\definecolor{faulgrey}{RGB}{210,213,215}
+\definecolor{faullgrey}{RGB}{235,236,238}
+
+\definecolor{faunat}{RGB}{0,155,119}
+\definecolor{faulnat}{RGB}{170,207,189}
+\definecolor{faullnat}{RGB}{229,239,234}
+
+\tikzstyle{label} = [faugrey, font=\sffamily]
+\tikzstyle{phase} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=faulgrey, fill=faullgrey, font=\sffamily]
+\tikzstyle{process} = [rectangle, minimum width=2.5cm, minimum height=1cm, align=center, text centered, draw=faulnat, fill=faullnat, font=\sffamily]
+\tikzstyle{decision} = [diamond, minimum width=0.5cm, minimum height=0.5cm, align=center, text centered, draw=faulblue, fill=faullblue, font=\sffamily]
+\tikzstyle{connect} = [thick, draw=faunat]
+\tikzstyle{arrow} = [thick, ->, >=stealth, faunat, draw=faunat, font=\sffamily]
+
+\tikzstyle{labelSub} = [faugrey, font=\small\sffamily]
+\tikzstyle{processSub} = [rectangle, minimum width=2cm, minimum height=0.5cm, align=center, text centered, draw=faulnat, fill=faullnat, font=\small\sffamily]
+\tikzstyle{decisionSub} = [diamond, minimum width=0.5cm, minimum height=0.5cm, align=center, text centered, draw=faulblue, fill=faullblue, font=\scriptsize\sffamily]
+\tikzstyle{arrowSub} = [thick, ->, >=stealth, faunat, draw=faunat, font=\small\sffamily]
+
+\begin{tikzpicture}[scale=1]
+  \node[circle, fill=black] (start) at (-2.2, 0) {};
+  \node[label, black] at (-2.2, 0.4) {main};
+
+  \path (0, 0) node[process] (config)   {Configure\\Problem}
+       +(3, 0) node[process] (pre)      {Pre-process\\Problem}
+       +(6, 0) node[process] (init)     {Initialize\\Problem}
+       +(9.5,-3) node[phase, minimum width=3.5cm, minimum height=8.5cm]   (solve)    {}
+         +(8.1, 0) node[circle, fill=faunat] (intersect) {}
+         +(9.8, 0  ) node[decision] (finished)  {finished?}
+         +(9.8,-2.1) node[process] (preStep)    {Pre-process\\Step}
+         +(9.8,-3.6) node[process] (solveStep)  {Solve\\Step}
+         +(9.8,-5.1) node[process] (postStep)   {Post-process\\Step}
+         +(9.8,-6.6) node[process] (outStep)    {Output\\Step}
+       +(13, 0) node[process] (post)    {Post-process\\Problem};
+
+  \node [label] at (8.4, 1) {Solver};
+
+  \draw [arrow] (start) -- (config);
+  \draw [arrow] (config) -- (pre);
+  \draw [arrow] (pre) -- (init);
+  \draw [connect] (init) -- (intersect);
+  \draw [arrow] (intersect) -- (finished);
+  \draw [arrow] (finished) -- node[anchor=north] {yes} (post);
+
+  \draw [arrow] (finished) -- node[anchor=west] {no} (preStep);
+  \draw [arrow] (preStep) -- (solveStep);
+  \draw [arrow] (solveStep) -- (postStep);
+  \draw [arrow] (postStep) -- (outStep);
+  \draw [connect] (outStep) -- +(-1.7, 0) -- (intersect);
+
+  \path (2,-5) node[phase, minimum width=10cm, minimum height=2.3cm] (substep) {}
+       +(-3.6, 0.2) node[processSub] (preSub)   {Pre-process\\Sub-step}
+       +(-1.1, 0.2) node[processSub] (solveSub) {Solve\\Sub-step}
+       +( 1.4, 0.2) node[processSub] (postSub)  {Post-process\\Sub-Step}
+       +( 2.8, 0.2) node[circle, fill=faunat] (intersectSub) {}
+       +( 4  , 0.2) node[decisionSub] (subFinished) {finished?};
+
+  \node [labelSub] at (-2, -4.1) {Sub-stepping};
+
+  \draw[arrowSub] (preSub) -- (solveSub);
+  \draw[arrowSub] (solveSub) -- (postSub);
+  \draw[connect] (postSub) -- (intersectSub);
+  \draw[arrowSub] (intersectSub) -- (subFinished);
+  \draw[arrowSub] (subFinished) -- node[anchor=west] {no} +(0, -1.1) -- +(-7.6, -1.1) -- (preSub);
+  
+  \draw[arrowSub,dashed] (9,-3.5) -- node[anchor=south] {(optional)} +(-4.2,0) -- (intersectSub);
+  \draw[arrowSub,dashed] (subFinished) -- +(1.4,0) node[anchor=north] {yes} -- +(1.4,1) -- (9,-3.8);
+\end{tikzpicture}
+\end{document}

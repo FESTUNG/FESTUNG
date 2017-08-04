@@ -2,7 +2,7 @@
 % solution and output of the final solution.
 
 %===============================================================================
-%> @file advection/postprocessProblem.m
+%> @file ./advection/postprocessProblem.m
 %>
 %> @brief Performs all post-processing tasks, such as error estimates of the 
 %>        final solution and output of the final solution.

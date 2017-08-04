@@ -1,3 +1,55 @@
+% Defines the test cases that can be selected in
+% advection_implicit/configureProblem.
+
+%===============================================================================
+%> @file advection_implicit/getTestcase.m
+%>
+%> @brief Defines the test cases that can be selected in 
+%>        advection_implicit/configureProblem.
+%===============================================================================
+%>
+%> @brief Defines the test cases that can be selected in 
+%>        advection_implicit/configureProblem.
+%>
+%> It provides four different test cases:
+%> -# LeVeque's solid body rotation benchmark (see @ref RAWFK2016 for details).
+%> -# A stationary example with analytical solution 
+%>    @f$c(t,\mathbf{x}) = \cos(7x^1)\cos(7x^2)@f$ and velocity field
+%>    @f$\mathbf{u}(t,\mathbf{x}) = [\exp((x^1+x^2)/2), \exp((x^1-x^2)/2)]^T@f$.
+%> -# A transient quasi-ODE example with analytical solution
+%>    @f$c(t,\mathbf{x}) = \exp(-t)@f$ and velocity field @f$\mathbf{u}=\mathbf{0}@f$.
+%> -# A transient example with analytical solution
+%>    @f$c(t,\mathbf{x}) = \cos(7x^1)\cos(7x^2) + \exp(-t)@f$ and velocity field
+%>    @f$\mathbf{u}(t,\mathbf{x}) = [\exp((x^1+x^2)/2), \exp((x^1-x^2)/2)]^T@f$.
+%>
+%> @param  problemData  A (probably) empty struct with problem parameters.
+%>                      @f$[\text{struct}]@f$
+%> @param  testcase     One of the following: 'solid_body', 'stationary',
+%>                      'transient_ode', 'transient'
+%>
+%> @retval problemData  A struct with all necessary parameters and definitions
+%>                      for the problem description. @f$[\text{struct}]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%
 function problemData = getTestcase(problemData, testcase)
 checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 switch testcase
@@ -40,44 +92,42 @@ switch testcase
     numSteps = 1;
     tEnd = 10;
     
+  case 'transient_ode' % Transient ODE example
+    isAnalytical = true;
+    isStationary = false;
+    
+    cCont = @(t, x1, x2) exp(-t) * ones(size(x1));
+    u1Cont = @(t, x1, x2) zeros(size(x1));
+    u2Cont = @(t, x1, x2) zeros(size(x1));
+    fCont = @(t, x1, x2) -cCont(t, x1, x2);
+    c0Cont = @(x1, x2) cCont(0, x1, x2);
+    cDCont = @(t, x1, x2) cCont(t, x1, x2);
+    gNCont = @(t,x1,x2) zeros(size(x1));
+    
+    generateMarkE0TbdrN = @(g) false(g.numT, 3);
+    
+    numSteps = 4;
+    tEnd = 2;
+    
   case 'transient' % Transient analytical example
     isAnalytical = true;
     isStationary = false;
     
-    cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2) + t;
+    cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2) + exp(-t);
     u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
     u2Cont = @(t, x1, x2) exp(0.5 * (x1 - x2));
-    fCont = @(t, x1, x2) 1 - 7 * u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
+    fCont = @(t, x1, x2) -exp(-t) - 7 * u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
         - 7 * u2Cont(t, x1, x2) .* cos(7 * x1) .* sin(7 * x2) ...
         + 0.5 * (u1Cont(t, x1, x2) - u2Cont(t, x1, x2)) .* cCont(t, x1, x2);
     c0Cont = @(x1, x2) cCont(0, x1, x2);
     cDCont = @(t, x1, x2) cCont(t, x1, x2);
-    gNCont = @(t, x1, x2) zeros(size(x1));
+    gNCont = @(t,x1,x2) zeros(size(x1));
     
     generateMarkE0TbdrN = @(g) false(g.numT, 3);
-                              
+    
     numSteps = 10;
-    tEnd = 20;    
+    tEnd = 2;
     
-  case 'transient2' % Transient analytical example
-    isAnalytical = true;
-    isStationary = false;
-    
-    cCont = @(t, x1, x2) cos(7 * x1) .* cos(7 * x2) + sin(t);
-    u1Cont = @(t, x1, x2) exp(0.5 * (x1 + x2));
-    u2Cont = @(t, x1, x2) exp(0.5 * (x1 - x2));
-    fCont = @(t, x1, x2) cos(t) - 7 * u1Cont(t, x1, x2) .* sin(7 * x1) .* cos(7 * x2) ...
-        - 7 * u2Cont(t, x1, x2) .* cos(7 * x1) .* sin(7 * x2) ...
-        + 0.5 * (u1Cont(t, x1, x2) - u2Cont(t, x1, x2)) .* cCont(t, x1, x2);
-    c0Cont = @(x1, x2) cCont(0, x1, x2);
-    cDCont = @(t, x1, x2) cCont(t, x1, x2);
-    gNCont = @(t, x1, x2) -7 * cos(7 * x1) .* sin(7 * x2);
-    
-    generateMarkE0TbdrN = @(g) false(g.numT, 3);
-                              
-    numSteps = 10;
-    tEnd = 40;    
-   
   otherwise
     error('Invalid testcase "%s".', testcase);
 end % switch

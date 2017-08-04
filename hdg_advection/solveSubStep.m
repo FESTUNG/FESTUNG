@@ -1,7 +1,7 @@
 % Compute the solution of the current Runge-Kutta stage.
 
 %===============================================================================
-%> @file advection/solveSubStep.m
+%> @file hdg_advection/solveSubStep.m
 %>
 %> @brief Compute the solution of the current Runge-Kutta stage.
 %===============================================================================
@@ -17,6 +17,12 @@
 %>  2. solveSubStep()
 %>  3. postprocessSubStep()
 %>
+%> This routine is executed second in each loop iteration.
+%> It assembles the global system and computes the solution at
+%> the next Runge-Kutta level.
+%> It uses static condensation to speed up the computation of the solution
+%> and applies block-wise inversion to the local solves. See @ref JRASK2017
+%> for details.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
@@ -31,7 +37,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017.
+%> @author Balthasar Reuter, 2017.
 %>
 %> @par License
 %> @parblock
@@ -74,14 +82,6 @@ else
 end % if
 
 %% Computing local solves
-% There are two options.
-% 1. Invert the block diagonal matrix L locally, i.e. each block is 
-% inverted and then  we construct the inverse matrix L^{-1} from these 
-% blocks. This is usually quickest for large matrices and also saves a lot 
-% of memory. It may be efficient to invert more than one block at once.
-% 2. We invert the whole mass matrix. This may be very slow and memory
-% consuming for large matrices (=many elements). I guess it may be faster
-% for matrices of moderate size.
 if problemData.isBlockSolve
   matLinv = blkinv(matL, problemData.blockSolveSize * N);
   LinvQ = matLinv * vecQ;

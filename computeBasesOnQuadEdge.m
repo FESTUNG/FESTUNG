@@ -1,9 +1,10 @@
 % Evaluate edge basis functions in quadrature points on the
 % reference edge and stores them in a struct.
+
 %===============================================================================
 %> @file computeBasesOnQuadEdge.m
 %>
-%> @brief NEW Evaluate edge basis functions in quadrature points on the
+%> @brief Evaluate edge basis functions in quadrature points on the
 %> reference edge and stores them in a struct.
 %===============================================================================
 %>
@@ -23,13 +24,22 @@
 %> 
 %> This function computes the following struct variables (dimensions given for
 %> each order):
-%> - <code>phi1D</code>: @f$\hat{\mu}_i (q_r)
-%>                           \; [R \times \bar{N}]@f$
-%> - <code>thetaPhi1D</code>: @f$\hat{\mu}_i \circ 
-%>                                
-%>                                \hat{\beta}_{kn}(q_r)
-%>                                \; [R \times \bar{N} \times 2]@f$
+%> - <code>mu</code>: @f$\hat{\mu}_i (q_r) \; [R \times \bar{N}]@f$
+%> - <code>thetaMu</code>: @f$\hat{\mu}_i \circ \hat{\beta}_{kn}(q_r)
+%>                         \; [R \times \bar{N} \times 2]@f$
 %> 
+%> Here, the mapping @f$\hat{\beta}_{kn}@f$ adapts the edge orientation to
+%> match the definitions of edge basis function from an element view and an
+%> edge view. It is defined as
+%> 
+%> @f[
+%>  \hat{\beta}_{kn} =
+%>  \begin{cases}
+%>    s   &\text{if } T_k \text{ is the first element in the edge-local indexing}, \\
+%>    1-s &\text{if } T_k \text{ is the second element in the edge-local indexing}\,.
+%>  \end{cases}
+%> @f]
+%>
 %> @param  N          The number of local edge degrees of freedom. For polynomial
 %>                    order @f$p@f$, it is given as @f$\bar{N} = p+1@f$
 %>                    @f$[\text{scalar}]@f$
@@ -43,6 +53,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Alexander Jaust, 2017
 %> @author Balthasar Reuter, 2017
 %> 
 %> @par License

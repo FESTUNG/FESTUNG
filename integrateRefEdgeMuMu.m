@@ -1,11 +1,10 @@
-% TODO
 % Compute integrals over the reference edge, whose integrands 
 % consist of all permutations of two edge basis functions.
 
 %===============================================================================
 %> @file integrateRefEdgeMuMu.m
 %>
-%> @brief NEW Compute integrals over the reference edge, whose integrands 
+%> @brief Compute integrals over the reference edge, whose integrands 
 %> consist of all permutations of two edge basis functions.
 %===============================================================================
 %>
@@ -27,7 +26,7 @@
 %> @param  basesOnQuadEdge  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least mu. @f$[\text{struct}]@f$
-%> @param  qord 	(optional) The order of the quadrature rule to be used.. @f$[\text{scalar}]@f$
+%> @param  qOrd 	(optional) The order of the quadrature rule to be used.. @f$[\text{scalar}]@f$
 %> @retval ret  The computed matrix @f$[\bar{N} \times \bar{N}]@f$
 %>
 %> This file is part of FESTUNG

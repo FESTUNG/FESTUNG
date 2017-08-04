@@ -1,11 +1,11 @@
 % Compute integral contributions on the reference triangle, whose integrands consist of all
 % permutations of a basis function with one of the (spatial) derivatives of a
 % basis function for every integration point.
-%
+
 %===============================================================================
 %> @file integrateRefElemDphiPhiPerQuad.m
 %>
-%> @brief NEW Compute integral contributions on the reference triangle, whose integrands consist 
+%> @brief Compute integral contributions on the reference triangle, whose integrands consist 
 %>        of all permutations of a basis function with one of the (spatial)
 %>        derivatives of a basis function  for every integration point.
 %===============================================================================
@@ -29,7 +29,7 @@
 %>                      functions on quadrature points. Must provide at
 %>                      least phi2D and gradPhi2D. @f$[\text{struct}]@f$
 %> 
-%> @param  qord 	(optional) The order of the quadrature rule to be used.. @f$[\text{scalar}]@f$
+%> @param  qOrd 	(optional) The order of the quadrature rule to be used.. @f$[\text{scalar}]@f$
 %> 
 %> @retval ret  The computed array @f$2 \times 1 \text{ cell}@f$ 
 %>

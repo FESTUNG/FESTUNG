@@ -1,10 +1,11 @@
 % Compute integral contributions on the reference interval, whose integrands 
 % consist of all permutations of a basis function with an edge basis function 
 % at every integration point.
+
 %===============================================================================
 %> @file integrateRefEdgePhiIntMuPerQuad.m
 %>
-%> @brief NEW Compute integral contributions on the reference interval, whose 
+%> @brief Compute integral contributions on the reference interval, whose 
 %> integrands consist of all permutations of a basis function with an edge basis
 %> function at every integration point.
 %===============================================================================
@@ -20,14 +21,13 @@
 %> [\mathsf{\hat{S}}]_{i,j,n,r,l} = \omega_{r} \,  \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r) \, \hat{\mu}_{j}(\hat{q}_r \circ \hat{\beta}_{kn}(\hat{q}_r) 
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is given in 
-%> <code>gammaMap()</code>, @f$\omega_r@f$ is the integration weight associated with integration points @f$\hat{q}_r@f$and @f$\hat{\beta}_{kn} @f$the mapping as described in <code>TODO</code>. For efficient access of the array entries it is actually stored as an @f$2 \times 1 \text{ cell}@f$ with each cell storing a @f$N \times \bar{N} \times 3 \times R@f$ array.
+%> <code>gammaMap()</code>, @f$\omega_r@f$ is the integration weight associated with integration points @f$\hat{q}_r@f$and @f$\hat{\beta}_{kn} @f$the mapping as described in computeBasesOnQuadEdge(). For efficient access of the array entries it is actually stored as an @f$2 \times 1 \text{ cell}@f$ with each cell storing a @f$N \times \bar{N} \times 3 \times R@f$ array.
 %> 
-%> @param  N    The local number of degrees of freedom @f$[2 \text{vector}]@f$
+%> @param  N    The local number of degrees of freedom @f$[2 \text{ vector}]@f$
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D, mu and thetaMu. @f$[\text{struct}]@f$
-%> 
-%> @param  qord 	(optional) The order of the quadrature rule to be used.. @f$[\text{scalar}]@f$
+%> @param  qOrd 	(optional) The order of the quadrature rule to be used. @f$[\text{scalar}]@f$
 %>
 %> @retval ret  The computed array @f$2 \times 1 \text{ cell}@f$ 
 %> 
