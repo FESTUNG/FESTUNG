@@ -1,6 +1,6 @@
 % Assembles a vector containing integrals over edges of products of a basis 
 % function with a continuous function.
-%
+
 %===============================================================================
 %> @file assembleVecEdgePhiIntFuncCont.m
 %>
@@ -66,6 +66,10 @@
 %>                    assembled @f$[K \times 3]@f$
 %> @param  funcCont   A function handle for the continuous function
 %> @param  N          The number of local degrees of freedom @f$[\text{scalar}]@f$
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi1D.
+%> @param qOrd       (optional) Order of quadrature rule to be used.
 %> @retval ret        The assembled vector @f$[KN]@f$
 %>
 %> This file is part of FESTUNG
@@ -88,18 +92,20 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncCont(g, markE0Tbdr, funcCont, N)
-global gPhi1D
-
+function ret = assembleVecEdgePhiIntFuncCont(g, markE0Tbdr, funcCont, N, basesOnQuad, qOrd)
 % Determine quadrature rule and mapping to physical element
-p = (sqrt(8*N+1)-3)/2;
-qOrd = 2*p+1; [Q, W] = quadRule1D(qOrd);
+if nargin < 6
+  p = (sqrt(8*N+1)-3)/2;
+  qOrd = 2*p+1;
+end % if
+[Q, W] = quadRule1D(qOrd);
 Q2X1   = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
 Q2X2   = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 
 % Check function arguments that are directly used
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 validateattributes(markE0Tbdr, {'logical', 'numeric'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
 % Assemble vector
 ret = zeros(g.numT, N);
@@ -107,7 +113,7 @@ for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
   for i = 1 : N
-    ret(:,i) = ret(:,i) + markE0Tbdr(:,n) .* ( cDn * (W' .* gPhi1D{qOrd}(:,i,n)) );
+    ret(:,i) = ret(:,i) + markE0Tbdr(:,n) .* ( cDn * (W' .* basesOnQuad.phi1D{qOrd}(:,i,n)) );
   end % for
 end % for
 ret = reshape(ret', g.numT*N, 1);

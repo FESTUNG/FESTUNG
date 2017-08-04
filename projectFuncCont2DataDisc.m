@@ -1,5 +1,5 @@
 % Compute the DG/modal basis representation of an algebraic function.
-%
+
 %===============================================================================
 %> @file projectFuncCont2DataDisc.m
 %>
@@ -60,11 +60,14 @@
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  funcCont   A function handle for the continuous function
-%> @param  ord        The order of the quadrature rule provided by 
+%> @param  qOrd       The order of the quadrature rule provided by 
 %>                    <code>quadRule2D()</code>
 %> @param refElemPhiPhi Local matrix @f$\hat{\mathsf{M}}@f$ as provided
 %>                    by <code>integrateRefElemPhiPhi()</code>.
 %>                    @f$[N \times N]@f$
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi2D.
 %> @retval The representation matrix of the DG/modal basis representation.
 %>         @f$[K \times N]@f$
 %>
@@ -88,13 +91,11 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataDisc = projectFuncCont2DataDisc(g, funcCont, ord, refElemPhiPhi)
-global gPhi2D
+function dataDisc = projectFuncCont2DataDisc(g, funcCont, qOrd, refElemPhiPhi, basesOnQuad)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
-ord = max(ord,1);  [Q1, Q2, W] = quadRule2D(ord);
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad');
+qOrd = max(qOrd,1);  [Q1, Q2, W] = quadRule2D(qOrd);
 N = size(refElemPhiPhi, 1);
-F1 = @(X1, X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
-F2 = @(X1, X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
-rhs = funcCont(F1(Q1, Q2), F2(Q1, Q2)) * (repmat(W.', 1, N) .* gPhi2D{ord});
+rhs = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2)) * (repmat(W.', 1, N) .* basesOnQuad.phi2D{qOrd}(:,1:N));
 dataDisc = rhs / refElemPhiPhi;
 end % function

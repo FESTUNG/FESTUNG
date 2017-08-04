@@ -1,6 +1,6 @@
 % Evaluates all permutations of two basis functions from different elements
 % in all quadrature points of all edges of the reference triangle.
-%
+
 %===============================================================================
 %> @file integrateRefEdgePhiIntPhiExtPerQuad.m
 %>
@@ -25,6 +25,10 @@
 %> <code>quadRule1D()</code>
 %>
 %> @param  N    The local number of degrees of freedom
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi1D and thetaPhi1D.
+%> @param  qOrd (optional) The order of the quadrature rule to be used.
 %> @retval ret  The computed array @f$[N\times N\times 3\times 3\times R]@f$
 %>
 %> This file is part of FESTUNG
@@ -47,15 +51,18 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgePhiIntPhiExtPerQuad(N)
-global gPhi1D gThetaPhi1D
-p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
+function ret = integrateRefEdgePhiIntPhiExtPerQuad(N, basesOnQuad, qOrd)
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
+if nargin < 3
+  p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;
+end % if
+[~, W] = quadRule1D(qOrd);
 ret = zeros(N,N,3,3,length(W)); % [N x N x N x 3 x 3]
 for nn = 1 : 3 % 3 edges
   for np = 1 : 3
       for i = 1 : N
         for j = 1 : N
-          ret(i, j, nn, np, :) = gPhi1D{qOrd}(:,i,nn) .* gThetaPhi1D{qOrd}(:,j,nn,np) .* W.';
+          ret(i, j, nn, np, :) = basesOnQuad.phi1D{qOrd}(:,i,nn) .* basesOnQuad.thetaPhi1D{qOrd}(:,j,nn,np) .* W.';
         end % for
       end % for
   end % for

@@ -1,6 +1,6 @@
 % Assembles a matrix containing a function evaluated in vertex of each
 % element.
-%
+
 %===============================================================================
 %> @file computeFuncContV0T.m
 %>
@@ -45,6 +45,6 @@ validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 % Evaluate function
 valV0T = zeros(g.numT,3);
 for n = 1 : 3
-    valV0T(:, n) = funcCont(g.coordV0T(:, n, 1), g.coordV0T(:, n, 2));
+  valV0T(:, n) = funcCont(g.coordV0T(:, n, 1), g.coordV0T(:, n, 2));
 end
 end

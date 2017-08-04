@@ -1,7 +1,7 @@
 % Assembles two matrices containing integrals over interior edges of products of
 % two basis functions with a discontinuous coefficient function and with a
 % component of the edge normal.
-%
+
 %===============================================================================
 %> @file assembleMatEdgePhiPhiFuncDiscNu.m
 %>
@@ -35,6 +35,7 @@
 %> @f$ d_h(t, \mathbf{x}) = \sum_{l=1}^N D_{kl}(t) \varphi_{kl}(\mathbf{x}) @f$
 %> on a triangle @f$T_k@f$.
 %> All other entries are zero.
+%>
 %> To allow for vectorization, the assembly is reformulated as
 %> @f$\mathsf{{R}}^m = \mathsf{{R}}^{m,\mathrm{diag}} + 
 %>    \mathsf{{R}}^{m,\mathrm{offdiag}}@f$ with the blocks defined as
@@ -111,15 +112,15 @@
 %> @param refEdgePhiIntPhiIntPhiInt  Local matrix 
 %>                    @f$\hat{\mathsf{{R}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiIntPhiInt()</code>.
-%>                    @f$[N \times N \times N \times 3]@f$
+%>                    @f$[N \times N \times N_\mathrm{data} \times 3]@f$
 %> @param refEdgePhiIntPhiExtPhiExt  Local matrix 
 %>                    @f$\hat{\mathsf{{R}}}^\text{offdiag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiExtPhiExt()</code>.
-%>                    @f$[N \times N \times N \times 3 \times 3]@f$
+%>                    @f$[N \times N \times N_\mathrm{data} \times 3 \times 3]@f$
 %> @param dataDisc    A representation of the discrete function 
 %>                    @f$d_h(\mathbf(x))@f$, e.g., as computed by 
 %>                    <code>projectFuncCont2DataDisc()</code>
-%>                    @f$[K \times N]@f$
+%>                    @f$[K \times N_\mathrm{data}]@f$
 %> @param areaNuE0Tint (optional) argument to provide precomputed values
 %>                    for the products of <code>markE0Tint</code>,
 %>                    <code>g.areaE0T</code>, and <code>g.nuE0T</code>
@@ -148,13 +149,14 @@
 %> @endparblock
 %
 function ret = assembleMatEdgePhiPhiFuncDiscNu(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc, areaNuE0Tint)
-[K, N] = size(dataDisc);
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Check function arguments that are directly used
-validateattributes(dataDisc, {'numeric'}, {'size', [g.numT N]}, mfilename, 'dataDisc');
+validateattributes(dataDisc, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc');
 validateattributes(markE0Tint, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tint');
-validateattributes(refEdgePhiIntPhiIntPhiInt, {'numeric'}, {'size', [N N N 3]}, mfilename, 'refEdgePhiIntPhiIntPhiInt');
-validateattributes(refEdgePhiIntPhiExtPhiExt, {'numeric'}, {'size', [N N N 3 3]}, mfilename, 'refEdgePhiIntPhiExtPhiExt');
+validateattributes(refEdgePhiIntPhiIntPhiInt, {'numeric'}, {'size', [N N dataN 3]}, mfilename, 'refEdgePhiIntPhiIntPhiInt');
+validateattributes(refEdgePhiIntPhiExtPhiExt, {'numeric'}, {'size', [N N dataN 3 3]}, mfilename, 'refEdgePhiIntPhiExtPhiExt');
 
 if nargin > 5
   if isfield(g, 'areaNuE0TE0T')
@@ -185,7 +187,8 @@ end % function
 %> a precomputed field areaNuE0TE0T.
 %
 function ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0Tint_wiAreaNuE0TE0T(g, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc, areaNuE0Tint)
-[K, N] = size(dataDisc);
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Assemble matrices
 ret = cell(2,1); 
@@ -195,14 +198,14 @@ for nn = 1 : 3
   % Off-diagonal blocks
   for np = 1 : 3
     RtildeT = zeros(K*N, N);
-    for l = 1 : N
+    for l = 1 : dataN
       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
     end % for
     ret{1} = ret{1} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,1}.', RtildeT).';
     ret{2} = ret{2} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,2}.', RtildeT).';
   end % for
   % Diagonal blocks
-  for l = 1 : N
+  for l = 1 : dataN
     ret{1} = ret{1} + kron(spdiags(0.5 * areaNuE0Tint{nn,1} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
     ret{2} = ret{2} + kron(spdiags(0.5 * areaNuE0Tint{nn,2} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
   end % for
@@ -215,7 +218,8 @@ end % function
 %> no precomputed field areaNuE0TE0T.
 %
 function ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0Tint_noAreaNuE0TE0T(g, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc, areaNuE0Tint)
-[K, N] = size(dataDisc);
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Assemble matrices
 ret = cell(2,1); 
@@ -228,14 +232,14 @@ for nn = 1 : 3
     markE0TE0TtimesRkn1 = spdiags(Rkn .* g.nuE0T(:,nn,1), 0,K,K) * g.markE0TE0T{nn, np};
     markE0TE0TtimesRkn2 = spdiags(Rkn .* g.nuE0T(:,nn,2), 0,K,K) * g.markE0TE0T{nn, np};
     RtildeT = zeros(K*N, N);
-    for l = 1 : N
+    for l = 1 : dataN
       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
     end % for
     ret{1} = ret{1} + kronVec(markE0TE0TtimesRkn1.', RtildeT).';
     ret{2} = ret{2} + kronVec(markE0TE0TtimesRkn2.', RtildeT).';
   end % for
   % Diagonal blocks
-  for l = 1 : N
+  for l = 1 : dataN
     ret{1} = ret{1} + kron(spdiags(0.5 * areaNuE0Tint{nn,1} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
     ret{2} = ret{2} + kron(spdiags(0.5 * areaNuE0Tint{nn,2} .* dataDisc(:,l),0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
   end % for
@@ -248,7 +252,8 @@ end % function
 %> precomputed fields areaNuE0TE0T and areaNuE0T.
 %
 function ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc)
-[K, N] = size(dataDisc);
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Assemble matrices
 ret = cell(2,1); 
@@ -258,14 +263,14 @@ for nn = 1 : 3
   % Off-diagonal blocks
   for np = 1 : 3
     RtildeT = zeros(K*N, N);
-    for l = 1 : N
+    for l = 1 : dataN
       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
     end % for
     ret{1} = ret{1} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,1}.', RtildeT).';
     ret{2} = ret{2} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,2}.', RtildeT).';
   end % for
   % Diagonal blocks
-  for l = 1 : N
+  for l = 1 : dataN
     ret{1} = ret{1} + kron(spdiags(0.5 * g.areaNuE0T{nn,1} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
     ret{2} = ret{2} + kron(spdiags(0.5 * g.areaNuE0T{nn,2} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
   end % for
@@ -278,7 +283,8 @@ end % function
 %> a precomputed field areaNuE0TE0T but no field areaNuE0T.
 %
 function ret = assembleMatEdgePhiPhiFuncDiscNu_withAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc)
-[K, N] = size(dataDisc);
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Assemble matrices
 ret = cell(2,1); 
@@ -288,7 +294,7 @@ for nn = 1 : 3
   % Off-diagonal blocks
   for np = 1 : 3
     RtildeT = zeros(K*N, N);
-    for l = 1 : N
+    for l = 1 : dataN
       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
     end % for
     ret{1} = ret{1} + 0.5 * kronVec(g.areaNuE0TE0T{nn,np,1}.', RtildeT).';
@@ -296,7 +302,7 @@ for nn = 1 : 3
   end % for
   % Diagonal blocks
   Rkn = 0.5 * g.areaE0T(:,nn) .* markE0Tint(:, nn);
-  for l = 1 : N
+  for l = 1 : dataN
     ret{1} = ret{1} + kron(spdiags(Rkn .* g.nuE0T(:,nn,1) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
     ret{2} = ret{2} + kron(spdiags(Rkn .* g.nuE0T(:,nn,2) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
   end % for
@@ -309,7 +315,8 @@ end % function
 %> a precomputed field areaNuE0T but no field areaNuE0TE0T.
 %
 function ret = assembleMatEdgePhiPhiFuncDiscNu_noAreaNuE0TE0T_withAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc)
-[K, N] = size(dataDisc);
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Assemble matrices
 ret = cell(2,1); 
@@ -322,14 +329,14 @@ for nn = 1 : 3
     markE0TE0TtimesRkn1 = spdiags(Rkn .* g.nuE0T(:,nn,1), 0,K,K) * g.markE0TE0T{nn, np};
     markE0TE0TtimesRkn2 = spdiags(Rkn .* g.nuE0T(:,nn,2), 0,K,K) * g.markE0TE0T{nn, np};
     RtildeT = zeros(K*N, N);
-    for l = 1 : N
+    for l = 1 : dataN
       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
     end % for
     ret{1} = ret{1} + kronVec(markE0TE0TtimesRkn1.', RtildeT).';
     ret{2} = ret{2} + kronVec(markE0TE0TtimesRkn2.', RtildeT).';
   end % for
   % Diagonal blocks
-  for l = 1 : N
+  for l = 1 : dataN
     ret{1} = ret{1} + kron(spdiags(0.5 * g.areaNuE0T{nn,1} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
     ret{2} = ret{2} + kron(spdiags(0.5 * g.areaNuE0T{nn,2} .* markE0Tint(:, nn) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
   end % for
@@ -342,7 +349,8 @@ end % function
 %> no precomputed fields areaNuE0TE0T or areaNuE0T.
 %
 function ret = assembleMatEdgePhiPhiFuncDiscNu_noAreaNuE0TE0T_noAreaNuE0T(g, markE0Tint, refEdgePhiIntPhiIntPhiInt, refEdgePhiIntPhiExtPhiExt, dataDisc)
-[K, N] = size(dataDisc);
+[K, dataN] = size(dataDisc);
+N = size(refEdgePhiIntPhiIntPhiInt, 1);
 
 % Assemble matrices
 ret = cell(2, 1); ret{1} = sparse(K*N, K*N); ret{2} = sparse(K*N, K*N);
@@ -353,7 +361,7 @@ for nn = 1 : 3
     markE0TE0TtimesRkn1 = spdiags(Rkn .* g.nuE0T(:,nn,1), 0,K,K) * g.markE0TE0T{nn, np};
     markE0TE0TtimesRkn2 = spdiags(Rkn .* g.nuE0T(:,nn,2), 0,K,K) * g.markE0TE0T{nn, np};
     RtildeT = zeros(K*N, N);
-    for l = 1 : N
+    for l = 1 : dataN
       RtildeT = RtildeT + kron(dataDisc(:,l), refEdgePhiIntPhiExtPhiExt(:,:,l,nn,np).');
     end % for
     ret{1} = ret{1} + kronVec(markE0TE0TtimesRkn1.', RtildeT).';
@@ -361,7 +369,7 @@ for nn = 1 : 3
   end % for
   % Diagonal blocks
   Rkn = Rkn .* markE0Tint(:,nn);
-  for l = 1 : N
+  for l = 1 : dataN
     ret{1} = ret{1} + kron(spdiags(Rkn .* g.nuE0T(:,nn,1) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
     ret{2} = ret{2} + kron(spdiags(Rkn .* g.nuE0T(:,nn,2) .* dataDisc(:,l), 0,K,K), refEdgePhiIntPhiIntPhiInt(:,:,l,nn));
   end % for

@@ -73,6 +73,9 @@
 %>                    computed by <code>projectFuncCont2DataDisc()</code>
 %>                    @f$[K \times N]@f$
 %> @param  funcCont   A function handle for the continuous function
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi1D.
 %> @param areaE0Tbdr  (optional) argument to provide precomputed values
 %>                    for the products of <code>markE0Tbdr</code>,
 %>                    and <code>g.areaE0T</code>,
@@ -100,16 +103,17 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncDiscIntFuncCont(g, markE0Tbdr, dataDisc, funcCont, areaE0Tbdr)
+function ret = assembleVecEdgePhiIntFuncDiscIntFuncCont(g, markE0Tbdr, dataDisc, funcCont, basesOnQuad, areaE0Tbdr)
 % Check function arguments that are directly used
 validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 validateattributes(dataDisc, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataDisc');
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
-if nargin > 4
-  ret = assembleVecEdgePhiIntFuncDiscIntFuncCont_WithAreaE0Tbdr(g, dataDisc, funcCont, areaE0Tbdr);
+if nargin > 5
+  ret = assembleVecEdgePhiIntFuncDiscIntFuncCont_WithAreaE0Tbdr(g, dataDisc, funcCont, basesOnQuad, areaE0Tbdr);
 else
-  ret = assembleVecEdgePhiIntFuncDiscIntFuncCont_NoAreaE0Tbdr(g, markE0Tbdr, dataDisc, funcCont);
+  ret = assembleVecEdgePhiIntFuncDiscIntFuncCont_NoAreaE0Tbdr(g, markE0Tbdr, dataDisc, funcCont, basesOnQuad);
 end % if
 end % function
 %
@@ -117,9 +121,7 @@ end % function
 %> @brief Helper function for the case that assembleVedEdgePhiIntFuncDiscIntFuncCont()
 %> was called with a precomputed field areaE0Tbdr.
 %
-function ret = assembleVecEdgePhiIntFuncDiscIntFuncCont_WithAreaE0Tbdr(g, dataDisc, funcCont, areaE0Tbdr)
-global gPhi1D
-
+function ret = assembleVecEdgePhiIntFuncDiscIntFuncCont_WithAreaE0Tbdr(g, dataDisc, funcCont, basesOnQuad, areaE0Tbdr)
 % Determine quadrature rule and mapping to physical element
 [K, N] = size(dataDisc);  p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd);
@@ -133,7 +135,7 @@ for n = 1 : 3
   funcAtQ = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
   for i = 1 : N
     for l = 1 : N
-      integral = funcAtQ * ( W .* gPhi1D{qOrd}(:,i,n)' .* gPhi1D{qOrd}(:,l,n)' )';
+      integral = funcAtQ * ( W .* basesOnQuad.phi1D{qOrd}(:,i,n)' .* basesOnQuad.phi1D{qOrd}(:,l,n)' )';
       ret(:,i) = ret(:,i) + areaE0Tbdr{n} .* dataDisc(:,l) .* integral;
     end % for
   end % for
@@ -145,9 +147,7 @@ end % function
 %> @brief Helper function for the case that assembleVedEdgePhiIntFuncDiscIntFuncCont()
 %> was called with no precomputed field areaE0Tbdr.
 %
-function ret = assembleVecEdgePhiIntFuncDiscIntFuncCont_NoAreaE0Tbdr(g, markE0Tbdr, dataDisc, funcCont)
-global gPhi1D
-
+function ret = assembleVecEdgePhiIntFuncDiscIntFuncCont_NoAreaE0Tbdr(g, markE0Tbdr, dataDisc, funcCont, basesOnQuad)
 % Determine quadrature rule and mapping to physical element
 [K, N] = size(dataDisc);  p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd);
@@ -162,7 +162,7 @@ for n = 1 : 3
   Kkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
   for i = 1 : N
     for l = 1 : N
-      integral = funcAtQ * ( W .* gPhi1D{qOrd}(:,i,n)' .* gPhi1D{qOrd}(:,l,n)' )';
+      integral = funcAtQ * ( W .* basesOnQuad.phi1D{qOrd}(:,i,n)' .* basesOnQuad.phi1D{qOrd}(:,l,n)' )';
       ret(:,i) = ret(:,i) + Kkn .* dataDisc(:,l) .* integral;
     end % for
   end % for

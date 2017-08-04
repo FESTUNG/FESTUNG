@@ -1,5 +1,5 @@
 % Applies a slope limiter to a discrete function given in (modal) DG basis.
-%
+
 %===============================================================================
 %> @file applySlopeLimiterDisc.m
 %>
@@ -40,6 +40,9 @@
 %>                    @f$[KN \times KN]@f$.
 %> @param globMDiscTaylor  The transformation matrix @f$\mathsf{M}^\mathrm{DG,Taylor}@f$.
 %>                         @f$[KN \times KN]@f$.
+%> @param  basesOnQuad  A struct containing precomputed values of (Taylor) basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phiTaylorV0T.
 %> @param  type       The type of slope limiter to be used. [<code>string</code>]
 %> @retval dataDisc   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}c_h@f$. @f$[K \times N]@f$
@@ -64,12 +67,12 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataDisc = applySlopeLimiterDisc(g, dataDisc, markV0TbdrD, dataV0T, globM, globMDiscTaylor, type)
+function dataDisc = applySlopeLimiterDisc(g, dataDisc, markV0TbdrD, dataV0T, globM, globMDiscTaylor, basesOnQuad, type)
 % Project into Taylor basis
 dataTaylor = projectDataDisc2DataTaylor(dataDisc, globM, globMDiscTaylor);
 
 % Limit in Taylor basis
-dataTaylor = applySlopeLimiterTaylor(g, dataTaylor, markV0TbdrD, dataV0T, type);
+dataTaylor = applySlopeLimiterTaylor(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad, type);
 
 % Project back to original basis
 dataDisc = projectDataTaylor2DataDisc(dataTaylor, globM, globMDiscTaylor);

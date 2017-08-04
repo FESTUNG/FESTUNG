@@ -1,6 +1,6 @@
 % Applies the linear vertex based slope limiter to a discrete 
 % function given in Taylor basis.
-%
+
 %===============================================================================
 %> @file applySlopeLimiterTaylorLinear.m
 %>
@@ -72,6 +72,9 @@
 %>                    slope limiting routine. @f$[K \times 3]@f$
 %> @param  dataV0T    The function values for (Dirichlet boundary) vertices
 %>                    specified by <code>markV0TbdrD</code>. @f$[K \times 3]@f$
+%> @param  basesOnQuad  A struct containing precomputed values of (Taylor) basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phiTaylorV0T.
 %> @retval dataTaylorLim   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}^\mathrm{Taylor}c_h@f$. @f$[K \times N]@f$
 %>
@@ -95,17 +98,16 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataTaylorLim = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0TbdrD, dataV0T)
-global gPhiTaylorV0T
-
+function dataTaylorLim = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad)
 % Check function arguments that are directly used
 validateattributes(dataTaylor, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataTaylor');
 assert(size(dataTaylor, 2) >= 3, 'Number of local degrees of freedom in dataTaylor does not correspond to p>=1')
-validateattributes(gPhiTaylorV0T, {'numeric'}, {'size', [g.numT 3 NaN]}, mfilename, 'gPhiTaylorV0T');
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
+validateattributes(basesOnQuad.phiTaylorV0T, {'numeric'}, {'size', [g.numT 3 NaN]}, mfilename, 'phiTaylorV0T');
 
 %% Limit first order derivative terms
 % Compute limiter parameter for each vertex
-alphaE = computeVertexBasedLimiter(g, dataTaylor(:, 1), computeFuncDiscAtPoints(dataTaylor(:, 1:3), gPhiTaylorV0T(:,:,1:3)), markV0TbdrD, dataV0T);
+alphaE = computeVertexBasedLimiter(g, dataTaylor(:, 1), computeFuncDiscAtPoints(dataTaylor(:, 1:3), basesOnQuad.phiTaylorV0T(:,:,1:3)), markV0TbdrD, dataV0T);
 
 % Apply limiter to first order terms, set all higher order terms to zero in
 % the case of limiting

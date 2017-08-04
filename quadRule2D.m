@@ -1,5 +1,5 @@
 % Provides quadrature points and associated weights within the reference triangle.
-%
+
 %===============================================================================
 %> @file quadRule2D.m
 %>
@@ -18,7 +18,7 @@
 %> <code>[Q1, Q2, W] = quadRule2D(qOrd)</code> returns quadrature points 
 %> @f$\hat{\vec{q}}_r = [\hat{q}_r^1, \hat{q}_r^2]^\mathrm{T}@f$ within the reference triangle @f$\hat{T}@f$ in lists of
 %> @f$\hat{x}^1@f$ and @f$\hat{x}^2@f$ coordinates <code>Q1</code> and <code>Q2</code>, respectively, and the associated 
-%> weights <code>Q</code>.  The quadrature rule is exact for polynomials of order <code>qOrd</code> (see @ref FRAK2015 for details).
+%> weights <code>W</code>.  The quadrature rule is exact for polynomials of order <code>qOrd</code> (see @ref FRAK2015 for details).
 %> The area of @f$1/2@f$ of the reference triangle @f$\hat{T}@f$ is incorporated in the weights.
 %>
 %> An overview of quadrature rules on triangles is found in the &ldquo;Encyclopaedia of Cubature Formulas&rdquo; @ref Cools2003.

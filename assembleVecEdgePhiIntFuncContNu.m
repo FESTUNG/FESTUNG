@@ -72,6 +72,9 @@
 %>                    assembled @f$[K \times 3]@f$
 %> @param  funcCont   A function handle for the continuous function
 %> @param  N          The number of local degrees of freedom @f$[\text{scalar}]@f$
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi1D.
 %> @param areaNuE0Tbdr (optional) argument to provide precomputed values
 %>                    for the products of <code>markE0Tbdr</code>,
 %>                    <code>g.areaE0T</code>, and <code>g.nuE0T</code>
@@ -99,18 +102,19 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncContNu(g, markE0Tbdr, funcCont, N, areaNuE0Tbdr)
+function ret = assembleVecEdgePhiIntFuncContNu(g, markE0Tbdr, funcCont, N, basesOnQuad, areaNuE0Tbdr)
 
 % Check function arguments that are directly used
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
-if nargin > 4
-  ret = assembleVecEdgePhiIntFuncContNu_withAreaNuE0Tbdr(g, funcCont, N, areaNuE0Tbdr);
+if nargin > 5
+  ret = assembleVecEdgePhiIntFuncContNu_withAreaNuE0Tbdr(g, funcCont, N, basesOnQuad, areaNuE0Tbdr);
 elseif isfield(g, 'areaNuE0T')
-  ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_withAreaNuE0T(g, markE0Tbdr, funcCont, N);
+  ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_withAreaNuE0T(g, markE0Tbdr, funcCont, N, basesOnQuad);
 else
-  ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_noAreaNuE0T(g, markE0Tbdr, funcCont, N);
+  ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_noAreaNuE0T(g, markE0Tbdr, funcCont, N, basesOnQuad);
 end % if
 
 end % function
@@ -119,9 +123,7 @@ end % function
 %> @brief Helper function for the case that assembleVecEdgePhiIntFuncContNu()
 %> was called with a precomputed field areaNuE0Tbdr.
 %
-function ret = assembleVecEdgePhiIntFuncContNu_withAreaNuE0Tbdr(g, funcCont, N, areaNuE0Tbdr)
-global gPhi1D
-
+function ret = assembleVecEdgePhiIntFuncContNu_withAreaNuE0Tbdr(g, funcCont, N, basesOnQuad, areaNuE0Tbdr)
 % Determine quadrature rule and mapping to physical element
 K = g.numT; p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd); 
@@ -136,7 +138,7 @@ for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
   for i = 1 : N
-    integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
+    integral = cDn * ( W .* basesOnQuad.phi1D{qOrd}(:, i, n)' )';
     ret{1}(:,i) = ret{1}(:,i) + areaNuE0Tbdr{n,1} .* integral;
     ret{2}(:,i) = ret{2}(:,i) + areaNuE0Tbdr{n,2} .* integral;
   end % for
@@ -151,9 +153,7 @@ end % function
 %> was called without a precomputed field areaNuE0Tbdr but parameter g provides
 %> a field areaNuE0T.
 %
-function ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_withAreaNuE0T(g, markE0Tbdr, funcCont, N)
-global gPhi1D
-
+function ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_withAreaNuE0T(g, markE0Tbdr, funcCont, N, basesOnQuad)
 % Determine quadrature rule and mapping to physical element
 K = g.numT; p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd); 
@@ -168,7 +168,7 @@ for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
   cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
   for i = 1 : N
-    integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
+    integral = cDn * ( W .* basesOnQuad.phi1D{qOrd}(:, i, n)' )';
     ret{1}(:,i) = ret{1}(:,i) + markE0Tbdr(:,n).*g.areaNuE0T{n,1} .* integral;
     ret{2}(:,i) = ret{2}(:,i) + markE0Tbdr(:,n).*g.areaNuE0T{n,2} .* integral;
   end % for
@@ -183,9 +183,7 @@ end % function
 %> was called without a precomputed field areaNuE0Tbdr and parameter g provides
 %> no field areaNuE0T.
 %
-function ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_noAreaNuE0T(g, markE0Tbdr, funcCont, N)
-global gPhi1D
-
+function ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_noAreaNuE0T(g, markE0Tbdr, funcCont, N, basesOnQuad)
 % Determine quadrature rule and mapping to physical element
 K = g.numT; p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd); 
@@ -201,7 +199,7 @@ for n = 1 : 3
   cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
   Jkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
   for i = 1 : N
-    integral = cDn * ( W .* gPhi1D{qOrd}(:, i, n)' )';
+    integral = cDn * ( W .* basesOnQuad.phi1D{qOrd}(:, i, n)' )';
     ret{1}(:,i) = ret{1}(:,i) + Jkn .* g.nuE0T(:,n,1) .* integral;
     ret{2}(:,i) = ret{2}(:,i) + Jkn .* g.nuE0T(:,n,2) .* integral;
   end % for

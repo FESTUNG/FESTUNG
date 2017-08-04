@@ -1,6 +1,6 @@
 % Assembles a matrix containing integrals over edges of products of two 
 % basis functions from the interior of each element.
-%
+
 %===============================================================================
 %> @file assembleMatEdgePhiIntPhiInt.m
 %>
@@ -50,13 +50,16 @@
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0Tbdr <code>logical</code> arrays that mark each triangles
+%> @param  markE0T    <code>logical</code> arrays that mark each triangles
 %>                    (boundary) edges on which the matrix blocks should be
 %>                    assembled @f$[K \times 3]@f$
 %> @param refEdgePhiIntPhiInt  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
 %>                    @f$[N \times N \times 3]@f$
+%> @param coefE0T     (optional) Coefficient vector that is applied to each
+%>                    block. Defaults to <code>g.areaE0T</code>
+%>                    @f$[K \times 3]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
@@ -79,17 +82,19 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgePhiIntPhiInt(g, markE0Tbdr, refEdgePhiIntPhiInt)
+function ret = assembleMatEdgePhiIntPhiInt(g, markE0T, refEdgePhiIntPhiInt, coefE0T)
+if nargin < 7, coefE0T = g.areaE0T; end
+
 % Extract dimensions
 K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
 
 % Check function arguments that are directly used
-validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
+validateattributes(markE0T, {'logical'}, {'size', [K 3]}, mfilename, 'markE0T');
 validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N 3]}, mfilename, 'refEdgePhiIntPhiInt');
 
 % Assemble matrix
 ret = sparse(K*N, K*N);
 for n = 1 : 3
-  ret = ret + kron(spdiags(markE0Tbdr(:,n),0,K,K), refEdgePhiIntPhiInt(:,:,n));
+  ret = ret + kron(spdiags(markE0T(:, n) .* coefE0T(:, n), 0, K, K ), refEdgePhiIntPhiInt(:, :, n));
 end % for
 end % function

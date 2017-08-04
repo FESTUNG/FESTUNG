@@ -1,7 +1,7 @@
 % Compute integrals over the edges of the reference triangle, whose integrands 
 % consist of all permutations of three basis functions of which two are from
 % a neighboring element.
-%
+
 %===============================================================================
 %> @file integrateRefEdgePhiIntPhiExtPhiExt.m
 %>
@@ -30,6 +30,9 @@
 %> @f$\hat{\mathbf{\vartheta}}_{n^-n^+}@f$ as described in <code>theta()</code>.
 %>
 %> @param  N    The local number of degrees of freedom
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi1D and thetaPhi1D.
 %> @retval ret  The computed array @f$[N\times N\times N\times 3\times 3]@f$
 %>
 %> This file is part of FESTUNG
@@ -52,8 +55,8 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgePhiIntPhiExtPhiExt(N)
-global gPhi1D gThetaPhi1D
+function ret = integrateRefEdgePhiIntPhiExtPhiExt(N, basesOnQuad)
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
 ret = zeros(N,N,N,3,3); % [N x N x N x 3 x 3]
 for nn = 1 : 3 % 3 edges
@@ -61,8 +64,8 @@ for nn = 1 : 3 % 3 edges
     for l = 1 : N
       for i = 1 : N
         for j = 1 : N
-          ret(i, j, l, nn,np) = sum( W'.*gPhi1D{qOrd}(:,i,nn) .* ...
-            gThetaPhi1D{qOrd}(:,l,nn,np) .* gThetaPhi1D{qOrd}(:,j,nn,np) );
+          ret(i, j, l, nn,np) = sum( W'.* basesOnQuad.phi1D{qOrd}(:,i,nn) .* ...
+            basesOnQuad.thetaPhi1D{qOrd}(:,l,nn,np) .* basesOnQuad.thetaPhi1D{qOrd}(:,j,nn,np) );
         end % for
       end % for
     end % for

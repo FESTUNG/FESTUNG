@@ -1,6 +1,6 @@
 % Applies the linear vertex based slope limiter to a discrete 
 % function given in modal DG basis.
-%
+
 %===============================================================================
 %> @file applySlopeLimiterDiscLinear.m
 %>

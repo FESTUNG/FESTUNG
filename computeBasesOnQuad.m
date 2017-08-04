@@ -1,15 +1,15 @@
 % Evaluate basis functions and their gradients in quadrature points on the
-% reference triangle and store them in global variables.
-%
+% reference triangle and stores them in a struct.
+
 %===============================================================================
 %> @file computeBasesOnQuad.m
 %>
 %> @brief Evaluate basis functions and their gradients in quadrature points on
-%>        the reference triangle and store them in global variables.
+%>        the reference triangle and stores them in a struct.
 %===============================================================================
 %>
 %> @brief Evaluate basis functions and their gradients in quadrature points on
-%>        reference triangle and store them in global variables.
+%>        reference triangle and stores them in a struct.
 %>
 %> It evaluates the basis functions provided by <code>phi()</code> and
 %> <code>gradPhi()</code> in all quadrature points for all required orders 
@@ -19,25 +19,31 @@
 %> unit interval @f$[0,1]@f$, @f$q_r@f$, are provided by 
 %> <code>quadRule2D()</code> and <code>quadRule1D()</code>, respectively.
 %>
-%> All global variables are @f$\#\mathcal{P} \times 1@f$ <code>cell</code>-arrays, 
+%> All struct variables are @f$\#\mathcal{P} \times 1@f$ <code>cell</code>-arrays, 
 %> with @f$\mathcal{P} = \{2p, 2p+1\}@f$ the set of required polynomial orders. 
 %> Note, for @f$p=0@f$ only order @f$1@f$ is provided.
 %>
-%> This function computes the following global variables (dimensions given for
+%> This function computes the following struct variables (dimensions given for
 %> each order):
-%> - <code>gPhi1D</code>: @f$\hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(q_r)
+%> - <code>phi1D</code>: @f$\hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(q_r)
 %>                           \; [R \times N \times 3]@f$
-%> - <code>gThetaPhi1D</code>: @f$\hat{\varphi}_i \circ 
+%> - <code>thetaPhi1D</code>: @f$\hat{\varphi}_i \circ 
 %>                                \hat{\mathbf{\gamma}}_{n^-} \circ
 %>                                \hat{\vartheta}_{n^-n^+}(q_r)
 %>                                \; [R \times N \times 3 \times 3]@f$
-%> - <code>gPhi2D</code>: @f$\hat{\varphi}_i(\mathbf{q}_r) \; [R \times N]@f$
-%> - <code>gGradPhi2D</code>: @f$\hat{\nabla} \hat{\varphi}_i(\mathbf{q}_r)
+%> - <code>phi2D</code>: @f$\hat{\varphi}_i(\mathbf{q}_r) \; [R \times N]@f$
+%> - <code>gradPhi2D</code>: @f$\hat{\nabla} \hat{\varphi}_i(\mathbf{q}_r)
 %>                               \; [R \times N \times 2]@f$
 %> 
 %> @param  N          The number of local degrees of freedom. For polynomial
 %>                    order @f$p@f$, it is given as @f$N = (p+1)(p+2)/2@f$
 %>                    @f$[\text{scalar}]@f$
+%> @param  basesOnQuad A (possibly empty) struct to which the computed
+%>                    arrays are added. @f$[\text{struct}]@f$
+%> @param  requiredOrders (optional) An array providing a list of all
+%>                    required quadrature orders.
+%>
+%> @retval  basesOnQuad A struct with the computed array.
 %>
 %> This file is part of FESTUNG
 %>
@@ -59,45 +65,53 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function computeBasesOnQuad(N)
-global gPhi2D gGradPhi2D gPhi1D gThetaPhi1D
-
+function basesOnQuad = computeBasesOnQuad(N, basesOnQuad, requiredOrders)
 % Check for valid number of DOFs: N == (p+1)(p+2)/2
-assert(~isempty(find(N == ((0:4)+1).*((0:4)+2)/2, 1)), 'Number of degrees of freedom does not match a polynomial order') 
+assert(~isempty(find(N == ((0:4)+1).*((0:4)+2)/2, 1)), ...
+  'Number of degrees of freedom does not match a polynomial order')
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
 % Determine polynomial degree and quadrature orders
-p = (sqrt(8*N+1)-3)/2;
-if p > 0, requiredOrders = [2*p, 2*p+1]; else requiredOrders = 1; end
+if nargin < 3
+  p = (sqrt(8*N+1)-3)/2;
+  if p > 0
+    requiredOrders = [2*p, 2*p+1]; 
+  else
+    requiredOrders = 1; 
+  end % if
+end % if
 
 % Initialize global variables
-gPhi2D = cell(max(requiredOrders),1);  gGradPhi2D  = cell(max(requiredOrders),1);
-gPhi1D = cell(max(requiredOrders),1);  gThetaPhi1D = cell(max(requiredOrders),1);
+basesOnQuad.phi2D = cell(max(requiredOrders),1);  
+basesOnQuad.gradPhi2D  = cell(max(requiredOrders),1);
+basesOnQuad.phi1D = cell(max(requiredOrders),1);  
+basesOnQuad.thetaPhi1D = cell(max(requiredOrders),1);
 
 % Fill global variables
 for it = 1 : length(requiredOrders)
   ord = requiredOrders(it);
   [Q1, Q2, ~] = quadRule2D(ord);
-  gPhi2D{ord}      = zeros(length(Q1), N);
+  basesOnQuad.phi2D{ord}      = zeros(length(Q1), N);
   for i = 1 : N
-    gPhi2D{ord}(:, i) = phi(i, Q1, Q2);
+    basesOnQuad.phi2D{ord}(:, i) = phi(i, Q1, Q2);
   end % for
-  gGradPhi2D{ord}  = zeros(length(Q1), N, 2);
+  basesOnQuad.gradPhi2D{ord}  = zeros(length(Q1), N, 2);
   for m = 1 : 2
     for i = 1 : N
-      gGradPhi2D{ord}(:, i, m) = gradPhi(i, m, Q1, Q2);
+      basesOnQuad.gradPhi2D{ord}(:, i, m) = gradPhi(i, m, Q1, Q2);
     end % for
   end % for
   [Q, ~] = quadRule1D(ord);
-  gPhi1D{ord} = zeros(length(Q), N, 3);
+  basesOnQuad.phi1D{ord} = zeros(length(Q), N, 3);
   for nn = 1 : 3
     [Q1, Q2] = gammaMap(nn, Q);
     for i = 1 : N
-      gPhi1D{ord}(:, i, nn) = phi(i, Q1, Q2);
+      basesOnQuad.phi1D{ord}(:, i, nn) = phi(i, Q1, Q2);
     end
     for np = 1 : 3
       [QP1,QP2] = theta(nn, np, Q1, Q2);
       for i = 1 : N
-        gThetaPhi1D{ord}(:, i, nn, np) = phi(i, QP1, QP2);
+        basesOnQuad.thetaPhi1D{ord}(:, i, nn, np) = phi(i, QP1, QP2);
       end % for
     end % for
   end % for

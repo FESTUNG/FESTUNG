@@ -1,6 +1,6 @@
 % Assembles lists describing the geometric and topological
 % properties of a triangulation.
-%
+
 %===============================================================================
 %> @file generateGridData.m
 %>
@@ -183,4 +183,5 @@ for nn = 1 : 3
   end % for
 end % for
 g.mapRef2Phy = @(i,X1,X2) g.B(:,i,1)*X1 + g.B(:,i,2)*X2 + g.coordV0T(:,1,i)*ones(size(X1));
+g.detJ0T = 2 * g.areaT;
 end % function

@@ -1,6 +1,6 @@
 % Compute integrals over the edges of the reference triangle, whose integrands 
 % consist of all permutations of two basis functions.
-%
+
 %===============================================================================
 %> @file integrateRefEdgePhiIntPhiInt.m
 %>
@@ -24,11 +24,17 @@
 %> <code>gammaMap()</code>.
 %>
 %> @param  N    The local number of degrees of freedom
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi1D.
+%> @param  qOrd  (optional) The order of the quadrature rule to be used. 
+%>               Defaults to @f$2p+1 @f$.
 %> @retval ret  The computed array @f$[N\times N\times 3]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @author Balthasar Reuter, 2017
 %> 
 %> @par License
 %> @parblock
@@ -46,14 +52,15 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgePhiIntPhiInt(N)
-global gPhi1D
-p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
+function ret = integrateRefEdgePhiIntPhiInt(N, basesOnQuad, qOrd)
+validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
+if nargin < 3, p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  end
+[~, W] = quadRule1D(qOrd);
 ret = zeros(N, N, 3); % [N x N x 3]
 for n = 1 : 3 % 3 edges
   for i = 1 : N
     for j = 1 : N
-      ret(i, j, n) = sum( W' .* gPhi1D{qOrd}(:,i,n) .* gPhi1D{qOrd}(:,j,n) );
+      ret(i, j, n) = sum( W' .* basesOnQuad.phi1D{qOrd}(:,i,n) .* basesOnQuad.phi1D{qOrd}(:,j,n) );
     end % for
   end % for
 end % for
