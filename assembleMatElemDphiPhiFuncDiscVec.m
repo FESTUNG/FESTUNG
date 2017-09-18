@@ -87,15 +87,16 @@
 %>                    <code>projectFuncCont2DataDisc()</code> @f$[K \times N]@f$
 %> @param dataDisc2   A representation of the second component of the
 %>                    discrete function. @f$[K \times N]@f$
-%> @param  elem       (optional) <code>logical</code> arrays to provide the 
+%> @param markElem    (optional) <code>logical</code> arrays to provide the 
 %>                    elements of the grid for which the computation is done.
-%>                    @f$[K \times 3]@f$
+%>                    @f$[K \times 1]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
-%>                      Modified 09/02/16 by Hennes Hajduk
+%>
+%> @author Hennes Hajduk, 2016.
 %> 
 %> @par License
 %> @parblock
@@ -113,28 +114,28 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatElemDphiPhiFuncDiscVec(g, refElemDphiPhiPhi, dataDisc1, dataDisc2, elem)
+function ret = assembleMatElemDphiPhiFuncDiscVec(g, refElemDphiPhiPhi, dataDisc1, dataDisc2, markElem)
 [K, dataN] = size(dataDisc1);
 N = size(refElemDphiPhiPhi,1);
 
 if nargin == 4
-  elem = true(K,1);
+  markElem = true(K, 1);
 end % if
 
 % Check function arguments that are directly used
 validateattributes(dataDisc1, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc1');
 validateattributes(dataDisc2, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc2');
 validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N dataN 2]}, mfilename, 'refElemDphiPhiPhi');
-validateattributes(elem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
+validateattributes(markElem, {'logical'}, {'size', [K 1]}, mfilename, 'markElem');
 
-Ke = sum(elem);
+Ke = sum(markElem);
 
 % Assemble matrices
 ret = cell(2, 1);  ret{1} = sparse(Ke*N, Ke*N);  ret{2} = sparse(Ke*N, Ke*N);
 for l = 1 : dataN
-  ret{1} = ret{1} + kron(spdiags(dataDisc1(elem,l) .* g.B(elem,2,2), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,1)) ...
-                  - kron(spdiags(dataDisc1(elem,l) .* g.B(elem,2,1), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,2));
-  ret{2} = ret{2} - kron(spdiags(dataDisc2(elem,l) .* g.B(elem,1,2), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,1)) ...
-                  + kron(spdiags(dataDisc2(elem,l) .* g.B(elem,1,1), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,2));
+  ret{1} = ret{1} + kron(spdiags(dataDisc1(markElem,l) .* g.B(markElem,2,2), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,1)) ...
+                  - kron(spdiags(dataDisc1(markElem,l) .* g.B(markElem,2,1), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,2));
+  ret{2} = ret{2} - kron(spdiags(dataDisc2(markElem,l) .* g.B(markElem,1,2), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,1)) ...
+                  + kron(spdiags(dataDisc2(markElem,l) .* g.B(markElem,1,1), 0,Ke,Ke), refElemDphiPhiPhi(:,:,l,2));
 end % for
 end % function

@@ -1,11 +1,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //! @page references References
 //! 
+//! @section JRASK2017 [JRASK2017]
+//! A. Jaust, B. Reuter, V. Aizinger, J. Schuetz, P. Knabner [2017]:
+//! &ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
+//! Galerkin method, Part III: Hybridized discontinuous (HDG) formulation&rdquo;.
+//! Submitted to: Computers & Mathematics with Applications.
+//!
 //! @section RAWFK2016 [RAWFK2016]
 //! B. Reuter, V. Aizinger, M. Wieland, F. Frank, P. Knabner [2016]: 
 //! &ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part II: Advection operator and slope limiting&rdquo;.
-//! In: Computers & Mathematics with Applications. In Press.
+//! In: Computers & Mathematics with Applications 72 (2016) 1896-1925.
 //! <code>doi:10.1016/j.camwa.2016.08.006</code>.
 //!
 //! @section FRAK2015 [FRAK2015]
@@ -21,10 +27,4 @@
 //! In: Journal of Complexity 19 (3) (2003) 445-453.
 //! <code>doi:10.1016/S0885-064X(03)00011-6</code>.
 //!
-//! @section ROE1985 [ROE1985]
-//! P.L. Roe, J. Pike [1985]:
-//! &ldquo;Efficient construction and utilisation of approximate Riemann solutions&rdquo;.
-//! In: Proc. of the sixth int'l. symposium on Computing methods in applied sciences and engineering, VI (1985) 499-518.
-//!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-

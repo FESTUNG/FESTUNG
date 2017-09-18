@@ -1,5 +1,5 @@
 % Write output files in VTK- or Tecplot-format.
-%
+
 %===============================================================================
 %> @file visualizeDataLagr.m
 %>

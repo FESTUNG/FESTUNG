@@ -47,6 +47,15 @@
 %>  \end{bmatrix} \in \mathbb{R}^{N\times N}\,.
 %> @f]
 %>
+%> For non-triangular elements, the argument refElemPhiPhi is expected to
+%> be a cell-array with the number of entries corresponding to the number
+%> of nonlinear contributions form the Jacobian of the mapping.
+%> Thus, the resulting matrix is assembled as
+%> @f[
+%>   \mathsf{M} = \sum_i \mathrm{diag}(\mathsf{M}^i_{T_1} \mathrm{det}(J_1^i),
+%>                               \ldots, \mathsf{M}_{T_K} \mathrm{det}(J_K^i))\,.
+%> @f]
+%>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
@@ -77,6 +86,15 @@
 %> @endparblock
 %
 function ret = assembleMatElemPhiPhi(g, refElemPhiPhi)
-K = g.numT;
-ret = 2*kron(spdiags(g.areaT, 0, K, K), refElemPhiPhi);
+if iscell(refElemPhiPhi)
+  % mesh with non-linear mapping
+  validateattributes(g.detJ0T, {'cell'}, {'size', size(refElemPhiPhi)}, mfilename, 'g.detJ0T')
+  ret = sparse(g.numT * size(refElemPhiPhi{1},1), g.numT * size(refElemPhiPhi{1}, 1));
+  for i = 1 : length(refElemPhiPhi)
+    ret = ret + kron(spdiags(g.detJ0T{i}, 0, g.numT, g.numT), refElemPhiPhi{i});
+  end % for
+else
+  % triangular mesh with affine-linear mapping
+  ret = kron(spdiags(g.detJ0T, 0, g.numT, g.numT), refElemPhiPhi);
+end % if
 end % function

@@ -62,11 +62,32 @@
 %> a subfolder and implement all above mentioned routines in this folder.
 %> Then call it as <code>main('folder-name')</code>.
 %>
+%> This function accepts either an optional struct parameter that contains 
+%> configuration values to be used, or an optional sequence of keys and values
+%> that are then used to initialize a struct.
+%>
+%> @par Example
+%> @parblock
+%> The following two uses are identical:
+%> @code
+%> problemData = struct();
+%> problemData.p = 2;
+%> problemData.tEnd = 1;
+%> problemData = main('advection', problemData);
+%> @endcode
+%> @code
+%> problemData = main('advection', 'p', 2, 'tEnd', 1);
+%> @endcode
+%> @endparblock
+%>
 %> @param  problemName  The name of the problem to be solved. A folder with
 %>                      matching name must exist and provide all of the 
 %>                      mentioned routines. @f$[\text{string}]@f$
-%>         problemParam (optional) struct that provides values for default
-%>                      parameters
+%> @param  problemData  (optional) A struct containing configuration values
+%>                      to be used by the solver. Thus, setdefault() should
+%>                      be used in configureProblem() to honor given values.
+%> @param  key          (optional) A string to identify the following value.
+%> @param  value        (optional) The value corresponding to the preceding key.
 %>
 %> This file is part of FESTUNG
 %>
@@ -88,68 +109,102 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = main(problemName, problemParam)
+function varargout = main(problemName, varargin)
 %% Check given problem
+narginchk(1, inf)
+nargoutchk(0, 1)
 validateattributes(problemName, {'char'},{'nonempty'}, mfilename, 'problemName')
 assert(isdir(problemName), 'No directory for specified problem found.')
+if nargin == 2
+  problemData = varargin{1};
+  validateattributes(problemData, {'struct'}, {}, mfilename, 'problemData')
+elseif nargin > 2
+  assert(mod(nargin, 2) == 1, 'Optional arguments must take the form "key, value"')
+  problemData = struct(varargin{:});
+else
+  problemData = struct;
+end % if
+problemData.problemName = problemName;
 %% List of functions making up a problem description
-preprocessList = { 'configureProblem'; 'preprocessProblem'; 'initializeProblem' };
-stepList = { 'preprocessStep'; 'solveStep'; 'postprocessStep'; 'outputStep' };
-postprocessList = { 'postprocessProblem' };
+[preprocessList, stepList, postprocessList] = getStepLists();
 %% Check existence of all required functions
-assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), preprocessList), 2 * ones(size(preprocessList))), ...
+assert(isequal(cellfun(@(fun) exist([problemName filesep fun '.m'], 'file'), preprocessList), 2 * ones(size(preprocessList))), ...
   'Not all the required functions for the preprocessing of the problem found.')
-assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), stepList), 2 * ones(size(stepList))), ...
+assert(isequal(cellfun(@(fun) exist([problemName filesep fun '.m'], 'file'), stepList), 2 * ones(size(stepList))), ...
   'Not all the required functions for the problem steps found.')
-assert(isequal(cellfun(@(fun) exist([problemName '/' fun '.m'], 'file'), postprocessList), 2 * ones(size(postprocessList))), ...
+assert(isequal(cellfun(@(fun) exist([problemName filesep fun '.m'], 'file'), postprocessList), 2 * ones(size(postprocessList))), ...
   'Not all the required functions for the postprocessing of the problem found.')
-%% Start logging and time measurements
+%% Start logging and time measurements, add problem to search path, and install exit handler
+[tStartup, oldpath, cwd] = startupFestung(problemName);
+cleanupObj = onCleanup(@() cleanupFestung(tStartup, oldpath, cwd));
+%% Pre-process and initialize problem
+tPreprocess = tic;
+for nFunc = 1 : length(preprocessList)
+  problemData = feval(preprocessList{nFunc}, problemData);
+end % for
+fprintf('Pre-processing time: %g seconds.\n', toc(tPreprocess));
+%% Enter iterative loop
+fprintf('Entering main loop.\n');
+assert(isstruct(problemData) && isfield(problemData, 'isFinished') && islogical(problemData.isFinished), ...
+  'Struct "problemData" must contain a logical variable "isFinished".');
+tLoop = tic;
+nStep = 0;
+while ~problemData.isFinished
+  nStep = nStep + 1;
+  for nFunc = 1 : length(stepList)
+    problemData = feval(stepList{nFunc}, problemData, nStep);
+  end % for
+end % while
+tLoop = toc(tLoop);
+fprintf('Loop time: %d iterations in %g seconds (on avg. %g seconds per iteration).\n', nStep, tLoop, tLoop/nStep);
+%% Post-process problem
+tPostprocess = tic;
+for nFunc = 1 : length(postprocessList)
+  problemData = feval(postprocessList{nFunc}, problemData);
+end % for
+fprintf('Post-processing time: %g seconds.\n', toc(tPostprocess))
+%% Assign output variable
+if nargout > 0
+  varargout{1} = problemData;
+end % if
+end % function
+%
+function [tStartup, oldpath, cwd] = startupFestung(problemName)
 more off % Disable paging of output
-tic % Start time measurement
-diary([problemName '.log']) % Start logging
-%% Add problem to search path
-oldpath = addpath(problemName, pwd);
-%% Execute problem
-try
-  %% Pre-process and initialize problem
-  tPreprocess = tic;
-  if nargin == 1 % TODO parameter check of problemParam
-    problemData = struct;
-  else
-    problemData = problemParam;
-  end % if
-  for nFunc = 1 : length(preprocessList)
-    problemData = feval(preprocessList{nFunc}, problemData);
-  end % for
-  fprintf('Pre-processing time: %g seconds.\n', toc(tPreprocess));
-  %% Enter iterative loop
-  fprintf('Entering main loop.\n');
-  assert(isstruct(problemData) && isfield(problemData, 'isFinished') && islogical(problemData.isFinished), ...
-    'Struct "problemData" must contain a logical variable "isFinished".');
-  tLoop = tic;
-  nStep = 0;
-  while ~problemData.isFinished
-    nStep = nStep + 1;
-    for nFunc = 1 : length(stepList)
-      problemData = feval(stepList{nFunc}, problemData, nStep);
-    end % for
-  end % while
-  tLoop = toc(tLoop);
-  fprintf('Loop time: %d iterations in %g seconds (on avg. %g seconds per iteration).\n', nStep, tLoop, tLoop/nStep);
-  %% Post-process problem
-  tPostprocess = tic;
-  for nFunc = 1 : length(postprocessList)
-    problemData = feval(postprocessList{nFunc}, problemData);
-  end % for
-  fprintf('Post-processing time: %g seconds.\n', toc(tPostprocess))
-catch e
-  %% End logging and restore original path
-  diary off
-  path(oldpath);
-  rethrow(e)
-end % try/catch
-fprintf('Total computation time: %g seconds.\n', toc);
+tStartup = tic; % Start time measurement
+diaryName = [problemName '_' datestr(now, 'yyyymmdd-HHMMSS') '.log'];
+diary(diaryName) % Start logging
+fprintf( [ '\n' ...
+'   __    __    __                      __    __    __ \n' ...
+'  |  |  |  |  |  |                    |  |  |  |  |  |\n' ...
+'  |  |__|  |__|  |                    |  |__|  |__|  |\n' ...
+'  |              |   __    __    __   |              |\n' ...
+'  |              |  |  |  |  |  |  |  |              |\n' ...
+'  |              |__|  |__|  |__|  |__|              |\n' ...
+'  |                                                  |\n' ...
+'  |            Welcome to  F E S T U N G             |\n' ...
+'  |                                                  |\n' ...
+'  |      (c) 2014-%04s     Balthasar Reuter          |\n' ...
+'  |                        Florian Frank             |\n' ...
+'  |                        Vadym Aizinger            |\n' ...
+'  |__________________________________________________|\n\n' ...
+'   --------------------------------------------------\n' ...
+'    Running problem "%s".\n' ...
+'    Current date/time: %s.\n' ...
+'    Logging output to "%s".\n' ...
+'   --------------------------------------------------\n\n' ], ...
+datestr(now,'yyyy'), problemName, datestr(now,'yyyy-mm-dd HH:MM:SS'), diaryName);
+if isdeployed
+  oldpath = path;
+else
+  oldpath = addpath([pwd filesep problemName], pwd);
+end
+cwd = pwd;
+end % function
+%
+function cleanupFestung(tStartup, oldpath, cwd)
+fprintf('Total computation time: %g seconds.\n', toc(tStartup));
 diary off
-%% Restore original search path
 path(oldpath);
+cd(cwd);
 end % function

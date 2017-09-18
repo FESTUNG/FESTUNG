@@ -69,6 +69,7 @@
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D.
+%> @param qOrd       (optional) Order of quadrature rule to be used.
 %> @retval ret        The assembled vector @f$[KN]@f$
 %>
 %> This file is part of FESTUNG
@@ -91,10 +92,13 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncCont(g, markE0Tbdr, funcCont, N, basesOnQuad)
+function ret = assembleVecEdgePhiIntFuncCont(g, markE0Tbdr, funcCont, N, basesOnQuad, qOrd)
 % Determine quadrature rule and mapping to physical element
-p = (sqrt(8*N+1)-3)/2;
-qOrd = 2*p+1; [Q, W] = quadRule1D(qOrd);
+if nargin < 6
+  p = (sqrt(8*N+1)-3)/2;
+  qOrd = 2*p+1;
+end % if
+[Q, W] = quadRule1D(qOrd);
 Q2X1   = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
 Q2X2   = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 

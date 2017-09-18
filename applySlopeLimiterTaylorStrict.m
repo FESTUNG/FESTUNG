@@ -80,7 +80,7 @@
 %>                      least phiTaylorV0T.
 %> @retval dataTaylorLim   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}^\mathrm{Taylor}c_h@f$. @f$[K \times N]@f$
-%> @retval  minMaxV0T  Two matrices with minimum or maximum centroid values,
+%> @retval  minMaxV0T  Two matrices with minimum and maximum centroid values,
 %>                     respectively, of the patch of elements surrounding each
 %>                     vertex of each element as computed by 
 %>                     <code>computeMinMaxV0TElementPatch()</code>
@@ -89,7 +89,8 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
-%>                      Modified 09/02/16 by Hennes Hajduk
+%>
+%> @author Hennes Hajduk, 2016.
 %> 
 %> @par License
 %> @parblock

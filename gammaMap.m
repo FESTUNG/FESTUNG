@@ -1,5 +1,5 @@
 % Mapping from interval [0,1] to the n-th edge in the reference triangle.
-%
+
 %===============================================================================
 %> @file gammaMap.m
 %>
@@ -16,7 +16,7 @@
 %> @f[
 %> \hat{\mathbf{\gamma}}_1(s) = (1-s, s)^T \,,\quad
 %> \hat{\mathbf{\gamma}}_2(s) = (0, 1-s)^T \,,\quad
-%> \hat{\mathbf{\gamma}}_2(s) = (s,   0)^T \,.
+%> \hat{\mathbf{\gamma}}_3(s) = (s,   0)^T \,.
 %> @f]
 %>
 %> @param  n  The index of the edge in the reference triangle @f$\hat{T}@f$.

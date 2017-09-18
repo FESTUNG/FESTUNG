@@ -28,6 +28,7 @@
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D and thetaPhi1D.
+%> @param  qOrd (optional) The order of the quadrature rule to be used.
 %> @retval ret  The computed array @f$[N\times N\times 3\times 3\times R]@f$
 %>
 %> This file is part of FESTUNG
@@ -50,9 +51,12 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgePhiIntPhiExtPerQuad(N, basesOnQuad)
+function ret = integrateRefEdgePhiIntPhiExtPerQuad(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  [~, W] = quadRule1D(qOrd);
+if nargin < 3
+  p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;
+end % if
+[~, W] = quadRule1D(qOrd);
 ret = zeros(N,N,3,3,length(W)); % [N x N x N x 3 x 3]
 for nn = 1 : 3 % 3 edges
   for np = 1 : 3

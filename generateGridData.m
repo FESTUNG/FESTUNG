@@ -65,10 +65,14 @@
 %>   - <code>V2T</code> @f$[\#\mathcal{V} \times 3]@f$:
 %>     global vertex indices of triangles accounting for the counter-clockwise
 %>     ordering
-%>   - <code>V2E</code> @f$[???]@f$:
-%>     ???
+%>   - <code>V2E</code> @f$[\#\mathcal{V} \times \#\mathcal{V}]@f$:
+%>     symmetric sparse matrix in which each row corresponds to a vertex,
+%>     holding the ids of all adjacent edges. A non-zero entry at position
+%>     (i,j) means, that vertices i and j are connected via an edge, and 
+%>     the value at this position gives the id of the edge.
 %>   - <code>E0E</code> @f$[\#\mathcal{E} \times 2]@f$:
-%>     ???
+%>     provides for each edge its local index (1, 2, 3) in the adjacent 
+%>     triangle. A value of zero indicates a boundary edge.
 %>
 %> Furthermore, it provides the following counts of mesh entities:
 %> 
@@ -179,4 +183,5 @@ for nn = 1 : 3
   end % for
 end % for
 g.mapRef2Phy = @(i,X1,X2) g.B(:,i,1)*X1 + g.B(:,i,2)*X2 + g.coordV0T(:,1,i)*ones(size(X1));
+g.detJ0T = 2 * g.areaT;
 end % function

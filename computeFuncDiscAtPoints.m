@@ -1,7 +1,7 @@
 % Assembles a matrix containing the values of a discrete function given by 
 % a representation matrix evaluated in all points, for which the evaluated
 % basis functions are given.
-%
+
 %===============================================================================
 %> @file computeFuncDiscAtPoints.m
 %>

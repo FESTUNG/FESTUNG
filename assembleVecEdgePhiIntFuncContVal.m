@@ -80,6 +80,7 @@
 %>                    for the products of <code>markE0Tbdr</code>,
 %>                    and <code>g.areaE0T</code>,
 %>                    @f$[3 \text{ cell}]@f$
+%> @param qOrd       (optional) Order of quadrature rule to be used.
 %> @retval ret        The assembled vector @f$[KN]@f$
 %>
 %> This file is part of FESTUNG
@@ -103,10 +104,12 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncContVal(g, markE0Tbdr, funcCont, valOnQuad, N, basesOnQuad, areaE0Tbdr)
+function ret = assembleVecEdgePhiIntFuncContVal(g, markE0Tbdr, funcCont, valOnQuad, N, basesOnQuad, areaE0Tbdr, qOrd)
 % Determine quadrature rule
-p = (sqrt(8*N+1)-3)/2;
-qOrd = 2*p+1;  
+if nargin < 8
+  p = (sqrt(8*N+1)-3)/2;
+  qOrd = 2*p+1;  
+end % if
 [~, W] = quadRule1D(qOrd);
 
 % Check function arguments that are directly used
