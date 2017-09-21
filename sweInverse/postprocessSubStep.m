@@ -97,7 +97,7 @@ problemData.zbDisc = zbDisc;
 
 problemData.cDisc(:,:,1) = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc(:,:,1) - problemData.zbDisc;
 % Ensure water height doesn't fall below threshold
-problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.minTol, problemData.elevTol, problemData.g);
+problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.minTol, problemData.elevTol);
 problemData.zbDisc = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.cDisc(:,:,1); % TODO consistency in case of correction!
 
 problemData.isSubSteppingFinished = nSubStep >= length(problemData.tLvls);

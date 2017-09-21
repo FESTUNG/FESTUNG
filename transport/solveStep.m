@@ -54,7 +54,7 @@
 function problemData = solveStep(problemData, nStep)
 
 % Obtain Runge-Kutta rule
-[problemData.timeLvls, problemData.omega] = rungeKuttaSSP(problemData.ordRK, problemData.tau, (nStep - 1) * problemData.tau);
+[problemData.timeLvls, problemData.omega] = rungeKuttaExplicit(problemData.ordRK, problemData.tau, (nStep - 1) * problemData.tau);
 
 % Linearize solution vector
 problemData.cDiscRK0 = cellfun(@(c) reshape(c.', [problemData.K * problemData.N, 1]), problemData.cDisc, 'UniformOutput', false);
