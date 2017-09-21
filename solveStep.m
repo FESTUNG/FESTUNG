@@ -62,7 +62,7 @@ end % if
 % Obtain Runge-Kutta rule
 switch problemData.schemeType
   case 'explicit'
-    [problemData.tLvls, problemData.omega] = rungeKuttaSSP(problemData.schemeOrder, problemData.dt, problemData.t);
+    [problemData.tLvls, problemData.omega] = rungeKuttaExplicit(problemData.schemeOrder, problemData.dt, problemData.t);
 
   case 'semi-implicit'
     problemData.tLvls = problemData.t + problemData.dt;
