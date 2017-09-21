@@ -29,6 +29,7 @@
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi2D and gradPhi2D.
+%> @param  qOrd (optional) The order of the quadrature rule to be used.
 %> @retval ret  The computed array @f$[N\times N\times N\times 2]@f$
 %>
 %> This file is part of FESTUNG
@@ -51,7 +52,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefElemDphiPhiPhi(N, basesOnQuad)
+function ret = integrateRefElemDphiPhiPhi(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 if length(N) == 1
   N = N * ones(3,1);
@@ -59,16 +60,23 @@ else
   validateattributes(N, {'numeric'}, {'numel', 3}, mfilename, 'N')
 end % if
 ret = zeros(N(1), N(2), N(3), 2);
-if N(1) > 1 % p > 0
-  p = (sqrt(8*max(N)+1)-3)/2;  qOrd = max(2*p, 1);  [~,~,W] = quadRule2D(qOrd);
-  for i = 1 : N(1)
-    for j = 1 : N(2)
-      for l = 1 : N(3)
-        for m = 1 : 2
-          ret(i,j,l,m) = sum( W' .* basesOnQuad.gradPhi2D{qOrd}(:,i,m) .* basesOnQuad.phi2D{qOrd}(:,j) .* basesOnQuad.phi2D{qOrd}(:,l) );
-        end % for
+
+if N(1) == 1 % p == 0
+  return
+end % if
+
+if nargin < 3
+  p = (sqrt(8*max(N)+1)-3)/2;  qOrd = max(2*p, 1); 
+end % if
+[~,~,W] = quadRule2D(qOrd);
+
+for i = 1 : N(1)
+  for j = 1 : N(2)
+    for l = 1 : N(3)
+      for m = 1 : 2
+        ret(i,j,l,m) = sum( W' .* basesOnQuad.gradPhi2D{qOrd}(:,i,m) .* basesOnQuad.phi2D{qOrd}(:,j) .* basesOnQuad.phi2D{qOrd}(:,l) );
       end % for
     end % for
   end % for
-end % if
+end % for
 end % function

@@ -2,7 +2,7 @@
 % Problem parameters are to be modified inside this routine.
 
 %===============================================================================
-%> @file advection/configureProblem.m
+%> @file ./advection/configureProblem.m
 %>
 %> @brief Fills the problemData-struct with all basic configuration options.
 %>        Problem parameters are to be modified inside this routine.
@@ -60,20 +60,31 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
-problemData.hmax        = 2^-6; % maximum edge length of triangle
-problemData.p           = 2; % local polynomial degree
-problemData.ordRK       = min(problemData.p+1,3); % order of Runge Kutta time stepper.
-problemData.numSteps    = 10; % number of time steps
-problemData.tEnd        = (problemData.numSteps/3142)*2*pi; % end time
+% Maximum edge length of triangle
+problemData = setdefault(problemData, 'hmax', 2^-6);
 
-problemData.isVisGrid   = false; % visualization of grid
-problemData.isVisSol    = true; % visualization of solution
-problemData.isSlopeLim  = true; % slope limiting
-problemData.typeSlopeLim = 'hierarch_vert'; % Type of slope limiter (linear, hierarch_vert, strict)
+% Local polynomial approximation order (0 to 4)
+problemData = setdefault(problemData, 'p', 2);
 
-problemData.outputFrequency = 100; % no visualization of every timestep
-problemData.outputBasename  = ['output' filesep 'solution_advection_' problemData.typeSlopeLim]; % Basename of output files
-problemData.outputTypes     = {'vtk'}; % solution output file types
+% Order of Runge-Kutta method
+problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3));
+
+% Time stepping parameters
+problemData = setdefault(problemData, 'numSteps', 10);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/3142)*2*pi);  % end time
+
+% Slope limiting settings
+problemData = setdefault(problemData, 'isSlopeLim', true); % enable/disable slope limiting
+problemData = setdefault(problemData, 'typeSlopeLim', 'hierarch_vert'); % Type of slope limiter (linear, hierarch_vert, strict)
+
+% Visualization settings
+problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
+problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
+problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputBasename', ...
+                         ['output' filesep 'advection_' problemData.typeSlopeLim]); 
+problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
+
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
 assert(problemData.ordRK >= 1 && problemData.ordRK <= 3, 'Order of Runge Kutta must be zero to three.')

@@ -39,10 +39,14 @@
 %>                      routine in all routines, which allows to store problem 
 %>                      data or computed values.
 %> @param  nStep        The index number of the current time step.
+%> @param  stepHandles  (optional) A cell array containing the names of the
+%>                      steps. Defaults to `subStepList` from getStepLists().
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Hennes Hajduk, Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @author Hennes Hajduk, 2016
+%> @author Balthasar Reuter, 2017
 %> 
 %> @par License
 %> @parblock

@@ -2,7 +2,7 @@
 % stationary blocks, etc. for the problem solution.
 
 %===============================================================================
-%> @file advection/preprocessProblem.m
+%> @file ./advection/preprocessProblem.m
 %>
 %> @brief Performs all pre-processing tasks, such as grid generation, assembly 
 %>        of stationary blocks, etc. for the problem solution.

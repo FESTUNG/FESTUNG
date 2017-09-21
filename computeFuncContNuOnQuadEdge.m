@@ -1,6 +1,6 @@
 % Assembles a multidimensional array containing a function evaluated in
 % each quadrature point of each edge, multiplied with the edge normal.
-%
+
 %===============================================================================
 %> @file computeFuncContNuOnQuadEdge.m
 %>

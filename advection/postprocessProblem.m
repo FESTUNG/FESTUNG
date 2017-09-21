@@ -2,7 +2,7 @@
 % solution and output of the final solution.
 
 %===============================================================================
-%> @file advection/postprocessProblem.m
+%> @file ./advection/postprocessProblem.m
 %>
 %> @brief Performs all post-processing tasks, such as error estimates of the 
 %>        final solution and output of the final solution.
@@ -50,8 +50,6 @@ end % if
 %% Error evaluation
 fprintf('L2 error w.r.t. the initial condition: %g\n', ...
   computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
-fprintf('norm(cDisc, 1) = %g\n', norm(problemData.cDisc(:), 1));
-fprintf('norm(cDisc, 2) = %g\n', norm(problemData.cDisc(:), 2));
-fprintf('norm(cDisc, inf) = %g\n', norm(problemData.cDisc(:), inf));
+
 end % function
 

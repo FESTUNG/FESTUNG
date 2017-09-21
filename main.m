@@ -62,9 +62,32 @@
 %> a subfolder and implement all above mentioned routines in this folder.
 %> Then call it as <code>main('folder-name')</code>.
 %>
+%> This function accepts either an optional struct parameter that contains 
+%> configuration values to be used, or an optional sequence of keys and values
+%> that are then used to initialize a struct.
+%>
+%> @par Example
+%> @parblock
+%> The following two uses are identical:
+%> @code
+%> problemData = struct();
+%> problemData.p = 2;
+%> problemData.tEnd = 1;
+%> problemData = main('advection', problemData);
+%> @endcode
+%> @code
+%> problemData = main('advection', 'p', 2, 'tEnd', 1);
+%> @endcode
+%> @endparblock
+%>
 %> @param  problemName  The name of the problem to be solved. A folder with
 %>                      matching name must exist and provide all of the 
 %>                      mentioned routines. @f$[\text{string}]@f$
+%> @param  problemData  (optional) A struct containing configuration values
+%>                      to be used by the solver. Thus, setdefault() should
+%>                      be used in configureProblem() to honor given values.
+%> @param  key          (optional) A string to identify the following value.
+%> @param  value        (optional) The value corresponding to the preceding key.
 %>
 %> This file is part of FESTUNG
 %>
@@ -86,14 +109,18 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function varargout = main(problemName, problemData)
+function varargout = main(problemName, varargin)
 %% Check given problem
-narginchk(1, 2)
+narginchk(1, inf)
 nargoutchk(0, 1)
 validateattributes(problemName, {'char'},{'nonempty'}, mfilename, 'problemName')
 assert(isdir(problemName), 'No directory for specified problem found.')
 if nargin == 2
+  problemData = varargin{1};
   validateattributes(problemData, {'struct'}, {}, mfilename, 'problemData')
+elseif nargin > 2
+  assert(mod(nargin, 2) == 1, 'Optional arguments must take the form "key, value"')
+  problemData = struct(varargin{:});
 else
   problemData = struct;
 end % if
@@ -148,7 +175,7 @@ tStartup = tic; % Start time measurement
 diaryName = [problemName '_' datestr(now, 'yyyymmdd-HHMMSS') '.log'];
 diary(diaryName) % Start logging
 fprintf( [ '\n' ...
-'   __    __    __                      __    __    __\n' ...
+'   __    __    __                      __    __    __ \n' ...
 '  |  |  |  |  |  |                    |  |  |  |  |  |\n' ...
 '  |  |__|  |__|  |                    |  |__|  |__|  |\n' ...
 '  |              |   __    __    __   |              |\n' ...
@@ -167,7 +194,11 @@ fprintf( [ '\n' ...
 '    Logging output to "%s".\n' ...
 '   --------------------------------------------------\n\n' ], ...
 datestr(now,'yyyy'), problemName, datestr(now,'yyyy-mm-dd HH:MM:SS'), diaryName);
-oldpath = addpath([pwd filesep problemName], pwd);
+if isdeployed
+  oldpath = path;
+else
+  oldpath = addpath([pwd filesep problemName], pwd);
+end
 cwd = pwd;
 end % function
 %

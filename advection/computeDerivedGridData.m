@@ -4,24 +4,32 @@
 % time but used in every step. They are saved as part of the grid.
 
 %===============================================================================
-%> @file advection/computeDerivedGridData.m
+%> @file ./advection/computeDerivedGridData.m
 %>
 %> @brief Computes various additional fields needed throughout the advection
-%>        problem presented in @ref RAWFK2016 . These fields only contain
-%>        information based on the underlying grid and are therefore constant in
-%>        time but used in every step. They are saved as part of the grid.
+%>        problem presented in @ref RAWFK2016 . 
 %===============================================================================
 %>
 %> @brief Computes various additional fields needed throughout the advection
-%>        problem presented in @ref RAWFK2016 . These fields only contain
-%>        information based on the underlying grid and are therefore constant in
-%>        time but used in every step. They are saved as part of the grid.
+%>        problem presented in @ref RAWFK2016 . 
+%>
+%> These fields only contain information based on the underlying grid and 
+%> are therefore constant in time but used in every step. 
+%> They are saved as part of the grid.
 %>
 %> For every vertex of a triangle the columns of g.markV0TT0V indicate which triangle 
 %> corresponds to this vertex.
 %>
 %> g.areaE0TbdrD provides the elementwise products of the vectors 
-%> <code>g.areaE0T</code>, and <code>markE0TbdrD</code>.
+%> <code>g.areaE0T</code> and <code>markE0TbdrD</code>.
+%> @f$[3 \text{ cell}]@f$
+%>
+%> g.areaE0TbdrN provides the elementwise products of the vectors 
+%> <code>g.areaE0T</code> and <code>markE0TbdrN</code>.
+%> @f$[3 \text{ cell}]@f$
+%>
+%> g.areaE0TbdrNotN provides the elementwise products of the vectors 
+%> <code>g.areaE0T</code> and the logical negation of <code>markE0TbdrN</code>.
 %> @f$[3 \text{ cell}]@f$
 %>
 %> @param  g          The lists describing the geometric and topological 

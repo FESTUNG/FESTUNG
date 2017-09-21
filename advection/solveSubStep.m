@@ -1,7 +1,7 @@
 % Compute the solution of the current Runge-Kutta stage.
 
 %===============================================================================
-%> @file advection/solveSubStep.m
+%> @file ./advection/solveSubStep.m
 %>
 %> @brief Compute the solution of the current Runge-Kutta stage.
 %===============================================================================
@@ -78,7 +78,9 @@ problemData.cDiscRK{nSubStep + 1} = problemData.omega(nSubStep) * problemData.cD
 
 % Limiting the solution
 if problemData.isSlopeLim
-  cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont(problemData.t(nSubStep), x1, x2));
+  % Evaluate boundary condition at new time level
+  tBC = getdefault(problemData.t, nSubStep + 1, problemData.t(1) + problemData.tau);
+  cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont(tBC, x1, x2));
   problemData.cDiscRK{nSubStep + 1} = reshape(applySlopeLimiterDisc(problemData.g, reshape(problemData.cDiscRK{nSubStep + 1}, [N K])', problemData.g.markV0TbdrD, ...
                                       cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim)', [K*N 1]);
 end % if
