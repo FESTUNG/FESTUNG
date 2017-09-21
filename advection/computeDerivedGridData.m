@@ -36,6 +36,9 @@
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
+%> @param  markE0TbdrD <code>logical</code> arrays that mark each triangles
+%>                    (Dirichlet boundary) edges on which the vector entries should be
+%>                    assembled @f$[K \times 3]@f$
 %> @retval g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 

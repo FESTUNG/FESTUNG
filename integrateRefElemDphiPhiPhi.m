@@ -78,5 +78,5 @@ for i = 1 : N(1)
       end % for
     end % for
   end % for
-end % for
+end % if
 end % function

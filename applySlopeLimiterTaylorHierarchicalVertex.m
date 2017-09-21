@@ -93,10 +93,17 @@
 %>                      least phiTaylorV0T.
 %> @retval dataTaylorLim   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}^\mathrm{Taylor}c_h@f$. @f$[K \times N]@f$
+%> @retval minMaxV0T   Two matrices with minimum and maximum centroid values,
+%>                     respectively, of the patch of elements surrounding each
+%>                     vertex of each element as computed by 
+%>                     <code>computeMinMaxV0TElementPatch()</code>
+%>                     @f$[2 \times 1 \mathrm{cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Hennes Hajduk, 2016
 %> 
 %> @par License
 %> @parblock
@@ -114,7 +121,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataTaylorLim = applySlopeLimiterTaylorHierarchicalVertex(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad)
+function [dataTaylorLim, minMaxV0T] = applySlopeLimiterTaylorHierarchicalVertex(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad)
 % Number of elements and polynomial degree
 [K, N] = size(dataTaylor);
 p = (sqrt(8*N+1)-3)/2;
@@ -145,9 +152,9 @@ for ord = p : -1 : 1
     % Compute limiter parameters for each element
     valV0T = computeFuncDiscAtPoints(dataTaylor(:, ind), basesOnQuad.phiTaylorV0T(:, :, 1:3));
     if ord > 1
-      alphaTmp = computeVertexBasedLimiter(g, dataTaylor(:, ind(1)), valV0T, markV0TbdrD, valV0T);
+      [alphaTmp, minMaxV0T] = computeVertexBasedLimiter(g, dataTaylor(:, ind(1)), valV0T, markV0TbdrD, valV0T);
     else
-      alphaTmp = computeVertexBasedLimiter(g, dataTaylor(:, ind(1)), valV0T, markV0TbdrD, dataV0T);
+      [alphaTmp, minMaxV0T] = computeVertexBasedLimiter(g, dataTaylor(:, ind(1)), valV0T, markV0TbdrD, dataV0T);
     end
     alphaOrd = min(alphaOrd, alphaTmp);
   end %for

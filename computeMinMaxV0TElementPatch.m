@@ -19,9 +19,9 @@
 %> @f[
 %> \forall T_k \in \mathcal{T}_h \,, \forall i\in\{1,2,3\} \,, \quad
 %> c_{ki}^\mathrm{min} := \min_{\{ T_l \in \mathcal{T}_h \,|\,
-%>  \mathbf{x}_{ki} \in T \}} c_{l\mathrm{c}} \,,\quad
+%>  \mathbf{x}_{ki} \in T_l \}} c_{l\mathrm{c}} \,,\quad
 %> c_{ki}^\mathrm{max} := \max_{\{ T_l \in \mathcal{T}_h \,|\,
-%>  \mathbf{x}_{ki} \in T \}} c_{l\mathrm{c}} \,,
+%>  \mathbf{x}_{ki} \in T_l \}} c_{l\mathrm{c}} \,,
 %> @f]
 %> where @f$c_{l\mathrm{c}} = c_h(\mathbf{x}_{lc})@f$ is the function value
 %> in the centroid @f$\mathbf{x}_{lc}@f$ of triangle @f$T_l@f$.
@@ -43,7 +43,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
-%> Modified by Hennes Hajduk, 2016-04-06
+%>                      Modified 09/02/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock

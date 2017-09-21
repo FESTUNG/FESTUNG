@@ -1,14 +1,110 @@
+% Reads grid and boundary parameters from fort.14- and fort.17-files and creates
+% a grid as well as fields that store model parameter data.
+
+%===============================================================================
+%> @file swe/domainADCIRC.m
+%>
+%> @brief Reads grid and boundary parameters from fort.14- and fort.17-files and
+%>        creates a grid as well as fields that store model parameter data.
+%===============================================================================
+%>
+%> @brief Reads grid and boundary parameters from fort.14- and fort.17-files and
+%>        creates a grid as well as fields that store model parameter data.
+%>
+%> This function reads in the coordinates, connectivity and values for the depth
+%> in each vertex of a grid from the fort.14-file, see
+%> <http://www.unc.edu/ims/adcirc/documentv47/fort_14.html>. This is used to 
+%> construct a grid, which is usually used for a Shallow-Water type problem.\n
+%> Edge information along with Dirichlet-type boundary conditions is read in 
+%> from the fort.17-file. \n\n
+%> Short overview of fort.17 files: \n
+%> The first number is the total number of edges @f$numE@f$.\n
+%> Then for the next @f$numE@f$ lines, i.e. for every edge the indices of the 
+%> vertices at the end of the edge as well as the two elements that are 
+%> separeted by this edge are given. For bounadry edges the second element index
+%> must be zero.\n
+%> Then for every element the three global edge indices are given in counter-
+%> clockwise direction. \n
+%> Next is the number of interior edges.\n
+%> Then for every interior edge the global edge number is given.\n
+%> Next is the number of land edges.\n
+%> Then for every land edge the global edge number is given.\n
+%> Next is the number of radiation edges.\n
+%> Then for every radiation edge the global edge number is given.\n
+%> Next is the number of river edges.\n
+%> Then for every river edge the global edge number, the value of the free 
+%> surface elevation and the normal and tangential velocities on this edge 
+%> are given.\n
+%> Next is the number of open sea edges.\n
+%> Then for every open sea edge the global edge number is given.\n
+%> For all frequencies and all open sea bounadry edges the amplitude and phase
+%> in degrees are given.\n\n
+%>
+%> Since the grids in FESTUNG need to fulfill certain local indexing 
+%> properties, such as that local edges of arbitrary index must be opposing 
+%> local vertices of the same index, some of the information provided must be 
+%> altered.
+%>
+%> @param  grid_file    The name of the fort.14-file.
+%> @param  conn_file    The name of the fort.17-file.
+%> @param  numForcingOS The number of forcing terms on the open sea boundary as
+%>                      provided by the fort.15-parameter NBFR.
+%> @param  isSpherical  <code>logical</code> scalar as provided by the fort.15-
+%>                      parameter ICS that indicates if CPP projection is used 
+%>                      to include curvature of the physical domain or if it is
+%>                      approximately flat.
+%> @param  projCenter   Projection center for CPP projection as provided by the 
+%>                      fort.15-parameters SLAM0, SFEA0 in case curvature is 
+%>                      considered. @f$[1 \times 2]@f$
+%>
+%> @retval g            The lists describing the geometric and topological 
+%>                      properties of a triangulation.
+%> @retval  depth       Positive values of the depth in each vertex of the grid.
+%>                      @f$[numV \times 1]@f$
+%> @retval  forcingOS   Amplitude and phase (in degrees) of each harmonic 
+%>                      forcing function at each open sea boundary edge.
+%>                      @f$[numForcingOS \times numEbdrOS \times 2]@f$
+%> @retval  flowRateRiv Free surface elevation, normal and tangential velocity
+%>                      components of river boundary conditions for each river 
+%>                      edge. @f$[numEbdRiv \times 3]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>                      Modified 08/23/16 by Hennes Hajduk
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%
 function [g, depth, forcingOS, flowRateRiv] = domainADCIRC(grid_file, conn_file, numForcingOS, isSpherical, projCenter)
 % Set default values for input parameters
 switch nargin
+  case 2
+    numForcingOS = 0;
+    isSpherical = false;
+    projCenter = [0 0];
   case 3
     isSpherical = false;
+    projCenter = [0 0];
   case 4
     projCenter = [0 0];
 end % switch
 assert(exist(grid_file, 'file') == 2, ['Grid file "' grid_file '" does not exist!'])
 assert(exist(conn_file, 'file') == 2, ['Connectivity file "' conn_file '" does not exist!'])
-assert(isscalar(numForcingOS) && round(numForcingOS) == numForcingOS && numForcingOS >= 0, 'Invalid number of open sea boundary forcings.')
+assert(isnumeric(numForcingOS) && round(numForcingOS) == numForcingOS && numForcingOS >= 0, 'Invalid number of open sea boundary forcings.')
 validateattributes(projCenter, {'numeric'}, {'size', [1 2]}, mfilename, 'projectionCenter')
 
 %% Grid file
@@ -117,9 +213,6 @@ numEbdrOS = data(offset);
 idxEbdrOS = data(offset+2 : 2 : offset+2*numEbdrOS);
 if numEbdrOS > 0
   validateattributes(idxEbdrOS, {'numeric'}, {'size', [numEbdrOS 1], '>', 0, '<=', numE}, mfilename, 'idxEbdrOS');
-end % if
-if numEbdrOS ~= 0 && numForcingOS == 0
-  warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
 end % if
 offset = offset + 1 + 2 * numEbdrOS;
 

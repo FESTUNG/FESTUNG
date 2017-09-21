@@ -45,7 +45,7 @@
 %> @f[
 %> \mathsf{{S}}^\mathrm{offdiag} = -\sum_{n^-=1}^3\sum_{n^+=1}^3
 %>   \begin{bmatrix}
-%>     0&\delta_{E_{1n^-} = E_{1n^+}}&\dots&\dots&\delta_{E_{1n^-}=E_{Kn^+}} \\
+%>     0&\delta_{E_{1n^-} = E_{2n^+}}&\dots&\dots&\delta_{E_{1n^-}=E_{Kn^+}} \\
 %>     \delta_{E_{2n^-} = E_{1n^+}}&0&\ddots& &\vdots \\
 %>     \vdots & \ddots & \ddots & \ddots & \vdots \\
 %>     \vdots & & \ddots & 0 & \delta_{E_{(K-1)n^-}=E_{Kn^+}} \\

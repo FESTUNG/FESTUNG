@@ -1,19 +1,19 @@
-% Computes various additional fields needed throughout the advection
-% problem presented in @ref RAWFK2016 . These fields only contain
+% Computes various additional fields needed throughout the transport
+% problem presented in @ref TODO . These fields only contain
 % information based on the underlying grid and are therefore constant in
 % time but used in every step. They are saved as part of the grid.
 
 %===============================================================================
 %> @file transport/computeDerivedGridData.m
 %>
-%> @brief Computes various additional fields needed throughout the advection
-%>        problem presented in @ref RAWFK2016 . These fields only contain
+%> @brief Computes various additional fields needed throughout the transport
+%>        problem presented in @ref TODO . These fields only contain
 %>        information based on the underlying grid and are therefore constant in
 %>        time but used in every step. They are saved as part of the grid.
 %===============================================================================
 %>
-%> @brief Computes various additional fields needed throughout the advection
-%>        problem presented in @ref RAWFK2016 . These fields only contain
+%> @brief Computes various additional fields needed throughout the transport
+%>        problem presented in @ref TODO . These fields only contain
 %>        information based on the underlying grid and are therefore constant in
 %>        time but used in every step. They are saved as part of the grid.
 %>
@@ -22,6 +22,10 @@
 %>
 %> g.areaE0TbdrD provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, and <code>markE0TbdrD</code>.
+%> @f$[3 \text{ cell}]@f$
+%>
+%> g.areaE0TbdrNotN provides the elementwise products of the vectors 
+%> <code>g.areaE0T</code>, and ~<code>markE0TbdrN</code>.
 %> @f$[3 \text{ cell}]@f$
 %>
 %> @param  g          The lists describing the geometric and topological 

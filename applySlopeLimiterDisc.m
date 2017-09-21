@@ -46,10 +46,17 @@
 %> @param  type       The type of slope limiter to be used. [<code>string</code>]
 %> @retval dataDisc   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}c_h@f$. @f$[K \times N]@f$
+%> @retval  minMaxV0T  Two matrices with minimum and maximum centroid values,
+%>                     respectively, of the patch of elements surrounding each
+%>                     vertex of each element as computed by 
+%>                     <code>computeMinMaxV0TElementPatch()</code>
+%>                     @f$[2 \times 1 \mathrm{cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> 
+%> @author Hennes Hajduk, 2016.
 %> 
 %> @par License
 %> @parblock
@@ -67,12 +74,12 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataDisc = applySlopeLimiterDisc(g, dataDisc, markV0TbdrD, dataV0T, globM, globMDiscTaylor, basesOnQuad, type)
+function [dataDisc, minMaxV0T] = applySlopeLimiterDisc(g, dataDisc, markV0TbdrD, dataV0T, globM, globMDiscTaylor, basesOnQuad, type)
 % Project into Taylor basis
 dataTaylor = projectDataDisc2DataTaylor(dataDisc, globM, globMDiscTaylor);
 
 % Limit in Taylor basis
-dataTaylor = applySlopeLimiterTaylor(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad, type);
+[dataTaylor, minMaxV0T] = applySlopeLimiterTaylor(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad, type);
 
 % Project back to original basis
 dataDisc = projectDataTaylor2DataDisc(dataTaylor, globM, globMDiscTaylor);

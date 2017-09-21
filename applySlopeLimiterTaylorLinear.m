@@ -77,10 +77,17 @@
 %>                      least phiTaylorV0T.
 %> @retval dataTaylorLim   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}^\mathrm{Taylor}c_h@f$. @f$[K \times N]@f$
+%> @retval  minMaxV0T  Two matrices with minimum and maximum centroid values,
+%>                     respectively, of the patch of elements surrounding each
+%>                     vertex of each element as computed by 
+%>                     <code>computeMinMaxV0TElementPatch()</code>
+%>                     @f$[2 \times 1 \mathrm{cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Hennes Hajduk, 2016.
 %> 
 %> @par License
 %> @parblock
@@ -98,7 +105,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataTaylorLim = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad)
+function [dataTaylorLim, minMaxV0T] = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad)
 % Check function arguments that are directly used
 validateattributes(dataTaylor, {'numeric'}, {'size', [g.numT NaN]}, mfilename, 'dataTaylor');
 assert(size(dataTaylor, 2) >= 3, 'Number of local degrees of freedom in dataTaylor does not correspond to p>=1')
@@ -107,7 +114,7 @@ validateattributes(basesOnQuad.phiTaylorV0T, {'numeric'}, {'size', [g.numT 3 NaN
 
 %% Limit first order derivative terms
 % Compute limiter parameter for each vertex
-alphaE = computeVertexBasedLimiter(g, dataTaylor(:, 1), computeFuncDiscAtPoints(dataTaylor(:, 1:3), basesOnQuad.phiTaylorV0T(:,:,1:3)), markV0TbdrD, dataV0T);
+[alphaE, minMaxV0T] = computeVertexBasedLimiter(g, dataTaylor(:, 1), computeFuncDiscAtPoints(dataTaylor(:, 1:3), basesOnQuad.phiTaylorV0T(:,:,1:3)), markV0TbdrD, dataV0T);
 
 % Apply limiter to first order terms, set all higher order terms to zero in
 % the case of limiting

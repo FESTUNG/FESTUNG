@@ -2,7 +2,7 @@
 % filename.
 
 %===============================================================================
-%> @file swe/outputHotstart.m
+%> @file outputHotstart.m
 %>
 %> @brief Stores an arbitrary number of variables to a hotstart file with 
 %>        given filename.

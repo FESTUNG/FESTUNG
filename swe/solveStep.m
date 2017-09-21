@@ -8,9 +8,9 @@
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %>
-%> The main loop repeatedly executes four steps until the number of
-%> iterations provided by configureProblem in the parameter
-%> <code>numSteps</code> is reached. These four steps are:
+%> The main loop repeatedly executes four steps until a certain
+%> criterion, such as reaching the end of the simulation time or
+%> steady state. These four steps are:
 %>
 %>  1. preprocessStep()
 %>  2. solveStep()
@@ -33,6 +33,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>                      Modified 08/17/16 by Hennes Hajduk
 %> 
 %> @par License
 %> @parblock
@@ -50,39 +51,39 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function pd = solveStep(pd, nStep)
-K = pd.K;
-N = pd.N;
+function problemData = solveStep(problemData, nStep)
+K = problemData.K;
+N = problemData.N;
 
-if pd.isAdaptiveTimestep
-  pd.dt = selectTimeStepSWE(pd.avgDiff(:,1), pd.avgDiff(:,2), pd.avgDepth, pd.gConst, pd.dt, nStep);
+if problemData.isAdaptiveTimestep
+  problemData = selectTimeStep(problemData, nStep);
 end % if
 
 % Obtain Runge-Kutta rule
-switch pd.schemeType
+switch problemData.schemeType
   case 'explicit'
-    [pd.tLvls, pd.omega] = rungeKuttaSSP(pd.schemeOrder, pd.dt, pd.t);
+    [problemData.tLvls, problemData.omega] = rungeKuttaExplicit(problemData.schemeOrder, problemData.dt, problemData.t);
 
   case 'semi-implicit'
-    pd.tLvls = pd.t + pd.dt;
+    problemData.tLvls = problemData.t + problemData.dt;
     
   otherwise
     error('Invalid time stepping scheme')
 end % switch
-    
+
 % Initialize solution vectors for RK steps
-pd.cDiscRK0 = [ reshape(pd.cDisc(:,:,1).', K*N, 1) ; ...
-                reshape(pd.cDisc(:,:,2).', K*N, 1) ; ...
-                reshape(pd.cDisc(:,:,3).', K*N, 1) ];
-pd.cDiscRK = pd.cDiscRK0;
+problemData.cDiscRK0 = [reshape(problemData.cDisc(:,:,1).', K*N, 1); ...
+                        reshape(problemData.cDisc(:,:,2).', K*N, 1); ...
+                        reshape(problemData.cDisc(:,:,3).', K*N, 1)];
+problemData.cDiscRK = problemData.cDiscRK0;
 
 % Carry out RK steps
-pd.isSubSteppingFinished = false;
-pd = iterateSubSteps(pd, nStep);
+problemData.isSubSteppingFinished = false;
+problemData = iterateSubSteps(problemData, nStep);
 
 % Compute change
-if pd.isSteadyState
-  pd.changeL2 = norm(pd.cDiscRK - pd.cDiscRK0, 2);
+if problemData.isSteadyState
+  problemData.changeL2 = norm(problemData.cDiscRK - problemData.cDiscRK0, 2);
 end % if
 
 end % function

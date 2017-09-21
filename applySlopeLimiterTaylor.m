@@ -38,10 +38,17 @@
 %> @param  type       The type of slope limiter to be used. [<code>string</code>]
 %> @retval dataTaylorLim   The representation matrix of the limited function
 %>                    @f$\mathsf{\Phi}^\mathrm{Taylor}c_h@f$. @f$[K \times N]@f$
+%> @retval  minMaxV0T  Two matrices with minimum and maximum centroid values,
+%>                     respectively, of the patch of elements surrounding each
+%>                     vertex of each element as computed by 
+%>                     <code>computeMinMaxV0TElementPatch()</code>
+%>                     @f$[2 \times 1 \mathrm{cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Hennes Hajduk, 2016.
 %> 
 %> @par License
 %> @parblock
@@ -59,7 +66,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataTaylorLim = applySlopeLimiterTaylor(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad, type)
+function [dataTaylorLim, minMaxV0T] = applySlopeLimiterTaylor(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad, type)
 % Set default limiter
 if nargin < 5
   type = 'linear';
@@ -67,11 +74,11 @@ end
 % Apply chosen limiter
 switch type
   case 'linear'
-    dataTaylorLim = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad);
+    [dataTaylorLim, minMaxV0T] = applySlopeLimiterTaylorLinear(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad);
   case 'hierarch_vert'
-    dataTaylorLim = applySlopeLimiterTaylorHierarchicalVertex(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad);
+    [dataTaylorLim, minMaxV0T] = applySlopeLimiterTaylorHierarchicalVertex(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad);
   case 'strict'
-    dataTaylorLim = applySlopeLimiterTaylorStrict(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad);
+    [dataTaylorLim, minMaxV0T] = applySlopeLimiterTaylorStrict(g, dataTaylor, markV0TbdrD, dataV0T, basesOnQuad);
   otherwise
     error('Unknown limiter type');
 end

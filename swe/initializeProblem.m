@@ -70,27 +70,40 @@ elseif pd.isSolutionAvail
   vH0Cont = @(x1,x2) h0Cont(x1,x2) .* pd.vCont(x1,x2,pd.t0);
   
   pd.cDisc = zeros(K,N,3);
-  pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g, xi0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
-  pd.cDisc(:,:,2) = projectFuncCont2DataDisc(pd.g, uH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
-  pd.cDisc(:,:,3) = projectFuncCont2DataDisc(pd.g, vH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g, xi0Cont, 2*p+1, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc(:,:,2) = projectFuncCont2DataDisc(pd.g, uH0Cont, 2*p+1, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc(:,:,3) = projectFuncCont2DataDisc(pd.g, vH0Cont, 2*p+1, pd.refElemPhiPhi, pd.basesOnQuad);
 else
   pd.cDisc = zeros(K,N,3);
 end % if
 
 for i = 1 : length(pd.slopeLimList)
   switch pd.slopeLimList{i}
-    case 'H'
-      dataV0T = pd.ramp(pd.t0 / 86400) * pd.g.markV0TbdrRI .* xiRivV0T + (pd.g.markV0TbdrOS & ~pd.g.markV0TbdrRI) .* xiOSV0T;
-      pd.cDisc(:,:,1) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,1), pd.g.markV0TbdrRI | pd.g.markV0TbdrOS, dataV0T, pd.globM, pd.globMDiscTaylor, pd.typeSlopeLim);
+    case 'elevation'
+      if pd.isRivCont
+        pd.xiV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0));
+      end % if
+      if pd.isOSCont
+        pd.xiV0Tos = pd.g.markV0TbdrOS .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiOSCont(x1, x2, pd.t0));
+      end % if
+      pd.cDisc(:,:,1) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,1), pd.g.markV0TbdrD, pd.ramp(pd.t0/86400) * (pd.xiV0Triv + pd.xiV0Tos), pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
+    case 'momentum'
+      if pd.isRivCont
+        hV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0)) - pd.zbV0T;
+        pd.uHV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.uRivCont(x1, x2, pd.t0)) .* hV0Triv;
+        pd.vHV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.vRivCont(x1, x2, pd.t0)) .* hV0Triv;
+      end % if
+      pd.cDisc(:,:,2) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,2), pd.g.markV0TbdrRI, pd.ramp(pd.t0/86400) * pd.uHV0Triv, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
+      pd.cDisc(:,:,3) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,3), pd.g.markV0TbdrRI, pd.ramp(pd.t0/86400) * pd.vHV0Triv, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
     otherwise
-      error('Unknown variable for slope limiting')
+      error('Slope limiting not implemented for non primary variables.')
   end % switch
 end % for
 
-pd.cDisc(:,:,1) = pd.swe_correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr + pd.minTol, pd.elevTol);
+pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr + pd.minTol, pd.elevTol);
 
 %% Visualize initial solution.
-pd.swe_visualizeSolution(pd, 0);
+pd = pd.visualizeSolution(pd, 0);
 
 %% Initialize waitbar.
 if pd.isWaitbar

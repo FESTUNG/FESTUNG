@@ -61,7 +61,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function [t, omega] = rungeKuttaExcplicit(ord, tau, t0)
+function [t, omega] = rungeKuttaExplicit(ord, tau, t0)
 switch ord
   case 1
     omega = 0;
