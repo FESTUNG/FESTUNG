@@ -56,7 +56,7 @@ pd = setdefault(pd, 'name', 'squareCoarse');
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'sweInverse/fort_<name>.15'
 % - 'manual' calls configureManualADCIRC()
-pd = setdefault(pd, 'configSource', 'manual');
+pd = setdefault(pd, 'configSource', 'ADCIRC');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
