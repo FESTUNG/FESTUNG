@@ -54,7 +54,7 @@
 function problemData = solveStep(problemData, nStep)
 
 % Obtain Runge-Kutta rule
-[problemData.timeLvls, problemData.omega] = rungeKuttaSSP(problemData.sweData.schemeOrder, problemData.sweData.dt, problemData.sweData.t);
+[problemData.timeLvls, problemData.omega] = rungeKuttaExplicit(problemData.sweData.schemeOrder, problemData.sweData.dt, problemData.sweData.t);
 
 % Initialize time stepping
 K = problemData.sweData.K;
