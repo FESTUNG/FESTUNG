@@ -146,7 +146,7 @@ pd.refinement = 0;  % Grid refinement level
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
 pd.tEnd = 1; % End time of simulation
-pd.numSteps = 1; % Number of time steps
+pd.numSteps = 10; % Number of time steps
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
