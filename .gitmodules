@@ -29,3 +29,6 @@
 [submodule "transport"]
 	path = transport
 	url = https://www1.am.uni-erlangen.de/git/festung-transport
+[submodule "swe_inf"]
+	path = swe_inf
+	url = https://www1.am.uni-erlangen.de/git/festung-swe_inf
