@@ -2,7 +2,7 @@ function problemData = getTestcase(problemData, problemName)
 switch problemName  
   case 'convergence'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; 
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; 
     
     gConst = 10;
@@ -43,7 +43,7 @@ switch problemName
   
   case 'coupling'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     gConst = 10;
@@ -85,7 +85,7 @@ switch problemName
     
   case 'utbest'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; 
     
     gConst = 10;
