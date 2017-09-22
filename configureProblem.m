@@ -356,7 +356,7 @@ problemData = setdefault(problemData, 'domainADCIRC', getFunctionHandle('swe/dom
 [problemData.g, depth] = problemData.domainADCIRC(['swe/fort_' problemData.name '.14'], ['swe/fort_' problemData.name '.17'], numForcings, isSpherical, projCenter);
 
 problemData.isHotstart = true;
-hotstartData = readHotstart('output/galv_1.mat');
+hotstartData = readHotstart('swe/galv_1.mat');
 
 zbCont = @(x1,x2) execin('swe/evaluateFuncFromVertexValues', problemData.g, -depth, x1, x2);
 problemData = setdefault(problemData, 'hCont', @(t,x1,x2) -zbCont(x1,x2));
