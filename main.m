@@ -125,6 +125,9 @@ else
   problemData = struct;
 end % if
 problemData.problemName = problemName;
+%% Start logging and time measurements, add problem to search path, and install exit handler
+[tStartup, oldpath, cwd] = startupFestung(problemName);
+cleanupObj = onCleanup(@() cleanupFestung(tStartup, oldpath, cwd));
 %% List of functions making up a problem description
 [preprocessList, stepList, postprocessList] = getStepLists();
 %% Check existence of all required functions
@@ -134,9 +137,6 @@ assert(isequal(cellfun(@(fun) exist([problemName filesep fun '.m'], 'file'), ste
   'Not all the required functions for the problem steps found.')
 assert(isequal(cellfun(@(fun) exist([problemName filesep fun '.m'], 'file'), postprocessList), 2 * ones(size(postprocessList))), ...
   'Not all the required functions for the postprocessing of the problem found.')
-%% Start logging and time measurements, add problem to search path, and install exit handler
-[tStartup, oldpath, cwd] = startupFestung(problemName);
-cleanupObj = onCleanup(@() cleanupFestung(tStartup, oldpath, cwd));
 %% Pre-process and initialize problem
 tPreprocess = tic;
 for nFunc = 1 : length(preprocessList)
@@ -197,7 +197,7 @@ datestr(now,'yyyy'), problemName, datestr(now,'yyyy-mm-dd HH:MM:SS'), diaryName)
 if isdeployed
   oldpath = path;
 else
-  oldpath = addpath([pwd filesep problemName], pwd);
+  oldpath = addpath([pwd filesep problemName], pwd, [pwd filesep 'core']);
 end
 cwd = pwd;
 end % function
