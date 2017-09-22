@@ -11,3 +11,12 @@
 [submodule "advection_implicit"]
 	path = advection_implicit
 	url = https://www1.am.uni-erlangen.de/git/festung-advection_implicit
+[submodule "darcy_swe_2dv"]
+	path = darcy_swe_2dv
+	url = https://www1.am.uni-erlangen.de/git/festung-darcy_swe_2dv
+[submodule "darcy_2dv"]
+	path = darcy_2dv
+	url = https://www1.am.uni-erlangen.de/git/festung-darcy_2dv
+[submodule "swe_2dv"]
+	path = swe_2dv
+	url = https://www1.am.uni-erlangen.de/git/festung-swe_2dv
