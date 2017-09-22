@@ -20,3 +20,6 @@
 [submodule "swe_2dv"]
 	path = swe_2dv
 	url = https://www1.am.uni-erlangen.de/git/festung-swe_2dv
+[submodule "swe"]
+	path = swe
+	url = https://www1.am.uni-erlangen.de/git/festung-swe
