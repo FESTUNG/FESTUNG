@@ -1,6 +1,0 @@
-function ret = assembleMatEdgeTetraHorizPhiPhiNuBottomUp(g, markE0T, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
-areaNuE0T = { markE0T(:,1) .* g.areaE0T(:,1) .* g.nuE0T(:,1,2), ...
-              markE0T(:,2) .* g.areaE0T(:,2) .* g.nuE0T(:,2,2) };
-ret = kron(spdiags(areaNuE0T{2}, 0, g.numT, g.numT ), refEdgePhiIntPhiInt(:,:,2)) + ...
-      kron(bsxfun(@times, g.markE0TE0T{1}, areaNuE0T{1}), refEdgePhiIntPhiExt(:,:,1));
-end  % function
