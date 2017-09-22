@@ -1,6 +1,6 @@
  GALVESTON BAY                     ! 32 CHARACTER ALPHANUMERIC RUN DESCRIPTION
  R02                     ! 24 CHARACTER ALPANUMERIC RUN IDENTIFICATION 
- 1 output/galv_1.mat ! IHOT - parameter fort hot start, 0=cold, 67-read fort.67 (binary)
+ 1 swe/galv_1.mat ! IHOT - parameter fort hot start, 0=cold, 67-read fort.67 (binary)
  1 ! ICS - COORDINATE SYSTEM SELECTION PARAMETER
  1 ! NOLIBF - BOTTOM FRICTION TERM SELECTION PARAMETER
  0 ! NWP - VARIABLE BOTTOM FRICTION AND LATERAL VISCOSITY OPTION PARAMETER
