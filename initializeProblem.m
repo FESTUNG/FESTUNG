@@ -2,7 +2,7 @@ function problemData = initializeProblem(problemData)
 problemData.isFinished = false;
 
 % Vector of unknowns (H, U, W) for each Runge-Kutta stage
-problemData.cDiscRK = cell(length(rungeKuttaSSP(problemData.ordRK, 0, 0)), 3);
+problemData.cDiscRK = cell(length(rungeKuttaExplicit(problemData.ordRK, 0, 0)), 3);
 
 %% Initial height.
 problemData.cDiscRK{end, 1} = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.h0Cont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
