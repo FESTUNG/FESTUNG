@@ -33,7 +33,7 @@ in the main directory.
 
 ## Contributors
 
-FESTUNGs main developers are Florian Frank (Rice University), [Balthasar Reuter](https://math.fau.de/reuter), and [Vadym Aizinger](https://math.fau.de/aizinger). Its initial release was developed at the [Chair for Applied Mathematics I](https://www.mso.math.fau.de/applied-mathematics-1.html) at [Friedrich-Alexander-University Erlangen-Nürnberg](https://www.fau.eu).
+FESTUNGs main developers are [Florian Frank](http://frank.ink), [Balthasar Reuter](https://math.fau.de/reuter), and [Vadym Aizinger](https://math.fau.de/aizinger). Its initial release was developed at the [Chair for Applied Mathematics I](https://www.mso.math.fau.de/applied-mathematics-1.html) at [Friedrich-Alexander-University Erlangen-Nürnberg](https://www.fau.eu).
 
 ### Third party libraries
 * FESTUNG makes extensive use of the built-in routines in MATLAB / GNU Octave.
