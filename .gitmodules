@@ -5,3 +5,6 @@
 [submodule "advection"]
 	path = advection
 	url = https://www1.am.uni-erlangen.de/git/festung-advection
+[submodule "hdg_advection"]
+	path = hdg_advection
+	url = https://www1.am.uni-erlangen.de/git/festung-hdg_advection
