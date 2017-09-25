@@ -2,7 +2,7 @@
 % Problem parameters are to be modified inside this routine.
 
 %===============================================================================
-%> @file sweInverse/configureProblem.m
+%> @file swe_inverse/configureProblem.m
 %>
 %> @brief Fills the problemData-struct with all basic configuration options.
 %>        Problem parameters are to be modified inside this routine.
@@ -54,7 +54,7 @@ pd = setdefault(pd, 'name', 'squareCoarse');
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
-% - 'ADCIRC' reads 'sweInverse/fort_<name>.15'
+% - 'ADCIRC' reads 'swe_inverse/fort_<name>.15'
 % - 'manual' calls configureManualADCIRC()
 pd = setdefault(pd, 'configSource', 'ADCIRC');
 
@@ -65,7 +65,7 @@ pd = setdefault(pd, 'configSource', 'ADCIRC');
 % - 'hierarchical' creates a unit square [0,100]x[0,100] with specified 
 %   hmax and performs uniform refinement according to parameter 
 %   'refinement'. All boundaries are type 3, i.e river.
-% - 'ADCIRC' reads grid information from 'sweInverse/fort_<name>.{14,17}'.
+% - 'ADCIRC' reads grid information from 'swe_inverse/fort_<name>.{14,17}'.
 pd = setdefault(pd, 'gridSource', 'ADCIRC');
 
 %% Polynomial approximation order
@@ -109,7 +109,7 @@ switch pd.configSource
     error('Invalid config source.')
 end % switch
 
-%% sweInverse specific parameters
+%% swe_inverse specific parameters
 pd = setdefault(pd, 'noiseLvl', 0.); % percentage of uniforamlly distributed noise on free surface
 pd.isDiffusion = false;
 pd.diffCoef = [100; 100; 100];
@@ -301,13 +301,13 @@ pd.isSolutionAvail = false;
 pd.isRhsAvail = false;
 
 % Verify input files exist
-assert(exist(['sweInverse/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "sweInverse/fort_' pd.name '.14" not found!'])
-assert(exist(['sweInverse/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "sweInverse/fort_' pd.name '.17" not found!'])
-assert(exist(['sweInverse/fort_' pd.name '.15'], 'file') == 2, ['Config file "sweInverse/fort_' pd.name '.15" not found!'])
+assert(exist(['swe_inverse/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe_inverse/fort_' pd.name '.14" not found!'])
+assert(exist(['swe_inverse/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe_inverse/fort_' pd.name '.17" not found!'])
+assert(exist(['swe_inverse/fort_' pd.name '.15'], 'file') == 2, ['Config file "swe_inverse/fort_' pd.name '.15" not found!'])
 
 %% Read parameter file
-h = getFunctionHandle('sweInverse/readConfigADCIRC');
-pd.configADCIRC = h(['sweInverse/fort_' pd.name '.15']);
+h = getFunctionHandle('swe_inverse/readConfigADCIRC');
+pd.configADCIRC = h(['swe_inverse/fort_' pd.name '.15']);
 
 %% Map ADCIRC variables to internal names
 % Constants
@@ -393,8 +393,8 @@ end % function
 function pd = configureManualADCIRC(pd)
 
 % Verify input files exist
-assert(exist(['sweInverse/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "sweInverse/fort_' pd.name '.14" not found!'])
-assert(exist(['sweInverse/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "sweInverse/fort_' pd.name '.17" not found!'])
+assert(exist(['swe_inverse/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe_inverse/fort_' pd.name '.14" not found!'])
+assert(exist(['swe_inverse/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe_inverse/fort_' pd.name '.17" not found!'])
 
 % Overwrite grid config source
 pd.gridSource = 'ADCIRC';

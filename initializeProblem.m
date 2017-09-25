@@ -1,14 +1,14 @@
 % Fills the problem's data structures with initial data (if applicable).
 
 %===============================================================================
-%> @file sweInverse/initializeProblem.m
+%> @file swe_inverse/initializeProblem.m
 %>
 %> @brief Fills the problem's data structures with initial data.
 %===============================================================================
 %>
 %> @brief Fills the problem's data structures with initial data.
 %>
-%> This routine is called after sweInverse/preprocessProblem.m.
+%> This routine is called after swe_inverse/preprocessProblem.m.
 %>
 %> Before entering the main loop of the solution algorithm, this routine
 %> fills the problem's data structures with initial data.
@@ -81,7 +81,7 @@ elseif pd.isSolutionAvail
 else
   pd.cDisc = zeros(K,N,3);
 end % if
-pd.zbDisc = execin('sweInverse/setInitialDepth', pd);
+pd.zbDisc = setInitialDepth(pd);
 [pd.zbDisc, pd.zbV] = applyVertexAveraging(pd.g, pd.zbDisc, pd.averagingOperator, pd.sysMinValueCorrection);
 pd.xiDisc = addNoise(pd.cDisc(:,:,1) + pd.zbExact, pd.noiseLvl);
 pd.cDisc(:,:,1) = pd.rampInput(pd.t0) * pd.xiDisc(:,:,1) - pd.zbDisc;
