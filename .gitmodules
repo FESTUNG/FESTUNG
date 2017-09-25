@@ -38,3 +38,6 @@
 [submodule "swe_inverse"]
 	path = swe_inverse
 	url = https://www1.am.uni-erlangen.de/git/festung-swe_inverse
+[submodule "template"]
+	path = template
+	url = https://www1.am.uni-erlangen.de/git/festung-template
