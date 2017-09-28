@@ -43,7 +43,9 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
-%>                      Modified 09/02/16 by Hennes Hajduk
+%>
+%> @author Balthasar Reuter, 2016.
+%> @author Hennes Hajduk, 2016.
 %> 
 %> @par License
 %> @parblock
@@ -83,7 +85,7 @@ if isfield(g, 'markV0TT0V')
   minMaxV0T = computeMinMaxV0T_withMarkV0TT0V(g, valCentroidNeg, valCentroidPos, shiftCentroidToNeg, shiftCentroidToPos, valD);
 else
   minMaxV0T = computeMinMaxV0T_noMarkV0TT0V(g, valCentroidNeg, valCentroidPos, shiftCentroidToNeg, shiftCentroidToPos, valD);
-end
+end % if
 end % function
 %
 %===============================================================================
