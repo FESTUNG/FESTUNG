@@ -93,17 +93,37 @@ for species = 1:problemData.numSpecies
   % right hand side
   sysV = globL - globKD - globKN;
 
-  advectiveTerm = assembleMatEdgePhiPhiValUpwind( problemData.g, ~problemData.g.markE0TbdrN, problemData.hatRdiagOnQuad, problemData.hatRoffdiagOnQuad, ...
-                                                  problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN) * reshape(problemData.concDisc{species}',[],1);
+% BEFORE
+%   advectiveTerm = assembleMatEdgePhiPhiValUpwind( problemData.g, ~problemData.g.markE0TbdrN, problemData.hatRdiagOnQuad, problemData.hatRoffdiagOnQuad, ...
+%                                                   problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN) * reshape(problemData.concDisc{species}',[],1);
+%   
+%   if any(problemData.mask(:,species))
+%     % Assembly of time-dependent global matrices
+%     globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, problemData.uHDisc, problemData.vHDisc, problemData.mask(:,species));
+% %     globR = assembleMatEdgePhiPhiValUpwind(problemData.g, ~problemData.g.markE0TbdrN, problemData.hatRdiagOnQuad, problemData.hatRoffdiagOnQuad, ...
+% %                                            problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN, problemData.mask(:,species));
+%     % Building the system
+%     sysA = -globG{1} - globG{2};
+%     
+%     indx = logical(kron(problemData.mask(:,species),true(N,1)));
+%     advectiveTerm(indx) = advectiveTerm(indx) + sysA * reshape(problemData.concDisc{species}(problemData.mask(:,species),:)', [problemData.numElem(species)*N 1]);
+%   end % if
+%   
+%   % Computing the discrete time derivative
+%   cDiscDot = problemData.globM \ (sysV - advectiveTerm);
+%   
+%   
+% END BEFORE
   
+  advectiveTerm = zeros(K*N,1);
   if any(problemData.mask(:,species))
     % Assembly of time-dependent global matrices
     globG = assembleMatElemDphiPhiFuncDiscVec(problemData.g, problemData.hatG, problemData.uHDisc, problemData.vHDisc, problemData.mask(:,species));
-%     globR = assembleMatEdgePhiPhiValUpwind(problemData.g, ~problemData.g.markE0TbdrN, problemData.hatRdiagOnQuad, problemData.hatRoffdiagOnQuad, ...
-%                                            problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN, problemData.mask(:,species));
+    globR = assembleMatEdgePhiPhiValUpwind(problemData.g, ~problemData.g.markE0TbdrN, problemData.hatRdiagOnQuad, problemData.hatRoffdiagOnQuad, ...
+                                           problemData.vNormalOnQuadEdge, problemData.g.areaE0TbdrNotN, problemData.mask(:,species));
     % Building the system
-    sysA = -globG{1} - globG{2};
-    
+    sysA = -globG{1} - globG{2} + globR;
+      
     indx = logical(kron(problemData.mask(:,species),true(N,1)));
     advectiveTerm(indx) = advectiveTerm(indx) + sysA * reshape(problemData.concDisc{species}(problemData.mask(:,species),:)', [problemData.numElem(species)*N 1]);
   end % if
