@@ -2,7 +2,7 @@
 % Problem parameters are to be modified inside this routine.
 
 %===============================================================================
-%> @file template/configureProblem.m
+%> @file ./transport/configureProblem.m
 %>
 %> @brief Fills the problemData-struct with all basic configuration options.
 %>        Problem parameters are to be modified inside this routine.
@@ -55,7 +55,7 @@ problemData.isHotstart = false;
 % - 'analytical' calls configureAnalyticalTest()
 % - 'biological' calls configureBiological()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
-problemData = setdefault(problemData, 'configSource', 'ADCIRC');
+problemData = setdefault(problemData, 'configSource', 'rotation');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -65,7 +65,7 @@ problemData = setdefault(problemData, 'configSource', 'ADCIRC');
 %   and performs uniform refinement according to parameter 'refinement'.
 %   Boundary type 4 on east-boundary, 1 on all others.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-problemData = setdefault(problemData, 'gridSource', 'ADCIRC');
+problemData = setdefault(problemData, 'gridSource', 'square');
 problemData = setdefault(problemData, 'refinement', 0);
 
 %% Parameters. 
@@ -73,7 +73,8 @@ problemData = setdefault(problemData, 'refinement', 0);
 problemData = setdefault(problemData, 'p'         , 1);  % local polynomial degree
 problemData = setdefault(problemData, 'ordRK'     , min(problemData.p+1,3));  % order of Runge Kutta time stepper
 problemData = setdefault(problemData, 'isVisGrid' , false);  % visualization of grid
-problemData = setdefault(problemData, 'isCoupling', false); % Receive velocity coefficients and fluxes from a different model, e.g. 'swe'
+problemData = setdefault(problemData, 'isCoupling', false);  % Receive velocity coefficients and fluxes from a different model, e.g. 'swe'
+problemData = setdefault(problemData, 'isCheckMass', false);  % Write total mass for each species to output file 'mass.csv' at every time step
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
@@ -93,7 +94,7 @@ switch problemData.configSource
     error('Invalid config source.')
 end % switch
 
-problemData = setdefault(problemData, 'maskTol', 1.0e-12 * ones(1, problemData.numSpecies));  % maximal tolerance of slope for which species are considered constant
+problemData = setdefault(problemData, 'maskTol', 1.0e-6 * ones(1, problemData.numSpecies));  % maximal tolerance of slope for which species are considered constant
 problemData = setdefault(problemData, 'isMask', true(problemData.numSpecies, 1)); % computation only where species is not constant
 problemData = setdefault(problemData, 'maskType', 'vertex-based');
 

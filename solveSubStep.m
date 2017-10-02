@@ -126,6 +126,14 @@ for species = 1:problemData.numSpecies
       
     indx = logical(kron(problemData.mask(:,species),true(N,1)));
     advectiveTerm(indx) = advectiveTerm(indx) + sysA * reshape(problemData.concDisc{species}(problemData.mask(:,species),:)', [problemData.numElem(species)*N 1]);
+    
+    % Check mass conservation
+    if problemData.isCheckMass
+      globR = assembleMatEdgePhiPhiValUpwind(problemData.g, problemData.g.markE0TbdrD, problemData.hatRdiagOnQuad, problemData.hatRoffdiagOnQuad, ...
+                                             problemData.vNormalOnQuadEdge, [], problemData.mask(:,species));
+      massDot = problemData.globM(indx,indx) \ ( globR * reshape(problemData.concDisc{species}(problemData.mask(:,species),:)', [], 1) );
+      problemData.massLossBdr(species) = problemData.massLossBdr(species) + (1 - problemData.omega(nSubStep)) * problemData.tau * sum(massDot);
+    end % if
   end % if
   
   % Computing the discrete time derivative

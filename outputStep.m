@@ -64,7 +64,23 @@ for species = 1:problemData.numSpecies
   end % if
 end % for
 % TODO use this kind of visualization
-% if ~isempty(dataLagr)
-%   visualizeDataLagr(problemData.g, dataLagr, varName, problemData.outputBasename, nStep, problemData.outputTypes)
+% isVis = cell2mat( cellfun(@(vis, freq) vis && (mod(nStep, freq) == 0 || problemData.isFinished), ...
+%                            problemData.isVisSol, problemData.outputFrequency, 'UniformOutput', false) );
+% if any(isVis)
+%   isVisMask = problemData.isMask(isVis);
+%   
+%   [~, varName] = cellfun(@(str) fileparts(str), problemData.outputBasename(isVis), 'UniformOutput', false);
+%   varName = [ varName, cellfun(@(str) [str '_mask'], varName(isVisMask), 'UniformOutput', false) ]';
+%   
+%   cLagr = [ cellfun(@(c) projectDataDisc2DataLagr(c), problemData.concDisc(isVis), 'UniformOutput', false); ...
+%             mat2cell(problemData.mask(:, isVis & problemData.isMask), size(problemData.mask, 1), ones(size(isVis & problemData.isMask)))' ];
+%   
+%   visualizeDataLagr(problemData.g, cLagr, varName, problemData.outputBasename{1}, nStep, problemData.outputTypes{1});
 % end % if
+%% Mass balance
+if problemData.isCheckMass
+  mass = cellfun(@(c) sum(c(:,1)), problemData.concDisc, 'UniformOutput', false);
+  dlmwrite('mass.csv', [nStep, cell2mat(mass)'], '-append', 'Precision', 18)
+  dlmwrite('mass_bdr.csv', [nStep, problemData.massLossBdr], '-append', 'Precision', 18)
+end % if
 end % function

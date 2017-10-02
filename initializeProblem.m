@@ -114,6 +114,16 @@ for species = 1:problemData.numSpecies
 end % for
 problemData.numElem = sum(problemData.mask, 1);
 
+%% Mass balance
+if problemData.isCheckMass
+%   header = {'nStep', arrayfun(@(n) ['species_' num2str(n)], 1 : problemData.numSpecies, 'UniformOutput', false) };
+%   dlmwrite('mass.csv', header)
+  dlmwrite('mass.csv', [0, cell2mat(cellfun(@(c) sum(c(:,1)), problemData.concDisc, 'UniformOutput', false))'], 'Precision', 18)
+  problemData.massLossBdr = zeros(1, problemData.numSpecies);
+%   dlmwrite('mass_bdr.csv', header)
+  dlmwrite('mass_bdr.csv', [0, problemData.massLossBdr], 'Precision', 18)
+end % if
+
 %% Initialize time stepping.
 problemData.isFinished = false;
 fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', problemData.tEnd, problemData.tau, problemData.numSteps)
