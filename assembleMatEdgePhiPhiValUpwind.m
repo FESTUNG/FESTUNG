@@ -210,7 +210,7 @@ validateattributes(markElem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
 if nargin > 5 && ~isequal(areaE0Tbdr, [])
   ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad(markElem,:,:), areaE0Tbdr, markElem);
 else
-  ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, markElem);
+  ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad(markElem,:,:), markElem);
 end % for
 end % function
 
