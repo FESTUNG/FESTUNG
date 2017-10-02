@@ -147,7 +147,9 @@ for species = 1:problemData.numSpecies
   % Limiting the concentration
   if problemData.isSlopeLim{species}
 
-    cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(problemData.timeLvls(nSubStep), x1, x2));
+    tBC = getdefault(problemData.timeLvls, nSubStep + 1, problemData.timeLvls(1) + problemData.tau);
+    cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(tBC, x1, x2));
+%     cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont{species}(problemData.timeLvls(nSubStep), x1, x2));
     [problemData.concDisc{species}, problemData.minMaxV0T{species}] = applySlopeLimiterDisc(problemData.g, problemData.concDisc{species}, ...
                                                                                             problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
                                                                                             problemData.globMDiscTaylor, problemData.basesOnQuad, ...
