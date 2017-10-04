@@ -154,6 +154,11 @@ while ~problemData.isFinished
   for nFunc = 1 : length(stepList)
     problemData = feval(stepList{nFunc}, problemData, nStep);
   end % for
+  % Flush diary
+  if mod(nStep, 1000) == 0
+    diary off
+    diary on
+  end % if
 end % while
 tLoop = toc(tLoop);
 fprintf('Loop time: %d iterations in %g seconds (on avg. %g seconds per iteration).\n', nStep, tLoop, tLoop/nStep);
