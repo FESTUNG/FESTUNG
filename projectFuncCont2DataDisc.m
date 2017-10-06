@@ -93,6 +93,7 @@
 %
 function dataDisc = projectFuncCont2DataDisc(g, funcCont, qOrd, refElemPhiPhi, basesOnQuad)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
+assert(nargin(funcCont) == 2, 'funcCont must expect two arguments')
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad');
 qOrd = max(qOrd,1);  [Q1, Q2, W] = quadRule2D(qOrd);
 N = size(refElemPhiPhi, 1);
