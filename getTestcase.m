@@ -2,8 +2,9 @@ function problemData = getTestcase(problemData, problemName)
 switch problemName  
   case 'convergence'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
-%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; 
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4]; idRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
@@ -32,11 +33,11 @@ switch problemName
     dxdzU1Cont = @(t,x,z) delta * omega * cos(omega * (x+t));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.5 * delta * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2;
+    u1hCont = @(t,x) 0.5 * delta * sin(omega * (x+t)) .* (xiCont(t,x).^2 - zBotCont(x).^2) - delta * zBotCont(x) .* hCont(t,x) .* sin(omega * (x+t));
     dxU1hCont = @(t,x) 0.5 * delta * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
                         delta * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
                         
-    DCont = { @(t,x,z) rho * ones(size(x)), @(t,x,z) zeros(size(x)); ...
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
     dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
                  @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
@@ -162,40 +163,273 @@ switch problemName
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {D, 0; 0, D}, 'UniformOutput', false);
     dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
         
-  case 'test'
+  case 'test_no_diffusion'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4]; idRiem = [2,4];
-%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4]; idRiem = [2,4];
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
-    dxZb = 0;
+    dxZb = 0.005;%0;
     
-    xiCont = @(t,x) 0.005 * x;%0.005 * x; %0.01 * sin(0.01*(100-x));%0.005 * x; %0.01 * sin(0.1*(x));
+    xiCont = @(t,x) 0.01 * sin(0.01*(100-x));%0.005 * x; %0.01 * sin(0.1*(x));
     zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
-    u1Cont = @(t,x,z) zeros(size(x)); %sin(z+0.01*t);
+    u1Cont = @(t,x,z) sin(z+0.01*t);%zeros(size(x)); %sin(z+0.01*t);
     u2Cont = @(t,x,z) zeros(size(x));
     
-    dxXiCont = @(t,x) 0.005 * ones(size(x));%0.005 * ones(size(x)); %-0.01*0.01*cos(0.01*(100-x));%0.005 * ones(size(x)); %0.1*0.01*cos(0.1*(x));
+    dxXiCont = @(t,x) -0.01*0.01*cos(0.01*(100-x));%0.005 * ones(size(x)); %0.1*0.01*cos(0.1*(x));
     dtHCont = @(t,x) zeros(size(x));
     
-    dtU1Cont = @(t,x,z) zeros(size(x));%0.01*cos(z+0.01*t);
+    dtU1Cont = @(t,x,z) 0.01*cos(z+0.01*t);%zeros(size(x));%0.01*cos(z+0.01*t);
     dxU1Cont = @(t,x,z) zeros(size(x));
-    dzU1Cont = @(t,x,z) zeros(size(x));%cos(z+0.01*t);
+    dzU1Cont = @(t,x,z) cos(z+0.01*t);%zeros(size(x));%cos(z+0.01*t);
     dzU2Cont = @(t,x,z) zeros(size(x));
     
     dxdxU1Cont = @(t,x,z) zeros(size(x));
     dxdzU1Cont = @(t,x,z) zeros(size(x));
-    dzdzU1Cont = @(t,x,z) zeros(size(x));%sin(z+0.01*t);
+    dzdzU1Cont = @(t,x,z) -sin(z+0.01*t);%zeros(size(x));%-sin(z+0.01*t);
     
-    u1hCont = @(t,x) zeros(size(x));%cos(xiCont(t,x)+0.01*t) - cos(zBotCont(x)+0.01*t);
-    dxU1hCont = @(t,x) zeros(size(x));%-sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);
+    u1hCont = @(t,x) -cos(xiCont(t,x)+0.01*t) + cos(zBotCont(x)+0.01*t);%zeros(size(x));%cos(xiCont(t,x)+0.01*t) - cos(zBotCont(x)+0.01*t);
+    dxU1hCont = @(t,x) sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);%zeros(size(x));%-sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);
 
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0.0, 0; 0, 0.0}, 'UniformOutput', false);
     dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
 
+  case 'constant' % OK (ausser mit Riemann-Loeser am Rand)
+    domainWidth = 100;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+    
+    gConst = 10;
+    xi0Cont = @(x) zeros(size(x));
+    dtXi = 0.01;
+    rho = 0;
+    
+    xiCont = @(t,x) dtXi * t * ones(size(x));
+    zBotCont = @(x) -2 * ones(size(x));
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) 0.1 * ones(size(x));
+    u2Cont = @(t,x,z) zeros(size(x));
+    
+    dxXiCont = @(t,x) zeros(size(x));
+    dtHCont = @(t,x) dtXi * ones(size(x));
+    
+    dtU1Cont = @(t,x,z) zeros(size(x));
+    dxU1Cont = @(t,x,z) zeros(size(x));
+    dzU1Cont = @(t,x,z) zeros(size(x));
+    dzU2Cont = @(t,x,z) zeros(size(x));
+    
+    dxdxU1Cont = @(t,x,z) zeros(size(x));
+    dxdzU1Cont = @(t,x,z) zeros(size(x));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
+    
+    u1hCont = @(t,x) 0.1 * hCont(t,x);
+    dxU1hCont = @(t,x) zeros(size(x));
+                        
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+              @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
+    
+  case 'linear_h' % OK (ausser mit Riemann-Loeser am Rand)
+    domainWidth = 100;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+    
+    gConst = 10;
+    xi0Cont = @(x) zeros(size(x));
+    dxZb = -0.005;
+    dxXi = 0.005;
+    rho = 0;
+    
+    xiCont = @(t,x) dxXi * x;
+    zBotCont = @(x) -2 + dxZb * x;
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) 0.1 * ones(size(x));
+    u2Cont = @(t,x,z) zeros(size(x));
+    
+    dxXiCont = @(t,x) dxXi * ones(size(x));
+    dtHCont = @(t,x) zeros(size(x));
+    
+    dtU1Cont = @(t,x,z) zeros(size(x));
+    dxU1Cont = @(t,x,z) zeros(size(x));
+    dzU1Cont = @(t,x,z) zeros(size(x));
+    dzU2Cont = @(t,x,z) zeros(size(x));
+    
+    dxdxU1Cont = @(t,x,z) zeros(size(x));
+    dxdzU1Cont = @(t,x,z) zeros(size(x));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
+    
+    u1hCont = @(t,x) 0.1 * hCont(t,x);
+    dxU1hCont = @(t,x) 0.1 * (dxXiCont(t,x) - dxZb);
+                        
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+              @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
+    
+  case 'z-linear_u' % OK (ausser mit Riemann-Loeser am Rand)
+    domainWidth = 100;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+    
+    gConst = 10;
+    xi0Cont = @(x) zeros(size(x));
+    dzU1 = 0.1;
+    rho = 0;
+    
+    xiCont = @(t,x) zeros(size(x));
+    zBotCont = @(x) -2 * ones(size(x));
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) dzU1 * z;
+    u2Cont = @(t,x,z) zeros(size(x));
+    
+    dxXiCont = @(t,x) zeros(size(x));
+    dtHCont = @(t,x) zeros(size(x));
+    
+    dtU1Cont = @(t,x,z) zeros(size(x));
+    dxU1Cont = @(t,x,z) zeros(size(x));
+    dzU1Cont = @(t,x,z) dzU1 * ones(size(x));
+    dzU2Cont = @(t,x,z) zeros(size(x));
+    
+    dxdxU1Cont = @(t,x,z) zeros(size(x));
+    dxdzU1Cont = @(t,x,z) zeros(size(x));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
+    
+    u1hCont = @(t,x) -0.2 * ones(size(x));
+    dxU1hCont = @(t,x) zeros(size(x));
+                        
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+              @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
+    
+  case 'x-linear_w' % OK (ausser mit Riemann-Loeser am Rand)
+    domainWidth = 100;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+    
+    gConst = 10;
+    xi0Cont = @(x) zeros(size(x));
+    dxU2 = 0.01;
+    rho = 0;
+    
+    xiCont = @(t,x) zeros(size(x));
+    zBotCont = @(x) -2 * ones(size(x));
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) 0.1 * ones(size(x));
+    u2Cont = @(t,x,z) dxU2 * x;
+    
+    dxXiCont = @(t,x) zeros(size(x));
+    dtHCont = @(t,x) zeros(size(x));
+    
+    dtU1Cont = @(t,x,z) zeros(size(x));
+    dxU1Cont = @(t,x,z) zeros(size(x));
+    dzU1Cont = @(t,x,z) zeros(size(x));
+    dzU2Cont = @(t,x,z) zeros(size(x));
+    
+    dxdxU1Cont = @(t,x,z) zeros(size(x));
+    dxdzU1Cont = @(t,x,z) zeros(size(x));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
+    
+    u1hCont = @(t,x) 0.2 * ones(size(x));
+    dxU1hCont = @(t,x) zeros(size(x));
+                        
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+              @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
+    
+  case 'linear_vel' % OK (ausser mit Riemann-Loeser am Rand)
+    domainWidth = 100;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+    
+    gConst = 10;
+    xi0Cont = @(x) zeros(size(x));
+    dxU1 = -0.01;
+    rho = 0;
+    
+    xiCont = @(t,x) zeros(size(x));
+    zBotCont = @(x) -2 * ones(size(x));
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) dxU1 * x;
+    u2Cont = @(t,x,z) -dxU1 * z;
+    
+    dxXiCont = @(t,x) zeros(size(x));
+    dtHCont = @(t,x) zeros(size(x));
+    
+    dtU1Cont = @(t,x,z) zeros(size(x));
+    dxU1Cont = @(t,x,z) dxU1 * ones(size(x));
+    dzU1Cont = @(t,x,z) zeros(size(x));
+    dzU2Cont = @(t,x,z) -dxU1 * ones(size(x));
+    
+    dxdxU1Cont = @(t,x,z) zeros(size(x));
+    dxdzU1Cont = @(t,x,z) zeros(size(x));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
+    
+    u1hCont = @(t,x) 2 * dxU1 * x;
+    dxU1hCont = @(t,x) 2 * dxU1 * ones(size(x));
+                        
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+              @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
+    
+  case 'linear' % OK (ausser mit Riemann-Loeser am Rand)
+    domainWidth = 100;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+    
+    gConst = 10;
+    xi0Cont = @(x) zeros(size(x));
+    dtXi = 0.01;
+    dxZb = -0.005;
+    dxXi = 0.005;
+    dxU1 = 0.01;
+    dzU2 = 0.01;
+    rho = 0;
+    
+    xiCont = @(t,x) dxXi * x + dtXi * t;
+    zBotCont = @(x) -2 + dxZb * x;
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) dxU1 * x;
+    u2Cont = @(t,x,z) -dzU2 * z;
+    
+    dxXiCont = @(t,x) dxXi * ones(size(x));
+    dtHCont = @(t,x) dtXi * ones(size(x));
+    
+    dtU1Cont = @(t,x,z) zeros(size(x));
+    dxU1Cont = @(t,x,z) dxU1 * ones(size(x));
+    dzU1Cont = @(t,x,z) zeros(size(x));
+    dzU2Cont = @(t,x,z) -dzU2 * ones(size(x));
+    
+    dxdxU1Cont = @(t,x,z) zeros(size(x));
+    dxdzU1Cont = @(t,x,z) zeros(size(x));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
+    
+    u1hCont = @(t,x) dxU1 * x .* hCont(t,x);
+    dxU1hCont = @(t,x) dxU1 * hCont(t,x) + dxU1 * x .* (dxXiCont(t,x) - dxZb);
+                        
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+              @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+                 @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
+    
 end % switch
 
 problemData = setdefault(problemData, 'domainWidth', domainWidth);

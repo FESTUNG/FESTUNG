@@ -47,7 +47,7 @@ if force || any(markModifiedV0T1D(:))
   % Determine smoothed height
   [Q,~] = quadRule1D(problemData.qOrd);
   problemData.hSmoothV0T1D = problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,end), [4 3], 2) - problemData.g.coordV0T(problemData.g.g1D.idxT2D0T(:,1), [1 2], 2);
-  assert(max(max(abs(hSmoothV0T1D - problemData.hSmoothV0T1D))) < 1e-12, 'hSmootV0T1D and problemData.heightV0T1D must be the same');
+  assert(max(max(abs(hSmoothV0T1D - problemData.hSmoothV0T1D))) < 1e-12, 'hSmoothV0T1D and problemData.heightV0T1D must be the same');
   problemData.hSmoothQ0T1D = problemData.hSmoothV0T1D(:,1) * (1-Q) + problemData.hSmoothV0T1D(:,2) * Q;
 end % if
 end % function
@@ -75,6 +75,7 @@ problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - 
 %% Flux and continuity equation
 % Element integral in flux and continuity equation (IX, XI)
 globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
+problemData.globH = globH;
 
 % Boundary edge integral without Dirichlet data for U in flux and continuity equation (X, XII)
 globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
@@ -89,12 +90,14 @@ problemData.globHQ = cellfun(@(H, Q, Qbdr) H - Q - Qbdr, globH, globQ, globQbdr,
 %% Continuity equation
 % Horizontal interior edge integral with first normal component in continuity equation (XII)
 globQAvg = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
+problemData.globQAvg = globQAvg;
 
 % Horizontal interior and top boundary edge integral with second normal component in continuity equation (XII)
 globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, (problemData.g.markE0Tint | problemData.g.markE0TbdrTop) & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
+problemData.globQup = globQup;
 
 % Combine matrices
-problemData.globHQup = globH{2} - globQup - globQAvg{2};
+problemData.globHQup = globH{2} - globQup;% - globQAvg{2}; % Dafuq???? Warum up UND Avg?
 problemData.globHQavg = -globH{1} + globQAvg{1} + globQbdr{1};
 
 %% Helper matrices for assembly of jump terms in Lax-Friedrichs Riemann solver

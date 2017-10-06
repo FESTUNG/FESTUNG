@@ -69,9 +69,9 @@ qDCont = { @(x1,x2) problemData.q1DCont(t,x1,x2); @(x1,x2) problemData.q2DCont(t
 uhDCont = @(x1) problemData.uhDCont(t, x1);
 
 %% L2-projections of algebraic coefficients and right hand side.
-DDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x1,x2), problemData.N, problemData.qOrd, ...
+DDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
                        problemData.globM, problemData.basesOnQuad2D), problemData.DCont, 'UniformOutput', false);
-problemData.globLu = reshape(projectFuncCont2DataDiscTetra(problemData.g, fuCont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D).', [], 1);
+problemData.globLu = reshape(projectFuncCont2DataDiscTetra(problemData.g, fuCont, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D).', [], 1);
 problemData.globLh = reshape(projectFuncCont2DataDisc1D(problemData.g.g1D, fhCont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D).', [], 1);
 
 %% Compute depth integrated velocity

@@ -17,8 +17,8 @@ dXzBot = problemData.g.g1D.markT2DT * ( problemData.gConst * (dZbot1D ./ dXbot1D
 problemData.globLzBot = kron(dXzBot, eye(problemData.N, 1));
 
 %% Initial velocities.
-problemData.cDiscRK{end, 2} = projectFuncCont2DataDiscTetra(problemData.g, problemData.u10Cont, problemData.N, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
-problemData.cDiscRK{end, 3} = zeros(size(problemData.cDiscRK{1, 2}));
+problemData.cDiscRK{end, 2} = projectFuncCont2DataDiscTetra(problemData.g, problemData.u10Cont, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
+problemData.cDiscRK{end, 3} = zeros(size(problemData.cDiscRK{end, 2}));
 
 %% Initial error computation.
 if problemData.isVisGrid, visualizeGridTetra(problemData.g); end
