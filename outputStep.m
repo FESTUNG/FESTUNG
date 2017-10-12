@@ -58,7 +58,7 @@ if mod(nStep-1, problemData.outputFrequency) == 0
   if problemData.isVisSol
     cLagr = { projectDataDisc2DataLagr1D(problemData.cDiscRK{1, 1}), ...
               projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{1, 2}), ...
-              projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 3}) };
+              projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{2, 3}) };
     visualizeDataLagr1D(problemData.g.g1D, cLagr{1}, { 'h' }, [ problemData.outputBasename '_h' ], nStep-1, problemData.outputTypes);
     visualizeDataLagrTetra(problemData.g, cLagr(2:3), {'u1', 'u2'}, problemData.outputBasename, nStep-1, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
     isOutput = true;
@@ -68,12 +68,26 @@ if mod(nStep-1, problemData.outputFrequency) == 0
     hCont = @(x1) problemData.hCont(problemData.t(1), x1);
     u1Cont = @(x1,x2) problemData.u1Cont(problemData.t(1), x1, x2);
     u2Cont = @(x1,x2) problemData.u2Cont(problemData.t(1), x1, x2);
+    
+    if problemData.isVisSol
+      problemData.pdExact.cDiscRK{end, 1} = projectFuncCont2DataDisc1D(problemData.pdExact.g.g1D, hCont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
 
+      problemData.pdExact = problemData.fn_adaptFreeSurface(problemData.pdExact, true);
+
+      problemData.pdExact.cDiscRK{end, 2} = projectFuncCont2DataDiscTetra(problemData.pdExact.g, u1Cont, problemData.qOrd, problemData.pdExact.globM, problemData.basesOnQuad2D);
+      problemData.pdExact.cDiscRK{end, 3} = projectFuncCont2DataDiscTetra(problemData.pdExact.g, u2Cont, problemData.qOrd, problemData.pdExact.globM, problemData.basesOnQuad2D);
+
+      cLagr = { projectDataDisc2DataLagrTensorProduct(problemData.pdExact.cDiscRK{end, 2}), ...
+                projectDataDisc2DataLagrTensorProduct(problemData.pdExact.cDiscRK{end, 3}) };
+
+      visualizeDataLagrTetra(problemData.pdExact.g, cLagr, {'u1', 'u2'}, [ problemData.outputBasename '_ex' ], nStep-1, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+    end % if
+    
     problemData.error = [ computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{1, 1}, ...
                               hCont, problemData.qOrd + 1, problemData.basesOnQuad1D), ...
                           computeL2ErrorTetra(problemData.g, problemData.cDiscRK{1, 2}, ...
                               u1Cont, problemData.qOrd + 1, problemData.basesOnQuad2D), ...
-                          computeL2ErrorTetra(problemData.g, problemData.cDiscRK{1, 3}, ...
+                          computeL2ErrorTetra(problemData.g, problemData.cDiscRK{2, 3}, ...
                               u2Cont, problemData.qOrd + 1, problemData.basesOnQuad2D) ];
 
     fprintf('L2 errors of h, u1, u2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);

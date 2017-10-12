@@ -36,11 +36,11 @@ markE0TbdrRad = problemData.generateMarkE0TbdrRad(problemData.g);
 problemData.g.markE0TbdrCoupling = sparse(problemData.generateMarkE0TbdrCoupling(problemData.g));
 
 % Boundary edges with Riemann solver applied
-problemData.g.markE0TbdrRiem = problemData.generateMarkE0TbdrRiem(problemData.g);
+problemData.g.markE0TbdrRiem = sparse(problemData.generateMarkE0TbdrRiem(problemData.g));
 
 % Prescribed horizontal velocity without and with Riemann solver
-problemData.g.markE0TbdrU = sparse(~(problemData.g.markE0TbdrRiem | problemData.g.markE0TbdrCoupling) & (markE0TbdrLand | problemData.g.markE0TbdrBot));
-problemData.g.markE0TbdrRiemU = sparse(problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrCoupling & (markE0TbdrLand | problemData.g.markE0TbdrBot));
+problemData.g.markE0TbdrU = sparse(~(problemData.g.markE0TbdrRiem | problemData.g.markE0TbdrCoupling) & (markE0TbdrLand | markE0TbdrRiv | problemData.g.markE0TbdrBot));
+problemData.g.markE0TbdrRiemU = sparse(problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrCoupling & (markE0TbdrLand | markE0TbdrRiv | problemData.g.markE0TbdrBot));
 
 % Prescribed vertical velocity without Riemann solver
 problemData.g.markE0TbdrW = sparse(problemData.g.markE0TbdrBot & ~problemData.g.markE0TbdrCoupling);
@@ -70,7 +70,7 @@ markV0TbdrRiv = problemData.generateMarkV0T1DbdrRiv(problemData.g.g1D);
 % markV0TbdrRad = problemData.generateMarkV0T1DbdrRad(problemData.g.g1D);
 
 % Boundary vertices with Riemann solver applied
-problemData.g.g1D.markV0TbdrRiem = problemData.generateMarkV0T1DbdrRiem(problemData.g.g1D);
+problemData.g.g1D.markV0TbdrRiem = sparse(problemData.generateMarkV0T1DbdrRiem(problemData.g.g1D));
 
 % Prescribed flow rate without and with Riemann solver
 problemData.g.g1D.markV0TbdrUH = sparse(~problemData.g.g1D.markV0TbdrRiem & markV0TbdrRiv);
