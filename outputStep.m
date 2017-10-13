@@ -72,7 +72,7 @@ if mod(nStep-1, problemData.outputFrequency) == 0
     if problemData.isVisSol
       problemData.pdExact.cDiscRK{end, 1} = projectFuncCont2DataDisc1D(problemData.pdExact.g.g1D, hCont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
 
-      problemData.pdExact = problemData.fn_adaptFreeSurface(problemData.pdExact, true);
+      problemData.pdExact = problemData.fn_adaptFreeSurface(problemData.pdExact);
 
       problemData.pdExact.cDiscRK{end, 2} = projectFuncCont2DataDiscTetra(problemData.pdExact.g, u1Cont, problemData.qOrd, problemData.pdExact.globM, problemData.basesOnQuad2D);
       problemData.pdExact.cDiscRK{end, 3} = projectFuncCont2DataDiscTetra(problemData.pdExact.g, u2Cont, problemData.qOrd, problemData.pdExact.globM, problemData.basesOnQuad2D);

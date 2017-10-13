@@ -75,7 +75,6 @@ problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - 
 %% Flux and continuity equation
 % Element integral in flux and continuity equation (IX, XI)
 globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
-problemData.globH = globH;
 
 % Boundary edge integral without Dirichlet data for U in flux and continuity equation (X, XII)
 globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
@@ -95,6 +94,11 @@ problemData.globQAvg = globQAvg;
 % Horizontal interior and top boundary edge integral with second normal component in continuity equation (XII)
 globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, (problemData.g.markE0Tint | problemData.g.markE0TbdrTop) & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
 problemData.globQup = globQup;
+
+% Boundary edge integral without Dirichlet data for U in continuity equation (XII), restricted to boundaries without Riemann solver
+if any(problemData.g.markE0TbdrRiemU(:))
+  globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~(problemData.g.markE0TbdrU | problemData.g.markE0TbdrRiemU), problemData.hatQdiag);
+end % if
 
 % Combine matrices
 problemData.globHQup = globH{2} - globQup;% - globQAvg{2}; % Dafuq???? Warum up UND Avg?
