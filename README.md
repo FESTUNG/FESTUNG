@@ -4,12 +4,16 @@ FESTUNG
 
 FESTUNG relies on fully vectorized matrix/vector operations to deliver optimized computational performance combined with a compact, user-friendly interface and a comprehensive documentation.
 
+![](doxygen/images/features.png)
+
 ## Download
 * Tarballs of previous code versions and further information about the project can be found on our [Project page](https://math.fau.de/FESTUNG).
 * The latest published version can always be downloaded from the [Github repository](https://github.com/FESTUNG/project).
 
 ## Usage
-To check out the latest version, run `git clone https://github.com/FESTUNG/project.git`
+To check out the latest version, run 
+
+    git clone https://github.com/FESTUNG/project.git
 
 Model problems are defined following a generic [solver structure](doxygen/solver-structure.md).
 Have a look at the implementation of the standard (element-based) DG discretizations of linear advection (folders `advection` for time-explicit and `advection_implicit` for time-implicit) or the LDG discretization of the diffusion operator (folder `diffusion`).
@@ -32,7 +36,6 @@ All routines are carefully documented in the Doxygen format, which allows to pro
 in the main directory.
 
 ## Contributors
-
 FESTUNGs main developers are [Florian Frank](http://frank.ink), [Balthasar Reuter](https://math.fau.de/reuter), and [Vadym Aizinger](https://math.fau.de/aizinger). Its initial release was developed at the [Chair for Applied Mathematics I](https://www.mso.math.fau.de/applied-mathematics-1.html) at [Friedrich-Alexander-University Erlangen-Nürnberg](https://www.fau.eu).
 
 ### Third party libraries

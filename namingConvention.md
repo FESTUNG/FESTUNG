@@ -1,4 +1,4 @@
-NAMING CONVENTION
+Naming convention
 =================
 To ensure a similar appearance of all codes and to allow for an easier and more intuitive understanding of the purpose of identifiers (e. g., variable or function names), we agreed on the following naming convention for the source code of *FESTUNG*:
 
