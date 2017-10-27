@@ -1,31 +1,42 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //! @page references References
 //! 
-//! @section JRASK2017 [JRASK2017]
+//!
+//! @subsection JRASK2017 [JRASK2017]
+//! <tt>[JRASK2017]</tt><br>
 //! A. Jaust, B. Reuter, V. Aizinger, J. Schütz, P. Knabner,<br>
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part III: Hybridized discontinuous (HDG) formulation&rdquo;</b>.<br>
 //! Submitted to: Computers & Mathematics with Applications.<br>
 //! Preprint on arXiv: https://arxiv.org/abs/1709.04390
 //!
-//! @section RAWFK2016 [RAWFK2016]
+//! @subsection RAWFK2016 [RAWFK2016]
+//! <tt>[RAWFK2016]</tt><br>
 //! B. Reuter, V. Aizinger, M. Wieland, F. Frank, P. Knabner,<br>
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part II: Advection operator and slope limiting&rdquo;</b>,<br>
 //! Computers & Mathematics with Applications 72 (7) (2016) 1896–1925.<br>
 //! [<code>doi:10.1016/j.camwa.2016.08.006</code>](https://doi.org/10.1016/j.camwa.2016.08.006).
 //!
-//! @section FRAK2015 [FRAK2015]
+//! @subsection FRAK2015 [FRAK2015]
+//! <tt>[FRAK2015]</tt><br>
 //! F. Frank, B. Reuter, V. Aizinger, P. Knabner,<br>
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part I: Diffusion operator&rdquo;</b>,<br>
 //! Computers & Mathematics with Applications 70 (1) (2015) 11–46.<br>
 //! [<code>doi:10.1016/j.camwa.2015.04.013</code>](https://doi.org/10.1016/j.camwa.2015.04.013).
 //!
-//! @section Cools2003 [Cools2003]
+//! @subsection Cools2003 [Cools2003]
+//! <tt>[Cools2003]</tt><br>
 //! R. Cools,<br>
 //! <b>&ldquo;An encyclopaedia of cubature formulas&rdquo;</b>,<br>
 //! Journal of Complexity 19 (3) (2003) 445–453.<br>
 //! [<code>doi:10.1016/S0885-064X(03)00011-6</code>](https://doi.org/10.1016/S0885-064X(03)00011-6).
 //!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Subsection titles will be hidden when there is no section.  It seems to 
+% look cleaner to hide the titles, since the font is too big and the 
+% vertical space too large.  Instead, we print the tag manually.  The linking works
+% despite hiding the titles.
+%

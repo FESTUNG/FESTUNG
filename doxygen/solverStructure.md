@@ -1,5 +1,5 @@
-Generic solver structure
-========================
+Solver structure
+================
 
 
 The solver structure of FESTUNG is built around the perception that almost
