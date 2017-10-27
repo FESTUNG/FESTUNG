@@ -684,7 +684,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            = doxygen/doxygenLayout.xml
+LAYOUT_FILE            =
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -774,9 +774,9 @@ WARN_LOGFILE           =
 INPUT                  = . \
                          README.md \
                          doxygen/gallery.md \
-   						 license.md \
+            						 license.md \
                          namingConvention.md \
-                         doxygen/solverStructure.md
+                         doxygen/solverStructure.md 
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1155,6 +1155,9 @@ HTML_FOOTER            =
 # it is more robust and this tag (HTML_STYLESHEET) will in the future become
 # obsolete.
 # This tag requires that the tag GENERATE_HTML is set to YES.
+# Note
+# It is not longer recommended to use HTML_STYLESHEET, as it make it difficult to 
+# upgrade to a newer version of doxygen. Use HTML_EXTRA_STYLESHEET instead.
 
 HTML_STYLESHEET        =
 
