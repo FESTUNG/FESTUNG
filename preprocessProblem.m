@@ -17,8 +17,8 @@ problemData.g.markE0Tv = ~problemData.g.markE0Th;
 % Interior edges
 problemData.g.markE0Tint = problemData.generateMarkE0Tint(problemData.g); 
 
-% Boundary edges
-problemData.g.markE0Tbdr = sparse(~problemData.g.markE0Tint); 
+% Vertical boundary edges
+problemData.g.markE0Tbdr = sparse(~problemData.g.markE0Tint & problemData.g.markE0Tv); 
 
 % Bottom boundary edges
 problemData.g.markE0TbdrBot = sparse(problemData.generateMarkE0TbdrBot(problemData.g));
@@ -27,10 +27,10 @@ problemData.g.markE0TbdrBot = sparse(problemData.generateMarkE0TbdrBot(problemDa
 problemData.g.markE0TbdrTop = sparse(problemData.generateMarkE0TbdrTop(problemData.g));
 
 % Land, Open sea, River and Radiation boundary edges
-markE0TbdrLand = problemData.generateMarkE0TbdrLand(problemData.g);
-markE0TbdrOS = problemData.generateMarkE0TbdrOS(problemData.g);
-markE0TbdrRiv = problemData.generateMarkE0TbdrRiv(problemData.g);
-markE0TbdrRad = problemData.generateMarkE0TbdrRad(problemData.g);
+% markE0TbdrLand = problemData.generateMarkE0TbdrLand(problemData.g);
+% markE0TbdrOS = problemData.generateMarkE0TbdrOS(problemData.g);
+% markE0TbdrRiv = problemData.generateMarkE0TbdrRiv(problemData.g);
+% markE0TbdrRad = problemData.generateMarkE0TbdrRad(problemData.g);
 
 % Coupling boundary edges
 problemData.g.markE0TbdrCoupling = sparse(problemData.generateMarkE0TbdrCoupling(problemData.g));
@@ -39,22 +39,22 @@ problemData.g.markE0TbdrCoupling = sparse(problemData.generateMarkE0TbdrCoupling
 problemData.g.markE0TbdrRiem = sparse(problemData.generateMarkE0TbdrRiem(problemData.g));
 
 % Prescribed horizontal velocity without and with Riemann solver
-problemData.g.markE0TbdrU = sparse(~(problemData.g.markE0TbdrRiem | problemData.g.markE0TbdrCoupling) & (markE0TbdrLand | markE0TbdrRiv | problemData.g.markE0TbdrBot));
-problemData.g.markE0TbdrRiemU = sparse(problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrCoupling & (markE0TbdrLand | markE0TbdrRiv | problemData.g.markE0TbdrBot));
+problemData.g.markE0TbdrU = sparse(problemData.generateMarkE0TbdrU(problemData.g));
+% problemData.g.markE0TbdrRiemU = sparse(problemData.g.markE0TbdrRiem & problemData.generateMarkE0TbdrU(problemData.g));
 
 % Prescribed vertical velocity without Riemann solver
-problemData.g.markE0TbdrW = sparse(problemData.g.markE0TbdrBot & ~problemData.g.markE0TbdrCoupling);
+% problemData.g.markE0TbdrW = sparse(problemData.g.markE0TbdrBot & ~problemData.g.markE0TbdrCoupling);
 
 % Prescribed water height without and with Riemann solver
-problemData.g.markE0TbdrH = sparse(~problemData.g.markE0TbdrRiem & (markE0TbdrOS | markE0TbdrRiv));
-problemData.g.markE0TbdrRiemH = sparse(problemData.g.markE0TbdrRiem & (markE0TbdrOS | markE0TbdrRiv));
+problemData.g.markE0TbdrH = sparse(problemData.generateMarkE0TbdrH(problemData.g));
+% problemData.g.markE0TbdrRiemH = sparse(problemData.g.markE0TbdrRiem & problemData.generateMarkE0TbdrH(problemData.g));
 
 % Prescribed diffusion without Riemann solver
-problemData.g.markE0TbdrQ = sparse(problemData.g.markE0TbdrTop | markE0TbdrOS | markE0TbdrRad);
+problemData.g.markE0TbdrQ = sparse(problemData.generateMarkE0TbdrQ(problemData.g));
 
 % Prescribed flow rate without and with Riemann solver
-problemData.g.markE0TbdrUH = sparse(~problemData.g.markE0TbdrRiem & markE0TbdrRiv);
-problemData.g.markE0TbdrRiemUH = sparse(problemData.g.markE0TbdrRiem & markE0TbdrRiv);
+% problemData.g.markE0TbdrUH = sparse(~problemData.g.markE0TbdrRiem & markE0TbdrRiv);
+% problemData.g.markE0TbdrRiemUH = sparse(problemData.g.markE0TbdrRiem & markE0TbdrRiv);
 
 %% Additional 1D mesh data: [barK x 2] marker for local edges
 % Interior vertices
@@ -63,32 +63,38 @@ problemData.g.g1D.markV0Tint = problemData.generateMarkV0T1Dint(problemData.g.g1
 % Boundary vertices
 problemData.g.g1D.markV0Tbdr = sparse(~problemData.g.g1D.markV0Tint);
 
+problemData.g.g1D.markV0TbdrU = sparse(problemData.generateMarkV0T1DbdrU(problemData.g.g1D));
+problemData.g.g1D.markV0TbdrH = sparse(problemData.generateMarkV0T1DbdrH(problemData.g.g1D));
+
 % Land, Open sea, River and Radiation boundary vertices
-markV0TbdrLand = problemData.generateMarkV0T1DbdrLand(problemData.g.g1D);
-markV0TbdrOS = problemData.generateMarkV0T1DbdrOS(problemData.g.g1D);
-markV0TbdrRiv = problemData.generateMarkV0T1DbdrRiv(problemData.g.g1D);
+% markV0TbdrLand = problemData.generateMarkV0T1DbdrLand(problemData.g.g1D);
+% markV0TbdrOS = problemData.generateMarkV0T1DbdrOS(problemData.g.g1D);
+% markV0TbdrRiv = problemData.generateMarkV0T1DbdrRiv(problemData.g.g1D);
 % markV0TbdrRad = problemData.generateMarkV0T1DbdrRad(problemData.g.g1D);
 
 % Boundary vertices with Riemann solver applied
 problemData.g.g1D.markV0TbdrRiem = sparse(problemData.generateMarkV0T1DbdrRiem(problemData.g.g1D));
 
 % Prescribed flow rate without and with Riemann solver
-problemData.g.g1D.markV0TbdrUH = sparse(~problemData.g.g1D.markV0TbdrRiem & markV0TbdrRiv);
-problemData.g.g1D.markV0TbdrRiemUH = sparse(problemData.g.g1D.markV0TbdrRiem & markV0TbdrRiv);
+% problemData.g.g1D.markV0TbdrUH = sparse(~problemData.g.g1D.markV0TbdrRiem & markV0TbdrRiv);
+% problemData.g.g1D.markV0TbdrRiemUH = sparse(problemData.g.g1D.markV0TbdrRiem & markV0TbdrRiv);
 
 % Prescribed water height without and with Riemann solver
-problemData.g.g1D.markV0TbdrH = sparse(~problemData.g.g1D.markV0TbdrRiem & ~markV0TbdrRiv & markV0TbdrOS);
-problemData.g.g1D.markV0TbdrRiemH = sparse(problemData.g.g1D.markV0TbdrRiem & ~markV0TbdrRiv & markV0TbdrOS);
+% problemData.g.g1D.markV0TbdrH = sparse(~problemData.g.g1D.markV0TbdrRiem & (markV0TbdrRiv | markV0TbdrOS));
+% problemData.g.g1D.markV0TbdrRiemH = sparse(problemData.g.g1D.markV0TbdrRiem & (markV0TbdrRiv | markV0TbdrOS));
 
 % Prescribed horizontal velocity without and with Riemann solver
-problemData.g.g1D.markV0TbdrU = sparse(~problemData.g.g1D.markV0TbdrRiem & ~markV0TbdrRiv & markV0TbdrLand);
-problemData.g.g1D.markV0TbdrRiemU = sparse(problemData.g.g1D.markV0TbdrRiem & ~markV0TbdrRiv & markV0TbdrLand);
+% problemData.g.g1D.markV0TbdrU = sparse(~problemData.g.g1D.markV0TbdrRiem & markV0TbdrLand);
+% problemData.g.g1D.markV0TbdrRiemU = sparse(problemData.g.g1D.markV0TbdrRiem & markV0TbdrLand);
 
-assert(~any((problemData.g.markE0TbdrRiemU(:) & ~problemData.g.markE0TbdrRiemH(:)) | (~problemData.g.markE0TbdrRiemU(:) & problemData.g.markE0TbdrRiemH(:))), ...
-      'Only u or h given with Riemann solver is not yet implemented in continuity equation!');
+assert(~any(problemData.g.markE0Th(:) & problemData.g.markE0TbdrRiem(:)), ...
+       'Riemann solver for horizontal boundaries is not implemented!');
+
+% assert(~any((problemData.g.markE0TbdrRiemU(:) & ~problemData.g.markE0TbdrRiemH(:)) | (~problemData.g.markE0TbdrRiemU(:) & problemData.g.markE0TbdrRiemH(:))), ...
+%       'Only u or h given with Riemann solver is not yet implemented in continuity equation!');
   
-assert(~any(problemData.g.g1D.markV0TbdrU(:) | problemData.g.g1D.markV0TbdrRiemU(:) | problemData.g.g1D.markV0TbdrH(:) | problemData.g.g1D.markV0TbdrRiemH(:)), ...
-      'Only u or h given is not yet implemented in free-surface equation!');
+% assert(~any(problemData.g.g1D.markV0TbdrU(:) | problemData.g.g1D.markV0TbdrRiemU(:) | problemData.g.g1D.markV0TbdrH(:) | problemData.g.g1D.markV0TbdrRiemH(:)), ...
+%       'Only u or h given is not yet implemented in free-surface equation!');
 
 %% Function handles for problem-specific functions
 problemData.fn_adaptFreeSurface = getFunctionHandle([problemData.problemName filesep 'adaptFreeSurface']);

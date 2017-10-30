@@ -2,9 +2,9 @@ function problemData = getTestcase(problemData, problemName)
 switch problemName  
   case 'convergence'
     domainWidth = 100;
-%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4]; idRiem = -1;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4]; idRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
@@ -393,18 +393,18 @@ switch problemName
 %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
 %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
-    idLand = -1; idOS = -1; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
-    dtXi = 0;%0.01;
-    dxZb = 0;%-0.005;
-    dxXi = 0;%0.005;
+    dtXi = 0*0.01;
+    dxZb = 0*-0.005;
+    dxXi = 0*0.005;
     dxU1 = 0.01;
     dzU2 = -dxU1;
     rho = 0;
     
-    xiCont = @(t,x) dxXi * x + dtXi * t;
+    xiCont = @(t,x) 0 + dxXi * x + dtXi * t;
     zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
@@ -434,9 +434,9 @@ switch problemName
   case 'quadratic_h' % 
     domainWidth = 100;
 %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
-    idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+%     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
 %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
-%     idLand = -1; idOS = -1; idRiv = [2,4]; idRad = -1; idRiem = -1;
+    idLand = -1; idOS = -1; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
     gConst = 40;
     xi0Cont = @(x) zeros(size(x));
