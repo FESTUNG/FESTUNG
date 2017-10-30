@@ -12,7 +12,7 @@ switch problemName
     omega = 0.1;
     delta = 0.1;
     epsilon = 0.01;
-    rho = 0.001;
+    rho = 0;%0.001;
     
     xiCont = @(t,x) epsilon * sin(omega * (x+t));
     zBotCont = @(x) -2 + dxZb * x;
@@ -397,9 +397,9 @@ switch problemName
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
-    dtXi = 0*0.01;
-    dxZb = 0*-0.005;
-    dxXi = 0*0.005;
+    dtXi = 0.01;
+    dxZb = -0.005;
+    dxXi = 0.005;
     dxU1 = 0.01;
     dzU2 = -dxU1;
     rho = 0;

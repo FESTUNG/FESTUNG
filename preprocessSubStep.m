@@ -179,16 +179,19 @@ problemData.barGlobJuhRiem = assembleVecV0T1DPhiIntFuncContNuHeight(problemData.
 numQuad1D = length(Q);
 
 % Horizontal velocity from interior and neighboring element in quadrature points of edges
-u1Q0E0Tint = { zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1) }; % cDisc{2} in quad points of edges
-u1Q0E0TE0T = { zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1) }; % cDisc{2} of neighboring element in quad points of edges
-u1Q0E0TbdrRiem = { zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1) }; % u1D in quad points of boundary edges with Riemann solver
-for n = 1 : 4
-  u1Q0E0Tint{n} = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,n) * problemData.cDiscRK{nSubStep, 2}.', K * numQuad1D, 1);
+u1Q0E0Tint = { []; []; zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1) }; % cDisc{2} in quad points of edges
+u1Q0E0TE0T = { []; []; zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1) }; % cDisc{2} of neighboring element in quad points of edges
+u1Q0E0TbdrRiem = { []; []; zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1) }; % u1D in quad points of boundary edges with Riemann solver
+for n = 3 : 4
+  u1Q0E0Tint{n} = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, n) * problemData.cDiscRK{nSubStep, 2}.', K * numQuad1D, 1);
+  
+  markQ0E0TbdrRiem = logical(kron(problemData.g.markE0TbdrRiem(:, n) & problemData.g.markE0TbdrU(:, n), true(numQuad1D, 1)));
   [Q1, Q2] = gammaMapTetra(n, Q);
-  X1 = problemData.g.mapRef2Phy(1, Q1, Q2);
-  X2 = problemData.g.mapRef2Phy(2, Q1, Q2);
-  u1Q0E0TbdrRiem{n}(problemData.g.markE0TbdrRiem(:, n)) = u1DCont(X1(problemData.g.markE0TbdrRiem(:, n)), X2(problemData.g.markE0TbdrRiem(:, n)));
-  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:,:,mapLocalEdgeTetra(n)) * problemData.cDiscRK{nSubStep, 2}.';
+  X1 = reshape(problemData.g.mapRef2Phy(1, Q1, Q2).', K * numQuad1D, 1);
+  X2 = reshape(problemData.g.mapRef2Phy(2, Q1, Q2).', K * numQuad1D, 1);
+  u1Q0E0TbdrRiem{n}(markQ0E0TbdrRiem) = u1DCont(X1(markQ0E0TbdrRiem), X2(markQ0E0TbdrRiem));
+  
+  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, mapLocalEdgeTetra(n)) * problemData.cDiscRK{nSubStep, 2}.';
   u1Q0E0TE0T{n} = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{n}.', K * numQuad1D, 1);
 end % for nn
 
@@ -206,9 +209,10 @@ problemData.barGlobKhRiem = zeros(barK * problemData.barN, 1);
 
 for n = 3 : 4
   nn1D = 5 - n; np1D = 5 - mapLocalEdgeTetra(n);
+  markV0TbdrRiem = problemData.g.g1D.markV0TbdrRiem(:, nn1D) & problemData.g.g1D.markV0TbdrH(:, nn1D);
   
-  [i, j] = find(problemData.g.g1D.markV0TbdrRiem(:, nn1D));
-  hV0T1DbdrRiem = sparse(i, j, hDCont(problemData.g.g1D.coordV0T(problemData.g.g1D.markV0TbdrRiem(:, nn1D), nn1D, 1)), barK, 1);
+  [i, j] = find(markV0TbdrRiem);
+  hV0T1DbdrRiem = sparse(i, j, hDCont(problemData.g.g1D.coordV0T(markV0TbdrRiem, nn1D, 1)), barK, 1);
   
   % Average and jump in height per edge
   hAvgE0T = 0.5 * problemData.g.g1D.markT2DT * ( problemData.hV0T1D(:,nn1D) + problemData.g.g1D.markV0TV0T{nn1D} * problemData.hV0T1D(:,np1D) + hV0T1DbdrRiem);
