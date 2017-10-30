@@ -104,7 +104,7 @@ ret = { zeros(K, N), zeros(K, N) };
 for n = 1 : 4
   [Q1, Q2] = gammaMapTetra(n, Q);
   for m = 1 : 2
-    funcQ0E = funcCont{1}(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
+    funcQ0E = funcCont{m}(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
     intQ0E = funcQ0E * (repmat(W(:), 1, N) .* basesOnQuad.phi1D{qOrd}(:, :, n));
     ret{m} = ret{m} + bsxfun(@times, markE0T(:, n) .* g.areaE0T(:, n) .* g.nuE0T(:, n, m), intQ0E);
   end  % for m
