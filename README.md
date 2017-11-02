@@ -47,9 +47,9 @@ FESTUNGs main developers are [Florian Frank](http://frank.ink), [Balthasar Reute
 * see [License](license.md) file
 
 ## Version 
-* Version 0.1 as published in the paper [[FRAK2015]](@ref FRAK2015).
-* Version 0.2 as published in the paper [[RAWFK2016]](@ref RAWFK2016).
-* Version 0.3 as published in the paper [[JRASK2017]](@ref JRASK2017).
+* Version 0.1 as published in the paper *Frank, Reuter, Aizinger, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part I: Diffusion operator". *In: Computers & Mathematics with Applications 70 (2015) 11-46, Available online 15 May 2015, ISSN 0898-1221, http://dx.doi.org/10.1016/j.camwa.2015.04.013.*
+* Version 0.2 as published in the paper *Reuter, Aizinger, Wieland, Frank, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part II: Advection operator and slope limiting". *In: Computers & Mathematics with Applications 72 (2016) 1896-1925, Available online 25 August 2016, ISSN 0898-1221, http://dx.doi.org/doi:10.1016/j.camwa.2016.08.006.*
+* Version 0.3 as published in the paper *Jaust, Reuter, Aizinger, Schuetz, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part III: Hybridized discontinuous Galerkin (HDG) formulation". *Submitted to: Computers & Mathematics with Applications (2017).  Preprint on arXiv: https://arxiv.org/abs/1709.04390.*
 
 ## Contact
 * Homepage: [https://math.fau.de/FESTUNG](https://math.fau.de/FESTUNG)

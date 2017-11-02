@@ -61,3 +61,8 @@
 % despite hiding the titles.  It would be more convenient to use a Markdown (md) file,
 % but it's not clear how to reference from m files to the section in the md file.
 %
+% Reference above section tags in md files via [[FRAK2015]](@ref FRAK2015).
+%
+%
+%
+%
