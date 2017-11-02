@@ -8,7 +8,7 @@
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part III: Hybridized discontinuous (HDG) formulation&rdquo;</b>.<br>
 //! Submitted to: Computers & Mathematics with Applications.<br>
-//! Preprint on arXiv: https://arxiv.org/abs/1709.04390
+//! Preprint on arXiv: https://arxiv.org/abs/1709.04390.
 //!
 //! @subsection RAWFK2016 [RAWFK2016]
 //! B. Reuter, V. Aizinger, M. Wieland, F. Frank, P. Knabner,<br>
@@ -58,5 +58,6 @@
 % Subsection titles will be hidden when there is no section.  It seems to 
 % look cleaner to hide the titles, since the font is too big and the 
 % vertical space too large.  Instead, we print the tag manually.  The linking works
-% despite hiding the titles.
+% despite hiding the titles.  It would be more convenient to use a Markdown (md) file,
+% but it's not clear how to reference from m files to the section in the md file.
 %
