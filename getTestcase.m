@@ -33,8 +33,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) delta * omega * cos(omega * (x+t));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.5 * delta * sin(omega * (x+t)) .* (xiCont(t,x).^2 - zBotCont(x).^2) - delta * zBotCont(x) .* hCont(t,x) .* sin(omega * (x+t));
-    dxU1hCont = @(t,x) 0.5 * delta * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
+    u1zIntCont = @(t,x) 0.5 * delta * sin(omega * (x+t)) .* (xiCont(t,x).^2 - zBotCont(x).^2) - delta * zBotCont(x) .* hCont(t,x) .* sin(omega * (x+t));
+    dxU1zIntCont = @(t,x) 0.5 * delta * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
                         delta * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
@@ -76,8 +76,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) k * a * d^3 * cos(b*x+c*t) .* sin(d*z);
     dzdzU1Cont = @(t,x,z) k * a * d^4 / b * sin(b*x+c*t) .* cos(d*z);
     
-    u1hCont = @(t,x) -k * a * d / b * sin(b*x+c*t) .* ( sin(d*xiCont(t,x)) - sin(d*zBotCont(x)) ) + 0.5 * f * ( xiCont(t,x).^2 - zBotCont(x).^2 );
-    dxU1hCont = @(t,x) -k * a * d * cos(b*x+c*t) .* ( sin(d*xiCont(t,x)) - sin(d*zBotCont(x)) ) - ...
+    u1zIntCont = @(t,x) -k * a * d / b * sin(b*x+c*t) .* ( sin(d*xiCont(t,x)) - sin(d*zBotCont(x)) ) + 0.5 * f * ( xiCont(t,x).^2 - zBotCont(x).^2 );
+    dxU1zIntCont = @(t,x) -k * a * d * cos(b*x+c*t) .* ( sin(d*xiCont(t,x)) - sin(d*zBotCont(x)) ) - ...
                         k * a * d^2 / b * sin(b*x+c*t) .* ( cos(d*xiCont(t,x)) .* dxXiCont(t,x) - cos(d*zBotCont(x)) * dxZb ) + ...
                         f * ( xiCont(t,x) .* dxXiCont(t,x) - zBotCont(x) * dxZb );
                         
@@ -116,8 +116,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) d * omega * cos(omega * (x+t));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.5 * d * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2;
-    dxU1hCont = @(t,x) 0.5 * d * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
+    u1zIntCont = @(t,x) 0.5 * d * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2;
+    dxU1zIntCont = @(t,x) 0.5 * d * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
                         d * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
                         
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {D, 0; 0, D}, 'UniformOutput', false);
@@ -134,8 +134,8 @@ switch problemName
     omega = 0.01;
     d = 0.1;
     e = 0.01;
-    t_coef = 1;
-    D = 0.1;
+    t_coef = 0;
+    D = 0*0.1;
     
     xiCont = @(t,x) e * sin(omega * (x+t_coef*t));
     zBotCont = @(x) -2 + dxZb * x;
@@ -156,8 +156,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) d * sin(omega * (x+t_coef*t)) .* hCont(t,x) - d/omega * (cos(omega * (xiCont(t,x)+t_coef*t)) - cos(omega * (zBotCont(x)+t_coef*t)));
-    dxU1hCont = @(t,x) d * omega * cos(omega * (x+t_coef*t)) .* hCont(t,x) + d * sin(omega * (x+t_coef*t)) .* dxXiCont(t,x) + ...
+    u1zIntCont = @(t,x) d * sin(omega * (x+t_coef*t)) .* hCont(t,x) - d/omega * (cos(omega * (xiCont(t,x)+t_coef*t)) - cos(omega * (zBotCont(x)+t_coef*t)));
+    dxU1zIntCont = @(t,x) d * omega * cos(omega * (x+t_coef*t)) .* hCont(t,x) + d * sin(omega * (x+t_coef*t)) .* dxXiCont(t,x) + ...
                       d * sin(omega * (xiCont(t,x)+t_coef*t)) .* dxXiCont(t,x);
                         
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {D, 0; 0, D}, 'UniformOutput', false);
@@ -191,25 +191,26 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) -sin(z+0.01*t);%zeros(size(x));%-sin(z+0.01*t);
     
-    u1hCont = @(t,x) -cos(xiCont(t,x)+0.01*t) + cos(zBotCont(x)+0.01*t);%zeros(size(x));%cos(xiCont(t,x)+0.01*t) - cos(zBotCont(x)+0.01*t);
-    dxU1hCont = @(t,x) sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);%zeros(size(x));%-sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);
+    u1zIntCont = @(t,x) -cos(xiCont(t,x)+0.01*t) + cos(zBotCont(x)+0.01*t);%zeros(size(x));%cos(xiCont(t,x)+0.01*t) - cos(zBotCont(x)+0.01*t);
+    dxU1zIntCont = @(t,x) sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);%zeros(size(x));%-sin(xiCont(t,x)+0.01*t).*dxXiCont(t,x);
 
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0.0, 0; 0, 0.0}, 'UniformOutput', false);
     dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
 
   case 'constant' % OK (ausser mit Riemann-Loeser am Rand)
     domainWidth = 100;
-%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
-    dtXi = 0.01;
+    dxZb = -0.005;
+    dtXi = 0*0.01;
     rho = 0;
     
     xiCont = @(t,x) dtXi * t * ones(size(x));
-    zBotCont = @(x) -2 * ones(size(x));
+    zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
     u1Cont = @(t,x,z) 0.1 * ones(size(x));
@@ -227,8 +228,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.1 * hCont(t,x);
-    dxU1hCont = @(t,x) zeros(size(x));
+    u1zIntCont = @(t,x) 0.1 * hCont(t,x);
+    dxU1zIntCont = @(t,x) 0.1 * (dxXiCont(t,x) - dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -266,8 +267,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.1 * hCont(t,x);
-    dxU1hCont = @(t,x) 0.1 * (dxXiCont(t,x) - dxZb);
+    u1zIntCont = @(t,x) 0.1 * hCont(t,x);
+    dxU1zIntCont = @(t,x) 0.1 * (dxXiCont(t,x) - dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -276,17 +277,18 @@ switch problemName
     
   case 'z-linear_u' % OK (ausser mit Riemann-Loeser am Rand)
     domainWidth = 100;
-%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
     dzU1 = 0.1;
+    dxZb = -0.005;
     rho = 0;
     
     xiCont = @(t,x) zeros(size(x));
-    zBotCont = @(x) -2 * ones(size(x));
+    zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
     u1Cont = @(t,x,z) dzU1 * z;
@@ -304,8 +306,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) -0.2 * ones(size(x));
-    dxU1hCont = @(t,x) zeros(size(x));
+    u1zIntCont = @(t,x) 0.05 * (xiCont(t,x).^2 - zBotCont(x).^2);
+    dxU1zIntCont = @(t,x) 0.1 * (xiCont(t,x) .* dxXiCont(t,x) - zBotCont(x) .* dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -321,10 +323,11 @@ switch problemName
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
     dxU2 = 0.01;
+    dxZb = -0.005;
     rho = 0;
     
     xiCont = @(t,x) zeros(size(x));
-    zBotCont = @(x) -2 * ones(size(x));
+    zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
     u1Cont = @(t,x,z) 0.1 * ones(size(x));
@@ -342,8 +345,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.2 * ones(size(x));
-    dxU1hCont = @(t,x) zeros(size(x));
+    u1zIntCont = @(t,x) 0.1 * hCont(t,x);
+    dxU1zIntCont = @(t,x) 0.1 * (dxXiCont(t,x) - dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -380,8 +383,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 2 * dxU1 * x;
-    dxU1hCont = @(t,x) 2 * dxU1 * ones(size(x));
+    u1zIntCont = @(t,x) 2 * dxU1 * x;
+    dxU1zIntCont = @(t,x) 2 * dxU1 * ones(size(x));
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -397,14 +400,14 @@ switch problemName
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
-    dtXi = 0.01;
+    dtXi = 0*0.01;
     dxZb = -0.005;
     dxXi = 0.005;
     dxU1 = 0.01;
     dzU2 = -dxU1;
     rho = 0;
     
-    xiCont = @(t,x) 0 + dxXi * x + dtXi * t;
+    xiCont = @(t,x) dxXi * x + dtXi * t;
     zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
@@ -423,8 +426,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) dxU1 * x .* hCont(t,x);
-    dxU1hCont = @(t,x) dxU1 * hCont(t,x) + dxU1 * x .* (dxXiCont(t,x) - dxZb);
+    u1zIntCont = @(t,x) (dxU1 * x) .* hCont(t,x);
+    dxU1zIntCont = @(t,x) dxU1 * hCont(t,x) + (dxU1 * x) .* (dxXiCont(t,x) - dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -466,8 +469,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) dxU1 * x .* hCont(t,x);
-    dxU1hCont = @(t,x) dxU1 * hCont(t,x) + dxU1 * x .* (dxXiCont(t,x) - dxZb);
+    u1zIntCont = @(t,x) dxU1 * x .* hCont(t,x);
+    dxU1zIntCont = @(t,x) dxU1 * hCont(t,x) + dxU1 * x .* (dxXiCont(t,x) - dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -509,8 +512,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) dxU1 * x .* hCont(t,x);
-    dxU1hCont = @(t,x) dxU1 * hCont(t,x) + dxU1 * x .* (dxXiCont(t,x) - dxZb);
+    u1zIntCont = @(t,x) dxU1 * x .* hCont(t,x);
+    dxU1zIntCont = @(t,x) dxU1 * hCont(t,x) + dxU1 * x .* (dxXiCont(t,x) - dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -552,8 +555,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) dxU1 * x .* hCont(t,x);
-    dxU1hCont = @(t,x) dxU1 * hCont(t,x) + dxU1 * x .* (dxXiCont(t,x) - dxZb);
+    u1zIntCont = @(t,x) dxU1 * x .* hCont(t,x);
+    dxU1zIntCont = @(t,x) dxU1 * hCont(t,x) + dxU1 * x .* (dxXiCont(t,x) - dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -592,8 +595,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.1 * hCont(t,x);
-    dxU1hCont = @(t,x) 0.1 * (dxXiCont(t,x) - dxZb);
+    u1zIntCont = @(t,x) 0.1 * hCont(t,x);
+    dxU1zIntCont = @(t,x) 0.1 * (dxXiCont(t,x) - dxZb);
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -634,8 +637,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.25 * delta * (-cos(omega * t + 4 * xiCont(t,x)) + cos(omega * t + 4 * zBotCont(x)));
-    dxU1hCont = @(t,x) -delta * sin(omega * t + zBotCont(x)) * dxZb;
+    u1zIntCont = @(t,x) 0.25 * delta * (-cos(omega * t + 4 * xiCont(t,x)) + cos(omega * t + 4 * zBotCont(x)));
+    dxU1zIntCont = @(t,x) -delta * sin(omega * t + zBotCont(x)) * dxZb;
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -676,8 +679,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) zeros(size(x));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.1 * hCont(t,x);
-    dxU1hCont = @(t,x) zeros(size(x));
+    u1zIntCont = @(t,x) 0.1 * hCont(t,x);
+    dxU1zIntCont = @(t,x) zeros(size(x));
                         
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
               @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
@@ -720,8 +723,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) delta * omega * cos(omega * x + theta * t);
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1hCont = @(t,x) 0.5 * delta * sin(omega * x + theta * t) .* (xiCont(t,x) - zBotCont(x)).^2;
-    dxU1hCont = @(t,x) 0.5 * delta * omega * cos(omega * x + theta * t) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
+    u1zIntCont = @(t,x) 0.5 * delta * sin(omega * x + theta * t) .* (xiCont(t,x) - zBotCont(x)).^2;
+    dxU1zIntCont = @(t,x) 0.5 * delta * omega * cos(omega * x + theta * t) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
                         delta * sin(omega * x + theta * t) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
     
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
@@ -745,7 +748,7 @@ problemData = setdefault(problemData, 'u1Cont', u1Cont);
 problemData = setdefault(problemData, 'u2Cont', u2Cont);
 problemData = setdefault(problemData, 'DCont', DCont);
 
-fhCont = @(t,x) dtHCont(t,x) + dxU1hCont(t,x);
+fhCont = @(t,x) dtHCont(t,x) + dxU1zIntCont(t,x);
 fuCont = @(t,x,z) dtU1Cont(t,x,z) + 2 * u1Cont(t,x,z) .* dxU1Cont(t,x,z) + ...
                   dzU1Cont(t,x,z) .* u2Cont(t,x,z) + u1Cont(t,x,z) .* dzU2Cont(t,x,z) - ( ...
                     DCont{1,1}(t,x,z) .* dxdxU1Cont(t,x,z) + dxzDCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) + ...
@@ -762,5 +765,5 @@ problemData = setdefault(problemData, 'u1DCont', u1Cont);
 problemData = setdefault(problemData, 'u2DCont', u2Cont);
 problemData = setdefault(problemData, 'q1DCont', @(t,x,z) -DCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) - DCont{1,2}(t,x,z) .* dzU1Cont(t,x,z));
 problemData = setdefault(problemData, 'q2DCont', @(t,x,z) -DCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) - DCont{2,2}(t,x,z) .* dzU1Cont(t,x,z));
-problemData = setdefault(problemData, 'uhDCont', @(t,x) u1hCont(t,x));
+% problemData = setdefault(problemData, 'uhDCont', @(t,x) u1zIntCont(t,x));
 end % function

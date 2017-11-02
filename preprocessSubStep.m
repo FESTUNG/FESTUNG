@@ -128,6 +128,7 @@ problemData.globJ = globJbot{1} + globJbot{2} + globJuu{1} + 0.5 * globJuuRiem{1
 %% Assembly of time-dependent vectors in flux and continuity equation.
 % Boundary edge integrals with prescribed Dirichlet data for u (X, XII)
 problemData.globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJuBot = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrBot, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 %% Assembly of time-dependent matrices and vectors in continuity equation.
 % Interior edge integrals (averaging uh/Hs) (XII)
