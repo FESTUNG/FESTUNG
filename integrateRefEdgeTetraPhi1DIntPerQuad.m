@@ -50,7 +50,7 @@ end  % for n
 for n = 3 : 4
   for i = 1 : N
     [m, ~] = mapTensorProductIndexInv(i);
-    ret(i,:,n) = W * basesOnQuad.phi0D{qOrd}(m,n-2);
+    ret(i,:,n) = W * basesOnQuad.phi0D{qOrd}(m,5-n);
   end  % for i
 end  % for n
 end  % function
