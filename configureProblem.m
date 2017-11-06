@@ -15,7 +15,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 1);%86.4);  % end time
+problemData = setdefault(problemData, 'tEnd', 32.2);  % end time
 problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.003));  % number of time steps
 
 % Order of Runge-Kutta method
@@ -59,7 +59,7 @@ problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1 & ~problemData.generateMar
 problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
 problemData.generateMarkE0TbdrU = @(g) checkMultipleIds(g.idE0T, [1 2 4]);
 problemData.generateMarkE0TbdrH = @(g) checkMultipleIds(g.idE0T, [2 4]);
-problemData.generateMarkE0TbdrQ = @(g) checkMultipleIds(g.idE0T, [2 3 4]);
+problemData.generateMarkE0TbdrQ = @(g) checkMultipleIds(g.idE0T, [2 4]);
 
 % problemData.generateMarkE0TbdrLand = @(g) checkMultipleIds(g.idE0T, problemData.idLand);
 % problemData.generateMarkE0TbdrOS = @(g) checkMultipleIds(g.idE0T, problemData.idOS);

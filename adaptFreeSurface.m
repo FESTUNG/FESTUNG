@@ -76,19 +76,19 @@ tildeGlobQRiem = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData
 % Combine matrices
 problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQtop{1} - tildeGlobQbot{1} - tildeGlobQbdr{1} - 0.5 * tildeGlobQRiem{1});
 
-%% Flux and continuity equation
+%% Flux equation
 % Element integral in flux and continuity equation (IX, XI)
 globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
 
 % Boundary edge integral without Dirichlet data for U in flux and continuity equation (X, XII)
+globQtop = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
 globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
 
-%% Flux equation
 % Interior edge integral in flux equation (X)
 globQ = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Combine matrices
-problemData.globHQ = cellfun(@(H, Q, Qbdr) H - Q - Qbdr, globH, globQ, globQbdr, 'UniformOutput', false);
+problemData.globHQ = cellfun(@(H, Q, Qtop, Qbdr) H - Q - Qtop - Qbdr, globH, globQ, globQtop, globQbdr, 'UniformOutput', false);
 
 %% Continuity equation
 % Horizontal interior edge integral with first normal component in continuity equation (XII)

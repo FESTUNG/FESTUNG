@@ -66,7 +66,6 @@ hDCont = @(x1) problemData.hDCont(t,x1);
 u1DCont = @(x1,x2) problemData.u1DCont(t,x1,x2);
 u2DCont = @(x1,x2) problemData.u2DCont(t,x1,x2);
 qDCont = { @(x1,x2) problemData.q1DCont(t,x1,x2); @(x1,x2) problemData.q2DCont(t,x1,x2) };
-uhDCont = @(x1) problemData.uhDCont(t, x1);
 
 %% L2-projections of algebraic coefficients and right hand side.
 DDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
@@ -115,6 +114,7 @@ globG = assembleMatElemTetraDphiPhiFuncDisc(problemData.g, problemData.hatG, DDi
 globR = assembleMatEdgeTetraPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
 
 % Diffusion boundary edge integral without prescribed Dirichlet data (V)
+globRbot = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0TbdrBot, problemData.hatRdiag, DDisc);
 globRbdr = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
 
 % Diffusion boundary edge integral with prescribed Dirichlet data (V)
@@ -122,12 +122,13 @@ globJq = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE
 
 % Put together matrices
 problemData.globEP = cellfun(@(E, P, Ptop, Pbdr, PRiem) E - P - Ptop - Pbdr - 0.5 * PRiem, globE, globP, globPtop, globPbdr, globPRiem, 'UniformOutput', false);
-problemData.globGR = cellfun(@(G, R, Rbdr) G - R - Rbdr, globG, globR, globRbdr, 'UniformOutput', false);
+problemData.globGR = cellfun(@(G, R, Rbot, Rbdr) G - R - Rbot - Rbdr, globG, globR, globRbot, globRbdr, 'UniformOutput', false);
 problemData.globJ = globJbot{1} + globJbot{2} + globJuu{1} + 0.5 * globJuuRiem{1} + problemData.gConst * (globJh{1} + 0.5 * globJhRiem{1}) + globJq{1} + globJq{2};
 
 %% Assembly of time-dependent vectors in flux and continuity equation.
 % Boundary edge integrals with prescribed Dirichlet data for u (X, XII)
 problemData.globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJuFlux = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0Tbdr & problemData.g.markE0TbdrU, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.globJuBot = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrBot, u1DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 %% Assembly of time-dependent matrices and vectors in continuity equation.

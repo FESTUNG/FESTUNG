@@ -61,7 +61,7 @@ cSys = cellfun(@(c) reshape(c.', [], 1), problemData.cDiscRK(nSubStep, :), 'Unif
 % Flux variables
 qSys = cell(2,1);
 for m = 1 : 2
-  qSys{m} = problemData.globM \ (-problemData.globJu{m} - problemData.globJuCoupling{m} + ...
+  qSys{m} = problemData.globM \ (-problemData.globJuBot{m} - problemData.globJuFlux{m} - problemData.globJuCoupling{m} + ...
                                   problemData.globHQ{m} * cSys{2});
 end % for m
 
