@@ -15,7 +15,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 32.2);  % end time
+problemData = setdefault(problemData, 'tEnd', 86.4);  % end time
 problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.003));  % number of time steps
 
 % Order of Runge-Kutta method

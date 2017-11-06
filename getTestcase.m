@@ -126,15 +126,16 @@ switch problemName
   case 'utbest_sinus'
     domainWidth = 100;
     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
-    dxZb = 0;
-    omega = 0.01;
-    d = 0.1;
-    e = 0.01;
-    t_coef = 0.1;
+    dxZb = -0.005;
+    omega = 0.1;
+    d = 0.3;
+    e = 0.1;
+    t_coef = 1.;
     D = 0.1;
     
     xiCont = @(t,x) e * sin(omega * (x+t_coef*t));
@@ -147,17 +148,19 @@ switch problemName
     dxXiCont = @(t,x) e * omega * cos(omega * (x+t_coef*t));
     dtHCont = @(t,x)  e * omega * t_coef * cos(omega * (x+t_coef*t));
     
-    dtU1Cont = @(t,x,z) d * omega * t_coef * (cos(omega * (x+t_coef*t)) + cos(omega * (z+t_coef*t)));
+    dtU1Cont = @(t,x,z) d * omega * t_coef * ( cos(omega * (x+t_coef*t)) + cos(omega * (z+t_coef*t)) );
     dxU1Cont = @(t,x,z) d * omega * cos(omega * (x+t_coef*t));
     dzU1Cont = @(t,x,z) d * omega * cos(omega * (z+t_coef*t));
     dzU2Cont = @(t,x,z) -d * omega * cos(omega * (x+t_coef*t));
     
     dxdxU1Cont = @(t,x,z) -d * omega^2 * sin(omega * (x+t_coef*t));
     dxdzU1Cont = @(t,x,z) zeros(size(x));
-    dzdzU1Cont = @(t,x,z) zeros(size(x));
+    dzdzU1Cont = @(t,x,z) -d * omega^2 * sin(omega * (z+t_coef*t));
     
-    dxU1zIntCont = @(t,x) d * omega * cos(omega * (x+t_coef*t)) .* hCont(t,x) + d * sin(omega * (x+t_coef*t)) .* dxXiCont(t,x) + ...
-      d * sin(omega * (xiCont(t,x)+t_coef*t)) .* dxXiCont(t,x);
+    dxU1zIntCont = @(t,x) d * ( omega * cos(omega * (x+t_coef*t)) .* hCont(t,x) + ...
+      sin(omega * (x+t_coef*t)) .* (dxXiCont(t,x) - dxZb) + ...
+      sin(omega * (xiCont(t,x)+t_coef*t)) .* dxXiCont(t,x) - ...
+      sin(omega * (zBotCont(x)+t_coef*t)) .* dxZb );
     
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {D, 0; 0, D}, 'UniformOutput', false);
     dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
@@ -687,10 +690,10 @@ end % switch
 problemData = setdefault(problemData, 'domainWidth', domainWidth);
 problemData = setdefault(problemData, 'xi0Cont', xi0Cont);
 problemData = setdefault(problemData, 'zBotCont', zBotCont);
-problemData = setdefault(problemData, 'idLand', idLand);
-problemData = setdefault(problemData, 'idOS', idOS);
-problemData = setdefault(problemData, 'idRiv', idRiv);
-problemData = setdefault(problemData, 'idRad', idRad);
+% problemData = setdefault(problemData, 'idLand', idLand);
+% problemData = setdefault(problemData, 'idOS', idOS);
+% problemData = setdefault(problemData, 'idRiv', idRiv);
+% problemData = setdefault(problemData, 'idRad', idRad);
 problemData = setdefault(problemData, 'idRiem', idRiem);
 
 problemData = setdefault(problemData, 'gConst', gConst);
