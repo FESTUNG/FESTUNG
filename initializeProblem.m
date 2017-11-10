@@ -18,8 +18,8 @@ problemData.globLzBot = kron(dXzBot, eye(problemData.N, 1));
 
 %% Initial velocities.
 problemData.cDiscRK{end, 2} = projectFuncCont2DataDiscTetra(problemData.g, problemData.u10Cont, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
-problemData.cDiscRK{end, 3} = projectFuncCont2DataDiscTetra(problemData.g, @(x,z) problemData.u2Cont(0,x,z), problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
-% problemData.cDiscRK{end, 3} = zeros(size(problemData.cDiscRK{end, 2}));
+% problemData.cDiscRK{end, 3} = projectFuncCont2DataDiscTetra(problemData.g, @(x,z) problemData.u2Cont(0,x,z), problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
+problemData.cDiscRK{end, 3} = zeros(size(problemData.cDiscRK{end, 2}));
 
 %% Exact solution
 if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))

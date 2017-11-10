@@ -1,5 +1,34 @@
 function problemData = getTestcase(problemData, problemName)
+
+isAnalytical = true;
+
 switch problemName
+  case 'dambreak'
+    isAnalytical = false;
+    
+    domainWidth=100;
+    idRiem = [2,4];
+    
+    gConst = 10;
+    rho = 0.001;
+    
+    zBotCont = @(x) zeros(size(x));
+    xi0Cont = @(x) 2 * ones(size(x));
+    h0Cont = @(x) .1 + 4 * (x <= 20);
+    u10Cont = @(x,z) zeros(size(x));
+    
+    fhCont = @(t,x) zeros(size(x));
+    fuCont = @(t,x,z) zeros(size(x));
+    
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+      @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    
+    hDCont = @(t,x) zeros(size(x));
+    u1DCont = @(t,x,z) zeros(size(x));
+    u2DCont = @(t,x,z) zeros(size(x));
+    q1DCont = @(t,x,z) zeros(size(x));
+    q2DCont = @(t,x,z) zeros(size(x));
+  
   case 'convergence'
     domainWidth = 100;
     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
@@ -91,11 +120,11 @@ switch problemName
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
-    dxZb = 0.005;
-    omega = 0.01;
-    d = 0.1;
-    e = 0.01;
-    D = 0.1;
+    dxZb = -0.005;
+    omega = 0.15;
+    d = 0.125;
+    e = 0.125;
+    D = 0.125;
     
     xiCont = @(t,x) e * sin(omega * (x+t));
     zBotCont = @(x) -2 + dxZb * x;
@@ -116,9 +145,8 @@ switch problemName
     dxdzU1Cont = @(t,x,z) d * omega * cos(omega * (x+t));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1zIntCont = @(t,x) 0.5 * d * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2;
-    dxU1zIntCont = @(t,x) 0.5 * d * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
-      d * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
+    dxU1zIntCont = @(t,x) 0.5 * d * omega * cos(omega * (x+t)) .* hCont(t,x).^2 + ...
+      d * sin(omega * (x+t)) .* hCont(t,x) .* (dxXiCont(t,x) - dxZb);
     
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {D, 0; 0, D}, 'UniformOutput', false);
     dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
@@ -126,19 +154,18 @@ switch problemName
   case 'utbest_sinus'
     domainWidth = 100;
     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
-%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
-    %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+%         idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
-    dxZb = -0.005;
+    dxZb = 0.005;
     omega = 0.1;
     d = 0.3;
     e = 0.1;
     t_coef = 1.;
     D = 0.1;
     
-    xiCont = @(t,x) e * sin(omega * (x+t_coef*t));
+    xiCont = @(t,x) .25 + e * sin(omega * (x+t_coef*t));
     zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
@@ -356,8 +383,8 @@ switch problemName
     
   case 'linear' % OK
     domainWidth = 100;
-    %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+        idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
@@ -688,36 +715,61 @@ switch problemName
 end % switch
 
 problemData = setdefault(problemData, 'domainWidth', domainWidth);
+problemData = setdefault(problemData, 'gConst', gConst);
 problemData = setdefault(problemData, 'xi0Cont', xi0Cont);
 problemData = setdefault(problemData, 'zBotCont', zBotCont);
-% problemData = setdefault(problemData, 'idLand', idLand);
-% problemData = setdefault(problemData, 'idOS', idOS);
-% problemData = setdefault(problemData, 'idRiv', idRiv);
-% problemData = setdefault(problemData, 'idRad', idRad);
 problemData = setdefault(problemData, 'idRiem', idRiem);
 
-problemData = setdefault(problemData, 'gConst', gConst);
-problemData = setdefault(problemData, 'hCont', hCont);
-problemData = setdefault(problemData, 'u1Cont', u1Cont);
-problemData = setdefault(problemData, 'u2Cont', u2Cont);
-problemData = setdefault(problemData, 'DCont', DCont);
+if isAnalytical
+%   problemData = setdefault(problemData, 'idBdrH', [2 4]);
+%   problemData = setdefault(problemData, 'idBdrU', [1 2 4]);
+%   problemData = setdefault(problemData, 'idBdrQ', [2 4]);
+  problemData = setdefault(problemData, 'idBdrH', -1);
+  problemData = setdefault(problemData, 'idBdrU', [1 2 4]);
+  problemData = setdefault(problemData, 'idBdrQ', [2 4]);
+  
+  problemData = setdefault(problemData, 'hCont', hCont);
+  problemData = setdefault(problemData, 'u1Cont', u1Cont);
+  problemData = setdefault(problemData, 'u2Cont', u2Cont);
+  problemData = setdefault(problemData, 'DCont', DCont);
 
-fhCont = @(t,x) dtHCont(t,x) + dxU1zIntCont(t,x);
-fuCont = @(t,x,z) dtU1Cont(t,x,z) + 2 * u1Cont(t,x,z) .* dxU1Cont(t,x,z) + ...
-  dzU1Cont(t,x,z) .* u2Cont(t,x,z) + u1Cont(t,x,z) .* dzU2Cont(t,x,z) - ( ...
-  DCont{1,1}(t,x,z) .* dxdxU1Cont(t,x,z) + dxzDCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) + ...
-  DCont{1,2}(t,x,z) .* dxdzU1Cont(t,x,z) + dxzDCont{1,2}(t,x,z) .* dzU1Cont(t,x,z) + ...
-  DCont{2,1}(t,x,z) .* dxdzU1Cont(t,x,z) + dxzDCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) + ...
-  DCont{2,2}(t,x,z) .* dzdzU1Cont(t,x,z) + dxzDCont{2,2}(t,x,z) .* dzU1Cont(t,x,z) ) + ...
-  gConst * dxXiCont(t,x);
+  fhCont = @(t,x) dtHCont(t,x) + dxU1zIntCont(t,x);
+  fuCont = @(t,x,z) dtU1Cont(t,x,z) + 2 * u1Cont(t,x,z) .* dxU1Cont(t,x,z) + ...
+    dzU1Cont(t,x,z) .* u2Cont(t,x,z) + u1Cont(t,x,z) .* dzU2Cont(t,x,z) - ( ...
+    DCont{1,1}(t,x,z) .* dxdxU1Cont(t,x,z) + dxzDCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) + ...
+    DCont{1,2}(t,x,z) .* dxdzU1Cont(t,x,z) + dxzDCont{1,2}(t,x,z) .* dzU1Cont(t,x,z) + ...
+    DCont{2,1}(t,x,z) .* dxdzU1Cont(t,x,z) + dxzDCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) + ...
+    DCont{2,2}(t,x,z) .* dzdzU1Cont(t,x,z) + dxzDCont{2,2}(t,x,z) .* dzU1Cont(t,x,z) ) + ...
+    gConst * dxXiCont(t,x);
 
-problemData = setdefault(problemData, 'fhCont', fhCont);
-problemData = setdefault(problemData, 'fuCont', fuCont);
+  problemData = setdefault(problemData, 'fhCont', fhCont);
+  problemData = setdefault(problemData, 'fuCont', fuCont);
 
-problemData = setdefault(problemData, 'hDCont', hCont);
-problemData = setdefault(problemData, 'u1DCont', u1Cont);
-problemData = setdefault(problemData, 'u2DCont', u2Cont);
-problemData = setdefault(problemData, 'q1DCont', @(t,x,z) -DCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) - DCont{1,2}(t,x,z) .* dzU1Cont(t,x,z));
-problemData = setdefault(problemData, 'q2DCont', @(t,x,z) -DCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) - DCont{2,2}(t,x,z) .* dzU1Cont(t,x,z));
-% problemData = setdefault(problemData, 'uhDCont', @(t,x) u1zIntCont(t,x));
+  problemData = setdefault(problemData, 'h0Cont', @(x1) problemData.hCont(problemData.t0, x1));
+  problemData = setdefault(problemData, 'u10Cont', @(x1,x2) problemData.u1Cont(problemData.t0, x1, x2));
+
+  problemData = setdefault(problemData, 'hDCont', hCont);
+  problemData = setdefault(problemData, 'u1DCont', u1Cont);
+  problemData = setdefault(problemData, 'u2DCont', u2Cont);
+  problemData = setdefault(problemData, 'q1DCont', @(t,x,z) -DCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) - DCont{1,2}(t,x,z) .* dzU1Cont(t,x,z));
+  problemData = setdefault(problemData, 'q2DCont', @(t,x,z) -DCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) - DCont{2,2}(t,x,z) .* dzU1Cont(t,x,z));
+  % problemData = setdefault(problemData, 'uhDCont', @(t,x) u1zIntCont(t,x));
+else
+  problemData = setdefault(problemData, 'idBdrH', -1);
+  problemData = setdefault(problemData, 'idBdrU', [1 2 4]);
+  problemData = setdefault(problemData, 'idBdrQ', -1);
+  
+  problemData = setdefault(problemData, 'fhCont', fhCont);
+  problemData = setdefault(problemData, 'fuCont', fuCont);
+  problemData = setdefault(problemData, 'DCont', DCont);
+  
+  problemData = setdefault(problemData, 'h0Cont', h0Cont);
+  problemData = setdefault(problemData, 'u10Cont', u10Cont);
+
+  problemData = setdefault(problemData, 'hDCont', hDCont);
+  problemData = setdefault(problemData, 'u1DCont', u1DCont);
+  problemData = setdefault(problemData, 'u2DCont', u2DCont);
+  problemData = setdefault(problemData, 'q1DCont', q1DCont);
+  problemData = setdefault(problemData, 'q2DCont', q2DCont);
+end % if
 end % function

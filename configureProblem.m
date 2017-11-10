@@ -2,21 +2,21 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'convergence');
+problemData = setdefault(problemData, 'testcase', 'dambreak');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [16, 8]);
+problemData = setdefault(problemData, 'numElem', [128, 1]);
 
 % Local polynomial approximation order (0 to 5)
-problemData = setdefault(problemData, 'p', 1);
+problemData = setdefault(problemData, 'p', 0);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 86.4);  % end time
-problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.003));  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 25);  % end time
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.0005));  % number of time steps
 
 % Order of Runge-Kutta method
 problemData = setdefault(problemData, 'ordRK', 1);%min(problemData.p+1, 3));
@@ -39,8 +39,6 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
 problemData = execin([problemData.problemName filesep 'getTestcase'], problemData, problemData.testcase);
-problemData.h0Cont = @(x1) problemData.hCont(problemData.t0, x1);
-problemData.u10Cont = @(x1,x2) problemData.u1Cont(problemData.t0, x1, x2);
 generateX = @(numElem) (0:numElem(1)) * problemData.domainWidth / numElem(1);
 generateZbot = @(numElem) problemData.zBotCont(generateX(numElem));
 generateXi0 = @(numElem) problemData.xi0Cont(generateX(numElem));
@@ -57,9 +55,9 @@ problemData.generateMarkE0TbdrRiem = @(g) checkMultipleIds(g.idE0T, problemData.
 problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, problemData.idCoupling);
 problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1 & ~problemData.generateMarkE0TbdrCoupling(g);
 problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
-problemData.generateMarkE0TbdrU = @(g) checkMultipleIds(g.idE0T, [1 2 4]);
-problemData.generateMarkE0TbdrH = @(g) checkMultipleIds(g.idE0T, [2 4]);
-problemData.generateMarkE0TbdrQ = @(g) checkMultipleIds(g.idE0T, [2 4]);
+problemData.generateMarkE0TbdrH = @(g) checkMultipleIds(g.idE0T, problemData.idBdrH);
+problemData.generateMarkE0TbdrU = @(g) checkMultipleIds(g.idE0T, problemData.idBdrU);
+problemData.generateMarkE0TbdrQ = @(g) checkMultipleIds(g.idE0T, problemData.idBdrQ);
 
 % problemData.generateMarkE0TbdrLand = @(g) checkMultipleIds(g.idE0T, problemData.idLand);
 % problemData.generateMarkE0TbdrOS = @(g) checkMultipleIds(g.idE0T, problemData.idOS);
@@ -68,8 +66,8 @@ problemData.generateMarkE0TbdrQ = @(g) checkMultipleIds(g.idE0T, [2 4]);
 
 problemData.generateMarkV0T1Dint = @(g) g.idV0T == 0;
 problemData.generateMarkV0T1DbdrRiem = @(g) checkMultipleIds(g.idV0T, problemData.idRiem);
-problemData.generateMarkV0T1DbdrU = @(g) checkMultipleIds(g.idV0T, [1 2 4]);
-problemData.generateMarkV0T1DbdrH = @(g) checkMultipleIds(g.idV0T, [2 4]);
+problemData.generateMarkV0T1DbdrH = @(g) checkMultipleIds(g.idV0T, problemData.idBdrH);
+problemData.generateMarkV0T1DbdrU = @(g) checkMultipleIds(g.idV0T, problemData.idBdrU);
 
 % problemData.generateMarkV0T1DbdrLand = @(g) checkMultipleIds(g.idV0T, problemData.idLand);
 % problemData.generateMarkV0T1DbdrOS = @(g) checkMultipleIds(g.idV0T, problemData.idOS);

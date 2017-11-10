@@ -73,7 +73,7 @@ DDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x
 problemData.globLu = reshape(projectFuncCont2DataDiscTetra(problemData.g, fuCont, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D).', [], 1);
 problemData.globLh = reshape(projectFuncCont2DataDisc1D(problemData.g.g1D, fhCont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D).', [], 1);
 
-%% Compute depth integrated velocity
+%% Compute depth integrated velocity and water height in surface nodes.
 barU1Disc = { zeros(problemData.g.g1D.numT, problemData.barN), zeros(problemData.g.g1D.numT, problemData.barN) };
 for s = 1 : 2
   for j = 1 : problemData.barN
@@ -81,6 +81,7 @@ for s = 1 : 2
     barU1Disc{s}(:, j) = problemData.g.g1D.markT2DT.' * (problemData.cDiscRK{nSubStep, 2}(:,i) .* problemData.g.J0T{s}(:,2,2));
   end % for j
 end % for s
+hV0T1D = problemData.cDiscRK{nSubStep, 1} * problemData.basesOnQuad1D.phi0D{problemData.qOrd};
 
 %% Assembly of time-dependent matrices and vectors in momentum equation.
 % Advection element integral (II)
@@ -144,6 +145,9 @@ problemData.globJuhRiem = problemData.fn_assembleVecEdgeTetraPhiIntFuncContHeigh
 % Boundary edge integrals with prescribed Dirichlet data for w (XII)
 problemData.globJw = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrBot, u2DCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
+% Boundary edge integrals with prescribed Dirichlet Data and Riemann solver for u but not h (XII)
+problemData.tildeGlobJuRiem = problemData.fn_assembleVecEdgeTetraPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & ~problemData.g.markE0TbdrH, u1DCont, problemData.hSmoothV0T1D ./ hV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+
 %% Assembly of time-dependent matrices and vectors in free-surface equation.
 % Element integrals (uh/Hs) in free surface equation (XIV)
 problemData.barGlobG = problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight(barU1Disc, problemData.hSmoothQ0T1D, problemData.barHatG);
@@ -152,15 +156,18 @@ problemData.barGlobG = problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight(bar
 problemData.barGlobP = problemData.fn_assembleMatV0T1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
 
 % Boundary edge integrals without prescribed Dirichlet data (XV)
-markV0TbdrUH = problemData.g.g1D.markV0TbdrU | problemData.g.g1D.markV0TbdrH;
-problemData.barGlobPbdr = problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0Tbdr & ~markV0TbdrUH, problemData.barHatPdiag);
+markV0TbdrUoH = problemData.g.g1D.markV0TbdrU | problemData.g.g1D.markV0TbdrH;
+problemData.barGlobPbdr = problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0Tbdr & ~markV0TbdrUoH, problemData.barHatPdiag);
 
 % Boundary edge integrals with prescribed Dirichlet data and Riemann solver (XV)
-problemData.barGlobPRiem = problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0TbdrRiem & markV0TbdrUH, problemData.barHatPdiag);
+problemData.barGlobPRiem = problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0TbdrRiem & markV0TbdrUoH, problemData.barHatPdiag);
 
 % Boundary edge integrals with prescribed Dirichlet data for uh (XV)
 problemData.barGlobJuh = assembleVecV0T1DPhiIntFuncContNuHeight(problemData.g, problemData.g.g1D, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & problemData.g.markE0TbdrH, @(x1,x2) u1DCont(x1,x2) .* hDCont(x1), problemData.hSmoothV0T1D, problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 problemData.barGlobJuhRiem = assembleVecV0T1DPhiIntFuncContNuHeight(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & problemData.g.markE0TbdrH, @(x1,x2) u1DCont(x1,x2) .* hDCont(x1), problemData.hSmoothV0T1D, problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
+
+problemData.barGlobJu = assembleVecV0T1DPhiIntFuncContNuHeight(problemData.g, problemData.g.g1D, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & ~problemData.g.markE0TbdrH, u1DCont, problemData.hSmoothV0T1D ./ hV0T1D, problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
+problemData.barGlobJuRiem = assembleVecV0T1DPhiIntFuncContNuHeight(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & ~problemData.g.markE0TbdrH, u1DCont, problemData.hSmoothV0T1D ./ hV0T1D, problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 % barGlobJuh = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 % barGlobJuhRiem = zeros(problemData.g.g1D.numT * problemData.barN, 1);
 % for n = 1 : 2
