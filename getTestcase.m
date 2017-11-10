@@ -721,11 +721,11 @@ problemData = setdefault(problemData, 'zBotCont', zBotCont);
 problemData = setdefault(problemData, 'idRiem', idRiem);
 
 if isAnalytical
-%   problemData = setdefault(problemData, 'idBdrH', [2 4]);
+  problemData = setdefault(problemData, 'idBdrH', [2 4]);
 %   problemData = setdefault(problemData, 'idBdrU', [1 2 4]);
 %   problemData = setdefault(problemData, 'idBdrQ', [2 4]);
-  problemData = setdefault(problemData, 'idBdrH', -1);
-  problemData = setdefault(problemData, 'idBdrU', [1 2 4]);
+%   problemData = setdefault(problemData, 'idBdrH', -1);
+  problemData = setdefault(problemData, 'idBdrU', 1);
   problemData = setdefault(problemData, 'idBdrQ', [2 4]);
   
   problemData = setdefault(problemData, 'hCont', hCont);
