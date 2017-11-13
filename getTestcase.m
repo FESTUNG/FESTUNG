@@ -7,7 +7,7 @@ switch problemName
     isAnalytical = false;
     
     domainWidth=100;
-    idRiem = [2,4];
+    idLand = [2, 4]; idRad = -1; idRiv = -1; idOS = -1; idBdrRiem = [2, 4];
     
     gConst = 10;
     rho = 0.001;
@@ -31,7 +31,7 @@ switch problemName
   
   case 'convergence'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4]; idRiem = -1;
     
@@ -73,7 +73,7 @@ switch problemName
     
   case 'coupling'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     gConst = 10;
@@ -115,7 +115,7 @@ switch problemName
     
   case 'utbest'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
     
     gConst = 10;
@@ -153,7 +153,7 @@ switch problemName
     
   case 'utbest_sinus'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
 %         idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     
     gConst = 10;
@@ -194,12 +194,10 @@ switch problemName
     
   case 'constant' % OK
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
-    %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
-    %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
-    
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
+    idBdrU = -1; idBdrH = [2, 4]; idBdrQ = -1; idBdrRiem = [2, 4];
+    
     dxZb = -0.005;
     dtXi = 0*0.01;
     rho = 0;
@@ -232,7 +230,7 @@ switch problemName
     
   case 'linear_h' % OK
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
@@ -270,7 +268,7 @@ switch problemName
     
   case 'z-linear_u' % OK
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
@@ -310,7 +308,7 @@ switch problemName
     domainWidth = 100;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
@@ -346,7 +344,7 @@ switch problemName
     
   case 'linear_vel' % OK
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
@@ -383,11 +381,10 @@ switch problemName
     
   case 'linear' % OK
     domainWidth = 100;
-        idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
-%     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
-    
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
+    idBdrU = -1; idBdrH = [2, 4]; idBdrQ = -1; idBdrRiem = -[2, 4];
+    
     dtXi = 0.01;
     dxZb = -0.005;
     dxXi = 0.005;
@@ -425,7 +422,7 @@ switch problemName
     domainWidth = 100;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = -1;
     
     gConst = 40;
     xi0Cont = @(x) zeros(size(x));
@@ -464,7 +461,7 @@ switch problemName
     
   case 'quadratic_u' % ok for p=2
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
@@ -504,7 +501,7 @@ switch problemName
     
   case 'quadratic' %
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
 %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
@@ -546,7 +543,7 @@ switch problemName
     
   case 'test_h'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
+    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
@@ -589,7 +586,7 @@ switch problemName
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
-    idLand = -1; idOS = -1; idRiv = 4; idRad = -1; idRiem = -1;
+    idLand = -1; idOS = -1; idRiv = 4; idRad = -1; idBdrRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
@@ -631,7 +628,7 @@ switch problemName
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
     %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = -1;
-    idLand = -1; idOS = -1; idRiv = 4; idRad = -1; idRiem = -1;
+    idLand = -1; idOS = -1; idRiv = 4; idRad = -1; idBdrRiem = -1;
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
@@ -672,7 +669,7 @@ switch problemName
   case 'test_uw'
     domainWidth = 100;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idRiem = [2,4];
-    idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+    idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idBdrRiem = -1;
     %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4]; idRiem = -1;
     %     idLand = -1; idOS = -1; idRiv = [2,4]; idRad = -1; idRiem = -1;
     
@@ -718,16 +715,28 @@ problemData = setdefault(problemData, 'domainWidth', domainWidth);
 problemData = setdefault(problemData, 'gConst', gConst);
 problemData = setdefault(problemData, 'xi0Cont', xi0Cont);
 problemData = setdefault(problemData, 'zBotCont', zBotCont);
-problemData = setdefault(problemData, 'idRiem', idRiem);
+
+% Convert idLand, idRiver, idOS to idBdrU, idBdrQ, idBdrH
+if ~isequal([exist('idBdrU', 'var'), exist('idBdrH', 'var'), exist('idBdrQ', 'var')], [1,1,1])
+  assert(isequal([exist('idLand', 'var'), exist('idRiv', 'var'), exist('idOS', 'var'), exist('idRad', 'var')], [1,1,1,1]), 'No boundary conditions given.')
+  assert(~any(intersect(idLand(:), idRad(:)) > 0), 'Land and Radiation on same boundary specified.')
+  assert(~any(intersect(idLand(:), idRiv(:)) > 0), 'Land and River on same boundary specified.')
+  assert(~any(intersect(idLand(:), idOS(:)) > 0), 'Land and Open Sea on same boundary specified.')
+  assert(~any(intersect(idRad(:), idRiv(:)) > 0), 'Radiation and River on same boundary specified.')
+  assert(~any(intersect(idRad(:), idOS(:)) > 0), 'Radiation and Open Sea on same boundary specified.')
+  assert(~any(intersect(idRiv(:), idOS(:)) > 0), 'River and Open Sea on same boundary specified.')
+  fprintf('Converting physical to numerical boundary conditions.\n')
+  idBdrU = sort([idLand, idRiv]);
+  idBdrH = sort([idRiv, idOS]);
+  idBdrQ = sort([idRad, idOS]);
+end % if
+
+problemData = setdefault(problemData, 'idBdrRiem', idBdrRiem);
+problemData = setdefault(problemData, 'idBdrH', idBdrH);
+problemData = setdefault(problemData, 'idBdrU', idBdrU);
+problemData = setdefault(problemData, 'idBdrQ', idBdrQ);
 
 if isAnalytical
-  problemData = setdefault(problemData, 'idBdrH', [2 4]);
-%   problemData = setdefault(problemData, 'idBdrU', [1 2 4]);
-%   problemData = setdefault(problemData, 'idBdrQ', [2 4]);
-%   problemData = setdefault(problemData, 'idBdrH', -1);
-  problemData = setdefault(problemData, 'idBdrU', 1);
-  problemData = setdefault(problemData, 'idBdrQ', [2 4]);
-  
   problemData = setdefault(problemData, 'hCont', hCont);
   problemData = setdefault(problemData, 'u1Cont', u1Cont);
   problemData = setdefault(problemData, 'u2Cont', u2Cont);
@@ -755,10 +764,6 @@ if isAnalytical
   problemData = setdefault(problemData, 'q2DCont', @(t,x,z) -DCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) - DCont{2,2}(t,x,z) .* dzU1Cont(t,x,z));
   % problemData = setdefault(problemData, 'uhDCont', @(t,x) u1zIntCont(t,x));
 else
-  problemData = setdefault(problemData, 'idBdrH', -1);
-  problemData = setdefault(problemData, 'idBdrU', [1 2 4]);
-  problemData = setdefault(problemData, 'idBdrQ', -1);
-  
   problemData = setdefault(problemData, 'fhCont', fhCont);
   problemData = setdefault(problemData, 'fuCont', fuCont);
   problemData = setdefault(problemData, 'DCont', DCont);

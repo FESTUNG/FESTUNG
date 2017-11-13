@@ -99,12 +99,12 @@ globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g
 
 % Boundary edge integral without Dirichlet data for U in continuity equation (XII), restricted to boundaries without Riemann solver
 globQtop = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
-globQbot = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrBot & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
+% globQbot = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrBot & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
 globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
 
 % Combine matrices
 problemData.globHQup = globH{2} - globQup;
-problemData.globHQavg = -globH{1} + globQAvg{1} + globQtop{1} + globQbot{1} + globQbdr{1};
+problemData.globHQavg = -globH{1} + globQAvg{1} + globQtop{1} + globQbdr{1}; % + globQbot{1}
 
 %% Helper matrices for assembly of jump terms in Lax-Friedrichs Riemann solver
 % Helper matrix for jumps over vertical interior edges in momentum and continuity equation (VI, XII)

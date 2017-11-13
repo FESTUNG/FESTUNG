@@ -5,9 +5,7 @@ ret = zeros(K, N);
 for n = 3 : 4
   funcQ0E = dataDisc * basesOnQuad.phi1D{qOrd}(:, :, n).';
   areaNuE0THeight = markE0T(:,n) .* g2D.areaE0T(:,n) .* g2D.nuE0T(:,n,1) ./ (g1D.markT2DT * heightV0T1D(:,5-n));
-  for i = 1 : N
-    ret(:, i) = ret(:, i) + areaNuE0THeight .* ( funcQ0E * (W.' .* basesOnQuad.phi1D{qOrd}(:, i, n)) );
-  end  % for i
+  ret = ret + bsxfun(@times, areaNuE0THeight, funcQ0E * (repmat(W(:), 1, N) .* basesOnQuad.phi1D{qOrd}(:, :, n)));
 end  % for n
 ret = reshape(ret.', K*N, 1);
 end  % function

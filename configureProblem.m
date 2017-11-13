@@ -15,7 +15,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 25);  % end time
+problemData = setdefault(problemData, 'tEnd', 30);  % end time
 problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.0005));  % number of time steps
 
 % Order of Runge-Kutta method
@@ -51,26 +51,11 @@ problemData.generateGrid1D = @(numElem, g2D) generateGridData1D(generateX(numEle
 checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrRiem = @(g) checkMultipleIds(g.idE0T, problemData.idRiem);
+problemData.generateMarkE0TbdrRiem = @(g) checkMultipleIds(g.idE0T, problemData.idBdrRiem);
 problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, problemData.idCoupling);
 problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1 & ~problemData.generateMarkE0TbdrCoupling(g);
 problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
 problemData.generateMarkE0TbdrH = @(g) checkMultipleIds(g.idE0T, problemData.idBdrH);
 problemData.generateMarkE0TbdrU = @(g) checkMultipleIds(g.idE0T, problemData.idBdrU);
 problemData.generateMarkE0TbdrQ = @(g) checkMultipleIds(g.idE0T, problemData.idBdrQ);
-
-% problemData.generateMarkE0TbdrLand = @(g) checkMultipleIds(g.idE0T, problemData.idLand);
-% problemData.generateMarkE0TbdrOS = @(g) checkMultipleIds(g.idE0T, problemData.idOS);
-% problemData.generateMarkE0TbdrRiv = @(g) checkMultipleIds(g.idE0T, problemData.idRiv);
-% problemData.generateMarkE0TbdrRad = @(g) checkMultipleIds(g.idE0T, problemData.idRad);
-
-problemData.generateMarkV0T1Dint = @(g) g.idV0T == 0;
-problemData.generateMarkV0T1DbdrRiem = @(g) checkMultipleIds(g.idV0T, problemData.idRiem);
-problemData.generateMarkV0T1DbdrH = @(g) checkMultipleIds(g.idV0T, problemData.idBdrH);
-problemData.generateMarkV0T1DbdrU = @(g) checkMultipleIds(g.idV0T, problemData.idBdrU);
-
-% problemData.generateMarkV0T1DbdrLand = @(g) checkMultipleIds(g.idV0T, problemData.idLand);
-% problemData.generateMarkV0T1DbdrOS = @(g) checkMultipleIds(g.idV0T, problemData.idOS);
-% problemData.generateMarkV0T1DbdrRiv = @(g) checkMultipleIds(g.idV0T, problemData.idRiv);
-% problemData.generateMarkV0T1DbdrRad = @(g) checkMultipleIds(g.idV0T, problemData.idRad);
 end % function
