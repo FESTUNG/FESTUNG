@@ -7,7 +7,7 @@ switch problemName
     isAnalytical = false;
     
     domainWidth=100;
-    idLand = [2, 4]; idRad = -1; idRiv = -1; idOS = -1; idBdrRiem = [2, 4];
+    idLand = -1; idRad = [2,4]; idRiv = -1; idOS = -1; idBdrRiem = -1;
     
     gConst = 10;
     rho = 0.001;
@@ -153,8 +153,7 @@ switch problemName
     
   case 'utbest_sinus'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
-%         idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
+    idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
