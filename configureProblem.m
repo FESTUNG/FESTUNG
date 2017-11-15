@@ -55,11 +55,11 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'coupling');
 
 % Enable coupling
-problemData = setdefault(problemData, 'isCouplingDarcy', true);
-problemData = setdefault(problemData, 'isCouplingSWE', true);
+problemData = setdefault(problemData, 'isCouplingDarcy', false);
+problemData = setdefault(problemData, 'isCouplingSWE', false);
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [128, 64]);
+problemData = setdefault(problemData, 'numElem', [64 32]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -69,14 +69,14 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 0.01);  % end time
-problemData = setdefault(problemData, 'numSteps', 50);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 10);  % end time
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.05));  % number of time steps
 problemData = setdefault(problemData, 'numSubSteps', 10); % number of free-flow steps per sub-surface step
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
-problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
+problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
+problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
 
 couplingString = '_';
 if problemData.isCouplingDarcy, couplingString = [couplingString 'couplingDarcy']; end
@@ -86,12 +86,12 @@ problemData = setdefault(problemData, 'outputBasename', [problemData.testcase co
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
 
 %% Function handles for steps of the sub-problems
-problemData.darcySteps = getStepHandles('darcyVert');
-problemData.sweSteps = getStepHandles('sweVert');
+problemData.darcySteps = getStepHandles('darcy_2dv');
+problemData.sweSteps = getStepHandles('swe_2dv');
 
 %% Sub-surface problem
 problemData.darcyData = struct;
-problemData.darcyData.problemName = 'darcyVert';
+problemData.darcyData.problemName = 'darcy_2dv';
 problemData.darcyData.testcase = problemData.testcase;
 
 problemData.darcyData.numElem = problemData.numElem;
@@ -109,14 +109,14 @@ end % if
 problemData.darcyData.isVisGrid = problemData.isVisGrid;
 problemData.darcyData.isVisSol = problemData.isVisSol;
 problemData.darcyData.outputFrequency = problemData.outputFrequency;
-problemData.darcyData.outputBasename = ['output' filesep 'darcyVert_' problemData.outputBasename];
+problemData.darcyData.outputBasename = ['output' filesep 'darcy_2dv_' problemData.outputBasename];
 problemData.darcyData.outputTypes = problemData.outputTypes;
 
 problemData.darcyData = problemData.darcySteps.configureProblem(problemData.darcyData);
 
 %% Free-flow problem
 problemData.sweData = struct;
-problemData.sweData.problemName = 'sweVert';
+problemData.sweData.problemName = 'swe_2dv';
 problemData.sweData.testcase = problemData.testcase;
 
 problemData.sweData.numElem = problemData.numElem;
@@ -134,7 +134,7 @@ end % if
 problemData.sweData.isVisGrid = problemData.isVisGrid;
 problemData.sweData.isVisSol = problemData.isVisSol;
 problemData.sweData.outputFrequency = problemData.outputFrequency * problemData.numSubSteps;
-problemData.sweData.outputBasename = ['output' filesep 'sweVert_' problemData.outputBasename];
+problemData.sweData.outputBasename = ['output' filesep 'swe_2dv_' problemData.outputBasename];
 problemData.sweData.outputTypes = problemData.outputTypes;
 
 problemData.sweData = problemData.sweSteps.configureProblem(problemData.sweData);
