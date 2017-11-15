@@ -2,21 +2,21 @@ function problemData = configureProblem(problemData)
 
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'dambreak');
+problemData = setdefault(problemData, 'testcase', 'coupling');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [128, 1]);
+problemData = setdefault(problemData, 'numElem', [32, 16]);
 
 % Local polynomial approximation order (0 to 5)
-problemData = setdefault(problemData, 'p', 0);
+problemData = setdefault(problemData, 'p', 1);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 86.4);  % end time
-problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.0005));  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 10);  % end time
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.005));  % number of time steps
 
 % Order of Runge-Kutta method
 problemData = setdefault(problemData, 'ordRK', 1);%min(problemData.p+1, 3));

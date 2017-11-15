@@ -6,7 +6,7 @@ switch problemName
   case 'dambreak'
     isAnalytical = false;
     
-    domainWidth=100;
+    domainWidth = 100;
     idLand = -1; idRad = [2,4]; idRiv = -1; idOS = -1; idBdrRiem = -1;
     
     gConst = 10;
@@ -73,8 +73,7 @@ switch problemName
     
   case 'coupling'
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
-    %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1;
+    idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
     
     gConst = 10;
     xi0Cont = @(x) 5 * ones(size(x));
@@ -105,7 +104,6 @@ switch problemName
     dxdzU1Cont = @(t,x,z) k * a * d^3 * cos(b*x+c*t) .* sin(d*z);
     dzdzU1Cont = @(t,x,z) k * a * d^4 / b * sin(b*x+c*t) .* cos(d*z);
     
-    u1zIntCont = @(t,x) -k * a * d / b * sin(b*x+c*t) .* ( sin(d*xiCont(t,x)) - sin(d*zBotCont(x)) ) + 0.5 * f * ( xiCont(t,x).^2 - zBotCont(x).^2 );
     dxU1zIntCont = @(t,x) -k * a * d * cos(b*x+c*t) .* ( sin(d*xiCont(t,x)) - sin(d*zBotCont(x)) ) - ...
       k * a * d^2 / b * sin(b*x+c*t) .* ( cos(d*xiCont(t,x)) .* dxXiCont(t,x) - cos(d*zBotCont(x)) * dxZb ) + ...
       f * ( xiCont(t,x) .* dxXiCont(t,x) - zBotCont(x) * dxZb );
