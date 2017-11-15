@@ -53,8 +53,8 @@ for n = 1 : 2
   for i = 1 : N
     for j = 1 : N
       for l = 1 : N
-      ret{1}(i,j,l,n) = basesOnQuad.phi0D{qOrd}(i,n) * basesOnQuad.phi0D{qOrd}(j,n) * basesOnQuad.phi0D{qOrd}(l,n);
-      ret{2}(i,j,l,n) = (n-1) * basesOnQuad.phi0D{qOrd}(i,n) * basesOnQuad.phi0D{qOrd}(j,n) * basesOnQuad.phi0D{qOrd}(l,n);
+        ret{1}(i,j,l,n) = basesOnQuad.phi0D{qOrd}(i,n) * basesOnQuad.phi0D{qOrd}(j,n) * basesOnQuad.phi0D{qOrd}(l,n);
+        ret{2}(i,j,l,n) = (n-1) * basesOnQuad.phi0D{qOrd}(i,n) * basesOnQuad.phi0D{qOrd}(j,n) * basesOnQuad.phi0D{qOrd}(l,n);
       end % for l
     end % for j
   end  % for i
