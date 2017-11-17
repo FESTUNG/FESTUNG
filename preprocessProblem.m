@@ -68,6 +68,9 @@ problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight = getFunctionHandle([probl
 problemData.fn_assembleMatV0T1DPhiPhiFuncDiscNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatV0T1DPhiPhiFuncDiscNuHeight']);
 problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight']);
 problemData.fn_assembleVecEdgeTetraPhiIntFuncContHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeTetraPhiIntFuncContHeightNu']);
+problemData.fn_assembleVecEdgeTetraPhiIntFuncDiscIntHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeTetraPhiIntFuncDiscIntHeightNu']);
+problemData.fn_assembleVecV0T1DPhiIntFuncContNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleVecV0T1DPhiIntFuncContNuHeight']);
+problemData.fn_assembleVecV0T1DPhiIntFuncDiscIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleVecV0T1DPhiIntFuncDiscIntNuHeight']);
 
 %% Configuration output.
 fprintf('-------------------------------------------------------------------------------------------\n');
@@ -112,5 +115,4 @@ problemData.globJuCoupling = { sparse(problemData.g.numT * problemData.N, 1), sp
 problemData.globJwCoupling = sparse(problemData.g.numT * problemData.N, 1);
 problemData.globJuuCoupling = sparse(problemData.g.numT * problemData.N, 1);
 problemData.globJuwCoupling = sparse(problemData.g.numT * problemData.N, 1);
-problemData.globSCoupling = sparse(problemData.g.numT * problemData.N, problemData.g.numT * problemData.N);
 end % function

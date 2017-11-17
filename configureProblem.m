@@ -30,7 +30,7 @@ problemData = setdefault(problemData, 'outputBasename', ...  % Basename of outpu
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
 
 % ID of coupling boundary
-problemData = setdefault(problemData, 'idCoupling', -1);
+problemData = setdefault(problemData, 'isCoupling', false);
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 5, 'Polynomial order must be zero to five.')
@@ -52,8 +52,8 @@ checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 
 
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
 problemData.generateMarkE0TbdrRiem = @(g) checkMultipleIds(g.idE0T, problemData.idBdrRiem);
-problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, problemData.idCoupling);
-problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1 & ~problemData.generateMarkE0TbdrCoupling(g);
+problemData.generateMarkE0TbdrCoupling = @(g) problemData.isCoupling & g.idE0T == 1;
+problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1;
 problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
 problemData.generateMarkE0TbdrH = @(g) checkMultipleIds(g.idE0T, problemData.idBdrH);
 problemData.generateMarkE0TbdrU = @(g) checkMultipleIds(g.idE0T, problemData.idBdrU);
