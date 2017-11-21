@@ -5,7 +5,7 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'coupling');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [32, 16]);
+problemData = setdefault(problemData, 'numElem', [8, 4]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -52,7 +52,7 @@ checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 
 
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
 problemData.generateMarkE0TbdrRiem = @(g) checkMultipleIds(g.idE0T, problemData.idBdrRiem);
-problemData.generateMarkE0TbdrCoupling = @(g) problemData.isCoupling & g.idE0T == 1;
+problemData.generateMarkE0TbdrCoupling = @(g) g.idE0T == 1;
 problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1;
 problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
 problemData.generateMarkE0TbdrH = @(g) checkMultipleIds(g.idE0T, problemData.idBdrH);

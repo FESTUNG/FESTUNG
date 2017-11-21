@@ -121,11 +121,12 @@ globRbdr = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemD
 
 % Diffusion boundary edge integral with prescribed Dirichlet data (V)
 globJq = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrQ, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+globJqtop = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrTop, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 % Put together matrices
 problemData.globEP = cellfun(@(E, P, Ptop, Pbdr, PRiem) E - P - Ptop - Pbdr - 0.5 * PRiem, globE, globP, globPtop, globPbdr, globPRiem, 'UniformOutput', false);
 problemData.globGR = cellfun(@(G, R, Rbot, Rbdr) G - R - Rbot - Rbdr, globG, globR, globRbot, globRbdr, 'UniformOutput', false);
-problemData.globJ = globJbot{1} + globJbot{2} + globJuu{1} + 0.5 * globJuuRiem{1} + problemData.gConst * (globJh{1} + 0.5 * globJhRiem{1}) + globJq{1} + globJq{2};
+problemData.globJ = globJbot{1} + globJbot{2} + globJuu{1} + 0.5 * globJuuRiem{1} + problemData.gConst * (globJh{1} + 0.5 * globJhRiem{1}) + globJq{1} + globJq{2} + globJqtop{1} + globJqtop{2};
 
 %% Assembly of time-dependent vectors in flux and continuity equation.
 % Boundary edge integrals with prescribed Dirichlet data for u (X, XII)

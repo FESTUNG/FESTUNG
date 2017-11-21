@@ -62,7 +62,6 @@ switch problemName
     dxdzU1Cont = @(t,x,z) delta * omega * cos(omega * (x+t));
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    u1zIntCont = @(t,x) 0.5 * delta * sin(omega * (x+t)) .* (xiCont(t,x).^2 - zBotCont(x).^2) - delta * zBotCont(x) .* hCont(t,x) .* sin(omega * (x+t));
     dxU1zIntCont = @(t,x) 0.5 * delta * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
       delta * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
     
@@ -70,6 +69,44 @@ switch problemName
       @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
     dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
       @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
+    
+  case 'coupling_linear'
+    domainWidth = 100;
+    idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
+    
+    gConst = 10;
+    xi0Cont = @(x) 5 * ones(size(x));
+    dxZb = 0;
+    a = 0.01;
+    b = 0.1;
+    c = 0.01;
+    d = 0.001;
+    
+    xiCont = @(t,x) 5 + a * x;
+    zBotCont = @(x) 0 + dxZb * x;
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) -a * x - b * (zBotCont(x) - z);
+    u2Cont = @(t,x,z) -a * (zBotCont(x) - z) + b * dxZb * z - c * x;
+    
+    dxXiCont = @(t,x) a * ones(size(x));
+    dtHCont = @(t,x) zeros(size(x));
+    
+    dtU1Cont = @(t,x,z) zeros(size(x));
+    dxU1Cont = @(t,x,z) -(a + b * dxZb) * ones(size(x));
+    dzU1Cont = @(t,x,z) b * ones(size(x));
+    dzU2Cont = @(t,x,z) (a + b * dxZb) * ones(size(x));
+    
+    dxdxU1Cont = @(t,x,z) zeros(size(x));
+    dxdzU1Cont = @(t,x,z) zeros(size(x));
+    dzdzU1Cont = @(t,x,z) zeros(size(x));
+    
+    dxU1zIntCont = @(t,x) -a * hCont(t,x) - a * x .* (dxXiCont(t,x) - dxZb) - ...
+      b * (dxZb - dxXiCont(t,x) / 2) .* xiCont(t,x) - ...
+      b * (zBotCont(x) - xiCont(t,x) / 2) .* dxXiCont(t,x) + b * dxZb * zBotCont(x);
+    
+    DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {d, 0; 0, d}, 'UniformOutput', false);
+    dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
     
   case 'coupling'
     domainWidth = 100;
