@@ -61,7 +61,9 @@ problemData.darcyData = problemData.darcySteps.preprocessStep(problemData.darcyD
 if problemData.isCouplingDarcy
   % Compute coupling terms
   problemData.hSWE = reshape(1 / problemData.darcyData.tau * problemData.hSWE.', [], 1);  % mass conservative
-  % problemData.hSWE = reshape(problemData.sweData.cDiscRK{end, 1}.', [], 1);  % analytically correct
+%   problemData.hSWE = reshape(problemData.sweData.cDiscRK{end, 1}.', [], 1);  % analytically correct
+%   hDisc = projectFuncCont2DataDisc1D(problemData.sweData.g.g1D, @(x) problemData.sweData.hCont(problemData.sweData.t(end), x), problemData.sweData.qOrd, problemData.sweData.barHatM, problemData.sweData.basesOnQuad1D);
+%   problemData.hSWE = reshape(hDisc.', [], 1);
   for m = 1 : 2
     problemData.darcyData.globJcouple{m} = problemData.darcyData.tildeGlobQcouple{m} * problemData.hSWE;
   end % for

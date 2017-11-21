@@ -52,14 +52,14 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'coupling');
+problemData = setdefault(problemData, 'testcase', 'coupling_linear');
 
 % Enable coupling
-problemData = setdefault(problemData, 'isCouplingDarcy', false);
-problemData = setdefault(problemData, 'isCouplingSWE', false);
+problemData = setdefault(problemData, 'isCouplingDarcy', true);
+problemData = setdefault(problemData, 'isCouplingSWE', true);
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [64 32]);
+problemData = setdefault(problemData, 'numElem', [8 4]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -102,9 +102,10 @@ problemData.darcyData.t0 = problemData.t0;
 problemData.darcyData.tEnd = problemData.tEnd;
 problemData.darcyData.numSteps = problemData.numSteps;
 
-if problemData.isCouplingDarcy
-  problemData.darcyData.idCoupling = 3;
-end % if
+% if problemData.isCouplingDarcy
+%   problemData.darcyData.idCoupling = 3;
+% end % if
+problemData.darcyData.isCoupling = true;
 
 problemData.darcyData.isVisGrid = problemData.isVisGrid;
 problemData.darcyData.isVisSol = problemData.isVisSol;
@@ -127,9 +128,7 @@ problemData.sweData.t0 = problemData.t0;
 problemData.sweData.tEnd = problemData.tEnd;
 problemData.sweData.numSteps = problemData.numSteps * problemData.numSubSteps;
 
-if problemData.isCouplingSWE
-  problemData.sweData.idCoupling = 1;
-end % if
+problemData.sweData.isCoupling = problemData.isCouplingSWE;
 
 problemData.sweData.isVisGrid = problemData.isVisGrid;
 problemData.sweData.isVisSol = problemData.isVisSol;
