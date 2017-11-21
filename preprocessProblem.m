@@ -11,9 +11,9 @@ problemData.tau = (problemData.tEnd - problemData.t0) / problemData.numSteps;  %
 %% Additional mesh data
 % [K x 3] mark local edges that are interior or boundary
 problemData.g.markE0Tint = problemData.generateMarkE0Tint(problemData.g); 
-problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
-problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
-problemData.g.markE0TbdrCoupling = problemData.generateMarkE0TbdrCoupling(problemData.g);
+problemData.g.markE0TbdrN = sparse(problemData.generateMarkE0TbdrN(problemData.g));
+problemData.g.markE0TbdrD = sparse(problemData.generateMarkE0TbdrD(problemData.g));
+problemData.g.markE0TbdrCoupling = sparse(problemData.generateMarkE0TbdrCoupling(problemData.g));
 
 %% Configuration output.
 fprintf('-------------------------------------------------------------------------------------------\n');

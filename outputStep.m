@@ -55,13 +55,37 @@ K = problemData.g.numT;
 N = problemData.N;
 %% Visualization
 if mod(nStep, problemData.outputFrequency) == 0
+  isOutput = false;
+  
   if problemData.isVisSol
-    hDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
-    hLagr = projectDataDisc2DataLagrTensorProduct(hDisc);
-    visualizeDataLagrTetra(problemData.g, hLagr, 'h', problemData.outputBasename, nStep, problemData.outputTypes);
-  elseif nStep > problemData.outputFrequency
+    cLagr = { projectDataDisc2DataLagrTensorProduct(reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)'), ...
+              projectDataDisc2DataLagrTensorProduct(reshape(problemData.sysY(1 : K*N), N, K)'), ...
+              projectDataDisc2DataLagrTensorProduct(reshape(problemData.sysY(K*N+1 : 2*K*N), N, K)') };
+    visualizeDataLagrTetra(problemData.g, cLagr, {'h', 'q1', 'q2'}, problemData.outputBasename, nStep, problemData.outputTypes, struct('q', {{'q1','q2'}}));
+    isOutput = true;
+  end % if
+    
+  if all(isfield(problemData, { 'hCont', 'q1Cont', 'q2Cont' }))
+    t = nStep * problemData.tau;
+    hCont = @(x1,x2) problemData.hCont(t, x1, x2);
+    q1Cont = @(x1,x2) problemData.q1Cont(t, x1, x2);
+    q2Cont = @(x1,x2) problemData.q2Cont(t, x1, x2);
+
+    problemData.error = [ computeL2ErrorTetra(problemData.g, reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)', ...
+                              hCont, problemData.qOrd + 1, problemData.basesOnQuad), ...
+                          computeL2ErrorTetra(problemData.g, reshape(problemData.sysY(1 : K*N), N, K)', ...
+                              q1Cont, problemData.qOrd + 1, problemData.basesOnQuad), ...
+                          computeL2ErrorTetra(problemData.g, reshape(problemData.sysY(K*N+1 : 2*K*N), N, K)', ...
+                              q2Cont, problemData.qOrd + 1, problemData.basesOnQuad) ];
+
+    fprintf('L2 errors of h, q1, q2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
+    isOutput = true;
+  end % if
+  
+  if ~isOutput && nStep > problemData.outputFrequency
     fprintf(repmat('\b', 1, 11));
   end % if
+  
   fprintf('%3.0f %% done\n', nStep / problemData.numSteps * 100);
 end % if
 end % function

@@ -6,7 +6,7 @@ problemData = setdefault(problemData, 'testcase', 'coupling');
 problemData.eta = 1; % penalty parameter (eta>0)
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [4, 2]);
+problemData = setdefault(problemData, 'numElem', [8, 4]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -16,16 +16,17 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 0.1);  % end time
-problemData = setdefault(problemData, 'numSteps', 10);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 10);  % end time
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.05));  % number of time steps
 
 % Discard time derivative and compute stationary solution
 problemData = setdefault(problemData, 'isStationary', false);  
+problemData = setdefault(problemData, 'isCoupling', false);  
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 10); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep 'solution_darcy' ]); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
@@ -60,6 +61,38 @@ switch problemData.testcase
     dZdZhCont = @(t,x,z) -a * d^2 * cos(b*x + c*t) .* cos(d*z);
     dXdZhCont = @(t,x,z) a * b * d * sin(b*x + c*t) .* sin(d*z);
     dXZKCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
+    % Boundary conditions
+    problemData.hDCont = problemData.hCont;
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    % Right hand side
+    problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
+                          dXZKCont{1,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{1,1}(t,x,z) .* dXdXhCont(t,x,z) - ...
+                          dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
+                        
+  case 'coupling_linear'
+    % width and height of computational domain
+    domainWidth = [0, 100];
+    domainHeight = [-5, 0];
+    idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
+    % Analytical solution
+    a = 0.01;
+    b = 0.1;
+    c = 0.01;
+    problemData.hCont = @(t,x,z) 5 + a * x + b * z;
+    problemData.q1Cont = @(t,x,z) -a * ones(size(x));
+    problemData.q2Cont = @(t,x,z) -b * ones(size(x));
+    % Diffusion matrix
+    problemData.KCont = {@(t,x,z) x, @(t,x,z) -z; @(t,x,z) -z, @(t,x,z) c/b * x};
+    % Derivatives
+    dThCont = @(t,x,z) zeros(size(x));
+    dXhCont = @(t,x,z) a * ones(size(x));
+    dZhCont = @(t,x,z) b * ones(size(x));
+    dXdXhCont = @(t,x,z) zeros(size(x));
+    dZdZhCont = @(t,x,z) zeros(size(x));
+    dXdZhCont = @(t,x,z) zeros(size(x));
+    dXZKCont = {@(t,x,z) ones(size(x)), @(t,x,z) zeros(size(x)); @(t,x,z) -ones(size(x)), @(t,x,z) zeros(size(x))};
     % Boundary conditions
     problemData.hDCont = problemData.hCont;
     problemData.gNCont = @(t,x,z) zeros(size(x));
@@ -134,7 +167,6 @@ end % switch
 
 problemData = setdefault(problemData, 'idNeumann', idNeumann);
 problemData = setdefault(problemData, 'idDirichlet', idDirichlet);
-problemData = setdefault(problemData, 'idCoupling', -1);
 
 %% Domain and triangulation.
 problemData.generateGrid = @(numElem) domainRectTrap(domainWidth, domainHeight, numElem);
@@ -143,7 +175,7 @@ problemData.generateGrid = @(numElem) domainRectTrap(domainWidth, domainHeight, 
 checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrCoupling = @(g) checkMultipleIds(g.idE0T, problemData.idCoupling);
-problemData.generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, problemData.idNeumann) & ~problemData.generateMarkE0TbdrCoupling(g);
-problemData.generateMarkE0TbdrD = @(g) checkMultipleIds(g.idE0T, problemData.idDirichlet) & ~problemData.generateMarkE0TbdrCoupling(g);
+problemData.generateMarkE0TbdrCoupling = @(g) g.idE0T == 3;
+problemData.generateMarkE0TbdrN = @(g) checkMultipleIds(g.idE0T, problemData.idNeumann) & ~(problemData.isCoupling & g.idE0T == 3);
+problemData.generateMarkE0TbdrD = @(g) checkMultipleIds(g.idE0T, problemData.idDirichlet) & ~(problemData.isCoupling & g.idE0T == 3);
 end % function
