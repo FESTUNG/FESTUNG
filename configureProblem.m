@@ -96,7 +96,7 @@ problemData = setdefault(problemData, 'stab', 1.0);
 
 % Enable blockwise local solves and specify block size
 problemData = setdefault(problemData, 'isBlockSolve', true);
-problemData = setdefault(problemData, 'blockSolveSize', floor(128 / 2^problemData.p));
+problemData = setdefault(problemData, 'blockSolveSize', 2^(5 - problemData.p));
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 4, 'Polynomial order must be zero to four.')
