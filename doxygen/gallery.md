@@ -10,9 +10,7 @@ The routine [visualizeDataLagr.m](visualizeDataLagr_8m.html) writes simulation d
 
 Author: [Hennes Hajduk](http://www.mathematik.tu-dortmund.de/de/personen/person/Hennes+Hajduk.html)
 
-![Galveston Bay model domain with computational mesh after a 10 days simulation.](doxygen/images/sweBathymetry.png "Galveston Bay model domain with computational mesh.")
-
-[comment]:<> ([velocity magnitude](doxygen/images/sweVelocity.png), [surface elevation](doxygen/images/sweBathymetry.png))
+![Galveston Bay model domain with computational mesh, velocity magnitude, and surface elevation after a 10 days simulation.](doxygen/images/sweBVE.png "Galveston Bay model domain with computational mesh.")
 
 ### Model equations
 \f[ \frac{\partial H}{\partial t} + \nabla\cdot(\vec{u}\,H) ~=~ 0 \f]
@@ -35,9 +33,9 @@ Author: [Hennes Hajduk](http://www.mathematik.tu-dortmund.de/de/personen/person/
 * Lax-Friedrichs Riemann-solver for flux approximation.
 * SSP-Runge-Kutta methods used for time-stepping, cf. [rungeKuttaExplicit.m](rungeKuttaExplicit_8m.html).
 * Slope-limiting framework incorporated, cf. [applySlopeLimiterTaylor.m](applySlopeLimiterTaylor_8m.html).
+* In total five different boundary types are implemented.
+* Multiple model and numerical parameters, such as the choice between linear and nonlinear bottom-friction or the possibility to turn on/off Riemann solver usage for boundary conditions.
+* Flexible coding strategies are used to allow easy modifications.
 * Additionally to the usual FESTUNG features an interface to ADCIRC for grid-generation and configuration is provided.
 * Unstructured and spherical grids supported.
 * Matrix-assembly is only required during pre-processing which makes the solver extremely fast.
-* Flexible coding strategies are used to allow easy modifications.
-* Multiple model and numerical parameters, such as the choice between linear and nonlinear bottom-friction or the possibility to turn on/off Riemann solver usage for boundary conditions.
-* In total five different boundary types are implemented.
