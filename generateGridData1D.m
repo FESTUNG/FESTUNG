@@ -122,7 +122,8 @@ g1D.nuV0T = repmat([-1 1], g1D.numT, 1);
 g1D.areaT = g1D.coordV0T(:, 2) - g1D.coordV0T(:, 1);
 %% Mapping to reference element and its Jacobian
 g1D.detJ0T = g1D.areaT;
-g1D.mapRef2Phy = @(X) g1D.detJ0T * X + g1D.coordV0T(:, 1) * ones(size(X));
+detJ0T = g1D.detJ0T; a1 = g1D.coordV0T(:, 1);
+g1D.mapRef2Phy = @(X) detJ0T * X + a1 * ones(size(X));
 %% Mapping of neighbouring elements (markV0TV0T)
 g1D.markV0TV0T = cell(1,2);
 for n = 1 : 2

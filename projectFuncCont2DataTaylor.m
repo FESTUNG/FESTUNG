@@ -62,11 +62,9 @@ function dataDisc = projectFuncCont2DataTaylor(g, funcCont, ord, globM)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 ord = max(ord,1);  [Q1, Q2, W] = quadRule2D(ord);
 K = g.numT; N = size(globM, 1) / K;
-F1 = @(X1, X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
-F2 = @(X1, X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 rhs = zeros(K, N);
 for i = 1 : N
-  funcOnQuad = funcCont(F1(Q1, Q2), F2(Q1, Q2));
+  funcOnQuad = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   phiOnQuad = phiTaylorPhy(g, i, F1(Q1, Q2), F2(Q1, Q2), ord);
   rhs(:, i) = g.areaT .* (( funcOnQuad .* phiOnQuad ) * (2 * W)');
 end

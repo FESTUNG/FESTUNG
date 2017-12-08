@@ -127,8 +127,6 @@ function ret = assembleVecEdgePhiIntFuncContNu_withAreaNuE0Tbdr(g, funcCont, N, 
 % Determine quadrature rule and mapping to physical element
 K = g.numT; p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd); 
-Q2X1 = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
-Q2X2 = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 
 % Assemble vector
 ret = cell(2, 1);  
@@ -136,7 +134,7 @@ ret{1} = zeros(K, N);
 ret{2} = zeros(K, N);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
-  cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
+  cDn = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   for i = 1 : N
     integral = cDn * ( W .* basesOnQuad.phi1D{qOrd}(:, i, n)' )';
     ret{1}(:,i) = ret{1}(:,i) + areaNuE0Tbdr{n,1} .* integral;
@@ -157,8 +155,6 @@ function ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_withAreaNuE0T(g, m
 % Determine quadrature rule and mapping to physical element
 K = g.numT; p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd); 
-Q2X1 = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
-Q2X2 = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 
 % Assemble vector
 ret = cell(2, 1);  
@@ -166,7 +162,7 @@ ret{1} = zeros(K, N);
 ret{2} = zeros(K, N);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
-  cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
+  cDn = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   for i = 1 : N
     integral = cDn * ( W .* basesOnQuad.phi1D{qOrd}(:, i, n)' )';
     ret{1}(:,i) = ret{1}(:,i) + markE0Tbdr(:,n).*g.areaNuE0T{n,1} .* integral;
@@ -187,8 +183,6 @@ function ret = assembleVecEdgePhiIntFuncContNu_noAreaNuE0Tbdr_noAreaNuE0T(g, mar
 % Determine quadrature rule and mapping to physical element
 K = g.numT; p = (sqrt(8*N+1)-3)/2;
 qOrd = 2*p+1;  [Q, W] = quadRule1D(qOrd); 
-Q2X1 = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
-Q2X2 = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 
 % Assemble vector
 ret = cell(2, 1);  
@@ -196,7 +190,7 @@ ret{1} = zeros(K, N);
 ret{2} = zeros(K, N);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
-  cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
+  cDn = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   Jkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
   for i = 1 : N
     integral = cDn * ( W .* basesOnQuad.phi1D{qOrd}(:, i, n)' )';

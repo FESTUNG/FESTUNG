@@ -216,6 +216,6 @@ g.detJ0T = { g.J0T{1}(:, 1, 1) .* g.J0T{1}(:, 2, 2), ...
 %% Element area (areaT)
 g.areaT = 0.5 * (g.areaE0T(:, 3) + g.areaE0T(:, 4)) .* g.J0T{1}(:, 1, 1);
 %% Mapping from reference element to physical element (mapRef2Phy)
-g.mapRef2Phy = @(i,X1,X2) g.J0T{1}(:,i,1) * X1 + g.J0T{1}(:,i,2) * X2 + ...
-                          g.J0T{2}(:,i,2) * (X1 .* X2) + g.coordV0T(:,1,i) * ones(size(X1));
+J0T1 = g.J0T{1}; J0T2 = g.J0T{2}; a1 = g.coordV0T(:,1,:);
+g.mapRef2Phy = @(i,X1,X2) J0T1(:,i,1) * X1 + J0T1(:,i,2) * X2 + J0T2(:,i,2) * (X1 .* X2) + a1(:,1,i) * ones(size(X1));
 end

@@ -99,8 +99,6 @@ if nargin < 6
   qOrd = 2*p+1;
 end % if
 [Q, W] = quadRule1D(qOrd);
-Q2X1   = @(X1,X2) g.B(:,1,1)*X1 + g.B(:,1,2)*X2 + g.coordV0T(:,1,1)*ones(size(X1));
-Q2X2   = @(X1,X2) g.B(:,2,1)*X1 + g.B(:,2,2)*X2 + g.coordV0T(:,1,2)*ones(size(X1));
 
 % Check function arguments that are directly used
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
@@ -111,7 +109,7 @@ validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 ret = zeros(g.numT, N);
 for n = 1 : 3
   [Q1, Q2] = gammaMap(n, Q);
-  cDn = funcCont(Q2X1(Q1, Q2), Q2X2(Q1, Q2));
+  cDn = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   for i = 1 : N
     ret(:,i) = ret(:,i) + markE0Tbdr(:,n) .* ( cDn * (W' .* basesOnQuad.phi1D{qOrd}(:,i,n)) );
   end % for

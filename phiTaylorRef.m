@@ -49,8 +49,6 @@
 %> @endparblock
 %
 function ret = phiTaylorRef(g, i, hatX1, hatX2)
-Q2X1 = @(X1, X2) g.B(:, 1, 1) * X1 + g.B(:, 1, 2) * X2 + g.coordV0T(:, 1, 1) * ones(size(X1));
-Q2X2 = @(X1, X2) g.B(:, 2, 1) * X1 + g.B(:, 2, 2) * X2 + g.coordV0T(:, 1, 2) * ones(size(X1));
-ret = phiTaylorPhy(g, i, Q2X1(hatX1, hatX2), Q2X2(hatX1, hatX2));
+ret = phiTaylorPhy(g, i, g.mapRef2Phy(1, hatX1, hatX2), g.mapRef2Phy(2, hatX1, hatX2));
 end
 

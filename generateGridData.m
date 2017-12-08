@@ -182,6 +182,7 @@ for nn = 1 : 3
     g.markV0TV0T{nn,np} = sparse(bsxfun(@eq, g.V0T(:,nn), g.V0T(:,np)'));
   end % for
 end % for
-g.mapRef2Phy = @(i,X1,X2) g.B(:,i,1)*X1 + g.B(:,i,2)*X2 + g.coordV0T(:,1,i)*ones(size(X1));
+B = g.B; a1 = g.coordV0T(:,1,:);
+g.mapRef2Phy = @(i,X1,X2) B(:,i,1)*X1 + B(:,i,2)*X2 + a1(:,1,i)*ones(size(X1));
 g.detJ0T = 2 * g.areaT;
 end % function
