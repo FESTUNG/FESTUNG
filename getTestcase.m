@@ -70,6 +70,84 @@ switch problemName
     dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
       @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
     
+  case 'coupling'
+    domainWidth = 100;
+    idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
+    
+    gConst = 10;
+    xi0Cont = @(x) 5 * ones(size(x));
+    dxZb = 0;
+    a = 0.05;
+    b = 0.1;
+    c = 0.1;
+    d = 0.01;
+    k = 1;
+    
+    xiCont = @(t,x) 5 + a * cos(b*x + c*t);
+    zBotCont = @(x) 0 + dxZb * x;
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) a * b * k * sin(b*x + c*t) .* exp(-b*z);
+    u2Cont = @(t,x,z) a * b * k * cos(b*x + c*t) .* exp(-b*z);
+    
+    dxXiCont = @(t,x) -a * b * sin(b*x + c*t);
+    dtHCont = @(t,x) -a * c * sin(b*x + c*t);
+    
+    dtU1Cont = @(t,x,z) a * b * c * k * cos(b*x + c*t) .* exp(-b*z);
+    dxU1Cont = @(t,x,z) a * b^2 * k * cos(b*x + c*t) .* exp(-b*z);
+    dzU1Cont = @(t,x,z) -a * b^2 * k * sin(b*x + c*t) .* exp(-b*z);
+    dzU2Cont = @(t,x,z) -a * b^2 * k * cos(b*x + c*t) .* exp(-b*z);
+    
+    dxdxU1Cont = @(t,x,z) -a * b^3 * k * sin(b*x + c*t) .* exp(-b*z);
+    dxdzU1Cont = @(t,x,z) -a * b^3 * k * cos(b*x + c*t) .* exp(-b*z);
+    dzdzU1Cont = @(t,x,z) a * b^3 * k * sin(b*x + c*t) .* exp(-b*z);
+    
+    dxU1zIntCont = @(t,x) a * b * k * ( ...
+      sin(b*x + c*t) .* (exp(-b * xiCont(t,x)) .* dxXiCont(t,x) - exp(-b * zBotCont(x)) .* dxZb) - ...
+      cos(b*x + c*t) .* (exp(-b * xiCont(t,x)) - exp(-b * zBotCont(x))) );
+    
+    DCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {d, 0; 0, d}, 'UniformOutput', false);
+    dxzDCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
+    
+  case 'coupling2'
+    domainWidth = 100;
+    idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
+    
+    gConst = 10;
+    xi0Cont = @(x) 5 * ones(size(x));
+    dxZb = 0.005;
+    a = 0.05;
+    b = 0.1;
+    c = 0.1;
+    d = 0.01;
+    k = 1;
+    
+    zBotCont = @(x) 0 + dxZb * x;
+    xiCont = @(t,x) 5 + a * cos(b*x + c*t) .* exp(-b * dxZb * x) + zBotCont(x);
+    
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    u1Cont = @(t,x,z) a * b * k * sin(b*x + c*t) .* exp(-b*z);
+    u2Cont = @(t,x,z) a * b * k * cos(b*x + c*t) .* exp(-b*z);
+    
+    dxXiCont = @(t,x) -a * b * sin(b*x + c*t) .* exp(-b * dxZb * x) - a * b * dxZb * cos(b*x + c*t) .* exp(-b * dxZb * x) + dxZb;
+    dtHCont = @(t,x) -a * c * sin(b*x + c*t) .* exp(-b * dxZb * x);
+    
+    dtU1Cont = @(t,x,z) a * b * c * k * cos(b*x + c*t) .* exp(-b*z);
+    dxU1Cont = @(t,x,z) a * b^2 * k * cos(b*x + c*t) .* exp(-b*z);
+    dzU1Cont = @(t,x,z) -a * b^2 * k * sin(b*x + c*t) .* exp(-b*z);
+    dzU2Cont = @(t,x,z) -a * b^2 * k * cos(b*x + c*t) .* exp(-b*z);
+    
+    dxdxU1Cont = @(t,x,z) -a * b^3 * k * sin(b*x + c*t) .* exp(-b*z);
+    dxdzU1Cont = @(t,x,z) -a * b^3 * k * cos(b*x + c*t) .* exp(-b*z);
+    dzdzU1Cont = @(t,x,z) a * b^3 * k * sin(b*x + c*t) .* exp(-b*z);
+    
+    dxU1zIntCont = @(t,x) a * b * k * ( ...
+      sin(b*x + c*t) .* (exp(-b * xiCont(t,x)) .* dxXiCont(t,x) - exp(-b * zBotCont(x)) .* dxZb) - ...
+      cos(b*x + c*t) .* (exp(-b * xiCont(t,x)) - exp(-b * zBotCont(x))) );
+    
+    DCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {d, 0; 0, d}, 'UniformOutput', false);
+    dxzDCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
+    
   case 'coupling_linear'
     domainWidth = 100;
     idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
@@ -108,7 +186,7 @@ switch problemName
     DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {d, 0; 0, d}, 'UniformOutput', false);
     dxzDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
     
-  case 'coupling'
+  case 'coupling_rupp'
     domainWidth = 100;
     idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
     
@@ -771,6 +849,8 @@ problemData = setdefault(problemData, 'idBdrU', idBdrU);
 problemData = setdefault(problemData, 'idBdrQ', idBdrQ);
 
 if isAnalytical
+  t0 = problemData.t0;
+  
   problemData = setdefault(problemData, 'hCont', hCont);
   problemData = setdefault(problemData, 'u1Cont', u1Cont);
   problemData = setdefault(problemData, 'u2Cont', u2Cont);
@@ -788,15 +868,14 @@ if isAnalytical
   problemData = setdefault(problemData, 'fhCont', fhCont);
   problemData = setdefault(problemData, 'fuCont', fuCont);
 
-  problemData = setdefault(problemData, 'h0Cont', @(x1) problemData.hCont(problemData.t0, x1));
-  problemData = setdefault(problemData, 'u10Cont', @(x1,x2) problemData.u1Cont(problemData.t0, x1, x2));
+  problemData = setdefault(problemData, 'h0Cont', @(x1) hCont(t0, x1));
+  problemData = setdefault(problemData, 'u10Cont', @(x1,x2) u1Cont(t0, x1, x2));
 
   problemData = setdefault(problemData, 'hDCont', hCont);
   problemData = setdefault(problemData, 'u1DCont', u1Cont);
   problemData = setdefault(problemData, 'u2DCont', u2Cont);
   problemData = setdefault(problemData, 'q1DCont', @(t,x,z) -DCont{1,1}(t,x,z) .* dxU1Cont(t,x,z) - DCont{1,2}(t,x,z) .* dzU1Cont(t,x,z));
   problemData = setdefault(problemData, 'q2DCont', @(t,x,z) -DCont{2,1}(t,x,z) .* dxU1Cont(t,x,z) - DCont{2,2}(t,x,z) .* dzU1Cont(t,x,z));
-  % problemData = setdefault(problemData, 'uhDCont', @(t,x) u1zIntCont(t,x));
 else
   problemData = setdefault(problemData, 'fhCont', fhCont);
   problemData = setdefault(problemData, 'fuCont', fuCont);

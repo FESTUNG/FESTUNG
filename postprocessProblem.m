@@ -54,18 +54,22 @@ problemData.cDiscRK{end, 3} = reshape( problemData.globHQup \ (problemData.globJ
 
 %% Evaluate errors (if analytical solution given).
 if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))
-  htEndCont = @(x1) problemData.hCont(problemData.tEnd, x1);
-  u1tEndCont = @(x1,x2) problemData.u1Cont(problemData.tEnd, x1, x2);
-  u2tEndCont = @(x1,x2) problemData.u2Cont(problemData.tEnd, x1, x2);
-
+  t = problemData.tEnd;
+  hCont = problemData.hCont;
+  u1Cont = problemData.u1Cont;
+  u2Cont = problemData.u2Cont;
+  
   problemData.error = [ computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{end, 1}, ...
-                            htEndCont, problemData.qOrd + 1, problemData.basesOnQuad1D), ...
+                            @(x1) hCont(t, x1), problemData.qOrd + 1, problemData.basesOnQuad1D), ...
                         computeL2ErrorTetra(problemData.g, problemData.cDiscRK{end, 2}, ...
-                            u1tEndCont, problemData.qOrd + 1, problemData.basesOnQuad2D), ...
+                            @(x1,x2) u1Cont(t, x1, x2), problemData.qOrd + 1, problemData.basesOnQuad2D), ...
                         computeL2ErrorTetra(problemData.g, problemData.cDiscRK{end, 3}, ...
-                            u2tEndCont, problemData.qOrd + 1, problemData.basesOnQuad2D) ];
+                            @(x1,x2) u2Cont(t, x1, x2), problemData.qOrd + 1, problemData.basesOnQuad2D) ];
 
   fprintf('L2 errors of h, u1, u2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
+  fprintf('Sum, max, min, and MD5-hash of h: %g, %g, %g, %s\n', sum(problemData.cDiscRK{end, 1}(:)), max(problemData.cDiscRK{end, 1}(:)), min(problemData.cDiscRK{end, 1}(:)), DataHash(problemData.cDiscRK{end, 1}));
+  fprintf('Sum, max, min, and MD5-hash of u1: %g, %g, %g, %s\n', sum(problemData.cDiscRK{end, 2}(:)), max(problemData.cDiscRK{end, 2}(:)), min(problemData.cDiscRK{end, 2}(:)), DataHash(problemData.cDiscRK{end, 2}));
+  fprintf('Sum, max, min, and MD5-hash of u2: %g, %g, %g, %s\n', sum(problemData.cDiscRK{end, 3}(:)), max(problemData.cDiscRK{end, 3}(:)), min(problemData.cDiscRK{end, 3}(:)), DataHash(problemData.cDiscRK{end, 3}));
 end % if
 
 %% Visualize final state.

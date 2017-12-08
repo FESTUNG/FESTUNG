@@ -15,7 +15,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 10);  % end time
+problemData = setdefault(problemData, 'tEnd', 86.4);  % end time
 problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.005));  % number of time steps
 
 % Order of Runge-Kutta method
@@ -39,23 +39,32 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
 problemData = execin([problemData.problemName filesep 'getTestcase'], problemData, problemData.testcase);
-generateX = @(numElem) (0:numElem(1)) * problemData.domainWidth / numElem(1);
-generateZbot = @(numElem) problemData.zBotCont(generateX(numElem));
-generateXi0 = @(numElem) problemData.xi0Cont(generateX(numElem));
+
 
 %% Domain and triangulation.
-problemData.generateGrid = @(numElem) domainRectTrap(generateX(numElem), [generateZbot(numElem); generateXi0(numElem)], numElem);
-problemData.generateGrid1D = @(numElem, g2D) generateGridData1D(generateX(numElem), generateXi0(numElem), numElem, g2D);
+domainWidth = problemData.domainWidth;
+generateX = @(numElem) (0:numElem(1)) * domainWidth / numElem(1);
+
+zBotCont = problemData.zBotCont;
+xi0Cont = problemData.xi0Cont;
+
+problemData.generateGrid = @(numElem) domainRectTrap(generateX(numElem), [zBotCont(generateX(numElem)); xi0Cont(generateX(numElem))], numElem);
+problemData.generateGrid1D = @(numElem, g2D) generateGridData1D(generateX(numElem), xi0Cont(generateX(numElem)), numElem, g2D);
 
 % Boundary parts (0 = int, 1 = bot, 2 = right, 3 = top, 4 = left)
 checkMultipleIds = @(idE0T, ids) logical(sum(bsxfun(@eq, idE0T, reshape(ids, 1, 1, length(ids))), 3));
 
+idBdrRiem = problemData.idBdrRiem;
+idBdrH = problemData.idBdrH;
+idBdrU = problemData.idBdrU;
+idBdrQ = problemData.idBdrQ;
+
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrRiem = @(g) checkMultipleIds(g.idE0T, problemData.idBdrRiem);
+problemData.generateMarkE0TbdrRiem = @(g) checkMultipleIds(g.idE0T, idBdrRiem);
 problemData.generateMarkE0TbdrCoupling = @(g) g.idE0T == 1;
 problemData.generateMarkE0TbdrBot = @(g) g.idE0T == 1;
 problemData.generateMarkE0TbdrTop = @(g) g.idE0T == 3;
-problemData.generateMarkE0TbdrH = @(g) checkMultipleIds(g.idE0T, problemData.idBdrH);
-problemData.generateMarkE0TbdrU = @(g) checkMultipleIds(g.idE0T, problemData.idBdrU);
-problemData.generateMarkE0TbdrQ = @(g) checkMultipleIds(g.idE0T, problemData.idBdrQ);
+problemData.generateMarkE0TbdrH = @(g) checkMultipleIds(g.idE0T, idBdrH);
+problemData.generateMarkE0TbdrU = @(g) checkMultipleIds(g.idE0T, idBdrU);
+problemData.generateMarkE0TbdrQ = @(g) checkMultipleIds(g.idE0T, idBdrQ);
 end % function
