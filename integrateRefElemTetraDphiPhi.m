@@ -34,10 +34,10 @@
 %> transformations.
 %>
 %> @param  N            The local number of degrees of freedom.
-%> @param  qOrd         The order of the quadrature rule.
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi2D and gradPhi2D.
+%> @param  qOrd         The order of the quadrature rule.
 %> @retval ret  The computed matrices as a cell array @f$[3\times 1]@f$
 %>
 %> This file is part of FESTUNG
@@ -60,7 +60,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefElemTetraDphiPhi(N, qOrd, basesOnQuad)
+function ret = integrateRefElemTetraDphiPhi(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 [Q1, Q2, W] = quadRuleTensorProduct(qOrd);
 ret = { zeros(N, N, 2), zeros(N, N, 2), zeros(N, N, 2) };
