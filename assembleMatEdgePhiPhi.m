@@ -16,25 +16,28 @@
 %> blocks. Diagonal blocks are defined as 
 %> @f[
 %> [\mathsf{{S}}]_{(k-1)N+i,(k-1)N+j} =
-%>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
-%>  \frac{1}{|E_{kn}|} \int_{E_{kn}} \varphi_{ki} \varphi_{kj} \mathrm{d}s \,,
+%>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_\Omega}
+%>  \int_{E_{kn}} \varphi_{ki} \varphi_{kj} \mathrm{d}s \,,
 %> @f]
 %> and off-diagonal blocks are defined as
 %> @f[
 %> [\mathsf{{S}}]_{(k^--1)N+i,(k^+-1)N+j} =
-%>  -\frac{1}{|E_{k^-n^-}|} \int_{E_{k^-n^-}} 
-%>   \varphi_{k^-i} \varphi_{k^+j} \mathrm{d}s \,.
+%>  -\int_{E_{k^-n^-}} \varphi_{k^-i} \varphi_{k^+j} \mathrm{d}s \,.
 %> @f]
-%> Entries in off-diagonal blocks are only non-zero for pairs of triangles
+%> Entries in off-diagonal blocks are potentially non-zero for pairs of elements
 %> @f$T_{k^-}, T_{k^+}@f$ with @f$\partial T_{k^-} \cap T_{k^+} \ne\emptyset@f$.
 %> Note that the local edge index @f$n^-@f$ is given implicitly, since 
 %> @f$\partial T_{k^-} \cap T_{k^+} \ne\emptyset@f$ consist of exactly one
 %> edge @f$E_{k^-n^-} = E_{k^+n^+}@f$.
+%> Depending on the element type, @f$n^+@f$ can either be deduced directly from
+%> @f$n^-@f$ alone or all possible combinations of @f$n^-@f$ and @f$n^+@f$
+%> must be considered.
+%>
 %> To allow for vectorization, the assembly is reformulated as
-%> @f$\mathsf{{S}} = \mathsf{{S}}^\mathrm{diag} + 
-%>    \mathsf{{S}}^\mathrm{offdiag}@f$ with the blocks defined as
+%> @f$\mathsf{{S}} = \mathsf{{S}}^\mathrm{diag} + \mathsf{{S}}^\mathrm{offdiag}@f$ 
+%> with the blocks defined as
 %> @f[
-%> \mathsf{{S}}^\mathrm{diag} = \sum_{n=1}^3
+%> \mathsf{{S}}^\mathrm{diag} = \sum_{n=1}^{n_\mathrm{edges}}
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\Omega} &   & \\
 %>     & ~\ddots~ & \\
@@ -43,7 +46,8 @@
 %> @f]
 %> and
 %> @f[
-%> \mathsf{{S}}^\mathrm{offdiag} = -\sum_{n^-=1}^3\sum_{n^+=1}^3
+%> \mathsf{{S}}^\mathrm{offdiag} = 
+%>   -\sum_{n^-=1}^{n_\mathrm{edges}}\sum_{n^+=1}^{n_\mathrm{edges}}
 %>   \begin{bmatrix}
 %>     0&\delta_{E_{1n^-} = E_{2n^+}}&\dots&\dots&\delta_{E_{1n^-}=E_{Kn^+}} \\
 %>     \delta_{E_{2n^-} = E_{1n^+}}&0&\ddots& &\vdots \\
@@ -57,7 +61,7 @@
 %> denote the Kronecker delta and @f$\otimes@f$ denotes the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
+%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times{n_\mathrm{edges}}}@f$
 %> are given by
 %> @f[
 %> [\hat{\mathsf{{S}}}^\mathrm{diag}]_{i,j,n} =
@@ -67,7 +71,8 @@
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
 %> <code>gammaMap()</code>. The entries of matrix
 %> @f$\hat{\mathsf{{S}}}^\mathrm{offdiag} \in 
-%>    \mathbb{R}^{N\times N\times 3\times 3}@f$ are defined as
+%>    \mathbb{R}^{N\times N\times {n_\mathrm{edges}}\times {n_\mathrm{edges}}}@f$ 
+%> are defined as
 %> @f[
 %> [\hat{\mathsf{{S}}}^\mathrm{offdiag}]_{i,j,n^-,n^+} =
 %>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_{n^-}(s) 
@@ -78,25 +83,28 @@
 %> <code>theta()</code>.
 %>
 %> @param  g          The lists describing the geometric and topological 
-%>                    properties of a triangulation (see 
+%>                    properties of a triangulation (see, e.g., 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0Tint <code>logical</code> arrays that mark each triangles
-%>                    (interior) edges on which the matrix blocks should be
-%>                    assembled @f$[K \times 3]@f$
+%> @param  markE0T    <code>logical</code> arrays that mark each elements
+%>                    edges on which the matrix blocks should be
+%>                    assembled @f$[K \times n_\mathrm{edges}]@f$
 %> @param refEdgePhiIntPhiInt  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
-%>                    @f$[N \times N \times 3]@f$
+%>                    @f$[N \times N \times n_\mathrm{edges}]@f$
 %> @param refEdgePhiIntPhiExt Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{offdiag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiExt()</code>.
-%>                    @f$[N \times N \times 3 \times 3]@f$
+%>                    @f$[N \times N \times n_\mathrm{edges}]@f$ or
+%>                    @f$[N \times N \times n_\mathrm{edges} \times n_\mathrm{edges}]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock
@@ -114,24 +122,40 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgePhiPhi(g, markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
-K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+function ret = assembleMatEdgePhiPhi(g, markE0T, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, coefE0T)
+if nargin < 5
+  coefE0T = g.areaE0T;
+end % if
+K = g.numT;  N = size(refEdgePhiIntPhiInt, 1); nEdges = size(g.E0T, 2);
 
 % Check function arguments that are directly used
-validateattributes(markE0Tint, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tint');
-validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N 3]}, mfilename, 'refEdgePhiIntPhiInt');
-validateattributes(refEdgePhiIntPhiExt, {'numeric'}, {'size', [N N 3 3]}, mfilename, 'refEdgePhiIntPhiExt');
+validateattributes(markE0T, {'logical'}, {'size', [K nEdges]}, mfilename, 'markE0T');
+validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N nEdges]}, mfilename, 'refEdgePhiIntPhiInt');
 
-% Assemble diagonal blocks
 ret = sparse(K*N, K*N);
-for n = 1 : 3
-  ret = ret + kron(spdiags(markE0Tint(:,n),0,K,K), refEdgePhiIntPhiInt(:,:,n));
-end % for
 
-% Assemble off-diagonal blocks
-for nn = 1 : 3
-  for np = 1 : 3
-    ret = ret - kron(g.markE0TE0T{nn, np}, refEdgePhiIntPhiExt(:,:,nn,np));
-  end % for
-end % for
+if numel(g.markE0TE0T) == nEdges % mapping from nn to np implicitly given
+  
+  validateattributes(refEdgePhiIntPhiExt, {'numeric'}, {'size', [N N nEdges]}, mfilename, 'refEdgePhiIntPhiExt');
+  
+  for n = 1 : nEdges
+    markCoefE0T = markE0T(:,n) .* coefE0T(:,n);
+    ret = ret + ...
+          kron(spdiags(markCoefE0T, 0, K, K), refEdgePhiIntPhiInt(:,:,n)) - ...
+          kron(bsxfun(@times, g.markE0TE0T{n}, markCoefE0T), refEdgePhiIntPhiExt(:,:,n));
+  end % for n
+  
+else % mapping from nn to np explicitly given
+  
+  validateattributes(refEdgePhiIntPhiExt, {'numeric'}, {'size', [N N nEdges nEdges]}, mfilename, 'refEdgePhiIntPhiExt');
+
+  for nn = 1 : nEdges
+    markCoefE0T = markE0T(:,nn) .* coefE0T(:,nn);
+    ret = ret + kron(spdiags(markCoefE0T, 0, K, K), refEdgePhiIntPhiInt(:,:,nn));
+    for np = 1 : nEdges
+      ret = ret - kron(bsxfun(@times, g.markE0TE0T{nn, np}, markCoefE0T), refEdgePhiIntPhiExt(:,:,nn,np));
+    end % for np
+  end % for nn
+  
+end % if
 end % function

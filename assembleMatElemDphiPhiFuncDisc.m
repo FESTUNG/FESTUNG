@@ -147,7 +147,7 @@ if iscell(dataDisc)
     error('dataDisc must be a KxN-matrix or a 2x1-cell or a 2x2-cell of such matrices.')
   end % if
 else
-  ret = assembleMatElemDphiPhiFuncDiscScalar(K, J0T, S, refElemDphiPhiPhi, dataDisc, markElem);
+  ret = assembleMatElemDphiPhiFuncDiscScalar(K, J0T, refElemDphiPhiPhi, dataDisc, markElem);
 end % if
 end % function
 
@@ -177,7 +177,7 @@ end % for m
 end  % function
 
 function ret = assembleMatElemDphiPhiFuncDiscVector(K, J0T, refElemDphiPhiPhi, dataDisc, markElem)
-[~, dataN] = size(dataDisc{1,1});
+[~, dataN] = size(dataDisc{1});
 N = size(refElemDphiPhiPhi{1}, 1);
 Ke = sum(markElem);
 
@@ -198,7 +198,7 @@ end % for m
 end  % function
 
 function ret = assembleMatElemDphiPhiFuncDiscScalar(K, J0T, refElemDphiPhiPhi, dataDisc, markElem)
-[~, dataN] = size(dataDisc{1,1});
+[~, dataN] = size(dataDisc);
 N = size(refElemDphiPhiPhi{1}, 1);
 Ke = sum(markElem);
 
