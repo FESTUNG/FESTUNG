@@ -1,19 +1,19 @@
-% Compute integrals over the edges of the reference triangle, whose integrands 
+% Compute integrals over the edges of the reference element, whose integrands 
 % consist of all permutations of two basis functions.
 
 %===============================================================================
 %> @file integrateRefEdgePhiIntPhiInt.m
 %>
-%> @brief Compute integrals over the edges of the reference triangle, whose 
+%> @brief Compute integrals over the edges of the reference element, whose 
 %>        integrands consist of all permutations of two basis functions.
 %===============================================================================
 %>
-%> @brief Compute integrals over the edges of the reference triangle 
+%> @brief Compute integrals over the edges of the reference element 
 %>        @f$\hat{T}@f$, whose integrands consist of all permutations of two
 %>        basis functions.
 %>
 %> It computes a multidimensional array
-%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
+%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times {n_\mathrm{edges}}@f$
 %> defined by
 %> @f[
 %> [\hat{\mathsf{{S}}}^\mathrm{diag}]_{i,j,n} =
@@ -23,17 +23,18 @@
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is given in 
 %> <code>gammaMap()</code>.
 %>
-%> @param  N    The local number of degrees of freedom
+%> @param  N            The local number of degrees of freedom
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D.
-%> @param  qOrd  (optional) The order of the quadrature rule to be used. 
-%>               Defaults to @f$2p+1 @f$.
-%> @retval ret  The computed array @f$[N\times N\times 3]@f$
+%> @param  qOrd         (optional) The order of the quadrature rule to be used. 
+%>                      Defaults to @f$2p+1 @f$.
+%> @retval ret  The computed array @f$[N\times N\times {n_\mathrm{edges}}]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
 %> @author Balthasar Reuter, 2017
 %> 
 %> @par License
@@ -54,14 +55,29 @@
 %
 function ret = integrateRefEdgePhiIntPhiInt(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-if nargin < 3, p = (sqrt(8*N+1)-3)/2;  qOrd = 2*p+1;  end
+nEdges = size(basesOnQuad.phi1D{qOrd}, 3);
+
+if nargin < 3
+  switch nEdges
+    case 3
+      p = (sqrt(8*N+1)-3)/2;
+    case 4
+      p = sqrt(N)-1;
+    otherwise
+      error('Unknown number of edges')
+  end % switch
+  qOrd = 2*p+1;  
+end % if
+
 [~, W] = quadRule1D(qOrd);
-ret = zeros(N, N, 3); % [N x N x 3]
-for n = 1 : 3 % 3 edges
+ret = zeros(N, N, nEdges); % [N x N x nEdges]
+
+for n = 1 : nEdges
   for i = 1 : N
-    for j = 1 : N
-      ret(i, j, n) = sum( W' .* basesOnQuad.phi1D{qOrd}(:,i,n) .* basesOnQuad.phi1D{qOrd}(:,j,n) );
-    end % for
-  end % for
-end % for
+    for j = 1 : i
+      ind = sub2ind([N N nEdges], [i j], [j i], [n n]);
+      ret(ind) = W * ( basesOnQuad.phi1D{qOrd}(:,i,n) .* basesOnQuad.phi1D{qOrd}(:,j,n) );
+    end  % for j
+  end  % for i
+end  % for n
 end % function

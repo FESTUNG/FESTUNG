@@ -17,12 +17,12 @@
 %> @f[
 %> [\mathsf{{S}}_\mathrm{D}]_{(k-1)N+i,(k-1)N+j} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
-%>  \frac{1}{|E_{kn}|} \int_{E_{kn}} \varphi_{ki} \varphi_{kj} \mathrm{d}s \,.
+%>  \int_{E_{kn}} \varphi_{ki} \varphi_{kj} \mathrm{d}s \,.
 %> @f]
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathsf{{S}}_\mathrm{D} = \sum_{n=1}^3
+%> \mathsf{{S}}_\mathrm{D} = \sum_{n=1}^{n_\mathrm{edges}}
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{D}} &   & \\
 %>     & ~\ddots~ & \\
@@ -33,7 +33,7 @@
 %> delta and @f$\otimes@f$ denotes the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
+%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times{n_\mathrm{edges}}}@f$
 %> are given by
 %> @f[
 %> [\hat{\mathsf{{S}}}^\mathrm{diag}]_{i,j,n} =
@@ -47,24 +47,27 @@
 %> <code>assembleMatEdgePhiPhi()</code>.
 %>
 %> @param  g          The lists describing the geometric and topological 
-%>                    properties of a triangulation (see 
+%>                    properties of a triangulation (see, e.g., 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  markE0T    <code>logical</code> arrays that mark each triangles
 %>                    (boundary) edges on which the matrix blocks should be
-%>                    assembled @f$[K \times 3]@f$
+%>                    assembled @f$[K \times n_\mathrm{edges}]@f$
 %> @param refEdgePhiIntPhiInt  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
-%>                    @f$[N \times N \times 3]@f$
+%>                    by <code>integrateRefEdgePhiIntPhiInt()</code> or
+%>                    by <code>integrateRefEdgeTetraPhiIntPhiInt()</code>.
+%>                    @f$[N \times N \times n_\mathrm{edges}]@f$
 %> @param coefE0T     (optional) Coefficient vector that is applied to each
 %>                    block. Defaults to <code>g.areaE0T</code>
-%>                    @f$[K \times 3]@f$
+%>                    @f$[K \times n_\mathrm{edges}]@f$
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock
@@ -83,18 +86,17 @@
 %> @endparblock
 %
 function ret = assembleMatEdgePhiIntPhiInt(g, markE0T, refEdgePhiIntPhiInt, coefE0T)
-if nargin < 7, coefE0T = g.areaE0T; end
+if nargin < 4, coefE0T = g.areaE0T; end
 
-% Extract dimensions
-K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+K = g.numT;  N = size(refEdgePhiIntPhiInt, 1); nEdges = size(g.E0T, 2);
 
 % Check function arguments that are directly used
-validateattributes(markE0T, {'logical'}, {'size', [K 3]}, mfilename, 'markE0T');
-validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N 3]}, mfilename, 'refEdgePhiIntPhiInt');
+validateattributes(markE0T, {'logical'}, {'size', [K nEdges]}, mfilename, 'markE0T');
+validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N nEdges]}, mfilename, 'refEdgePhiIntPhiInt');
 
 % Assemble matrix
 ret = sparse(K*N, K*N);
-for n = 1 : 3
-  ret = ret + kron(spdiags(markE0T(:, n) .* coefE0T(:, n), 0, K, K ), refEdgePhiIntPhiInt(:, :, n));
+for n = 1 : nEdges
+  ret = ret + kron(spdiags(markE0T(:, n) .* coefE0T(:, n), 0, K, K), refEdgePhiIntPhiInt(:, :, n));
 end % for
 end % function
