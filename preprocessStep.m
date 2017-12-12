@@ -9,7 +9,7 @@ fDisc = projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) problemData.fCont(
           problemData.globM, problemData.basesOnQuad);
                              
 %% Assembly of time-dependent global matrices.
-problemData.globG = assembleMatElemTetraDphiPhiFuncDisc(problemData.g, problemData.hatG, KDisc);
+problemData.globG = assembleMatElemDphiPhiFuncDisc(problemData.g, problemData.hatG, KDisc);
 problemData.globR = assembleMatEdgeTetraPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, ...
                     problemData.hatRdiag, problemData.hatRoffdiag, KDisc);
 
