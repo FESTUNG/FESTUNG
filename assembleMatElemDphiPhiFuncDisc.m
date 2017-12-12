@@ -1,7 +1,7 @@
 % Assembles two matrices, each containing integrals of products of a basis 
 % function with a (spatial) derivative of a basis function and with a 
 % discontinuous coefficient function.
-%
+
 %===============================================================================
 %> @file assembleMatElemDphiPhiFuncDisc.m
 %>
@@ -23,9 +23,10 @@
 %> @f]
 %> All other entries are zero.
 %> For the implementation, the element integrals are backtransformed to the
-%> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
-%> mapping @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$
-%> defined as
+%> reference element @f$\hat{T}@f$ using a mapping 
+%> @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$.
+%>
+%> In the case of an affine mapping, it is defined as
 %> @f[
 %> \mathbf{F}_k (\hat{\mathbf{x}}) = 
 %>   \mathsf{{B}}_k \hat{\mathbf{x}} + \hat{\mathbf{a}}_{k1}
@@ -34,62 +35,72 @@
 %>   \left[ \hat{\mathbf{a}}_{k2} - \hat{\mathbf{a}}_{k1} | 
 %>          \hat{\mathbf{a}}_{k3} - \hat{\mathbf{a}}_{k1} \right] \,.
 %> @f]
+%>
 %> For the transformation of the gradient holds @f$ \mathbf{\nabla} = 
-%> ( \hat{\mathbf{\nabla}} \mathbf{F}_k )^{-T} \hat{\mathbf{\nabla}} @f$,
-%> resulting in the component-wise rule in @f$\mathbf{x} \in T_k@f$:
-%> @f[
-%>   \begin{bmatrix} \partial_{x^1} \\ \partial_{x^2} \end{bmatrix} =
-%>   \frac{1}{2|T_k|} \begin{bmatrix}
-%>      B_k^{22} \partial_{\hat{x}^1} - B_k^{21} \partial_{\hat{x}^2} \\
-%>      B_k^{11} \partial_{\hat{x}^2} - B_k^{12} \partial_{\hat{x}^1}
-%>   \end{bmatrix} \,.
-%> @f]
+%> ( \hat{\mathbf{\nabla}} \mathbf{F}_k )^{-T} \hat{\mathbf{\nabla}} =
+%> (\mathbf{J}_k(\vec{x}))^{-T} \hat{\mathbf{\nabla}} @f$,
+%> with @f$\mathbf{J}_k(\vec{x})@f$ the Jacobian of the mapping.
+%>
 %> This allows to write
 %> @f[
-%>   \int_{T_k} \partial_{x^1} \varphi_{ki} \varphi_{kl} \varphi_{kj} =
-%>   B_k^{22}[\hat{\mathsf{G}}]_{i,j,l,1}-B_k^{21}[\hat{\mathsf{G}}]_{i,j,l,2}
-%>   \text{ and }
-%>   \int_{T_k} \partial_{x^2} \varphi_{ki} \varphi_{kl} \varphi_{kj} =
-%>   -B_k^{12}[\hat{\mathsf{G}}]_{i,j,l,1}+B_k^{11}[\hat{\mathsf{G}}]_{i,j,l,2}\,,
+%>   \int_{T_k} \partial_{x^m} \varphi_{ki} \varphi_{kl} \varphi_{kj} =
+%>   \sum_{s=1}^S [\mathbf{J}_k^s]_{3-m,3-m} [\hat{\mathsf{G}}^s]_{i,j,l,m}
+%>    - [\mathbf{J}_k^s]_{3-m,m} [\hat{\mathsf{G}}^s]_{i,j,l,3-m}\,,
 %> @f]
-%> with @f$\hat{\mathsf{G}} \in \mathbb{R}^{N\times N\times N\times 2}@f$
-%> given as 
+%> with @f$S\in\mathbb{N}@f$ the number of parts in the Jacobian. 
+%> For affine mappings, the Jacobian is constant for each element, thus @f$S = 1@f$.
+%> For trapezoidals, we have @f$S = 3@f$ corresponding to a constant, an
+%> @f$x^1@f$- and an @f$x^2@f$-dependent part.
+%> @f$\hat{\mathsf{G}} \in \mathbb{R}^{N\times N\times N\times 2}@f$
+%> is given as 
 %> @f[
 %>  [\hat{\mathsf{G}}]_{i,j,l,m} = \int_{\hat{T}} 
 %>    \partial_{\hat{x}^m} \hat{\varphi}_i \hat{\varphi}_l \hat{\varphi}_j \,.
 %> @f]
+%>
 %> Now we can build local matrices
 %> @f$\mathsf{G}_{T_k}^m \in \mathbb{R}^{N\times N}@f$ as
 %> @f[
-%>  \mathsf{G}_{T_k}^1 = \sum_{l=1}^N D_{kl}(t) \left(
-%>    B_k^{22}[\hat{\mathsf{G}}]_{:,:,l,1} 
-%>    - B_k^{21}[\hat{\mathsf{G}}]_{:,:,l,2} \right)
-%> @f]
-%> and
-%> @f[
-%>  \mathsf{G}_{T_k}^2 = \sum_{l=1}^N D_{kl}(t) \left(
-%>    -B_k^{12}[\hat{\mathsf{G}}]_{:,:,l,1} 
-%>    + B_k^{11}[\hat{\mathsf{G}}]_{:,:,l,2} \right) \,.
+%>  \mathsf{G}_{T_k}^m = \sum_{l=1}^N D_{kl}(t) \sum_{s=1}^S \left(
+%>     [\mathbf{J}_k^s]_{3-m,3-m} [\hat{\mathsf{G}}^s]_{i,j,l,m}
+%>    - [\mathbf{J}_k^s]_{3-m,m} [\hat{\mathsf{G}}^s]_{i,j,l,3-m} \right)\,.
 %> @f]
 %> With @f$\mathsf{G}^m = 
 %> \mathrm{diag}(\mathsf{G}_{T_1}^m,\ldots,\mathsf{G}_{T_K}^m)@f$
 %> we can vectorize the assembly using the Kronecker product.
 %>
+%> Optionally, the discrete function given by coefficients @f$D_{kl}@f$ can
+%> be different for each spatial dimension @f$m@f$ or even a matrix, thus
+%> introducing an additional sum for each @f$m@f$ over the components of
+%> the matrix-vector-product.
+%>
+%> The approximation order of the coefficient function can be different
+%> from the local degrees of freedom.
+%>
 %> @param  g          The lists describing the geometric and topological 
-%>                    properties of a triangulation (see 
+%>                    properties of a triangulation (see, e.g.,
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param refElemDphiPhiPhi Local matrix @f$\hat{\mathsf{G}}@f$ as provided
-%>                    by <code>integrateRefElemDphiPhiPhi()</code>.
+%>                    by <code>integrateRefElemDphiPhiPhi()</code> or
+%>                    <code>integrateRefElemTetraDphiPhiPhi()</code>.
 %>                    @f$[N \times N \times N \times 2]@f$
-%> @param dataDisc    A representation of the discrete function ,e.g., as 
+%> @param dataDisc    A representation of the discrete function, e.g., as 
 %>                    computed by <code>projectFuncCont2DataDisc()</code>
-%>                    @f$[K \times N]@f$
+%>                    @f$[K \times N]@f$ for scalar or @f$[2 \times 1\text{ cell}/
+%>                    [2 \times 2 \text{ cell}@f$ of such matrices for
+%>                    vectorial or matrix coefficients, respectively.
+%> @param markElem    (optional) <code>logical</code> arrays to provide the 
+%>                    elements of the grid for which the computation is done.
+%>                    @f$[K \times 1]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Hennes Hajduk, 2016.
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock
@@ -107,20 +118,102 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatElemDphiPhiFuncDisc(g, refElemDphiPhiPhi, dataDisc)
-[K, dataN] = size(dataDisc);
-N = size(refElemDphiPhiPhi, 1);
+function ret = assembleMatElemDphiPhiFuncDisc(g, refElemDphiPhiPhi, dataDisc, markElem)
+% Extract relevant grid information
+K = g.numT;
+if isfield(g, 'J0T')
+  J0T = g.J0T; 
+else
+  J0T = { g.B }; 
+end % if
+
+if nargin < 4
+  markElem = true(K, 1);
+end % if
+
+if ~iscell(refElemDphiPhiPhi)
+  refElemDphiPhiPhi = { refElemDphiPhiPhi };
+end % if
+
+validateattributes(refElemDphiPhiPhi, {'cell'}, {'numel', length(J0T)}, mfilename, 'refElemDphiPhiPhi');
+validateattributes(markElem, {'logical'}, {'size', [K 1]}, mfilename, 'markElem');
+
+if iscell(dataDisc)
+  if isequal(size(dataDisc), [2 2])
+    ret = assembleMatElemDphiPhiFuncDiscMatrix(K, J0T, refElemDphiPhiPhi, dataDisc, markElem);
+  elseif isvector(dataDisc) && numel(dataDisc) == 2
+    ret = assembleMatElemDphiPhiFuncDiscVector(K, J0T, refElemDphiPhiPhi, dataDisc, markElem);
+  else
+    error('dataDisc must be a KxN-matrix or a 2x1-cell or a 2x2-cell of such matrices.')
+  end % if
+else
+  ret = assembleMatElemDphiPhiFuncDiscScalar(K, J0T, S, refElemDphiPhiPhi, dataDisc, markElem);
+end % if
+end % function
+
+function ret = assembleMatElemDphiPhiFuncDiscMatrix(K, J0T, refElemDphiPhiPhi, dataDisc, markElem)
+[~, dataN] = size(dataDisc{1,1});
+N = size(refElemDphiPhiPhi{1}, 1);
+Ke = sum(markElem);
 
 % Check function arguments that are directly used
-validateattributes(dataDisc, {'numeric'}, {'size', [g.numT dataN]}, mfilename, 'dataDisc');
-validateattributes(refElemDphiPhiPhi, {'numeric'}, {'size', [N N dataN 2]}, mfilename, 'refElemDphiPhiPhi');
+validateattributes(dataDisc{1,1}, {'numeric'}, {'size', [K dataN]}, mfilename, 'dataDisc{1,1}');
+validateattributes(dataDisc{1,2}, {'numeric'}, {'size', [K dataN]}, mfilename, 'dataDisc{1,2}');
+validateattributes(dataDisc{2,1}, {'numeric'}, {'size', [K dataN]}, mfilename, 'dataDisc{2,1}');
+validateattributes(dataDisc{2,2}, {'numeric'}, {'size', [K dataN]}, mfilename, 'dataDisc{2,2}');
 
-% Assemble matrices
-ret = cell(2, 1);  ret{1} = sparse(K*N, K*N);  ret{2} = sparse(K*N, K*N);
-for l = 1 : dataN
-  ret{1} = ret{1} + kron(spdiags(dataDisc(:,l) .* g.B(:,2,2), 0,K,K), refElemDphiPhiPhi(:,:,l,1)) ...
-                  - kron(spdiags(dataDisc(:,l) .* g.B(:,2,1), 0,K,K), refElemDphiPhiPhi(:,:,l,2));
-  ret{2} = ret{2} - kron(spdiags(dataDisc(:,l) .* g.B(:,1,2), 0,K,K), refElemDphiPhiPhi(:,:,l,1)) ...
-                  + kron(spdiags(dataDisc(:,l) .* g.B(:,1,1), 0,K,K), refElemDphiPhiPhi(:,:,l,2));
-end % for
-end % function
+ret = { sparse(Ke*N, Ke*N), sparse(Ke*N, Ke*N) };
+for m = 1 : 2
+  for r = 1 : 2
+    for l = 1 : N
+      for s = 1 : length(J0T)
+        ret{m} = ret{m} + ...
+                   kron(spdiags(dataDisc{r,m}(markElem,l) .* J0T{s}(markElem,3-r,3-r), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,  r)) - ...
+                   kron(spdiags(dataDisc{r,m}(markElem,l) .* J0T{s}(markElem,3-r,  r), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,3-r));
+      end % for s
+    end % for l
+  end % for r
+end % for m
+end  % function
+
+function ret = assembleMatElemDphiPhiFuncDiscVector(K, J0T, refElemDphiPhiPhi, dataDisc, markElem)
+[~, dataN] = size(dataDisc{1,1});
+N = size(refElemDphiPhiPhi{1}, 1);
+Ke = sum(markElem);
+
+% Check function arguments that are directly used
+validateattributes(dataDisc{1}, {'numeric'}, {'size', [K dataN]}, mfilename, 'dataDisc{1}');
+validateattributes(dataDisc{2}, {'numeric'}, {'size', [K dataN]}, mfilename, 'dataDisc{2}');
+
+ret = { sparse(Ke*N, Ke*N), sparse(Ke*N, Ke*N) };
+for m = 1 : 2
+  for l = 1 : N
+    for s = 1 : length(J0T)
+      ret{m} = ret{m} + ...
+                 kron(spdiags(dataDisc{m}(markElem,l) .* J0T{s}(markElem,3-m,3-m), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
+                 kron(spdiags(dataDisc{m}(markElem,l) .* J0T{s}(markElem,3-m,  m), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,3-m));
+    end % for s
+  end % for l
+end % for m
+end  % function
+
+function ret = assembleMatElemDphiPhiFuncDiscScalar(K, J0T, refElemDphiPhiPhi, dataDisc, markElem)
+[~, dataN] = size(dataDisc{1,1});
+N = size(refElemDphiPhiPhi{1}, 1);
+Ke = sum(markElem);
+
+% Check function arguments that are directly used
+validateattributes(dataDisc, {'numeric'}, {'size', [K dataN]}, mfilename, 'dataDisc');
+
+ret = { sparse(Ke*N, Ke*N), sparse(Ke*N, Ke*N) };
+for m = 1 : 2
+  for l = 1 : N
+    for s = 1 : length(J0T)
+      ret{m} = ret{m} + ...
+                 kron(spdiags(dataDisc(markElem,l) .* J0T{s}(markElem,3-m,3-m), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
+                 kron(spdiags(dataDisc(markElem,l) .* J0T{s}(markElem,3-m,  m), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,3-m));
+    end % for s
+  end % for l
+end % for m
+end  % function
+
