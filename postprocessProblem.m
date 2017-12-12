@@ -59,5 +59,7 @@ if all(isfield(problemData, { 'hCont', 'q1Cont', 'q2Cont' }))
 
   fprintf('L2 errors of h, q1, q2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
 end % if
+
+fprintf('Sum, max, min, and MD5-hash of sysY: %g, %g, %g, %s\n', sum(problemData.sysY), max(problemData.sysY), min(problemData.sysY), DataHash(problemData.sysY));
 end % function
 

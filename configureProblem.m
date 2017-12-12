@@ -16,7 +16,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 10);  % end time
+problemData = setdefault(problemData, 'tEnd', 86.4);  % end time
 problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.05));  % number of time steps
 
 % Discard time derivative and compute stationary solution
@@ -43,23 +43,22 @@ switch problemData.testcase
     domainHeight = [-5, 0];
     idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
     % Analytical solution
-    a = 0.01;
-    b = 0.3;
-    c = 0.5;
-    d = 2;
+    a = 0.05;
+    b = 0.1;
+    c = 0.1;
     k = 1;
-    problemData.hCont = @(t,x,z) a * cos(b*x + c*t) .* cos(d*z) + 5 - z;
-    problemData.q1Cont = @(t,x,z) a * b * sin(b*x + c*t) .* cos(d*z);
-    problemData.q2Cont = @(t,x,z) a * d * cos(b*x + c*t) .* sin(d*z) + 1;
+    problemData.hCont = @(t,x,z) 5 + a * cos(b*x + c*t) .* exp(-b*z);
+    problemData.q1Cont = @(t,x,z) a * b * sin(b*x + c*t) .* exp(-b*z);
+    problemData.q2Cont = @(t,x,z) a * b * cos(b*x + c*t) .* exp(-b*z);
     % Diffusion matrix
     problemData.KCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {k, 0; 0, k}, 'UniformOutput', false);
     % Derivatives
-    dThCont = @(t,x,z) -a * c * sin(b*x + c*t) .* cos(d*z);
-    dXhCont = @(t,x,z) -a * b * sin(b*x + c*t) .* cos(d*z);
-    dZhCont = @(t,x,z) -a * d * cos(b*x + c*t) .* sin(d*z) - 1;
-    dXdXhCont = @(t,x,z) -a * b^2 * cos(b*x + c*t) .* cos(d*z);
-    dZdZhCont = @(t,x,z) -a * d^2 * cos(b*x + c*t) .* cos(d*z);
-    dXdZhCont = @(t,x,z) a * b * d * sin(b*x + c*t) .* sin(d*z);
+    dThCont = @(t,x,z) -a * c * sin(b*x + c*t) .* exp(-b*z);
+    dXhCont = @(t,x,z) -problemData.q1Cont(t,x,z);
+    dZhCont = @(t,x,z) -problemData.q2Cont(t,x,z);
+    dXdXhCont = @(t,x,z) -a * b^2 * cos(b*x + c*t) .* exp(-b*z);
+    dZdZhCont = @(t,x,z) a * b^2 * cos(b*x + c*t) .* exp(-b*z);
+    dXdZhCont = @(t,x,z) a * b^2 * sin(b*x + c*t) .* exp(-b*z);
     dXZKCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
     % Boundary conditions
     problemData.hDCont = problemData.hCont;
@@ -70,7 +69,43 @@ switch problemData.testcase
                           dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
                           dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
                           dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
-                        
+                         
+  case 'coupling2'
+    % width and height of computational domain
+%     domainWidth = [0, 100];
+%     domainHeight = [-5, 0];
+    dxZb = 0.005;
+    domainWidth = linspace(0, 100, problemData.numElem(1)+1);
+    domainHeight = [-5 * ones(1,problemData.numElem(1)+1); dxZb * domainWidth];
+    idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
+    % Analytical solution
+    a = 0.05;
+    b = 0.1;
+    c = 0.1;
+    k = 1;
+    problemData.hCont = @(t,x,z) 5 + a * cos(b*x + c*t) .* exp(-b*z);
+    problemData.q1Cont = @(t,x,z) a * b * sin(b*x + c*t) .* exp(-b*z);
+    problemData.q2Cont = @(t,x,z) a * b * cos(b*x + c*t) .* exp(-b*z);
+    % Diffusion matrix
+    problemData.KCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {k, 0; 0, k}, 'UniformOutput', false);
+    % Derivatives
+    dThCont = @(t,x,z) -a * c * sin(b*x + c*t) .* exp(-b*z);
+    dXhCont = @(t,x,z) -problemData.q1Cont(t,x,z);
+    dZhCont = @(t,x,z) -problemData.q2Cont(t,x,z);
+    dXdXhCont = @(t,x,z) -a * b^2 * cos(b*x + c*t) .* exp(-b*z);
+    dZdZhCont = @(t,x,z) a * b^2 * cos(b*x + c*t) .* exp(-b*z);
+    dXdZhCont = @(t,x,z) a * b^2 * sin(b*x + c*t) .* exp(-b*z);
+    dXZKCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
+    % Boundary conditions
+    problemData.hDCont = problemData.hCont;
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    % Right hand side
+    problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
+                          dXZKCont{1,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{1,1}(t,x,z) .* dXdXhCont(t,x,z) - ...
+                          dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
+                         
   case 'coupling_linear'
     % width and height of computational domain
     domainWidth = [0, 100];
@@ -93,6 +128,40 @@ switch problemData.testcase
     dZdZhCont = @(t,x,z) zeros(size(x));
     dXdZhCont = @(t,x,z) zeros(size(x));
     dXZKCont = {@(t,x,z) ones(size(x)), @(t,x,z) zeros(size(x)); @(t,x,z) -ones(size(x)), @(t,x,z) zeros(size(x))};
+    % Boundary conditions
+    problemData.hDCont = problemData.hCont;
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    % Right hand side
+    problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
+                          dXZKCont{1,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{1,1}(t,x,z) .* dXdXhCont(t,x,z) - ...
+                          dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
+                       
+  case 'coupling_rupp'
+    % width and height of computational domain
+    domainWidth = [0, 100];
+    domainHeight = [-5, 0];
+    idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
+    % Analytical solution
+    a = 0.01;
+    b = 0.3;
+    c = 0.5;
+    d = 2;
+    k = 1;
+    problemData.hCont = @(t,x,z) a * cos(b*x + c*t) .* cos(d*z) + 5 - z;
+    problemData.q1Cont = @(t,x,z) a * b * sin(b*x + c*t) .* cos(d*z);
+    problemData.q2Cont = @(t,x,z) a * d * cos(b*x + c*t) .* sin(d*z) + 1;
+    % Diffusion matrix
+    problemData.KCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {k, 0; 0, k}, 'UniformOutput', false);
+    % Derivatives
+    dThCont = @(t,x,z) -a * c * sin(b*x + c*t) .* cos(d*z);
+    dXhCont = @(t,x,z) -a * b * sin(b*x + c*t) .* cos(d*z);
+    dZhCont = @(t,x,z) -a * d * cos(b*x + c*t) .* sin(d*z) - 1;
+    dXdXhCont = @(t,x,z) -a * b^2 * cos(b*x + c*t) .* cos(d*z);
+    dZdZhCont = @(t,x,z) -a * d^2 * cos(b*x + c*t) .* cos(d*z);
+    dXdZhCont = @(t,x,z) a * b * d * sin(b*x + c*t) .* sin(d*z);
+    dXZKCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
     % Boundary conditions
     problemData.hDCont = problemData.hCont;
     problemData.gNCont = @(t,x,z) zeros(size(x));
