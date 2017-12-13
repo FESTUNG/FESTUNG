@@ -86,38 +86,34 @@ hSmooth_hDV0T1D = problemData.hSmoothV0T1D ./ hDCont(t, problemData.g.g1D.coordV
 
 %% Assembly of time-dependent matrices and vectors in momentum equation.
 % Advection element integral (II)
-globE = assembleMatElemTetraDphiPhiFuncDisc(problemData.g, problemData.hatG, problemData.cDiscRK{nSubStep, 2});
+globE = assembleMatElemDphiPhiFuncDisc(problemData.g, problemData.hatG, problemData.cDiscRK{nSubStep, 2});
 
 % Advection interior edge integrals (averaging uu, uw) (VI)
-globP = assembleMatEdgeTetraPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDiscRK{nSubStep, 2});
+globP = assembleMatEdgePhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDiscRK{nSubStep, 2});
 
 % Advection boundary edge integral (uu) without prescribed Dirichlet data for u (VI)
-globPtop = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
-globPbdr = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
-globPRiem = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
+globPtop = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
+globPbdr = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
+globPRiem = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
 
 % Advection boundary edge integral (uu) with prescribed Dirichlet data for u (VI)
 globJbot = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, { @(x1,x2) u1DCont(t,x1,x2).^2, @(x1,x2) u1DCont(t,x1,x2) .* u2DCont(t,x1,x2) }, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 globJuu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 globJuuRiem = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
-% Advection boundary edge integral (uw) with prescribed Dirichlet data for u (VI)
-% problemData.globSbdr = assembleMatEdgeTetraPhiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, u1DCont, problemData.qOrd, problemData.hatQPerQuad);
-% problemData.globSriem = assembleMatEdgeTetraPhiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrRiemU, u1DCont, problemData.qOrd, problemData.hatQPerQuad);
-
 % Advection boundary edge integral (gh) with prescribed Dirichlet data for h (VI)
 globJh = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, @(x1,x2) hDCont(t, x1), problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 globJhRiem = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, @(x1,x2) hDCont(t, x1), problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 % Diffusion element integral (IV)
-globG = assembleMatElemTetraDphiPhiFuncDisc(problemData.g, problemData.hatG, DDisc);
+globG = assembleMatElemDphiPhiFuncDisc(problemData.g, problemData.hatG, DDisc);
 
 % Diffusion interior edge integral (V)
-globR = assembleMatEdgeTetraPhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
+globR = assembleMatEdgePhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
 
 % Diffusion boundary edge integral without prescribed Dirichlet data (V)
-globRbot = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0TbdrBot, problemData.hatRdiag, DDisc);
-globRbdr = assembleMatEdgeTetraPhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
+globRbot = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0TbdrBot, problemData.hatRdiag, DDisc);
+globRbdr = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
 
 % Diffusion boundary edge integral with prescribed Dirichlet data (V)
 globJq = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrQ, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);

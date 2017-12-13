@@ -85,13 +85,13 @@ problemData.basesOnQuad1D = computeBasesOnQuad1D(problemData.p, struct, [problem
 problemData.basesOnQuad2D = computeBasesOnQuadTensorProduct(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
 
 %% Computation of matrices on the reference element.
-problemData.hatM = integrateRefElemTetraPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.hatG = integrateRefElemTetraDphiPhiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.hatH = integrateRefElemTetraDphiPhi(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.hatQdiag = integrateRefEdgeTetraPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.hatQoffdiag = integrateRefEdgeTetraPhiIntPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.hatRdiag = integrateRefEdgeTetraPhiIntPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.hatRoffdiag = integrateRefEdgeTetraPhiIntPhiExtPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.hatM = integrateRefElemTetraPhiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.hatG = integrateRefElemTetraDphiPhiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.hatH = integrateRefElemTetraDphiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.hatQdiag = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.hatQoffdiag = integrateRefEdgePhiIntPhiExt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.hatRdiag = integrateRefEdgePhiIntPhiIntPhiInt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.hatRoffdiag = integrateRefEdgePhiIntPhiExtPhiExt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 problemData.hatSdiag = integrateRefEdgeTetraPhiIntPerQuad(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 problemData.hatQPerQuad = integrateRefEdgeTetraPhiIntPhiIntPerQuad(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 

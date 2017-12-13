@@ -81,25 +81,25 @@ problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - 
 globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
 
 % Boundary edge integral without Dirichlet data for U in flux and continuity equation (X, XII)
-globQtop = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
-globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
+globQtop = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
+globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
 
 % Interior edge integral in flux equation (X)
-globQ = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
+globQ = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Combine matrices
 problemData.globHQ = cellfun(@(H, Q, Qtop, Qbdr) H - Q - Qtop - Qbdr, globH, globQ, globQtop, globQbdr, 'UniformOutput', false);
 
 %% Continuity equation
 % Horizontal interior edge integral with first normal component in continuity equation (XII)
-globQAvg = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
+globQAvg = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Horizontal interior and top boundary edge integral with second normal component in continuity equation (XII)
 globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, (problemData.g.markE0Tint & problemData.g.markE0Th | problemData.g.markE0TbdrTop), problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Boundary edge integral without Dirichlet data for U in continuity equation (XII), restricted to boundaries without Riemann solver
-globQtop = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
-globQbdr = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
+globQtop = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
+globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
 
 % Combine matrices
 problemData.globHQup = globH{2} - globQup;
