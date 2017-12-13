@@ -27,7 +27,7 @@
 %> All other entries are zero.
 %> To allow for vectorization, the assembly is reformulated as
 %> @f[
-%> \mathsf{{Q}}^m_\mathrm{N} = \sum_{n=1}^3
+%> \mathsf{{Q}}^m_\mathrm{N} = \sum_{n=1}^{n_\mathrm{edges}}
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\mathrm{N}} &   & \\
 %>     & ~\ddots~ & \\
@@ -43,7 +43,7 @@
 %> the Kronecker product.
 %>
 %> The entries of matrix 
-%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times3}@f$
+%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times{n_\mathrm{edges}}}@f$
 %> are given by
 %> @f[
 %> [\hat{\mathsf{{S}}}^\mathrm{diag}]_{i,j,n} =
@@ -60,23 +60,26 @@
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0Tbdr <code>logical</code> arrays that mark each triangles
+%> @param  markE0T    <code>logical</code> arrays that mark each triangles
 %>                    (boundary) edges on which the matrix blocks should be
-%>                    assembled @f$[K \times 3]@f$
+%>                    assembled @f$[K \times {n_\mathrm{edges}}]@f$
 %> @param refEdgePhiIntPhiInt  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
-%>                    @f$[N \times N \times 3]@f$
-%> @param areaNuE0Tbdr (optional) argument to provide precomputed values
-%>                    for the products of <code>markE0Tbdr</code>,
+%>                    by <code>integrateRefEdgePhiIntPhiInt()</code> or
+%>                    <code>integrateRefEdgeTetraPhiIntPhiInt()</code>.
+%>                    @f$[N \times N \times {n_\mathrm{edges}}]@f$
+%> @param areaNuMarkE0T (optional) argument to provide precomputed values
+%>                    for the products of <code>markE0T</code>,
 %>                    <code>g.areaE0T</code>, and <code>g.nuE0T</code>
-%>                    @f$[3 \times 2 \text{ cell}]@f$
+%>                    @f$[2 \times 1 \text{ cell}]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
-%> Modified by Hennes Hajduk, 2016-04-06
+%> @copyright 2014-2017 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Hennes Hajduk, 2016.
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock
@@ -94,76 +97,33 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgePhiIntPhiIntNu(g, markE0Tbdr, refEdgePhiIntPhiInt, areaNuE0Tbdr)
+function ret = assembleMatEdgePhiIntPhiIntNu(g, markE0T, refEdgePhiIntPhiInt, areaNuMarkE0T)
 % Extract dimensions
-K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+K = g.numT;  N = size(refEdgePhiIntPhiInt, 1); nEdges = size(g.E0T, 2);
 
 % Check function arguments that are directly used
-validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
-validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N 3]}, mfilename, 'refEdgePhiIntPhiInt');
+validateattributes(markE0T, {'logical'}, {'size', [K nEdges]}, mfilename, 'markE0T');
+validateattributes(refEdgePhiIntPhiInt, {'numeric'}, {'size', [N N nEdges]}, mfilename, 'refEdgePhiIntPhiInt');
 
-if nargin > 3
-  ret = assembleMatEdgePhiIntPhiIntNu_withAreaNuE0Tbdr(g, refEdgePhiIntPhiInt, areaNuE0Tbdr);
-elseif isfield(g, 'areaNuE0T')
-  ret = assembleMatEdgePhiIntPhiIntNu_noAreaNuE0Tbdr_withAreaNuE0T(g, markE0Tbdr, refEdgePhiIntPhiInt);
-else
-  ret = assembleMatEdgePhiIntPhiIntNu_noAreaNuE0Tbdr_noAreaNuE0T(g, markE0Tbdr, refEdgePhiIntPhiInt);
-end
-end % function
-%
-%===============================================================================
-%> @brief Helper function for the case that assembleMatEdgePhiIntPhiIntNu()
-%> was called with a precomputed field areaNuE0Tbdr.
-%
-function ret = assembleMatEdgePhiIntPhiIntNu_withAreaNuE0Tbdr(g, refEdgePhiIntPhiInt, areaNuE0Tbdr)
-% Extract dimensions
-K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+if nargin < 4
+  areaNuMarkE0T = cell(2,1);
+  if isfield(g, 'areaNuE0T')
+    areaNuMarkE0T{1} = markE0T .* g.areaNuE0T(:, :, 1);
+    areaNuMarkE0T{2} = markE0T .* g.areaNuE0T(:, :, 2);
+  else
+    areaNuMarkE0T{1} = markE0T .* g.areaE0T .* g.nuE0T(:, :, 1);
+    areaNuMarkE0T{2} = markE0T .* g.areaE0T .* g.nuE0T(:, :, 2);
+  end % if
+end % if
 
-% Assemble matrices
-ret = cell(2,1); 
-ret{1} = sparse(K*N, K*N); 
-ret{2} = sparse(K*N, K*N);
-for n = 1 : 3
-  ret{1} = ret{1} + kron(spdiags(areaNuE0Tbdr{n,1}, 0,K,K), refEdgePhiIntPhiInt(:,:,n));
-  ret{2} = ret{2} + kron(spdiags(areaNuE0Tbdr{n,2}, 0,K,K), refEdgePhiIntPhiInt(:,:,n));
-end % for
-end % function
-%
-%===============================================================================
-%> @brief Helper function for the case that assembleMatEdgePhiIntPhiIntNu()
-%> was called without a precomputed field areaNuE0Tbdr and parameter g provides
-%> a precomputed field areaNuE0T.
-%
-function ret = assembleMatEdgePhiIntPhiIntNu_noAreaNuE0Tbdr_withAreaNuE0T(g, markE0Tbdr, refEdgePhiIntPhiInt)
-% Extract dimensions
-K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
+validateattributes(areaNuMarkE0T, {'cell'}, {'numel', 2}, mfilename, 'areaNuMarkE0T');
+validateattributes(areaNuMarkE0T{1}, {'numeric'}, {'size', [K nEdges]}, mfilename, 'areaNuMarkE0T{1}');
+validateattributes(areaNuMarkE0T{2}, {'numeric'}, {'size', [K nEdges]}, mfilename, 'areaNuMarkE0T{2}');
 
-% Assemble matrices
-ret = cell(2,1); 
-ret{1} = sparse(K*N, K*N); 
-ret{2} = sparse(K*N, K*N);
-for n = 1 : 3
-  ret{1} = ret{1} + kron(spdiags(markE0Tbdr(:,n).*g.areaNuE0T{n,1}, 0,K,K), refEdgePhiIntPhiInt(:,:,n));
-  ret{2} = ret{2} + kron(spdiags(markE0Tbdr(:,n).*g.areaNuE0T{n,2}, 0,K,K), refEdgePhiIntPhiInt(:,:,n));
-end % for
-end % function
-%
-%===============================================================================
-%> @brief Helper function for the case that assembleMatEdgePhiIntPhiIntNu()
-%> was called without a precomputed field areaNuE0Tbdr and parameter g provides
-%> no precomputed field areaNuE0T.
-%
-function ret = assembleMatEdgePhiIntPhiIntNu_noAreaNuE0Tbdr_noAreaNuE0T(g, markE0Tbdr, refEdgePhiIntPhiInt)
-% Extract dimensions
-K = g.numT;  N = size(refEdgePhiIntPhiInt, 1);
-
-% Assemble matrices
-ret = cell(2,1); 
-ret{1} = sparse(K*N, K*N); 
-ret{2} = sparse(K*N, K*N);
-for n = 1 : 3
-  QNkn = markE0Tbdr(:,n) .* g.areaE0T(:,n);
-  ret{1} = ret{1} + kron(spdiags(QNkn .* g.nuE0T(:,n,1), 0,K,K), refEdgePhiIntPhiInt(:,:,n));
-  ret{2} = ret{2} + kron(spdiags(QNkn .* g.nuE0T(:,n,2), 0,K,K), refEdgePhiIntPhiInt(:,:,n));
-end % for
+ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
+for m = 1 : 2
+  for n = 1 : nEdges
+    ret{m} = ret{m} + kron(spdiags(areaNuMarkE0T{m}(:, n), 0, K, K), refEdgePhiIntPhiInt(:, :, n));
+  end % for n
+end % for m
 end % function

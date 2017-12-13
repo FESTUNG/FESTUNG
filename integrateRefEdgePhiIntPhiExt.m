@@ -34,6 +34,7 @@
 %> @param  qOrd         (optional) The order of the quadrature rule to be used. 
 %>                      Defaults to @f$2p+1 @f$.
 %> @retval ret  The computed array 
+%>              @f$[N\times N\times {n_\mathrm{edges}}]@f$ or
 %>              @f$[N\times N\times {n_\mathrm{edges}}\times {n_\mathrm{edges}}]@f$
 %>
 %> This file is part of FESTUNG
