@@ -34,18 +34,18 @@ problemData.basesOnQuad = computeBasesOnQuadTensorProduct(problemData.p, struct,
 problemData.hatM = integrateRefElemTetraPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 problemData.hatG = integrateRefElemTetraDphiPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 hatH = integrateRefElemTetraDphiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
-problemData.hatRdiag = integrateRefEdgeTetraPhiIntPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
-problemData.hatRoffdiag = integrateRefEdgeTetraPhiIntPhiExtPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
-hatSdiag = integrateRefEdgeTetraPhiIntPhiInt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
-hatSoffdiag = integrateRefEdgeTetraPhiIntPhiExt(problemData.N, problemData.qOrd, problemData.basesOnQuad);
+problemData.hatRdiag = integrateRefEdgePhiIntPhiIntPhiInt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+problemData.hatRoffdiag = integrateRefEdgePhiIntPhiExtPhiExt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+hatSdiag = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+hatSoffdiag = integrateRefEdgePhiIntPhiExt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 problemData.globH = assembleMatElemDphiPhi(problemData.g, hatH);
-problemData.globQ = assembleMatEdgeTetraPhiPhiNu(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag);
-problemData.globQN = assembleMatEdgeTetraPhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrN, hatSdiag);
-problemData.globS = problemData.eta * assembleMatEdgeTetraPhiPhi(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag, ones(problemData.g.numT, 4));
-problemData.globSD = problemData.eta * assembleMatEdgeTetraPhiIntPhiInt(problemData.g, problemData.g.markE0TbdrD | problemData.g.markE0TbdrCoupling, hatSdiag, ones(problemData.g.numT, 4));
+problemData.globQ = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag);
+problemData.globQN = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrN, hatSdiag);
+problemData.globS = problemData.eta * assembleMatEdgePhiPhi(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag, ones(problemData.g.numT, 4));
+problemData.globSD = problemData.eta * assembleMatEdgePhiIntPhiInt(problemData.g, problemData.g.markE0TbdrD | problemData.g.markE0TbdrCoupling, hatSdiag, ones(problemData.g.numT, 4));
 
 if ~problemData.isStationary
   problemData.sysW = [ sparse(2 * problemData.g.numT * problemData.N, 3 * problemData.g.numT * problemData.N) ; ...
