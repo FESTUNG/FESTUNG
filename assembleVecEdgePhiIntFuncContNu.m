@@ -26,26 +26,10 @@
 %> normal.
 %>
 %> For the implementation, the integrals are backtransformed to the
-%> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
-%> mapping @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$
-%> defined as
-%> @f[
-%> \mathbf{F}_k (\hat{\mathbf{x}}) = 
-%>   \mathsf{{B}}_k \hat{\mathbf{x}} + \hat{\mathbf{a}}_{k1}
-%>   \text{ with }
-%> \mathbb{R}^{2\times2} \ni \mathsf{{B}}_k =
-%>   \left[ \hat{\mathbf{a}}_{k2} - \hat{\mathbf{a}}_{k1} | 
-%>          \hat{\mathbf{a}}_{k3} - \hat{\mathbf{a}}_{k1} \right] \,.
-%> @f]
-%> This allows to reformulate 
-%> @f[
-%>   \int_{E_{kn}} \varphi_{ki} c_\mathrm{D}(t) \mathrm{d}s =
-%>   \frac{|E_{kn}|}{|\hat{E}_n|} \int_{\hat{E}_n} \hat{\varphi}_i 
-%>   c_\mathrm{D}(t,\mathbf{F}_k(\hat{\mathbf{x}}))\mathrm{d}\hat{\mathbf{x}}\,.
-%> @f]
-%> Further transformation to the unit interval @f$[0,1]@f$ using the mapping 
-%> @f$\hat{\mathbf{\gamma}}_n(s)@f$ as provided by <code>gammaMap()</code>
-%> gives the component-wise formulation
+%> reference element @f$\hat{T}@f$ and further to the unit interval @f$[0,1]@f$
+%> using the mapping @f$\hat{\mathbf{\gamma}}_n(s)@f$ as provided by 
+%> <code>gammaMap()</code>.
+%> This gives the component-wise formulation
 %> @f[
 %>  [\mathbf{J}_\mathrm{D}^m]_{(k-1)N+i} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D} \nu_{kn}^m |E_{kn}|

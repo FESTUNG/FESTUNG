@@ -223,10 +223,13 @@ if numel(g.markE0TE0T) == nEdges % mapping from nn to np implicitly given
         % Off-diagonal blocks
         ret{m} = ret{m} + kronVec((spdiags(0.5 * areaNuMarkE0T{r}(:, n), 0, K, K) * g.markE0TE0T{n}).', RtildeT).';
         % Diagonal blocks
+        RtildeT = zeros(K*N, N);
         for l = 1 : dataN
-          ret{m} = ret{m} + kron(spdiags(0.5 * areaNuMarkE0T{r}(:, n) .* dataDisc{r, m}(:, l), 0, K, K), ...
-                                 refEdgePhiIntPhiIntPhiInt(:, :, l, n));
+          RtildeT = RtildeT + kron(dataDisc{r, m}(:, l), refEdgePhiIntPhiIntPhiInt(:, :, l, n));
+%           ret{m} = ret{m} + kron(spdiags(0.5 * areaNuMarkE0T{r}(:, n) .* dataDisc{r, m}(:, l), 0, K, K), ...
+%                                  refEdgePhiIntPhiIntPhiInt(:, :, l, n));
         end % for l
+        ret{m} = ret{m} + kronVec(spdiags(0.5 * areaNuMarkE0T{r}(:, n), 0, K, K), RtildeT);
       end % for m
     end % for r
   end  % for n

@@ -17,32 +17,17 @@
 %> @f[
 %> [\mathbf{K}_\mathrm{D}]_{(k-1)N+i} =
 %>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
-%>  \frac{1}{|E_{kn}|} \int_{E_{kn}} \varphi_{ki} c_\mathrm{D}(t) \mathrm{d}s\,.
+%>  \int_{E_{kn}} \varphi_{ki} c_\mathrm{D}(t) \mathrm{d}s\,.
 %> @f]
+%>
 %> For the implementation, the integrals are backtransformed to the
-%> reference triangle @f$\hat{T} = \{(0,0), (1,0), (0,1)\}@f$ using an affine
-%> mapping @f$\mathbf{F}_k:\hat{T}\ni\hat{\mathbf{x}}\mapsto\mathbf{x}\in T_k@f$
-%> defined as
-%> @f[
-%> \mathbf{F}_k (\hat{\mathbf{x}}) = 
-%>   \mathsf{{B}}_k \hat{\mathbf{x}} + \hat{\mathbf{a}}_{k1}
-%>   \text{ with }
-%> \mathbb{R}^{2\times2} \ni \mathsf{{B}}_k =
-%>   \left[ \hat{\mathbf{a}}_{k2} - \hat{\mathbf{a}}_{k1} | 
-%>          \hat{\mathbf{a}}_{k3} - \hat{\mathbf{a}}_{k1} \right] \,.
-%> @f]
-%> This allows to reformulate 
-%> @f[
-%>   \int_{E_{kn}} \varphi_{ki} c_\mathrm{D}(t) \mathrm{d}s =
-%>   \frac{|E_{kn}|}{|\hat{E}_n|} \int_{\hat{E}_n} \hat{\varphi}_i 
-%>   c_\mathrm{D}(t,\mathbf{F}_k(\hat{\mathbf{x}}))\mathrm{d}\hat{\mathbf{x}}\,.
-%> @f]
-%> Further transformation to the unit interval @f$[0,1]@f$ using the mapping 
-%> @f$\hat{\mathbf{\gamma}}_n(s)@f$ as provided by <code>gammaMap()</code>
-%> gives the component-wise formulation
+%> reference element @f$\hat{T}@f$ and further to the unit interval @f$[0,1]@f$
+%> using the mapping @f$\hat{\mathbf{\gamma}}_n(s)@f$ as provided by 
+%> <code>gammaMap()</code>.
+%> This gives the component-wise formulation
 %> @f[
 %>  [\mathbf{K}_\mathrm{D}]_{(k-1)N+i} =
-%>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
+%>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D} |E_{kn}|
 %>  \int_0^1 \hat{\varphi}_{i} \circ \hat{\mathbf{\gamma}}_n(s)
 %>     c_\mathrm{D}(t, \mathbf{F}_k \circ \hat{\mathbf{\gamma}}_n(s))
 %>     \mathrm{d}s \,.
@@ -51,30 +36,36 @@
 %> <code>quadRule1D()</code> 
 %> @f[
 %>  [\mathbf{K}_\mathrm{D}]_{(k-1)N+i} \approx
-%>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D}
+%>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}_D} |E_{kn}|
 %>  \sum_{r=1}^R \omega_r \hat{\varphi}_{i} \circ \hat{\mathbf{\gamma}}_n(q_r)
 %>     c_\mathrm{D}(t, \mathbf{F}_k \circ \hat{\mathbf{\gamma}}_n(q_r)) \,,
 %> @f]
-%> allowing to vectorize over all triangles.
+%> allowing to vectorize over all elements.
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
 %>                    <code>generateGridData()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0Tbdr <code>logical</code> arrays that mark each triangles
-%>                    (boundary) edges on which the vector entries should be
-%>                    assembled @f$[K \times 3]@f$
+%> @param  markE0T    <code>logical</code> arrays that mark each elements
+%>                    edges on which the vector entries should be
+%>                    assembled @f$[K \times n_\mathrm{edges}]@f$
 %> @param  funcCont   A function handle for the continuous function
 %> @param  N          The number of local degrees of freedom @f$[\text{scalar}]@f$
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D.
-%> @param qOrd       (optional) Order of quadrature rule to be used.
+%> @param qOrd        (optional) Order of quadrature rule to be used.
+%                     Defaults to @f$2p+1@f$.
+%> @param coefE0T     (optional) Coefficient vector that is applied to each
+%>                    block. Defaults to <code>g.areaE0T</code>
+%>                    @f$[K \times n_\mathrm{edges}]@f$
 %> @retval ret        The assembled vector @f$[KN]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2017 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2017.
 %> 
 %> @par License
 %> @parblock
@@ -92,27 +83,54 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecEdgePhiIntFuncCont(g, markE0Tbdr, funcCont, N, basesOnQuad, qOrd)
+function ret = assembleVecEdgePhiIntFuncCont(g, markE0T, funcCont, N, basesOnQuad, qOrd, coefE0T)
+% Extract dimensions
+K = g.numT;  nEdges = size(g.E0T, 2);
+
 % Determine quadrature rule and mapping to physical element
 if nargin < 6
-  p = (sqrt(8*N+1)-3)/2;
-  qOrd = 2*p+1;
+  switch nEdges
+    case 3
+      p = (sqrt(8*N+1)-3)/2;
+    case 4
+      p = sqrt(N)-1;
+    otherwise
+      error('Unknown number of edges')
+  end % switch
+  qOrd = 2*p+1;  
 end % if
 [Q, W] = quadRule1D(qOrd);
 
+% Determine default coefficient
+if nargin < 7
+  coefE0T = g.areaE0T;
+end % if
+
 % Check function arguments that are directly used
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
-validateattributes(markE0Tbdr, {'logical', 'numeric'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
+validateattributes(markE0T, {'logical'}, {'size', [K nEdges]}, mfilename, 'markE0T');
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
+validateattributes(coefE0T, {'numeric'}, {'size', [K nEdges]}, mfilename, 'coefE0T');
+
+% Determine edge mapping
+switch nEdges
+  case 3
+    gamma = @gammaMap;
+  case 4
+    gamma = @gammaMapTetra;
+  otherwise
+    error('Unknown number of edges')
+end % switch
 
 % Assemble vector
-ret = zeros(g.numT, N);
-for n = 1 : 3
-  [Q1, Q2] = gammaMap(n, Q);
-  cDn = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
+ret = zeros(K, N);
+for n = 1 : nEdges
+  [Q1, Q2] = gamma(n, Q);
+  funcQ0E = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
+  markCoefE0T = markE0T(:, n) .* coefE0T(:, n);
   for i = 1 : N
-    ret(:,i) = ret(:,i) + markE0Tbdr(:,n) .* ( cDn * (W' .* basesOnQuad.phi1D{qOrd}(:,i,n)) );
+    ret(:,i) = ret(:,i) + markCoefE0T .* ( funcQ0E * (W' .* basesOnQuad.phi1D{qOrd}(:, i, n)) );
   end % for
 end % for
-ret = reshape(ret', g.numT*N, 1);
+ret = reshape(ret.', K*N, 1);
 end % function
