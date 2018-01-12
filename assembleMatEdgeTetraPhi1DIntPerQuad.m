@@ -59,7 +59,7 @@ function ret = assembleMatEdgeTetraPhi1DIntPerQuad(g2D, g1D, markE0T, refEdgePhi
 K = g2D.numT; barK = g1D.numT;
 ret = cell(4,1);
 for nn = 1 : 4
-	ret{nn} = kron( spdiags(g1D.markT2DT.' * ( markE0T(:,nn) .* g2D.areaE0T(:,nn) ), 0, barK, K), ...
-                  refEdgePhi1DIntPerQuad(:,:,nn) );
+	ret{nn} = kron( spdiags(g1D.markT2DT.' * ( markE0T(:, nn) .* g2D.areaE0T(:, nn) ), 0, barK, K), ...
+                  refEdgePhi1DIntPerQuad(:, :, nn) );
 end % for nn
 end % function
