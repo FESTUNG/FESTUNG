@@ -52,14 +52,14 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'coupling_linear');
+problemData = setdefault(problemData, 'testcase', 'coupling2');
 
 % Enable coupling
 problemData = setdefault(problemData, 'isCouplingDarcy', true);
 problemData = setdefault(problemData, 'isCouplingSWE', true);
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [8 4]);
+problemData = setdefault(problemData, 'numElem', [32 16]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -69,8 +69,8 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 10);  % end time
-problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.05));  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 0.5);%50);  % end time
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.01));  % number of time steps
 problemData = setdefault(problemData, 'numSubSteps', 10); % number of free-flow steps per sub-surface step
 
 % Visualization settings
@@ -102,10 +102,7 @@ problemData.darcyData.t0 = problemData.t0;
 problemData.darcyData.tEnd = problemData.tEnd;
 problemData.darcyData.numSteps = problemData.numSteps;
 
-% if problemData.isCouplingDarcy
-%   problemData.darcyData.idCoupling = 3;
-% end % if
-problemData.darcyData.isCoupling = true;
+problemData.darcyData.isCoupling = problemData.isCouplingDarcy;
 
 problemData.darcyData.isVisGrid = problemData.isVisGrid;
 problemData.darcyData.isVisSol = problemData.isVisSol;
