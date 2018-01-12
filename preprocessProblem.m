@@ -92,8 +92,7 @@ problemData.hatQdiag = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.b
 problemData.hatQoffdiag = integrateRefEdgePhiIntPhiExt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 problemData.hatRdiag = integrateRefEdgePhiIntPhiIntPhiInt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 problemData.hatRoffdiag = integrateRefEdgePhiIntPhiExtPhiExt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
-problemData.hatSdiag = integrateRefEdgeTetraPhiIntPerQuad(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.hatQPerQuad = integrateRefEdgeTetraPhiIntPhiIntPerQuad(problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.hatSdiag = integrateRefEdgePhiIntPerQuad(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
 problemData.barHatM = integrateRefElem1DPhiPhi(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 problemData.barHatG = integrateRefElem1DDphiPhiPhiPerQuad(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);

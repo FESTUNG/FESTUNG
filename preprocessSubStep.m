@@ -97,13 +97,13 @@ globPbdr = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g
 globPRiem = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
 
 % Advection boundary edge integral (uu) with prescribed Dirichlet data for u (VI)
-globJbot = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, { @(x1,x2) u1DCont(t,x1,x2).^2, @(x1,x2) u1DCont(t,x1,x2) .* u2DCont(t,x1,x2) }, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-globJuu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-globJuuRiem = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2).^2, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+globJbot = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, { @(x1,x2) u1DCont(t,x1,x2).^2, @(x1,x2) u1DCont(t,x1,x2) .* u2DCont(t,x1,x2) }, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+globJuu = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2).^2, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+globJuuRiem = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2).^2, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
 % Advection boundary edge integral (gh) with prescribed Dirichlet data for h (VI)
-globJh = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, @(x1,x2) hDCont(t, x1), problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-globJhRiem = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, @(x1,x2) hDCont(t, x1), problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+globJh = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, @(x1,x2) hDCont(t, x1), problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+globJhRiem = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, @(x1,x2) hDCont(t, x1), problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
 % Diffusion element integral (IV)
 globG = assembleMatElemDphiPhiFuncDisc(problemData.g, problemData.hatG, DDisc);
@@ -116,8 +116,8 @@ globRbot = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g
 globRbdr = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ, problemData.hatRdiag, DDisc);
 
 % Diffusion boundary edge integral with prescribed Dirichlet data (V)
-globJq = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrQ, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-globJqtop = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrTop, qDCont, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+globJq = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrQ, qDCont, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+globJqtop = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrTop, qDCont, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
 % Put together matrices
 problemData.globEP = cellfun(@(E, P, Ptop, Pbdr, PRiem) E - P - Ptop - Pbdr - 0.5 * PRiem, globE, globP, globPtop, globPbdr, globPRiem, 'UniformOutput', false);
@@ -126,9 +126,9 @@ problemData.globJ = globJbot{1} + globJbot{2} + globJuu{1} + 0.5 * globJuuRiem{1
 
 %% Assembly of time-dependent vectors in flux and continuity equation.
 % Boundary edge integrals with prescribed Dirichlet data for u (X, XII)
-problemData.globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2), problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.globJuFlux = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2), problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-problemData.globJuBot = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, @(x1,x2) u1DCont(t,x1,x2), problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJu = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2), problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.globJuFlux = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2), problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.globJuBot = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, @(x1,x2) u1DCont(t,x1,x2), problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
 %% Assembly of time-dependent matrices and vectors in continuity equation.
 % Interior edge integrals (averaging uh/Hs) (XII)
@@ -141,7 +141,7 @@ problemData.tildeGlobPRiem = problemData.fn_assembleMatEdgeTetraPhiIntPhiIntFunc
 problemData.globJuhRiem = problemData.fn_assembleVecEdgeTetraPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & problemData.g.markE0TbdrH, @(x1,x2) u1DCont(t,x1,x2) .* hDCont(t,x1), problemData.hSmoothV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 % Boundary edge integrals with prescribed Dirichlet data for w (XII)
-problemData.globJw = assembleVecEdgeTetraPhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, @(x1,x2) u2DCont(t,x1,x2), problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJw = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, @(x1,x2) u2DCont(t,x1,x2), problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
 % Boundary edge integrals with prescribed Dirichlet Data and Riemann solver for u or h but not both (XII)
 problemData.tildeGlobJuRiem = problemData.fn_assembleVecEdgeTetraPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & ~problemData.g.markE0TbdrH, @(x1,x2) u1DCont(t,x1,x2), hSmooth_hV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);

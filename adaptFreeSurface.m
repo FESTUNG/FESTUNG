@@ -107,13 +107,13 @@ problemData.globHQavg = -globH{1} + globQAvg{1} + globQtop{1} + globQbdr{1};
 
 %% Helper matrices for assembly of jump terms in Lax-Friedrichs Riemann solver
 % Helper matrix for jumps over vertical interior edges in momentum and continuity equation (VI, XII)
-problemData.globS = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Tv, problemData.hatSdiag);
+problemData.globS = assembleMatEdgePhiIntPerQuad(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Tv, problemData.hatSdiag);
 
 % Helper matrix for jumps over vertical boundary edges in momentum equation with prescribed Dirichlet data for u and Riemann solver (VI)
-problemData.globSuRiem = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, problemData.hatSdiag);
+problemData.globSuRiem = assembleMatEdgePhiIntPerQuad(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, problemData.hatSdiag);
 
 % Helper matrix for jumps over vertical boundary edges in continuity equation with prescribed Dirichlet data for h and Riemann solver (VI)
-problemData.globShRiem = assembleMatEdgeTetraPhiIntPerQuad(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, problemData.hatSdiag);
+problemData.globShRiem = assembleMatEdgePhiIntPerQuad(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, problemData.hatSdiag);
 
 % Helper matrix for jumps over interior vertices in free surface equation (XV)
 problemData.barGlobS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, problemData.g.markE0Tint & problemData.g.markE0Tv, problemData.barHatSdiag);
