@@ -1,7 +1,7 @@
 % First step of the three-part substepping algorithm.
 
 %===============================================================================
-%> @file darcyVert_sweVert/preprocessSubStep.m
+%> @file darcy_swe_2dv/preprocessSubStep.m
 %>
 %> @brief First step of the three-part substepping algorithm.
 %===============================================================================

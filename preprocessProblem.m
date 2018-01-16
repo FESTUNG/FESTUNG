@@ -2,7 +2,7 @@
 % stationary blocks, etc. for the problem solution.
 
 %===============================================================================
-%> @file darcyVert_sweVert/preprocessProblem.m
+%> @file darcy_swe_2dv/preprocessProblem.m
 %>
 %> @brief Performs all pre-processing tasks, such as grid generation, assembly 
 %>        of stationary blocks, etc. for the problem solution.
@@ -53,8 +53,6 @@ problemData.sweData = problemData.sweSteps.preprocessProblem(problemData.sweData
 g1D = problemData.generateGrid1D(problemData.darcyData.numElem(1), problemData.darcyData.g);
 problemData.darcyData.tildeGlobQcouple = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.tildeHatQdiag);
 problemData.darcyData.tildeGlobScouple = assembleMatEdgeTetraPhiIntPhi1DInt(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.tildeHatQdiag, ones(problemData.darcyData.g.numT, 4));
-
-% problemData.hatS = integrateRefEdgeTetraPhiIntPhiIntPhiExtPhiExt(problemData.sweData.N, problemData.sweData.qOrd, problemData.sweData.basesOnQuad2D);
 
 % Grid data structure for coupling terms
 problemData.gCoupling.areaE0T = problemData.sweData.g.areaE0T;

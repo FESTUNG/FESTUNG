@@ -1,7 +1,7 @@
 % Third step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file darcyVert_sweVert/postprocessStep.m
+%> @file darcy_swe_2dv/postprocessStep.m
 %>
 %> @brief Third step of the four-part algorithm in the main loop.
 %===============================================================================

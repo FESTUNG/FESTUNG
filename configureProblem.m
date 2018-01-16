@@ -2,7 +2,7 @@
 % Problem parameters are to be modified inside this routine.
 
 %===============================================================================
-%> @file darcyVert_sweVert/configureProblem.m
+%> @file darcy_swe_2dv/configureProblem.m
 %>
 %> @brief Fills the problemData-struct with all basic configuration options.
 %>        Problem parameters are to be modified inside this routine.
@@ -52,14 +52,14 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'coupling2');
+problemData = setdefault(problemData, 'testcase', 'coupling');
 
 % Enable coupling
 problemData = setdefault(problemData, 'isCouplingDarcy', true);
 problemData = setdefault(problemData, 'isCouplingSWE', true);
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [32 16]);
+problemData = setdefault(problemData, 'numElem', [8 4]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -69,8 +69,8 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 0.5);%50);  % end time
-problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.01));  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 2);%50);  % end time
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.05));  % number of time steps
 problemData = setdefault(problemData, 'numSubSteps', 10); % number of free-flow steps per sub-surface step
 
 % Visualization settings

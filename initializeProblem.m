@@ -1,7 +1,7 @@
 % Fills the problem's data structures with initial data (if applicable).
 
 %===============================================================================
-%> @file darcyVert_sweVert/initializeProblem.m
+%> @file darcy_swe_2dv/initializeProblem.m
 %>
 %> @brief Fills the problem's data structures with initial data (if applicable).
 %===============================================================================
@@ -22,7 +22,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock

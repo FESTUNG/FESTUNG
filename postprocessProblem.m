@@ -2,7 +2,7 @@
 % solution, etc.
 
 %===============================================================================
-%> @file darcyVert_sweVert/postprocessProblem.m
+%> @file darcy_swe_2dv/postprocessProblem.m
 %>
 %> @brief Performs all post-processing tasks, such as error estimates of the 
 %>        final solution, etc.
@@ -25,7 +25,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
@@ -53,10 +53,8 @@ if problemData.isCouplingSWE
   
   markAreaE0T = problemData.sweData.g.markE0TbdrCoupling(:, 1) .* problemData.sweData.g.areaE0T(:, 1);
   
-  % Upper edge (2) in Darcy problem is coupled to lower edge (1) in SWE 
-  % problem:
-  % Darcy values are evaluated on edge 2 and integrated over edge 1 in SWE
-  % grid data.
+  % Upper edge (2) in Darcy problem is coupled to lower edge (1) in SWE problem:
+  % Darcy values are evaluated on edge 2 and integrated over edge 1 in SWE grid data.
   [Q, W] = quadRule1D(problemData.qOrd);
   [Q1, Q2] = gammaMapTetra(2, Q);
   
@@ -78,37 +76,7 @@ if problemData.isCouplingSWE
   problemData.sweData.globJuCoupling{2} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 2)).', K*N, 1);
   problemData.sweData.globJwCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.gCoupling.markE0TE0T{1} * u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
  end % if
-
-% Coupling term for vertical velocity component
-% t = problemData.tEnd;
-% K = problemData.darcyData.g.numT;
-% N = problemData.darcyData.N;
-% KDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.darcyData.g, @(x1,x2) c(t,x1,x2), problemData.darcyData.qOrd, ...
-%                        problemData.darcyData.globM, problemData.darcyData.basesOnQuad), problemData.darcyData.KCont, 'UniformOutput', false);
-%                      
-% globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
-%                     problemData.sweData.hatRoffdiag, KDisc{1,1});
-% globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
-%                     problemData.sweData.hatRoffdiag, KDisc{1,2});
-% 
-% problemData.sweData.globJuCoupling = { -(globRcouple1{1} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{1} * problemData.darcyData.sysY(K*N+1 : 2*K*N)), ...
-%                                        -(globRcouple1{2} *  problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N)) };
-%                                      
-% globRcouple1 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
-%                     problemData.sweData.hatRoffdiag, KDisc{2,1});
-% globRcouple2 = assembleMatEdgeTetraPhiIntPhiExtFuncDiscExtNu(problemData.gCoupling, problemData.sweData.g.markE0TbdrCoupling, ...
-%                     problemData.sweData.hatRoffdiag, KDisc{2,2});
-%                   
-% problemData.sweData.globJwCoupling = globRcouple1{2} * problemData.darcyData.sysY(1 : K*N) + globRcouple2{2} * problemData.darcyData.sysY(K*N+1 : 2*K*N);
-
-% u1DCont = @(x1,x2) problemData.sweData.u1DCont(t,x1,x2);
-% globJu = assembleVecEdgeTetraPhiIntFuncContNu(problemData.sweData.g, problemData.sweData.g.markE0TbdrCoupling, u1DCont, problemData.sweData.N, problemData.sweData.qOrd, problemData.sweData.basesOnQuad2D);
-% problemData.sweData.globJuCoupling = globJu;
-% 
-% u2DCont = @(x1,x2) problemData.sweData.u2DCont(t,x1,x2);
-% globJw = assembleVecEdgeTetraPhiIntFuncContNu(problemData.sweData.g, problemData.sweData.g.markE0TbdrCoupling, u2DCont, problemData.sweData.N, problemData.sweData.qOrd, problemData.sweData.basesOnQuad2D);
-% problemData.sweData.globJwCoupling = globJw{2};
-
+ 
 problemData.sweData = problemData.sweSteps.postprocessProblem(problemData.sweData);
 problemData.error = [ problemData.sweData.error, problemData.darcyData.error ];
 end

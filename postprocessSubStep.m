@@ -1,7 +1,7 @@
 % Third step of the three-part substepping algorithm.
 
 %===============================================================================
-%> @file darcyVert_sweVert/postprocessSubStep.m
+%> @file darcy_swe_2dv/postprocessSubStep.m
 %>
 %> @brief Third step of the three-part substepping algorithm.
 %===============================================================================

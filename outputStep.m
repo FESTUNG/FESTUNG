@@ -1,7 +1,7 @@
 % Last step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file darcyVert_sweVert/outputStep.m
+%> @file darcy_swe_2dv/outputStep.m
 %>
 %> @brief Last step of the four-part algorithm in the main loop.
 %===============================================================================
@@ -32,7 +32,7 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
