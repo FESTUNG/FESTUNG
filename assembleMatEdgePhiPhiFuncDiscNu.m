@@ -211,9 +211,24 @@ ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 if numel(g.markE0TE0T) == nEdges % mapping from nn to np implicitly given
   
   validateattributes(refEdgePhiIntPhiExtPhiExt, {'numeric'}, {'size', [N N N nEdges]}, mfilename, 'refEdgePhiIntPhiExtPhiExt');
-  
+    
+  % Diagonal blocks
+  for m = 1 : 2
+    RtildeT = zeros(K*N, N);
+    for n = 1 : nEdges
+      for r = 1 : 2
+        for l = 1 : dataN
+          RtildeT = RtildeT + kron(0.5 * areaNuMarkE0T{r}(:, n) .* dataDisc{r, m}(:, l), refEdgePhiIntPhiIntPhiInt(:, :, l, n));
+        end % for l
+      end % for r
+    end % for n
+    ret{m} = kronVec(speye(K, K), RtildeT);
+  end % for m
+    
+  % Off-diagonal blocks
   for n = 1 : nEdges
     for r = 1 : 2
+      markOffdiag = (spdiags(0.5 * areaNuMarkE0T{r}(:, n), 0, K, K) * g.markE0TE0T{n}).';
       for m = 1 : 2
         % Coefficient-function for off-diagonal blocks
         RtildeT = zeros(K*N, N);
@@ -221,15 +236,7 @@ if numel(g.markE0TE0T) == nEdges % mapping from nn to np implicitly given
           RtildeT = RtildeT + kron(dataDisc{r, m}(:, l), refEdgePhiIntPhiExtPhiExt(:, :, l, n).');
         end % for l
         % Off-diagonal blocks
-        ret{m} = ret{m} + kronVec((spdiags(0.5 * areaNuMarkE0T{r}(:, n), 0, K, K) * g.markE0TE0T{n}).', RtildeT).';
-        % Diagonal blocks
-        RtildeT = zeros(K*N, N);
-        for l = 1 : dataN
-          RtildeT = RtildeT + kron(dataDisc{r, m}(:, l), refEdgePhiIntPhiIntPhiInt(:, :, l, n));
-%           ret{m} = ret{m} + kron(spdiags(0.5 * areaNuMarkE0T{r}(:, n) .* dataDisc{r, m}(:, l), 0, K, K), ...
-%                                  refEdgePhiIntPhiIntPhiInt(:, :, l, n));
-        end % for l
-        ret{m} = ret{m} + kronVec(spdiags(0.5 * areaNuMarkE0T{r}(:, n), 0, K, K), RtildeT);
+        ret{m} = ret{m} + kronVec(markOffdiag, RtildeT).';
       end % for m
     end % for r
   end  % for n
@@ -273,22 +280,30 @@ if numel(g.markE0TE0T) == nEdges % mapping from nn to np implicitly given
   
   validateattributes(refEdgePhiIntPhiExtPhiExt, {'numeric'}, {'size', [N N N nEdges]}, mfilename, 'refEdgePhiIntPhiExtPhiExt');
   
+  % Diagonal blocks
+  for m = 1 : 2
+    RtildeT = zeros(K*N, N);
+    for n = 1 : nEdges
+      for l = 1 : dataN
+        RtildeT = RtildeT + kron(0.5 * areaNuMarkE0T{m}(:, n) .* dataDisc{m}(:, l), refEdgePhiIntPhiIntPhiInt(:, :, l, n));
+      end % for l
+    end % for n
+    ret{m} = kronVec(speye(K, K), RtildeT);
+  end % for m
+    
+  % Off-diagonal blocks
   for n = 1 : nEdges
     for m = 1 : 2
       % Coefficient-function for off-diagonal blocks
       RtildeT = zeros(K*N, N);
       for l = 1 : dataN
-        RtildeT = RtildeT + kron(dataDisc{m}(:, l), refEdgePhiIntPhiExtPhiExt(:, :, l, n).');
+        RtildeT = RtildeT + kron(dataDisc{r, m}(:, l), refEdgePhiIntPhiExtPhiExt(:, :, l, n).');
       end % for l
       % Off-diagonal blocks
       ret{m} = ret{m} + kronVec((spdiags(0.5 * areaNuMarkE0T{m}(:, n), 0, K, K) * g.markE0TE0T{n}).', RtildeT).';
-      % Diagonal blocks
-      for l = 1 : dataN
-        ret{m} = ret{m} + kron(spdiags(0.5 * areaNuMarkE0T{m}(:, n) .* dataDisc{m}(:, l), 0, K, K), ...
-                               refEdgePhiIntPhiIntPhiInt(:, :, l, n));
-      end % for l
     end % for m
   end  % for n
+  
   
 else % mapping from nn to np explicitly given
   
@@ -328,6 +343,35 @@ if numel(g.markE0TE0T) == nEdges % mapping from nn to np implicitly given
   
   validateattributes(refEdgePhiIntPhiExtPhiExt, {'numeric'}, {'size', [N N N nEdges]}, mfilename, 'refEdgePhiIntPhiExtPhiExt');
   
+%   for n = 1 : nEdges
+%     % Coefficient-function for off-diagonal blocks
+%     RtildeT = zeros(K*N, N);
+%     for l = 1 : dataN
+%       RtildeT = RtildeT + kron(dataDisc(:, l), refEdgePhiIntPhiExtPhiExt(:, :, l, n).');
+%     end % for l
+%     for m = 1 : 2
+%       % Off-diagonal blocks
+%       ret{m} = ret{m} + kronVec((spdiags(0.5 * areaNuMarkE0T{m}(:, n), 0, K, K) * g.markE0TE0T{n}).', RtildeT).';
+%       % Diagonal blocks
+%       for l = 1 : dataN
+%         ret{m} = ret{m} + kron(spdiags(0.5 * areaNuMarkE0T{m}(:, n) .* dataDisc(:, l), 0, K, K), ...
+%                                refEdgePhiIntPhiIntPhiInt(:, :, l, n));
+%       end % for l
+%     end % for m
+%   end  % for n
+  
+  % Diagonal blocks
+  for m = 1 : 2
+    RtildeT = zeros(K*N, N);
+    for n = 1 : nEdges
+      for l = 1 : dataN
+        RtildeT = RtildeT + kron(0.5 * areaNuMarkE0T{m}(:, n) .* dataDisc(:, l), refEdgePhiIntPhiIntPhiInt(:, :, l, n));
+      end % for l
+    end % for m
+    ret{m} = kronVec(speye(K, K), RtildeT);
+  end  % for n
+  
+  % Off-diagonal blocks
   for n = 1 : nEdges
     % Coefficient-function for off-diagonal blocks
     RtildeT = zeros(K*N, N);
@@ -335,15 +379,10 @@ if numel(g.markE0TE0T) == nEdges % mapping from nn to np implicitly given
       RtildeT = RtildeT + kron(dataDisc(:, l), refEdgePhiIntPhiExtPhiExt(:, :, l, n).');
     end % for l
     for m = 1 : 2
-      % Off-diagonal blocks
       ret{m} = ret{m} + kronVec((spdiags(0.5 * areaNuMarkE0T{m}(:, n), 0, K, K) * g.markE0TE0T{n}).', RtildeT).';
-      % Diagonal blocks
-      for l = 1 : dataN
-        ret{m} = ret{m} + kron(spdiags(0.5 * areaNuMarkE0T{m}(:, n) .* dataDisc(:, l), 0, K, K), ...
-                               refEdgePhiIntPhiIntPhiInt(:, :, l, n));
-      end % for l
     end % for m
   end  % for n
+    
   
 else % mapping from nn to np explicitly given
   
