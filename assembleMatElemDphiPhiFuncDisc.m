@@ -164,15 +164,17 @@ validateattributes(dataDisc{2,2}, {'numeric'}, {'size', [K dataN]}, mfilename, '
 
 ret = { sparse(Ke*N, Ke*N), sparse(Ke*N, Ke*N) };
 for m = 1 : 2
+  Rs = zeros(Ke*N, N);
   for r = 1 : 2
     for l = 1 : N
       for s = 1 : length(J0T)
-        ret{m} = ret{m} + ...
-                   kron(spdiags(dataDisc{r,m}(markElem,l) .* J0T{s}(markElem,3-r,3-r), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,  r)) - ...
-                   kron(spdiags(dataDisc{r,m}(markElem,l) .* J0T{s}(markElem,3-r,  r), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,3-r));
+      % Multiplying dataDisc here seems to be slightly faster than using spdiags instead of speye in the kronVec
+        Rs = Rs + kron(dataDisc{r,m}(markElem,l) .* J0T{s}(markElem,3-r,3-r), refElemDphiPhiPhi{s}(:,:,l,  r)) - ...
+                  kron(dataDisc{r,m}(markElem,l) .* J0T{s}(markElem,3-r,  r), refElemDphiPhiPhi{s}(:,:,l,3-r));
       end % for s
     end % for l
   end % for r
+  ret{m} = kronVec(speye(Ke, Ke), Rs);
 end % for m
 end  % function
 
@@ -187,13 +189,15 @@ validateattributes(dataDisc{2}, {'numeric'}, {'size', [K dataN]}, mfilename, 'da
 
 ret = { sparse(Ke*N, Ke*N), sparse(Ke*N, Ke*N) };
 for m = 1 : 2
+  Rs = zeros(Ke*N, N);
   for l = 1 : N
     for s = 1 : length(J0T)
-      ret{m} = ret{m} + ...
-                 kron(spdiags(dataDisc{m}(markElem,l) .* J0T{s}(markElem,3-m,3-m), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
-                 kron(spdiags(dataDisc{m}(markElem,l) .* J0T{s}(markElem,3-m,  m), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,3-m));
+      % Multiplying dataDisc here seems to be slightly faster than using spdiags instead of speye in the kronVec
+      Rs = Rs + kron(J0T{s}(dataDisc{m}(markElem,l) .* markElem,3-m,3-m), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
+                kron(J0T{s}(dataDisc{m}(markElem,l) .* markElem,3-m,  m), refElemDphiPhiPhi{s}(:,:,l,3-m));
     end % for s
   end % for l
+  ret{m} = kronVec(speye(Ke, Ke), Rs);
 end % for m
 end  % function
 
@@ -207,13 +211,15 @@ validateattributes(dataDisc, {'numeric'}, {'size', [K dataN]}, mfilename, 'dataD
 
 ret = { sparse(Ke*N, Ke*N), sparse(Ke*N, Ke*N) };
 for m = 1 : 2
+  Rs = zeros(Ke*N, N);
   for l = 1 : N
     for s = 1 : length(J0T)
-      ret{m} = ret{m} + ...
-                 kron(spdiags(dataDisc(markElem,l) .* J0T{s}(markElem,3-m,3-m), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
-                 kron(spdiags(dataDisc(markElem,l) .* J0T{s}(markElem,3-m,  m), 0, Ke, Ke), refElemDphiPhiPhi{s}(:,:,l,3-m));
+      % Multiplying dataDisc here seems to be slightly faster than using spdiags instead of speye in the kronVec
+      Rs = Rs + kron(dataDisc(markElem,l) .* J0T{s}(markElem,3-m,3-m), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
+                kron(dataDisc(markElem,l) .* J0T{s}(markElem,3-m,  m), refElemDphiPhiPhi{s}(:,:,l,3-m));
     end % for s
   end % for l
+  ret{m} = kronVec(speye(Ke, Ke), Rs);
 end % for m
 end  % function
 
