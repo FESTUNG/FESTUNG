@@ -63,32 +63,40 @@ tildeGlobH = assembleMatElemTetraDphiPhi1D(problemData.g, problemData.g.g1D, pro
 % Interior edge integral for height-term in momentum equation (VI)
 tildeGlobQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tint, problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
 
-% Boundary edge integral for height term in momentum equation at top boundary (VI)
-tildeGlobQtop = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrTop, problemData.tildeHatQdiag);
-tildeGlobQbot = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrBot, problemData.tildeHatQdiag);
+% Boundary edge integrals
+markE0Tbdr = problemData.g.markE0TbdrTop | problemData.g.markE0TbdrBot | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH);
+tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, markE0Tbdr, problemData.tildeHatQdiag);
 
-% Boundary edge integral for height term in momentum equation with no prescribed Dirichlet-data (VI)
-tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH, problemData.tildeHatQdiag);
+% % Boundary edge integral for height term in momentum equation at top boundary (VI)
+% tildeGlobQtop = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrTop, problemData.tildeHatQdiag);
+% tildeGlobQbot = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrBot, problemData.tildeHatQdiag);
+% 
+% % Boundary edge integral for height term in momentum equation with no prescribed Dirichlet-data (VI)
+% tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH, problemData.tildeHatQdiag);
 
 % Boundary edge integral for height term in momentum equation with Riemann solver and prescribed Dirichlet-data (VI)
 tildeGlobQRiem = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, problemData.tildeHatQdiag);
 
 % Combine matrices
-problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQtop{1} - tildeGlobQbot{1} - tildeGlobQbdr{1} - 0.5 * tildeGlobQRiem{1});
+% problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQtop{1} - tildeGlobQbot{1} - tildeGlobQbdr{1} - 0.5 * tildeGlobQRiem{1});
+problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQbdr{1} - 0.5 * tildeGlobQRiem{1});
 
 %% Flux equation
 % Element integral in flux and continuity equation (IX, XI)
 globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
 
 % Boundary edge integral without Dirichlet data for U in flux and continuity equation (X, XII)
-globQtop = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
-globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
+% globQtop = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
+% globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
+markE0Tbdr = problemData.g.markE0TbdrTop | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU);
+globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, markE0Tbdr, problemData.hatQdiag);
 
 % Interior edge integral in flux equation (X)
 globQ = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Combine matrices
-problemData.globHQ = cellfun(@(H, Q, Qtop, Qbdr) H - Q - Qtop - Qbdr, globH, globQ, globQtop, globQbdr, 'UniformOutput', false);
+% problemData.globHQ = cellfun(@(H, Q, Qtop, Qbdr) H - Q - Qtop - Qbdr, globH, globQ, globQtop, globQbdr, 'UniformOutput', false);
+problemData.globHQ = cellfun(@(H, Q, Qbdr) H - Q - Qbdr, globH, globQ, globQbdr, 'UniformOutput', false);
 
 %% Continuity equation
 % Horizontal interior edge integral with first normal component in continuity equation (XII)
@@ -98,12 +106,15 @@ globQAvg = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint & pro
 globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, (problemData.g.markE0Tint & problemData.g.markE0Th | problemData.g.markE0TbdrTop), problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Boundary edge integral without Dirichlet data for U in continuity equation (XII), restricted to boundaries without Riemann solver
-globQtop = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
-globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
+% globQtop = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
+% globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrU, problemData.hatQdiag);
+markE0Tbdr = problemData.g.markE0TbdrTop | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrU);
+globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, markE0Tbdr, problemData.hatQdiag);
 
 % Combine matrices
 problemData.globHQup = globH{2} - globQup;
-problemData.globHQavg = -globH{1} + globQAvg{1} + globQtop{1} + globQbdr{1};
+% problemData.globHQavg = -globH{1} + globQAvg{1} + globQtop{1} + globQbdr{1};
+problemData.globHQavg = -globH{1} + globQAvg{1} + globQbdr{1};
 
 %% Helper matrices for assembly of jump terms in Lax-Friedrichs Riemann solver
 % Helper matrix for jumps over vertical interior edges in momentum and continuity equation (VI, XII)
