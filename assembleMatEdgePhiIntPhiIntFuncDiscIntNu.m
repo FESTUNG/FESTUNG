@@ -164,16 +164,17 @@ function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntMatrixNu(g, refEdgePhiIntPh
 [K, dataN] = size(dataDisc{1, 1});  N = size(refEdgePhiIntPhiIntPhiInt, 1);  nEdges = size(g.E0T, 2);
 
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
-for n = 1 : nEdges
-  for r = 1 : 2
-    for m = 1 : 2
+for m = 1 : 2
+  Rm = zeros(K*N, N);
+  for n = 1 : nEdges
+    for r = 1 : 2
       for l = 1 : dataN
-        ret{m} = ret{m} + kron(spdiags(areaNuMarkE0T{r}(:, n) .* dataDisc{r, m}(:, l), 0, K, K), ...
-                               refEdgePhiIntPhiIntPhiInt(:, :, l, n));
+        Rm = Rm + kron(areaNuMarkE0T{r}(:, n) .* dataDisc{r, m}(:, l), refEdgePhiIntPhiIntPhiInt(:, :, l, n));
       end % for l
-    end % for m
-  end % for r
-end  % for n
+    end % for r
+  end % for n
+  ret{m} = kronVec(speye(K, K), Rm);
+end  % for m
 end % function
 
 function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntVectorNu(g, refEdgePhiIntPhiIntPhiInt, dataDisc, areaNuMarkE0T)
@@ -181,26 +182,27 @@ function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntVectorNu(g, refEdgePhiIntPh
 
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 for m = 1 : 2
+  Rm = zeros(K*N, N);
   for n = 1 : nEdges
     for l = 1 : dataN
-      ret{m} = ret{m} + kron(spdiags(areaNuMarkE0T{m}(:, n) .* dataDisc{m}(:, l), 0, K, K), ...
-                             refEdgePhiIntPhiIntPhiInt(:, :, l, n));
+      Rm = Rm + kron(areaNuMarkE0T{m}(:, n) .* dataDisc{m}(:, l), refEdgePhiIntPhiIntPhiInt(:, :, l, n));
     end % for l
   end % for n
+  ret{m} = kronVec(speye(K, K), Rm);
 end  % for m
 end % function
-
 
 function ret = assembleMatEdgePhiIntPhiIntFuncDiscIntScalarNu(g, refEdgePhiIntPhiIntPhiInt, dataDisc, areaNuMarkE0T)
 [K, dataN] = size(dataDisc);  N = size(refEdgePhiIntPhiIntPhiInt, 1);  nEdges = size(g.E0T, 2);
 
 ret = { sparse(K*N, K*N), sparse(K*N, K*N) };
 for m = 1 : 2
+  Rm = zeros(K*N, N);
   for n = 1 : nEdges
     for l = 1 : dataN
-      ret{m} = ret{m} + kron(spdiags(areaNuMarkE0T{m}(:, n) .* dataDisc(:, l), 0, K, K), ...
-                             refEdgePhiIntPhiIntPhiInt(:, :, l, n));
+      Rm = Rm + kron(areaNuMarkE0T{m}(:, n) .* dataDisc(:, l), refEdgePhiIntPhiIntPhiInt(:, :, l, n));
     end % for l
   end % for n
+  ret{m} = kronVec(speye(K, K), Rm);
 end  % for m
 end % function
