@@ -148,8 +148,10 @@ if iscell(funcCont)
   
   for n = 1 : nEdges
     [Q1, Q2] = gamma(n, Q);
+    X1 = g.mapRef2Phy(1, Q1, Q2);
+    X2 = g.mapRef2Phy(2, Q1, Q2);
     for m = 1 : 2
-      funcQ0E = funcCont{m}(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
+      funcQ0E = funcCont{m}(X1, X2);
       for i = 1 : N
         integral = funcQ0E * ( W' .* basesOnQuad.phi1D{qOrd}(:, i, n) );
         ret{m}(:, i) = ret{m}(:, i) + areaNuMarkE0T{m}(:, n) .* integral;
