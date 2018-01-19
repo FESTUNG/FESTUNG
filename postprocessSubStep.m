@@ -60,6 +60,7 @@ problemData.sweData = problemData.sweSteps.outputStep(problemData.sweData, (nSte
 
 if problemData.isCouplingDarcy
   % Integrate water height over time for coupling (using trapezoidal rule)
+  problemData.cSWE = cellfun(@(a,b,c) a + 0.5 * problemData.sweData.tau * (b + c), problemData.cSWE, problemData.sweData.cDiscRK(1,:), problemData.sweData.cDiscRK(end,:), 'UniformOutput', false);
   problemData.hSWE = problemData.hSWE + 0.5 * problemData.sweData.tau * (problemData.sweData.cDiscRK{1, 1} + problemData.sweData.cDiscRK{end, 1});
 end % if
 

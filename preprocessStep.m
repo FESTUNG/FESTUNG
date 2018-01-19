@@ -57,6 +57,7 @@ t = (nStep-1) * problemData.darcyData.tau;
 if problemData.isCouplingDarcy
   % Reset water height for coupling
   problemData.hSWE = zeros(size(problemData.sweData.cDiscRK{1, 1}));
+  problemData.cSWE = cellfun(@(c) zeros(size(c)), problemData.sweData.cDiscRK(1, :), 'UniformOutput', false);
 end % if
 
 if problemData.isCouplingSWE
@@ -77,8 +78,8 @@ if problemData.isCouplingSWE
   % Evaluate q1, q2 in quadrature points (K_PM x R arrays)
   q1Disc = reshape(problemData.darcyData.sysY(1 : K*N), N, K)';
   q2Disc = reshape(problemData.darcyData.sysY(K*N+1 : 2*K*N), N, K)';
-  q1Q0E0T = q1Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2)';
-  q2Q0E0T = q2Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2)';
+  q1Q0E0T = q1Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2).';
+  q2Q0E0T = q2Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2).';
   
   % Compute combined values (K_PM x R arrays)
   u1CouplingQ0E0T = KQ0E0T{1,1} .* q1Q0E0T + KQ0E0T{1,2} .* q2Q0E0T;

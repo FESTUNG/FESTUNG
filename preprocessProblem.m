@@ -55,6 +55,10 @@ problemData.darcyData.tildeGlobQcouple = assembleMatEdgeTetraPhiIntPhi1DIntNu(pr
 problemData.darcyData.tildeGlobScouple = assembleMatEdgeTetraPhiIntPhi1DInt(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.tildeHatQdiag, ones(problemData.darcyData.g.numT, 4));
 
 % Grid data structure for coupling terms
+problemData.markE0TE0T = bsxfun(@and, problemData.sweData.g.g1D.markT2DT, problemData.sweData.g.markE0TbdrCoupling(:, 1)) * ...
+                                        bsxfun(@times, g1D.markT2DT, problemData.darcyData.g.markE0TbdrCoupling(:,2))';
+problemData.markT2DT = g1D.markT2DT;
+
 problemData.gCoupling.areaE0T = problemData.sweData.g.areaE0T;
 problemData.gCoupling.nuE0T = problemData.sweData.g.nuE0T;
 % Edge 1 of SWE is coupled to edge 2 of Darcy - identified via the 1D-elements
