@@ -89,12 +89,12 @@ hSmooth_hDV0T1D = problemData.hSmoothV0T1D ./ hDCont(t, problemData.g.g1D.coordV
 globE = assembleMatElemDphiPhiFuncDisc(problemData.g, problemData.hatG, problemData.cDiscRK{nSubStep, 2});
 
 % Advection interior edge integrals (averaging uu, uw) (VI)
-globP = assembleMatEdgePhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDiscRK{nSubStep, 2});
+markE0T = problemData.g.markE0Tint | (problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU);
+globP = assembleMatEdgePhiPhiFuncDiscNu(problemData.g, markE0T, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDiscRK{nSubStep, 2});
 
 % Advection boundary edge integral (uu) without prescribed Dirichlet data for u (VI)
 markE0T = problemData.g.markE0TbdrTop | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU);
 globPbdr = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, markE0T, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
-globPRiem = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
 
 % Advection boundary edge integral (uu) with prescribed Dirichlet data for u (VI)
 globJbot = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, { @(x1,x2) u1DCont(t,x1,x2).^2, @(x1,x2) u1DCont(t,x1,x2) .* u2DCont(t,x1,x2) }, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
@@ -120,7 +120,7 @@ markE0T = problemData.g.markE0TbdrQ | problemData.g.markE0TbdrTop;
 globJq = assembleVecEdgePhiIntFuncContNu(problemData.g, markE0T, qDCont, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
 % Put together matrices
-problemData.globEP = cellfun(@(E, P, Pbdr, PRiem) E - P - Pbdr - 0.5 * PRiem, globE, globP, globPbdr, globPRiem, 'UniformOutput', false);
+problemData.globEP = cellfun(@(E, P, Pbdr, PRiem) E - P - Pbdr, globE, globP, globPbdr, 'UniformOutput', false);
 problemData.globGR = cellfun(@(G, R, Rbdr) G - R - Rbdr, globG, globR, globRbdr, 'UniformOutput', false);
 problemData.globJ = globJbot{1} + globJbot{2} + globJuu{1} + 0.5 * globJuuRiem{1} + problemData.gConst * (globJh{1} + 0.5 * globJhRiem{1}) + globJq{1} + globJq{2};
 
@@ -133,10 +133,8 @@ problemData.globJuFlux = assembleVecEdgePhiIntFuncContNu(problemData.g, markE0T,
 
 %% Assembly of time-dependent matrices and vectors in continuity equation.
 % Interior edge integrals (averaging uh/Hs) (XII)
-problemData.tildeGlobP = problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.hSmoothV0T1D, problemData.g.markE0Tint & problemData.g.markE0Tv, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
-
-% Boundary edge integrals with prescribed Dirichlet data for u or h and Riemann solver (XII)
-problemData.tildeGlobPRiem = problemData.fn_assembleMatEdgeTetraPhiIntPhiIntFuncDisc1DIntNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.hSmoothV0T1D, problemData.g.markE0TbdrRiem & (problemData.g.markE0TbdrU | problemData.g.markE0TbdrH), problemData.tildeHatPdiag);
+markE0T = (problemData.g.markE0Tint & problemData.g.markE0Tv) | (problemData.g.markE0TbdrRiem & (problemData.g.markE0TbdrU | problemData.g.markE0TbdrH));
+problemData.tildeGlobP = problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.hSmoothV0T1D, markE0T, problemData.tildeHatPdiag, problemData.tildeHatPoffdiag);
 
 % Boundary edge integrals with prescribed Dirichlet data and Riemann solver for u and h (XII)
 problemData.globJuhRiem = problemData.fn_assembleVecEdgeTetraPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & problemData.g.markE0TbdrH, @(x1,x2) u1DCont(t,x1,x2) .* hDCont(t,x1), problemData.hSmoothV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
@@ -153,14 +151,12 @@ problemData.tildeGlobJhRiem = problemData.fn_assembleVecEdgeTetraPhiIntFuncDiscI
 problemData.barGlobG = problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight(barU1Disc, problemData.hSmoothQ0T1D, problemData.barHatG);
 
 % Interior edge integrals (averaging uh/Hs) (XV)
-problemData.barGlobP = problemData.fn_assembleMatV0T1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0Tint, problemData.barHatPdiag, problemData.barHatPoffdiag);
+markV0TbdrUoH = problemData.g.g1D.markV0TbdrU | problemData.g.g1D.markV0TbdrH;
+markV0T = problemData.g.g1D.markV0Tint | (problemData.g.g1D.markV0TbdrRiem & markV0TbdrUoH);
+problemData.barGlobP = problemData.fn_assembleMatV0T1DPhiPhiFuncDiscNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, markV0T, problemData.barHatPdiag, problemData.barHatPoffdiag);
 
 % Boundary edge integrals without prescribed Dirichlet data (XV)
-markV0TbdrUoH = problemData.g.g1D.markV0TbdrU | problemData.g.g1D.markV0TbdrH;
 problemData.barGlobPbdr = problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0Tbdr & ~markV0TbdrUoH, problemData.barHatPdiag);
-
-% Boundary edge integrals with prescribed Dirichlet data and Riemann solver (XV)
-problemData.barGlobPRiem = problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight(problemData.g.g1D, barU1Disc, problemData.hSmoothV0T1D, problemData.g.g1D.markV0TbdrRiem & markV0TbdrUoH, problemData.barHatPdiag);
 
 % Boundary edge integrals with prescribed Dirichlet data for uh (XV)
 problemData.barGlobJuh = problemData.fn_assembleVecV0T1DPhiIntFuncContNuHeight(problemData.g, problemData.g.g1D, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & problemData.g.markE0TbdrH, @(x1,x2) u1DCont(t,x1,x2) .* hDCont(t,x1), problemData.hSmoothV0T1D, problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
