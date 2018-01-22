@@ -78,7 +78,7 @@ if problemData.isCouplingDarcy
   % Evaluate primary variables in quadrature points of bottom edge of SWE domain
   hQ0E0T = (1/problemData.darcyData.tau) * problemData.cSWE{1} * problemData.sweData.basesOnQuad1D.phi1D{problemData.qOrd}.';
   u1Q0E0T = (1/problemData.darcyData.tau) * problemData.cSWE{2} * problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 2).';
-  hCouplingQ0E0T = problemData.markT2DT * hQ0E0T;
+  hCouplingQ0E0T = problemData.markT2DT * hQ0E0T + 0.5 * ( u1Q0E0T .* u1Q0E0T );
   
   % Integrate boundary condition
   markAreaNuE0T = bsxfun(@times, problemData.darcyData.g.markE0TbdrCoupling(:, 2) .* problemData.darcyData.g.areaE0T(:, 2), squeeze(problemData.darcyData.g.nuE0T(:, 2, :)));
