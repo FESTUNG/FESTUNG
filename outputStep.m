@@ -62,8 +62,8 @@ end % if
 
 %% Update waitbar.
 if problemData.isWaitbar
-  percentDone = round( nStep / problemData.numSteps * 100 );
-  problemData.waitbar = waitbar(percentDone / 100, problemData.waitbar, strcat( [ 'Time stepping:', ' ', num2str(percent), str ] ) );
+  frac = floor(nStep / problemData.numSteps * 100);
+  problemData.waitbar = waitbar(frac / 100, problemData.waitbar, strcat( [ 'Time stepping:', ' ', num2str(frac), problemData.waitbarMsg] ) );
 end % if
 end % function
 

@@ -49,14 +49,14 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'galv');
+pd = setdefault(pd, 'name', 'radial1');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
 % - 'manual' calls configureManualADCIRC()
-pd = setdefault(pd, 'configSource', 'ADCIRC');
+pd = setdefault(pd, 'configSource', 'debug');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -66,7 +66,7 @@ pd = setdefault(pd, 'configSource', 'ADCIRC');
 %   hmax and performs uniform refinement according to parameter 
 %   'refinement'. All boundaries are type 3, i.e river.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-pd = setdefault(pd, 'gridSource', 'ADCIRC');
+pd = setdefault(pd, 'gridSource', 'square');
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
@@ -83,14 +83,14 @@ pd = setdefault(pd, 'isRiemRiv', true); % Riemann solver type on river boundary 
 pd = setdefault(pd, 'typeBdrL', 'riemann'); % Flux type on land boundary ('reflected', 'natural', or 'riemann')
 pd = setdefault(pd, 'averagingType', 'semi-harmonic'); % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd = setdefault(pd, 'typeSlopeLim', 'linear'); % Slope limiter type ('linear', 'hierarch_vert', 'strict')
-pd = setdefault(pd, 'slopeLimList', {'elevation', 'momentum'}); % Apply slope limiter to specified variables ('xi', 'uH', 'vH')
+pd = setdefault(pd, 'slopeLimList', {'height', 'momentum'}); % Apply slope limiter to specified variables ('height', 'momentum')
 pd = setdefault(pd, 'isCoupling', false); % Compute velocity coefficients and flux of first unknown, e.g., for coupled transport problem
 pd = setdefault(pd, 'elevTol', 20); % maximum absolute value for elevation
 
 %% Visualization parameters
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
 pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
-pd = setdefault(pd, 'outputTypes', cellstr(['vtk';'tec'])); % Output file type
+pd = setdefault(pd, 'outputTypes', cellstr('vtk')); % Output file type
 pd = setdefault(pd, 'outputList', {'elevation', 'velocity'}); % List of variables to visualize
 pd = setdefault(pd, 'isVisStations', false); % Output stations
 
@@ -108,13 +108,6 @@ switch pd.configSource
     error('Invalid config source.')
 end % switch
 
-if ~pd.isSlopeLim
-  pd.slopeLimList = {};
-end % if
-if pd.isHotstartInput && pd.isRamp
-  warning('Ramp function should probably not be used in case of Hotstart input.');
-end % if
-assert(isempty(pd.slopeLimList) || pd.p > 0, 'Slope limiting only available for p > 0.');
 end % function
 
 %% Debugging
@@ -125,18 +118,18 @@ pd.isTidalDomain = false;
 pd.isHotstartInput = false;
 pd.isHotstartOutput = false;
 pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
-pd.isSlopeLim = false;
+pd.isSlopeLim = true;
 
 % Overwrite grid parameters
 pd.gridSource = 'square';
 pd.isSpherical = false;
-pd = setdefault(pd, 'hmax', 2^-6);
+pd = setdefault(pd, 'hmax', 1/80);
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd = setdefault(pd, 'numSteps', 3142);  % number of time steps
-pd = setdefault(pd, 'tEnd', 2*pi);  % end time
-pd = setdefault(pd, 'outputCount', 31); % Number of outputs over total simulation time
+pd = setdefault(pd, 'numSteps', 1000);  % number of time steps
+pd = setdefault(pd, 'tEnd', 0.5);  % end time
+pd = setdefault(pd, 'outputCount', 100); % Number of outputs over total simulation time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
@@ -154,23 +147,23 @@ pd.bottomFrictionCoef = 0;
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) -0.002*(x1==x1);
+pd.zbCont = @(x1,x2) -(x1==x1);
 pd.fcCont = @(x1,x2) 0*x1;
 
 % Analytical solution
-pd.xiCont = @(x1,x2,t) 0*x1;
-pd.uCont = @(x1,x2,t) 0.5 - x2;
-pd.vCont = @(x1,x2,t) x1 - 0.5;
+pd.xiCont = @(x1,x2,t) 0.5 * (sqrt((x1-0.5).^2+(x2-0.5).^2) < 0.1);
+pd.uCont = @(x1,x2,t) 0*x1;
+pd.vCont = @(x1,x2,t) 0*x1;
 
 % Right hand side functions (derived from analytical solution)
 pd.f0Cont = @(x1,x2,t) 0*x1;
-pd.f1Cont = @(x1,x2,t) 0.002*(0.5-x1);
-pd.f2Cont = @(x1,x2,t) 0.002*(0.5-x2);
+pd.f1Cont = @(x1,x2,t) 0*x1;
+pd.f2Cont = @(x1,x2,t) 0*x1;
 
 % Boundary conditions
 pd.isOSCont = false;
 pd.xiOSCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
-pd.isRivCont = true;
+pd.isRivCont = false;
 pd.xiRivCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
 pd.uRivCont = @(x1,x2,t) pd.uCont(x1,x2,t);
 pd.vRivCont = @(x1,x2,t) pd.vCont(x1,x2,t);
@@ -282,13 +275,13 @@ pd.isSolutionAvail = false;
 pd.isRhsAvail = false;
 
 % Verify input files exist
-assert(exist(['swe/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.14" not found!'])
-assert(exist(['swe/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.17" not found!'])
-assert(exist(['swe/fort_' pd.name '.15'], 'file') == 2, ['Config file "swe/fort_' pd.name '.15" not found!'])
+assert(exist(['swe/fortFiles/' pd.name '.14'], 'file') == 2, ['Mesh file "swe/fortFiles/' pd.name '.14" not found!'])
+assert(exist(['swe/fortFiles/' pd.name '.17'], 'file') == 2, ['Mesh file "swe/fortFiles/' pd.name '.17" not found!'])
+assert(exist(['swe/fortFiles/' pd.name '.15'], 'file') == 2, ['Config file "swe/fortFiles/' pd.name '.15" not found!'])
 
 %% Read parameter file
 h = getFunctionHandle('swe/readConfigADCIRC');
-pd.configADCIRC = h(['swe/fort_' pd.name '.15']);
+pd.configADCIRC = h(['swe/fortFiles/' pd.name '.15']);
 
 %% Map ADCIRC variables to internal names
 % Constants
@@ -374,8 +367,8 @@ end % function
 function pd = configureManualADCIRC(pd)
 
 % Verify input files exist
-assert(exist(['swe/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.14" not found!'])
-assert(exist(['swe/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe/fort_' pd.name '.17" not found!'])
+assert(exist(['swe/fortFiles/' pd.name '.14'], 'file') == 2, ['Mesh file "swe/fortFiles/' pd.name '.14" not found!'])
+assert(exist(['swe/fortFiles/' pd.name '.17'], 'file') == 2, ['Mesh file "swe/fortFiles/' pd.name '.17" not found!'])
 
 % Overwrite grid config source
 pd.gridSource = 'ADCIRC';
@@ -440,7 +433,7 @@ switch pd.name
     pd.isTidalDomain = false;
     
     pd.isHotstartInput = true;
-    pd.hotstartInput = [pd.name '_initialCondition_lin.mat'];
+    pd.hotstartInput = 'swe/initialConditions/test2_lin.mat';
     pd.isHotstartOutput = false;
     
     pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
@@ -493,7 +486,7 @@ switch pd.name
     pd.isTidalDomain = false;
     
     pd.isHotstartInput = true;
-    pd.hotstartInput = 'output/galv_1.mat';
+    pd.hotstartInput = 'swe/initialConditions/galv10dStartup_lin.mat';
     pd.isHotstartOutput = false;
     pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
     pd.isSlopeLim = false;

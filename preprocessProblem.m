@@ -46,6 +46,17 @@
 %> @endparblock
 %
 function pd = preprocessProblem(pd)
+
+if ~pd.isSlopeLim
+  pd.slopeLimList = {};
+elseif isempty(pd.slopeLimList)
+  pd.isSlopeLim = false;
+end % if
+if pd.isHotstartInput && pd.isRamp
+  warning('Ramp function should probably not be used in case of Hotstart input.');
+end % if
+assert(isempty(pd.slopeLimList) || pd.p > 0, 'Slope limiting only available for p > 0.');
+
 %% Triangulation
 switch pd.gridSource
   case 'square'
@@ -53,10 +64,10 @@ switch pd.gridSource
     
     % Set edge types
     pd.g.idE = zeros(pd.g.numE,1);
-    pd.g.idE(pd.g.baryE(:, 2) == 0) = 3; % south
-    pd.g.idE(pd.g.baryE(:, 1) == 1) = 3; % east
-    pd.g.idE(pd.g.baryE(:, 2) == 1) = 3; % north
-    pd.g.idE(pd.g.baryE(:, 1) == 0) = 3; % west
+    pd.g.idE(pd.g.baryE(:, 2) == 0) = 1; % south
+    pd.g.idE(pd.g.baryE(:, 1) == 1) = 1; % east
+    pd.g.idE(pd.g.baryE(:, 2) == 1) = 1; % north
+    pd.g.idE(pd.g.baryE(:, 1) == 0) = 1; % west
     
     pd.g.idE0T = pd.g.idE(pd.g.E0T);
     
@@ -104,8 +115,7 @@ switch pd.gridSource
     
   case 'ADCIRC'
     projCenter = [pd.configADCIRC.SLAM0, pd.configADCIRC.SFEA0];
-    [ pd.g, depth, forcingOS, flowRateRiv ] = execin('swe/domainADCIRC', ['swe/fort_' pd.name '.14'], ['swe/fort_' pd.name '.17'], ...
-                                                                          pd.configADCIRC.NBFR, pd.isSpherical, projCenter);
+    [ pd.g, depth, forcingOS, flowRateRiv ] = execin('swe/domainADCIRC', ['fortFiles/' pd.name '.14'], ['fortFiles/' pd.name '.17'], pd.configADCIRC.NBFR, pd.isSpherical, projCenter);
     
     % Bathymetry
     h = getFunctionHandle('swe/evaluateFuncFromVertexValues');
@@ -241,9 +251,10 @@ switch pd.gridSource
 end % switch
 
 if pd.isVisGrid,  visualizeGrid(pd.g);  end % if
+
 %% Globally constant parameters
 pd = setdefault(pd, 'outputStart', pd.t0 * ones(1,4));
-pd = setdefault(pd, 'outputEnd', pd.tEnd * ones(1,4));
+pd = setdefault(pd, 'outputEnd', 1.0000001 * pd.tEnd * ones(1,4));
 pd = setdefault(pd, 'outputFrequency', max(floor(pd.numSteps / pd.outputCount), 1) * ones(1,4));
 pd.K = pd.g.numT; % number of triangles
 pd.N = nchoosek(pd.p + 2, pd.p); % number of local DOFs
@@ -417,9 +428,11 @@ pd.linearTerms = [ sparse(K*N,K*N), globQ{1} + globQOS{1} + globQRA{1} - globH{1
 
 % Slope limiting matrices
 if ~isempty(pd.slopeLimList)
-  globMTaylor = assembleMatElemPhiTaylorPhiTaylor(pd.g, N);
+%   globMTaylor = assembleMatElemPhiTaylorPhiTaylor(pd.g, N);
   pd.globMDiscTaylor = assembleMatElemPhiDiscPhiTaylor(pd.g, N, pd.basesOnQuad);
-  pd.globMCorr = spdiags(1 ./ diag(globMTaylor), 0, K*N, K*N) * globMTaylor;
+% this is needed for limiting discrete time derivatives
+%   globMTaylor = assembleMatElemPhiTaylorPhiTaylor(pd.g, N);
+%   pd.globMCorr = spdiags(1 ./ diag(globMTaylor), 0, K*N, K*N) * globMTaylor;
 end % if
 
 %% Assembly of time-independent global matrices corresponding to non-linear contributions.
@@ -514,7 +527,7 @@ if pd.g.numEbdrRI > 0 % River boundaries
       dataV = dataV ./ dataVCountRI;
       
       xiV = dataV(:, 1);
-      if any(ismember(pd.slopeLimList, 'elevation'))
+      if any(ismember(pd.slopeLimList, 'height'))
         pd.xiV0Triv = xiV(pd.g.V0T);
       end % if
       hV0T = xiV(pd.g.V0T) - pd.zbV0T;
@@ -522,7 +535,7 @@ if pd.g.numEbdrRI > 0 % River boundaries
       pd.uHV0Triv = uV(pd.g.V0T) .* hV0T;
       vV = dataV(:, 3);
       pd.vHV0Triv = vV(pd.g.V0T) .* hV0T;
-    elseif any(ismember(pd.slopeLimList, 'elevation'))
+    elseif any(ismember(pd.slopeLimList, 'height'))
       % To determine the vertex values for all triangles we first compute
       % the vertex values for triangles that have a boundary edge of river
       % type. We average the values from both sides of the vertex if the 
@@ -588,7 +601,7 @@ if pd.g.numEbdrRI > 0 % River boundaries
     end % for
   end % if
 else
-  if any(ismember(pd.slopeLimList, 'elevation'))
+  if any(ismember(pd.slopeLimList, 'height'))
     pd.xiV0Triv = sparse(K,3);
   end % if
   if any(ismember(pd.slopeLimList, 'momentum'))
@@ -598,7 +611,7 @@ else
 end % if
 
 if pd.g.numEbdrOS > 0 % Open sea boundaries
-  if ~pd.isOSCont && any(ismember(pd.slopeLimList, 'elevation'))
+  if ~pd.isOSCont && any(ismember(pd.slopeLimList, 'height'))
     xiE0Tos = zeros(K,3);
     for n = 1 : numFrequency
       xiE0Tos = xiE0Tos + pd.xiFreqOS{1,n}(pd.t0) * pd.xiAmpOS{1,n} + pd.xiFreqOS{2,n}(pd.t0) * pd.xiAmpOS{2,n};
@@ -633,7 +646,7 @@ if pd.g.numEbdrOS > 0 % Open sea boundaries
   if pd.isRiemOS
     pd.globVOS = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaE0TbdrOS);
   end % if
-elseif any(ismember(pd.slopeLimList, 'elevation'))
+elseif any(ismember(pd.slopeLimList, 'height'))
   pd.xiV0Tos = sparse(K,3);
 end % if
 

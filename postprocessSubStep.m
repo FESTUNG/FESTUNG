@@ -22,7 +22,7 @@
 %> This routine is executed last in each substep loop iteration and is intended
 %> to post-process the solution computed by solveSubStep().
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
+%> @param  pd           A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
 %>                      with initial data or the solution from the previous
 %>                      loop iteration), as provided by configureProblem()  
@@ -31,7 +31,7 @@
 %> @param  nSubStep     The current iteration number of the iterateSubSteps 
 %>                      loop. 
 %>
-%> @retval problemData  The input struct enriched with post-processed data
+%> @retval pd           The input struct enriched with post-processed data
 %>                      the next substep. @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
@@ -55,37 +55,36 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = postprocessSubStep(problemData, nStep, nSubStep)
-K = problemData.K;
-N = problemData.N;
+function pd = postprocessSubStep(pd, nStep, nSubStep)
+K = pd.K;
+N = pd.N;
 
 % Reshape linearized vector to solution vectors
-problemData.cDisc(:,:,1) = reshape(problemData.cDiscRK(        1 :   K*N), N, K).';
-problemData.cDisc(:,:,2) = reshape(problemData.cDiscRK(  K*N + 1 : 2*K*N), N, K).';
-problemData.cDisc(:,:,3) = reshape(problemData.cDiscRK(2*K*N + 1 : 3*K*N), N, K).';
+pd.cDisc(:,:,1) = reshape(pd.cDiscRK(        1 :   K*N), N, K).';
+pd.cDisc(:,:,2) = reshape(pd.cDiscRK(  K*N + 1 : 2*K*N), N, K).';
+pd.cDisc(:,:,3) = reshape(pd.cDiscRK(2*K*N + 1 : 3*K*N), N, K).';
 
-for i = 1 : length(problemData.slopeLimList)
-  switch problemData.slopeLimList{i}
-    case 'elevation'
-      problemData.cDisc(:,:,1) = applySlopeLimiterDisc(problemData.g, problemData.cDisc(:,:,1), problemData.g.markV0TbdrD, ...
-                                  problemData.ramp(getdefault(problemData.tLvls, nSubStep+1, problemData.t + problemData.dt)/86400) * (problemData.xiV0Triv + problemData.xiV0Tos), ...
-                                  problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim);
+for i = 1 : length(pd.slopeLimList)
+  switch pd.slopeLimList{i}
+    case 'height'
+      hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
+      hV0T = pd.ramp(getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)/86400) * (pd.xiV0Triv + pd.xiV0Tos) - pd.zbLagr;
+      hDisc = applySlopeLimiterDisc(pd.g, hDisc, pd.g.markV0TbdrD, hV0T, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
+      pd.cDisc(:,:,1) = hDisc + pd.zbDisc;
     case 'momentum'
-      problemData.cDisc(:,:,2) = applySlopeLimiterDisc(problemData.g, problemData.cDisc(:,:,2), problemData.g.markV0TbdrRI, ...
-                                  problemData.ramp(getdefault(problemData.tLvls, nSubStep+1, problemData.t + problemData.dt)/86400) * problemData.uHV0Triv, ...
-                                  problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim);
+      pd.cDisc(:,:,2) = applySlopeLimiterDisc( pd.g, pd.cDisc(:,:,2), pd.g.markV0TbdrRI, pd.ramp(getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)/86400) * pd.uHV0Triv, ...
+                                               pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim );
       
-      problemData.cDisc(:,:,3) = applySlopeLimiterDisc(problemData.g, problemData.cDisc(:,:,3), problemData.g.markV0TbdrRI, ...
-                                  problemData.ramp(getdefault(problemData.tLvls, nSubStep+1, problemData.t + problemData.dt)/86400) * problemData.vHV0Triv, ...
-                                  problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim);
+      pd.cDisc(:,:,3) = applySlopeLimiterDisc( pd.g, pd.cDisc(:,:,3), pd.g.markV0TbdrRI, pd.ramp(getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)/86400) * pd.vHV0Triv, ...
+                                               pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim );
     otherwise
       error('Slope limiting not implemented for non primary variables.')
   end % switch
 end % for
 
 % Ensure water height doesn't fall below threshold
-problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.zbLagr + problemData.minTol, problemData.elevTol);
-problemData.cDiscRK(1 : problemData.K*problemData.N) = reshape(problemData.cDisc(:,:,1).', N*K, 1);
+pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, nStep, pd.zbLagr + pd.minTol, pd.elevTol);
+pd.cDiscRK(1 : pd.K*pd.N) = reshape(pd.cDisc(:,:,1).', N*K, 1);
 
-problemData.isSubSteppingFinished = nSubStep >= length(problemData.tLvls);
+pd.isSubSteppingFinished = nSubStep >= length(pd.tLvls);
 end % function

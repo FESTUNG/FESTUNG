@@ -79,14 +79,17 @@ end % if
 
 for i = 1 : length(pd.slopeLimList)
   switch pd.slopeLimList{i}
-    case 'elevation'
+    case 'height'
       if pd.isRivCont
         pd.xiV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0));
       end % if
       if pd.isOSCont
         pd.xiV0Tos = pd.g.markV0TbdrOS .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiOSCont(x1, x2, pd.t0));
       end % if
-      pd.cDisc(:,:,1) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,1), pd.g.markV0TbdrD, pd.ramp(pd.t0/86400) * (pd.xiV0Triv + pd.xiV0Tos), pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
+      hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
+      hV0T = pd.ramp(pd.t0/86400) * (pd.xiV0Triv + pd.xiV0Tos) - pd.zbLagr;
+      hDisc = applySlopeLimiterDisc(pd.g, hDisc, pd.g.markV0TbdrD, hV0T, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
+      pd.cDisc(:,:,1) = hDisc + pd.zbDisc;
     case 'momentum'
       if pd.isRivCont
         hV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0)) - pd.zbV0T;
@@ -107,7 +110,7 @@ pd = pd.visualizeSolution(pd, 0);
 
 %% Initialize waitbar.
 if pd.isWaitbar
-  str  = strcat( ['% done. Simulating refinement level =', ' ', num2str(pd.refinement), ', p =', ' ', num2str(p), '.' ]);
-  pd.waitbar = waitbar(0, strcat([ 'Time stepping:', ' ', num2str(0), str ]));
+  pd.waitbarMsg = strcat(['% done. Simulating problem ', pd.name, ' with polynomial order ', num2str(p), ', RK', num2str(pd.schemeOrder), '.']);
+  pd.waitbar = waitbar(0, strcat(['Time stepping: ', num2str(0), pd.waitbarMsg]));
 end % if
 end % function

@@ -64,7 +64,7 @@ dataLagrElev = {};
 dataLagrVel = {};
 
 % Evaluate water depth (h)
-if (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'h')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1)
+if (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'height')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1)
   hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
   varNameElev = [ varNameElev, {'h'} ];
   dataLagrElev = [ dataLagrElev, {projectDataDisc2DataLagr(hDisc)} ];

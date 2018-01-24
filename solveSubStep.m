@@ -75,36 +75,10 @@ switch problemData.schemeType
   case 'explicit'
     sysA = [ sparse(K*N,K*max(N,3)); problemData.tidalTerms{1}; problemData.tidalTerms{2} ];
     cDiscDot = problemData.sysW \ (sysV - problemData.linearTerms * problemData.cDiscRK + sysA * hDisc);
-
-    % Apply slope limiting to time derivative
-    for i = 1 : length(problemData.slopeLimList)
-      switch problemData.slopeLimList{i}
-        case 'elevation'
-          cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot(1:K*N), [N K])', problemData.globM, problemData.globMDiscTaylor);
-          cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
-          cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
-          cDiscDot(1:K*N) = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
-        case 'momentum'
-          cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot(K*N+1:2*K*N), [N K])', problemData.globM, problemData.globMDiscTaylor);
-          cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
-          cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
-          cDiscDot(K*N+1:2*K*N) = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
-          
-          cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot(2*K*N+1:3*K*N), [N K])', problemData.globM, problemData.globMDiscTaylor);
-          cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
-          cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
-          cDiscDot(2*K*N+1:3*K*N) = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
-        otherwise
-          error('Slope limiting not implemented for non primary variables.')
-      end % switch
-    end % for
-    
     problemData.cDiscRK = problemData.omega(nSubStep) * problemData.cDiscRK0 + (1 - problemData.omega(nSubStep)) * (problemData.cDiscRK + dt * cDiscDot);
-
   case 'semi-implicit'
     sysA = [ sparse(K*N,3*K*N); problemData.tidalTerms{1}, sparse(K*N,2*K*N); problemData.tidalTerms{2}, sparse(K*N,2*K*N) ];
     problemData.cDiscRK = (problemData.sysW + dt * (problemData.linearTerms - sysA)) \ (problemData.sysW * problemData.cDiscRK + dt * sysV);
-
   otherwise
     error('Invalid time-stepping scheme')
 end % switch
