@@ -68,9 +68,9 @@ nEdges = size(basesOnQuad.phi1D{end}, 3);
 if nargin < 3
   switch nEdges
     case 3
-      p = (sqrt(8*N+1)-3)/2;
+      p = (sqrt(8*max(N)+1)-3)/2;
     case 4
-      p = sqrt(N)-1;
+      p = sqrt(max(N))-1;
     otherwise
       error('Unknown number of edges')
   end % switch

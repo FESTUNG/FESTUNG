@@ -2,7 +2,7 @@
 % in all quadrature points of the edges.
 
 %===============================================================================
-%> @file assembleMatEdgeTetraPhiIntPerQuad.m
+%> @file assembleMatEdgePhiIntPerQuad.m
 %>
 %> @brief Assembles matrices containing a two-dimensional basis function 
 %>        evaluated in all quadrature points of the edges.
