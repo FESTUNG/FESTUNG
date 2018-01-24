@@ -61,7 +61,7 @@
 %
 function ret = integrateRefEdgePhiIntPhiExt(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
-nEdges = size(basesOnQuad.phi1D{qOrd}, 3);
+nEdges = size(basesOnQuad.phi1D{end}, 3);
 
 if nargin < 3
   switch nEdges
