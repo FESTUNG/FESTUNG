@@ -104,14 +104,14 @@ end % for ip
 end % function
 
 function printConvergence(err, eoc, pLevel)
-fprintf('Err(h)     EOC(h)  Err(u)     EOC(u)  Err(w)     EOC(w)\n');
+fprintf('Err(h)    EOC(h)   Err(u)    EOC(u)   Err(w)    EOC(w)\n');
 fprintf('=======================================================\n');
 
 for ip = 1 : length(err)
   N = size(err{ip}, 1);
   fprintf('------------------------ p = %d ------------------------\n', pLevel(ip)); 
   for i = 1 : N
-    fprintf('%6.2e  %6.3f   %6.2e  %6.3f   %6.2e  %6.3f\n', ...
+    fprintf('%6.2e %6.2f    %6.2e %6.2f    %6.2e %6.2f\n', ...
       err{ip}(i,1), eoc{ip}(i,1), err{ip}(i,2), eoc{ip}(i,2), err{ip}(i,3), eoc{ip}(i,3));
   end % for i
 end % for p

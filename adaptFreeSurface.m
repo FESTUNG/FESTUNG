@@ -65,8 +65,8 @@ markE0T = problemData.g.markE0Tint | (problemData.g.markE0TbdrRiem & problemData
 tildeGlobQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, markE0T, problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
 
 % Boundary edge integrals
-markE0Tbdr = problemData.g.markE0TbdrTop | problemData.g.markE0TbdrBot | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH);
-tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, markE0Tbdr, problemData.tildeHatQdiag);
+markE0T = problemData.g.markE0TbdrTop | problemData.g.markE0TbdrBot | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH);
+tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, markE0T, problemData.tildeHatQdiag);
 
 % Combine matrices
 problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQbdr{1});
@@ -76,43 +76,37 @@ problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - 
 globH = assembleMatElemDphiPhi(problemData.g, problemData.hatH);
 
 % Boundary edge integral without Dirichlet data for U in flux and continuity equation (X, XII)
-markE0Tbdr = problemData.g.markE0TbdrTop | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU);
-globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, markE0Tbdr, problemData.hatQdiag);
+markE0T = problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU;
+globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, markE0T, problemData.hatQdiag);
+globQtop = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrTop, problemData.hatQdiag);
 
 % Interior edge integral in flux equation (X)
 globQ = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint, problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Combine matrices
-problemData.globHQ = cellfun(@(H, Q, Qbdr) H - Q - Qbdr, globH, globQ, globQbdr, 'UniformOutput', false);
+problemData.globHQ = cellfun(@(H, Q, Qbdr, Qtop) H - Q - Qbdr - Qtop, globH, globQ, globQbdr, globQtop, 'UniformOutput', false);
 
 %% Continuity equation
 % Horizontal interior edge integral with first normal component in continuity equation (XII)
 globQAvg = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Th, problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Horizontal interior and top boundary edge integral with second normal component in continuity equation (XII)
-globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, (problemData.g.markE0Tint & problemData.g.markE0Th | problemData.g.markE0TbdrTop), problemData.hatQdiag, problemData.hatQoffdiag);
-
-% Boundary edge integral without Dirichlet data for U in continuity equation (XII), restricted to boundaries without Riemann solver
-markE0Tbdr = problemData.g.markE0TbdrTop | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrU);
-globQbdr = assembleMatEdgePhiIntPhiIntNu(problemData.g, markE0Tbdr, problemData.hatQdiag);
+markE0T = (problemData.g.markE0Tint & problemData.g.markE0Th) | problemData.g.markE0TbdrTop;
+globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, markE0T, problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Combine matrices
 problemData.globHQup = globH{2} - globQup;
-problemData.globHQavg = -globH{1} + globQAvg{1} + globQbdr{1};
+problemData.globHQavg = -globH{1} + globQAvg{1} + globQtop{1};
 
 %% Helper matrices for assembly of jump terms in Lax-Friedrichs Riemann solver
-% Helper matrix for jumps over vertical interior edges in momentum and continuity equation (VI, XII)
-problemData.globS = assembleMatEdgePhiIntPerQuad(problemData.g, problemData.g.markE0Tint & problemData.g.markE0Tv, problemData.hatSdiag);
+% Helper matrix for jumps over vertical edges in momentum equation
+markE0T = (problemData.g.markE0Tint & problemData.g.markE0Tv) | (problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU);
+problemData.globSu = assembleMatEdgePhiIntPerQuad(problemData.g, markE0T, problemData.hatSdiag);
 
-% Helper matrix for jumps over vertical boundary edges in momentum equation with prescribed Dirichlet data for u and Riemann solver (VI)
-problemData.globSuRiem = assembleMatEdgePhiIntPerQuad(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, problemData.hatSdiag);
+% Helper matrix for jumps over vertical edges in continuity equation
+markE0T = (problemData.g.markE0Tint & problemData.g.markE0Tv) | (problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH);
+problemData.globSh = assembleMatEdgePhiIntPerQuad(problemData.g, markE0T, problemData.hatSdiag);
 
-% Helper matrix for jumps over vertical boundary edges in continuity equation with prescribed Dirichlet data for h and Riemann solver (VI)
-problemData.globShRiem = assembleMatEdgePhiIntPerQuad(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, problemData.hatSdiag);
-
-% Helper matrix for jumps over interior vertices in free surface equation (XV)
-problemData.barGlobS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, problemData.g.markE0Tint & problemData.g.markE0Tv, problemData.barHatSdiag);
-
-% Helper matrix for jumps over boundary vertices in free surface equation with prescribed Dirichlet data for h and Riemann solver (XV)
-problemData.barGlobSRiem = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH, problemData.barHatSdiag);
+% Helper matrix for jumps over vertices in free surface equation 
+problemData.barGlobS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, markE0T, problemData.barHatSdiag);
 end % function

@@ -1,5 +1,9 @@
 function problemData = preprocessProblem(problemData)
 
+%% Function handles for time stepping
+[~, ~, ~, subStepList] = getStepLists();
+problemData.subStepHandles = getStepHandles(problemData.problemName, subStepList);
+
 %% Globally constant parameters.
 problemData.N = (problemData.p + 1)^2;  % number of local DOFs on trapezoidals
 problemData.barN = problemData.p + 1;  % number of local DOFs on intervals
@@ -112,6 +116,5 @@ problemData.barGlobM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.barH
 %% Empty vectors and matrices for coupled problem
 problemData.globJuCoupling = { sparse(problemData.g.numT * problemData.N, 1), sparse(problemData.g.numT * problemData.N, 1) };
 problemData.globJwCoupling = sparse(problemData.g.numT * problemData.N, 1);
-problemData.globJuuCoupling = sparse(problemData.g.numT * problemData.N, 1);
-problemData.globJuwCoupling = sparse(problemData.g.numT * problemData.N, 1);
+problemData.globJuuCoupling = { sparse(problemData.g.numT * problemData.N, 1), sparse(problemData.g.numT * problemData.N, 1) };
 end % function
