@@ -56,8 +56,7 @@ t = (nStep-1) * problemData.darcyData.tau;
 
 if problemData.isCouplingDarcy
   % Reset water height for coupling
-  problemData.hSWE = zeros(size(problemData.sweData.cDiscRK{1, 1}));
-  problemData.cSWE = cellfun(@(c) zeros(size(c)), problemData.sweData.cDiscRK(1, :), 'UniformOutput', false);
+  problemData.hCouplingQ0E0T = 0;
 end % if
 
 if problemData.isCouplingSWE
@@ -87,11 +86,11 @@ if problemData.isCouplingSWE
   u1u1CouplingQ0E0T = u1CouplingQ0E0T .* u1CouplingQ0E0T;
   u1u2CouplingQ0E0T = u1CouplingQ0E0T .* u2CouplingQ0E0T;
   
-  JuCoupling = markAreaE0T .* ((problemData.gCoupling.markE0TE0T{1} * u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)));
+  JuCoupling = markAreaE0T .* ((problemData.markE0TE0T * u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)));
   problemData.sweData.globJuCoupling{1} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 1)).', K*N, 1);
   problemData.sweData.globJuCoupling{2} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 2)).', K*N, 1);
-  problemData.sweData.globJwCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.gCoupling.markE0TE0T{1} * u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
-  problemData.sweData.globJuuCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 1) .* ((problemData.gCoupling.markE0TE0T{1} * u1u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
-  problemData.sweData.globJuwCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.gCoupling.markE0TE0T{1} * u1u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
+  problemData.sweData.globJwCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.markE0TE0T * u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
+  problemData.sweData.globJuuCoupling{1} = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 1) .* ((problemData.markE0TE0T * u1u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
+  problemData.sweData.globJuuCoupling{2} = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.markE0TE0T * u1u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
 end % if
 end % function

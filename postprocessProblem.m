@@ -47,34 +47,36 @@ function problemData = postprocessProblem(problemData)
 problemData.darcyData = problemData.darcySteps.postprocessProblem(problemData.darcyData);
 
 if problemData.isCouplingSWE
-  % Coupling term for vertical velocity component
-  K = problemData.sweData.g.numT;
-  N = problemData.darcyData.N;
-  
-  markAreaE0T = problemData.sweData.g.markE0TbdrCoupling(:, 1) .* problemData.sweData.g.areaE0T(:, 1);
-  
-  % Upper edge (2) in Darcy problem is coupled to lower edge (1) in SWE problem:
-  % Darcy values are evaluated on edge 2 and integrated over edge 1 in SWE grid data.
-  [Q, W] = quadRule1D(problemData.qOrd);
-  [Q1, Q2] = gammaMapTetra(2, Q);
-  
-  % Evaluate K in quadrature points (2x2 cell array of K_PM x R arrays)
-  KQ0E0T = cellfun(@(Kij) Kij(problemData.tEnd, problemData.darcyData.g.mapRef2Phy(1, Q1, Q2), problemData.darcyData.g.mapRef2Phy(2, Q1, Q2)), problemData.darcyData.KCont, 'UniformOutput', false);
-  
-  % Evaluate q1, q2 in quadrature points (K_PM x R arrays)
-  q1Disc = reshape(problemData.darcyData.sysY(1 : K*N), N, K)';
-  q2Disc = reshape(problemData.darcyData.sysY(K*N+1 : 2*K*N), N, K)';
-  q1Q0E0T = q1Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2)';
-  q2Q0E0T = q2Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2)';
-  
-  % Compute combined values (K_PM x R arrays)
-  u1CouplingQ0E0T = KQ0E0T{1,1} .* q1Q0E0T + KQ0E0T{1,2} .* q2Q0E0T;
-  u2CouplingQ0E0T = KQ0E0T{2,1} .* q1Q0E0T + KQ0E0T{2,2} .* q2Q0E0T;
-  
-  JuCoupling = markAreaE0T .* ((problemData.gCoupling.markE0TE0T{1} * u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)));
-  problemData.sweData.globJuCoupling{1} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 1)).', K*N, 1);
-  problemData.sweData.globJuCoupling{2} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 2)).', K*N, 1);
-  problemData.sweData.globJwCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.gCoupling.markE0TE0T{1} * u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
+  problemData = execin([problemData.problemName filesep 'preprocessStep'], problemData, problemData.numSteps + 1);
+
+%   % Coupling term for vertical velocity component
+%   K = problemData.sweData.g.numT;
+%   N = problemData.darcyData.N;
+%   
+%   markAreaE0T = problemData.sweData.g.markE0TbdrCoupling(:, 1) .* problemData.sweData.g.areaE0T(:, 1);
+%   
+%   % Upper edge (2) in Darcy problem is coupled to lower edge (1) in SWE problem:
+%   % Darcy values are evaluated on edge 2 and integrated over edge 1 in SWE grid data.
+%   [Q, W] = quadRule1D(problemData.qOrd);
+%   [Q1, Q2] = gammaMapTetra(2, Q);
+%   
+%   % Evaluate K in quadrature points (2x2 cell array of K_PM x R arrays)
+%   KQ0E0T = cellfun(@(Kij) Kij(problemData.tEnd, problemData.darcyData.g.mapRef2Phy(1, Q1, Q2), problemData.darcyData.g.mapRef2Phy(2, Q1, Q2)), problemData.darcyData.KCont, 'UniformOutput', false);
+%   
+%   % Evaluate q1, q2 in quadrature points (K_PM x R arrays)
+%   q1Disc = reshape(problemData.darcyData.sysY(1 : K*N), N, K)';
+%   q2Disc = reshape(problemData.darcyData.sysY(K*N+1 : 2*K*N), N, K)';
+%   q1Q0E0T = q1Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2)';
+%   q2Q0E0T = q2Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2)';
+%   
+%   % Compute combined values (K_PM x R arrays)
+%   u1CouplingQ0E0T = KQ0E0T{1,1} .* q1Q0E0T + KQ0E0T{1,2} .* q2Q0E0T;
+%   u2CouplingQ0E0T = KQ0E0T{2,1} .* q1Q0E0T + KQ0E0T{2,2} .* q2Q0E0T;
+%   
+%   JuCoupling = markAreaE0T .* ((problemData.gCoupling.markE0TE0T{1} * u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)));
+%   problemData.sweData.globJuCoupling{1} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 1)).', K*N, 1);
+%   problemData.sweData.globJuCoupling{2} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 2)).', K*N, 1);
+%   problemData.sweData.globJwCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.gCoupling.markE0TE0T{1} * u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
  end % if
  
 problemData.sweData = problemData.sweSteps.postprocessProblem(problemData.sweData);

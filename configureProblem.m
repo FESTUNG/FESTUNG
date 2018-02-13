@@ -55,8 +55,8 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'coupling');
 
 % Enable coupling
-problemData = setdefault(problemData, 'isCouplingDarcy', true);
-problemData = setdefault(problemData, 'isCouplingSWE', true);
+problemData = setdefault(problemData, 'isCouplingDarcy', ~true);
+problemData = setdefault(problemData, 'isCouplingSWE', ~true);
 
 % Number of elements in x- and y-direction
 problemData = setdefault(problemData, 'numElem', [8 4]);
@@ -69,9 +69,9 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 2);%50);  % end time
+problemData = setdefault(problemData, 'tEnd', 10);%50);  % end time
 problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.05));  % number of time steps
-problemData = setdefault(problemData, 'numSubSteps', 10); % number of free-flow steps per sub-surface step
+problemData = setdefault(problemData, 'numSubSteps', 5); % number of free-flow steps per sub-surface step
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid

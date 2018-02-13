@@ -58,16 +58,8 @@ problemData = iterateSubSteps(problemData, nStep);
 %% Solve Darcy time step
 problemData.darcyData = problemData.darcySteps.preprocessStep(problemData.darcyData, nStep);
 
+% Coupling term for Darcy head
 if problemData.isCouplingDarcy
-%   % Compute coupling terms
-%   problemData.hSWE = reshape(1 / problemData.darcyData.tau * problemData.hSWE.', [], 1);  % mass conservative
-% %   problemData.hSWE = reshape(problemData.sweData.cDiscRK{end, 1}.', [], 1);  % analytically correct
-%   for m = 1 : 2
-%     problemData.darcyData.globJcouple{m} = problemData.darcyData.tildeGlobQcouple{m} * problemData.hSWE;
-%   end % for
-%   problemData.darcyData.globKcouple = problemData.darcyData.tildeGlobScouple * problemData.hSWE;
-  
-  % Coupling term for Darcy head
   K = problemData.darcyData.g.numT;
   N = problemData.sweData.N;
   
@@ -75,16 +67,10 @@ if problemData.isCouplingDarcy
   % SWE values are evaluated on edge 1 and integrated over edge 2 in Darcy grid data.
   [~, W] = quadRule1D(problemData.qOrd);
   
-  % Evaluate primary variables in quadrature points of bottom edge of SWE domain
-  hQ0E0T = (1/problemData.darcyData.tau) * problemData.cSWE{1} * problemData.sweData.basesOnQuad1D.phi1D{problemData.qOrd}.';
-  u1Q0E0T = (1/problemData.darcyData.tau) * problemData.cSWE{2} * problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 2).';
-  hCouplingQ0E0T = problemData.markT2DT * hQ0E0T + 0.5 * ( u1Q0E0T .* u1Q0E0T );
-  
   % Integrate boundary condition
   markAreaNuE0T = bsxfun(@times, problemData.darcyData.g.markE0TbdrCoupling(:, 2) .* problemData.darcyData.g.areaE0T(:, 2), squeeze(problemData.darcyData.g.nuE0T(:, 2, :)));
-  globInt = (problemData.markE0TE0T.' * hCouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2));
+  globInt = (problemData.markE0TE0T.' * problemData.hCouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2));
   
-  %globJcouple = cell(2,1);
   % Apply coefficients
   for m = 1 : 2
     problemData.darcyData.globJcouple{m} = reshape((markAreaNuE0T(:, m) .* globInt).', K*N, 1);

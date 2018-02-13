@@ -58,10 +58,21 @@ function problemData = postprocessSubStep(problemData, nStep, nSubStep)
 problemData.sweData = problemData.sweSteps.postprocessStep(problemData.sweData, (nStep - 1) * problemData.numSubSteps + nSubStep);
 problemData.sweData = problemData.sweSteps.outputStep(problemData.sweData, (nStep - 1) * problemData.numSubSteps + nSubStep);
 
+% Coupling term for Darcy head
 if problemData.isCouplingDarcy
-  % Integrate water height over time for coupling (using trapezoidal rule)
-  problemData.cSWE = cellfun(@(a,b,c) a + 0.5 * problemData.sweData.tau * (b + c), problemData.cSWE, problemData.sweData.cDiscRK(1,:), problemData.sweData.cDiscRK(end,:), 'UniformOutput', false);
-  problemData.hSWE = problemData.hSWE + 0.5 * problemData.sweData.tau * (problemData.sweData.cDiscRK{1, 1} + problemData.sweData.cDiscRK{end, 1});
+  % Evaluate primary variables in quadrature points of bottom edge of SWE domain at old time level
+  hQ0E0T1 = problemData.sweData.cDiscRK{1,1} * problemData.sweData.basesOnQuad1D.phi1D{problemData.qOrd}.';
+  u1Q0E0T1 = problemData.sweData.cDiscRK{1,2} * problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 2).';
+  hCouplingQ0E0T1 = problemData.markT2DT * hQ0E0T1 + 0.5 * ( u1Q0E0T1 .* u1Q0E0T1 );
+  
+  % Evaluate primary variables in quadrature points of bottom edge of SWE domain at new time level
+  hQ0E0T2 =  problemData.sweData.cDiscRK{end,1} * problemData.sweData.basesOnQuad1D.phi1D{problemData.qOrd}.';
+  u1Q0E0T2 = problemData.sweData.cDiscRK{end,2} * problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 2).';
+  hCouplingQ0E0T2 = problemData.markT2DT * hQ0E0T2 + 0.5 * ( u1Q0E0T2 .* u1Q0E0T2 );
+  
+  % Integrate coupling condition over time (using trapezoidal rule)
+  problemData.hCouplingQ0E0T = problemData.hCouplingQ0E0T + ...
+    0.5 * problemData.sweData.tau / problemData.darcyData.tau * (hCouplingQ0E0T1 + hCouplingQ0E0T2);
 end % if
 
 problemData.isSubSteppingFinished = nSubStep >= problemData.numSubSteps;
