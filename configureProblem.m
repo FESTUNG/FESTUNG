@@ -1,7 +1,7 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'coupling');
+problemData = setdefault(problemData, 'testcase', 'coupled_constXi');
 
 problemData.eta = 1; % penalty parameter (eta>0)
 
@@ -16,7 +16,7 @@ problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 86.4);  % end time
+problemData = setdefault(problemData, 'tEnd', 10);  % end time
 problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.05));  % number of time steps
 
 % Discard time derivative and compute stationary solution
@@ -25,10 +25,10 @@ problemData = setdefault(problemData, 'isCoupling', false);
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
-problemData = setdefault(problemData, 'isVisSol', false);  % visualization of solution
+problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
 problemData = setdefault(problemData, 'outputFrequency', 100); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
-                         ['output' filesep 'solution_darcy' ]); 
+                         ['output' filesep problemData.problemName '_' problemData.testcase ]); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
 
 %% Parameter check.
@@ -37,6 +37,100 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
 switch problemData.testcase
+  case {'coupled_constXi', 'coupled_stationary', 'coupled_transient'}
+    % Parameters
+    aConst = 0;
+    bConst = 0.005;
+    betaConst = 0.3;
+    etaConst = 0.003;
+    rhoConst = 0.08;
+    tauConst = 0.08;
+    kConst = 0.01;
+    kappaConst = 1;
+    lambdaConst = 0.07;
+    muConst = 0.07;
+    
+    % Width and height of computational domain
+    zPMCont = @(x) -5 * ones(size(x));
+    zBotCont = @(x) aConst + bConst * x;
+    
+    domainWidth = linspace(0, 100, problemData.numElem(1)+1);
+    domainHeight = [zPMCont(domainWidth); zBotCont(domainWidth)];
+    idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
+    
+    % Analytical solution
+    switch problemData.testcase
+      case 'coupled_constXi'
+        xiCont = @(t,x) 5 * ones(size(x));
+        hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+
+        dxXiCont = @(t,x) zeros(size(x));
+        dxdxXiCont = @(t,x) zeros(size(x));
+        dxHCont = @(t,x) dxXiCont(t,x) - bConst;
+        dtHCont = @(t,x) zeros(size(x));
+      case 'coupled_stationary'
+        xiCont = @(t,x) 5 + etaConst * sin(rhoConst * x);
+        hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+
+        dxXiCont = @(t,x) etaConst * rhoConst * cos(rhoConst * x);
+        dxdxXiCont = @(t,x) -etaConst * rhoConst * rhoConst * sin(rhoConst * x);
+        dxHCont = @(t,x) dxXiCont(t,x) - bConst;
+        dtHCont = @(t,x) zeros(size(x));
+      case 'coupled_transient'
+        xiCont = @(t,x) 5 + etaConst * sin(rhoConst * x + tauConst * t);
+        hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+
+        dxXiCont = @(t,x) etaConst * rhoConst * cos(rhoConst * x + tauConst * t);
+        dxdxXiCont = @(t,x) -etaConst * rhoConst * rhoConst * sin(rhoConst * x + tauConst * t);
+        dxHCont = @(t,x) dxXiCont(t,x) - bConst;
+        dtHCont = @(t,x) etaConst * tauConst * cos(rhoConst * x + tauConst * t);
+    end % switch
+    
+    switch problemData.testcase
+      case {'coupled_constXi', 'coupled_stationary'}
+        omegaCont = @(t,x) kappaConst * cos(lambdaConst * x);
+        dtOmegaCont = @(t,x) zeros(size(x));
+        dxOmegaCont = @(t,x) -lambdaConst * kappaConst * sin(lambdaConst * x);
+        dxdxOmegaCont = @(t,x) - lambdaConst * lambdaConst * kappaConst * cos(lambdaConst * x);
+      case {'coupled_transient'}
+        omegaCont = @(t,x) kappaConst * cos(lambdaConst * x + muConst * t);
+        dtOmegaCont = @(t,x) -muConst * kappaConst * sin(lambdaConst * x + muConst * t);
+        dxOmegaCont = @(t,x) -lambdaConst * kappaConst * sin(lambdaConst * x + muConst * t);
+        dxdxOmegaCont = @(t,x) -lambdaConst * lambdaConst * kappaConst * cos(lambdaConst * x + muConst * t);
+    end % switch
+    
+    problemData.hCont = @(t,x,z) hCont(t,x) + (sin(betaConst * z) - sin(betaConst * zBotCont(x))) .* omegaCont(t,x);
+    problemData.q1Cont = @(t,x,z) -dxHCont(t,x) ...
+      + betaConst * bConst * cos(betaConst * zBotCont(x)) .* omegaCont(t,x) ...
+      - (sin(betaConst * z) - sin(betaConst * zBotCont(x))) .* dxOmegaCont(t,x);
+    problemData.q2Cont = @(t,x,z) -betaConst * cos(betaConst * z) .* omegaCont(t, x);
+    
+    % Diffusion matrix
+    problemData.KCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {kConst, 0; 0, kConst}, 'UniformOutput', false);
+    
+    % Derivatives
+    dThCont = @(t,x,z) dtHCont(t,x) + (sin(betaConst * z) - sin(betaConst * zBotCont(x))) .* dtOmegaCont(t,x);
+    dXhCont = @(t,x,z) -problemData.q1Cont(t,x,z);
+    dZhCont = @(t,x,z) -problemData.q2Cont(t,x,z);
+    dXdXhCont = @(t,x,z) -dxdxXiCont(t,x) ...
+      + betaConst * betaConst * bConst * bConst * sin(betaConst * zBotCont(x)) .* omegaCont(t,x) ...
+      - 2 * betaConst * bConst * cos(betaConst * zBotCont(x)) .* dxOmegaCont(t,x) ...
+      + (sin(betaConst * z) - sin(betaConst * zBotCont(x))) .* dxdxOmegaCont(t,x);
+    dZdZhCont = @(t,x,z) -betaConst * betaConst * sin(betaConst * z) .* omegaCont(t, x);
+    dXdZhCont = @(t,x,z) betaConst * cos(betaConst * z) .* dxOmegaCont(t, x);
+    dXZKCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
+    
+    % Boundary conditions
+    problemData.hDCont = problemData.hCont;
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    
+    % Right hand side
+    problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
+                          dXZKCont{1,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{1,1}(t,x,z) .* dXdXhCont(t,x,z) - ...
+                          dXZKCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
+                          dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
+    
   case 'coupling'
     % width and height of computational domain
     domainWidth = [0, 100];

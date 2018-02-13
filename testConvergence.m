@@ -64,10 +64,15 @@ if nargin < 4
   tLevel = 1;
 end % if
 
-isSpatConv = length(hLevel) > 1 && length(tLevel) == 1;
-isTimeSpatConv = length(hLevel) == length(tLevel);
+if ~iscell(tLevel)
+  tLevel = cellfun(@(c) tLevel, cell(size(pLevel)), 'UniformOutput', false);
+end % if
+nTimeLevel = cell2mat(cellfun(@(c) length(c), tLevel, 'UniformOutput', false));
+
+isSpatConv = length(hLevel) > 1 && all(1  == cell2mat(cellfun(@(c) length(c), tLevel, 'UniformOutput', false)));
+isTimeSpatConv = all(length(hLevel) == nTimeLevel);
 assert(xor(isSpatConv, isTimeSpatConv), 'Time and space convergence levels must fit to each other!');
-nLevel = max(length(hLevel), length(tLevel));
+nLevel = max(length(hLevel), max(nTimeLevel));
 
 err = cell(size(pLevel));
 eoc = cell(size(pLevel));
@@ -80,7 +85,7 @@ for ip = 1 : length(pLevel)
       pd.numElem = [2^hLevel(level), 2^(hLevel(level)-1)];
     end % if
     if ~isSpatConv
-      pd.numSteps = tLevel(level);
+      pd.numSteps = tLevel{ip}(level);
     end % if
     try
       pd = main('darcy_2dv', pd);
@@ -91,7 +96,7 @@ for ip = 1 : length(pLevel)
                         repmat((hLevel(2:N) - hLevel(1:N-1))' * log(2), 1, 3) ];
       else
         eoc{ip} = [ zeros(1,3); log(err{ip}(1:N-1, :) ./ err{ip}(2:N, :)) ./ ...
-                        repmat((tLevel(2:N) - tLevel(1:N-1))' * log(2), 1, 3) ];
+                        repmat((tLevel{ip}(2:N) - tLevel{ip}(1:N-1))' * log(2), 1, 3) ];
       end % if
       printConvergence(err, eoc, pLevel);
     catch ME
@@ -104,14 +109,14 @@ end % for ip
 end % function
 
 function printConvergence(err, eoc, pLevel)
-fprintf('Err(c)     EOC(c)  Err(q1)   EOC(q1)  Err(q2)   EOC(q2)\n');
-fprintf('=======================================================\n');
+fprintf('Err(c)    EOC(c)   Err(q1)   EOC(q1)  Err(q2)  EOC(q2)\n');
+fprintf('======================================================\n');
 
 for ip = 1 : length(err)
   N = size(err{ip}, 1);
-  fprintf('------------------------ p = %d ------------------------\n', pLevel(ip)); 
+  fprintf('------------------------ p = %d -----------------------\n', pLevel(ip)); 
   for i = 1 : N
-    fprintf('%6.2e  %6.3f   %6.2e  %6.3f   %6.2e  %6.3f\n', ...
+    fprintf('%6.2e %6.2f    %6.2e %6.2f    %6.2e %6.2f\n', ...
       err{ip}(i,1), eoc{ip}(i,1), err{ip}(i,2), eoc{ip}(i,2), err{ip}(i,3), eoc{ip}(i,3));
   end % for i
 end % for p
