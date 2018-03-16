@@ -1,3 +1,6 @@
+License
+=======
+
 FESTUNG Finite Element Simulation Toolbox for UNstructured Grids
 Copyright (C) 2014 Florian Frank, Balthasar Reuter, Vadym Aizinger
 
