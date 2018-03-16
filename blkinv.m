@@ -11,10 +11,10 @@
 %> The function takes a block diagonal matrix @f$\mathsf{A} \in \mathbb{R}^{KN \times KN}@f$ 
 %> with blocks of size @f$N \times N@f$ on the diagonal and computes its 
 %> inverse @f$\mathsf{A}^{-1}@f$. In order to optimize the performance of the
-%> method on can specify a \p blockSize that has to be a mutliple of @f$N@f$. 
+%> method one can specify a \p blockSize that has to be a mutliple of @f$N@f$. 
 %> The algorithm extracts blocks of size @f$ \text{blockSize} \times \text{blockSize} @f$
 %> from the diagonal of @f$A@f$ to invert several diagonal blocks at once. In our experiments
-%> values for \p blockSize around 128-192, was a good choice.
+%> values for \p blockSize around 64-128, were a good choice.
 %> However, this may change depending on the problem at hand and the computer used. 
 %> 
 %> 
@@ -31,6 +31,7 @@
 %>
 %> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> @author Balthasar Reuter, 2017
+%> @author Florian Frank, 2017
 %> 
 %> @par License
 %> @parblock
@@ -54,14 +55,10 @@ validateattributes(blockSize, {'numeric'}, {'scalar', '>', 0}, 'blockSize')
 
 n = size(A,1);
 numBlocks = ceil(n / blockSize);
-idxEnd = 0;
-    
-invA = cell(numBlocks, 1);
-for idxBlock = 1 : numBlocks - 1
-  idxStart = (idxBlock - 1) * blockSize + 1;
-  idxEnd = idxBlock * blockSize;
-  invA{idxBlock} = A(idxStart : idxEnd, idxStart : idxEnd) \ speye(blockSize);
-end % for
-invA{numBlocks} = A(idxEnd + 1 : end, idxEnd + 1 : end) \ speye(n - (numBlocks - 1) * blockSize);
-invA = blkdiag(invA{:});
+idxEnd = (numBlocks - 1) * blockSize;
+
+idxs = mat2cell(1 : idxEnd, 1, ones(1, numBlocks - 1) * blockSize);
+cellA = cellfun(@(X) A(X, X), idxs, 'UniformOutput', false);
+cellInvA = cellfun(@(X) inv(X), cellA, 'UniformOutput', false);
+invA = blkdiag(cellInvA{:}, inv(A(idxEnd + 1 : end, idxEnd + 1 : end)));
 end % function
