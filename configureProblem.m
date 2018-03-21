@@ -62,7 +62,7 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
-problemData.hmax            = 2^-4;       % maximum edge length of triangle
+problemData.hmax            = 2^-3;       % maximum edge length of triangle
 problemData.p               = 2;          % local polynomial degree
 problemData.tEnd            = pi;         % end time
 problemData.numSteps        = 20;         % number of time steps

@@ -17,30 +17,25 @@
 %>        information based on the underlying grid and are therefore constant in
 %>        time but used in every step. They are saved as part of the grid.
 %>
-%> g.areaNuE0TE0T provides the elementwise products of the matrices 
-%> <code>g.markE0TE0T</code> with the vectors of the elementwise product of
-%> <code>g.areaE0T</code>, and <code>g.nuE0T</code>.
-%> @f$[3 \times 3 \times 2 \text{ cell}]@f$
-%>
 %> g.areaNuE0T provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, and <code>g.nuE0T</code>.
-%> @f$[3 \times 2 \text{ cell}]@f$
+%> @f$[K \times 3 \times 2]@f$
 %>
 %> g.areaNuE0Tint provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, <code>g.nuE0T</code>, and <code>markE0Tint</code>.
-%> @f$[3 \times 2 \text{ cell}]@f$
+%> @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> g.areaNuE0TbdrD provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, <code>g.nuE0T</code>, and <code>markE0TbdrD</code>.
-%> @f$[3 \times 2 \text{ cell}]@f$
+%> @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> g.areaNuE0TbdrD provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, <code>g.nuE0T</code>, and <code>markE0TbdrN</code>.
-%> @f$[3 \times 2 \text{ cell}]@f$
+%> @f$[2 \times 1 \text{ cell}]@f$
 %>
 %> g.areaE0TbdrN provides the elementwise products of the vectors 
 %> <code>g.areaE0T</code>, and <code>markE0TbdrN</code>.
-%> @f$[3 \text{ cell}]@f$
+%> @f$[K \times 3]@f$
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
@@ -53,7 +48,10 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Hennes Hajduk, 2016
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock
@@ -72,24 +70,16 @@
 %> @endparblock
 %
 function g = computeDerivedGridData(g)
-g.areaNuE0TE0T = cell(3,3,2);
-g.areaNuE0T = cell(3,2);
-g.areaNuE0Tint = cell(3,2);
-g.areaNuE0TbdrD = cell(3,2);
-g.areaNuE0TbdrN = cell(3,2);
-g.areaE0TbdrN = cell(3,1);
-for nn = 1 : 3
-  for np = 1 : 3
-    for m = 1 : 2
-      g.areaNuE0TE0T{nn,np,m} = bsxfun(@times, g.markE0TE0T{nn,np}, g.areaE0T(:,nn).*g.nuE0T(:,nn,m));
-    end % for
-  end % for
-  for m = 1 : 2
-    g.areaNuE0T{nn,m} = g.areaE0T(:,nn).*g.nuE0T(:,nn,m);
-    g.areaNuE0Tint{nn,m} = g.areaNuE0T{nn,m} .* g.markE0Tint(:, nn);
-    g.areaNuE0TbdrD{nn,m} = g.areaNuE0T{nn,m} .* g.markE0TbdrD(:,nn);
-    g.areaNuE0TbdrN{nn,m} = g.areaNuE0T{nn,m} .* g.markE0TbdrN(:,nn);
-  end % for
-  g.areaE0TbdrN{nn} = g.markE0TbdrN(:, nn) .* g.areaE0T(:,nn);
-end % for
+K = g.numT;
+g.areaNuE0T = zeros(K,3,2);
+g.areaNuE0Tint = cell(2,1);
+g.areaNuE0TbdrD = cell(2,1);
+g.areaNuE0TbdrN = cell(2,1);
+g.areaE0TbdrN = g.markE0TbdrN .* g.areaE0T;
+for m = 1 : 2
+  g.areaNuE0T(:, :, m) = g.areaE0T .* g.nuE0T(:, :, m);
+  g.areaNuE0Tint{m} = g.markE0Tint .* g.areaNuE0T(:, :, m);
+  g.areaNuE0TbdrD{m} = g.markE0TbdrD .* g.areaNuE0T(:, :, m);
+  g.areaNuE0TbdrN{m} = g.markE0TbdrN .* g.areaNuE0T(:, :, m);
+end % for m
 end % function
