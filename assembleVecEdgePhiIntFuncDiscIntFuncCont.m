@@ -79,7 +79,7 @@
 %> @param areaE0Tbdr  (optional) argument to provide precomputed values
 %>                    for the products of <code>markE0Tbdr</code>,
 %>                    and <code>g.areaE0T</code>,
-%>                    @f$[3 \text{ cell}]@f$
+%>                    @f$[K \times 3]@f$
 %> @retval ret        The assembled vector @f$[KN]@f$
 %>
 %> This file is part of FESTUNG
@@ -134,7 +134,7 @@ for n = 1 : 3
   for i = 1 : N
     for l = 1 : N
       integral = funcAtQ * ( W .* basesOnQuad.phi1D{qOrd}(:,i,n)' .* basesOnQuad.phi1D{qOrd}(:,l,n)' )';
-      ret(:,i) = ret(:,i) + areaE0Tbdr{n} .* dataDisc(:,l) .* integral;
+      ret(:,i) = ret(:,i) + areaE0Tbdr(:,n) .* dataDisc(:,l) .* integral;
     end % for
   end % for
 end % for
