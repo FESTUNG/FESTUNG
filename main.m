@@ -177,7 +177,8 @@ end % function
 function [tStartup, oldpath, cwd] = startupFestung(problemName)
 more off % Disable paging of output
 tStartup = tic; % Start time measurement
-diaryName = [problemName '_' datestr(now, 'yyyymmdd-HHMMSS') '.log'];
+if ~isdir('log'), mkdir('log'); end
+diaryName = ['log' filesep problemName '_' datestr(now, 'yyyymmdd-HHMMSS') '.log'];
 diary(diaryName) % Start logging
 fprintf( [ '\n' ...
 '   __    __    __                      __    __    __ \n' ...
