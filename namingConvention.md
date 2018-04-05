@@ -49,12 +49,13 @@ Global variables can be tricky and limit the general applicability of your code.
 In our numerical setting, continuous functions are rather exceptional than the rule. Continuous functions should therefore be clearly identifiable as such. We use the leading keyword ```func...``` or the suffix ```...Cont``` to make this obvious. In functions where only one function handle is passed as an argument, we use ```funcCont```.
 
 ### Coefficient Functions/Data
-In Finite Elements continuous functions are approximated using coefficients for the basis functions. In *FESTUNG* these coefficients typically belong to the basis functions from the discontinuous ansatz space but, e. g., for the visualization routines, we also need coefficients for Lagrangian basis functions. To distinguish between the two of them, we use the suffices ```...Disc``` and ```...Lagr```, respectively. 
+In *FESTUNG*, unknowns and spatially varying coefficients are commonly stored by their local (i. e. elementwise) coordinates of a globally discontinuous approximation space that uses *modal* basis functions on each element.  Modal bases do not satisfy a Lagrangian/nodal property, which is, e. g., required for visualization routines though.  *FESTUNG* provides routines for basis transformations such as [projectDataDisc2DataLagr.m](projectDataDisc2DataLagr_8m.html).  
+To distinguish between modal and nodal bases, we use the suffices ```...Disc``` and ```...Lagr```, respectively. 
 
-For example, after an L2-projection of a function *d(x,y)* into our discontinuous space, we could name the array holding the coefficients ```dDisc```. In functions that expect only one coefficient argument, we call it ```dataDisc```.
+For example, after an L2-projection of a function *d(x,y)* into a discontinuous, modal space, we could name the array holding the coefficients ```dDisc```. In functions that expect only one coefficient argument, we may it ```dataDisc``` instead.
 
 ## Function Names
-Functions always *do* something, which means we can probably describe them by a verb. This verb should always form the first part of the function name, for example as in `visualizeGrid(...)`.
+Functions always *do* something, which means we can probably describe them by a verb. This verb should always form the first part of the function name, for example as in [visualizeGrid](visualizeGrid_8m.html).
 
 ### Integration Routines
 Integration routines compute blocks from integrals on the reference elements and are always named with the leading keyword `integrate...`, which is followed by the geometric entity over which we integrate - for example `integrateRefEdge...` or `integrateRefElem...`. The remainder of the function name should describe the argument of the integral. For example, the integration of the product of the two basis functions *phi* on the reference element is named `integrateRefElemPhiPhi(...)`. Derivatives of the basis function are called `Dphi`.
