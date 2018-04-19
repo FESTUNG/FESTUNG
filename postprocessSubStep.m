@@ -60,15 +60,19 @@ problemData.sweData = problemData.sweSteps.outputStep(problemData.sweData, (nSte
 
 % Coupling term for Darcy head
 if problemData.isCouplingDarcy
+  [Q,~] = quadRule1D(problemData.qOrd);
+  Q0T1D = problemData.sweData.g.g1D.mapRef2Phy(Q);
+  zBotQ0E0T = problemData.sweData.zBotCont(Q0T1D);
+  
   % Evaluate primary variables in quadrature points of bottom edge of SWE domain at old time level
   hQ0E0T1 = problemData.sweData.cDiscRK{1,1} * problemData.sweData.basesOnQuad1D.phi1D{problemData.qOrd}.';
   u1Q0E0T1 = problemData.sweData.cDiscRK{1,2} * problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 2).';
-  hCouplingQ0E0T1 = problemData.markT2DT * hQ0E0T1 + 0.5 * ( u1Q0E0T1 .* u1Q0E0T1 );
+  hCouplingQ0E0T1 = problemData.sweData.g.g1D.markT2DT * (hQ0E0T1 + zBotQ0E0T) + 0.5 / problemData.sweData.gConst * ( u1Q0E0T1 .* u1Q0E0T1 );
   
   % Evaluate primary variables in quadrature points of bottom edge of SWE domain at new time level
   hQ0E0T2 =  problemData.sweData.cDiscRK{end,1} * problemData.sweData.basesOnQuad1D.phi1D{problemData.qOrd}.';
   u1Q0E0T2 = problemData.sweData.cDiscRK{end,2} * problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 2).';
-  hCouplingQ0E0T2 = problemData.markT2DT * hQ0E0T2 + 0.5 * ( u1Q0E0T2 .* u1Q0E0T2 );
+  hCouplingQ0E0T2 = problemData.sweData.g.g1D.markT2DT * (hQ0E0T2 + zBotQ0E0T) + 0.5 / problemData.sweData.gConst * ( u1Q0E0T2 .* u1Q0E0T2 );
   
   % Integrate coupling condition over time (using trapezoidal rule)
   problemData.hCouplingQ0E0T = problemData.hCouplingQ0E0T + ...

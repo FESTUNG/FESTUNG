@@ -74,6 +74,8 @@ isTimeSpatConv = all(length(hLevel) == nTimeLevel);
 assert(xor(isSpatConv, isTimeSpatConv), 'Time and space convergence levels must fit to each other!');
 nLevel = max(length(hLevel), max(nTimeLevel));
 
+filename = ['testConvergence_darcy_swe_2dv_' testcase '_' datestr(now, 'yyyymmdd-HHMMSS') '.log'];
+
 err = cell(size(pLevel));
 eoc = cell(size(pLevel));
 
@@ -98,7 +100,7 @@ for ip = 1 : length(pLevel)
         eoc{ip} = [ zeros(1,6); log(err{ip}(1:N-1, :) ./ err{ip}(2:N, :)) ./ ...
                         repmat((tLevel{ip}(2:N) - tLevel{ip}(1:N-1))' * log(2), 1, 6) ];
       end % if
-      printConvergence(err, eoc, pLevel);
+      printConvergence(filename, err, eoc, pLevel);
     catch ME
       stack = arrayfun(@(a) sprintf('  In %s (line %d)\n', a.file, a.line), ME.stack, 'UniformOutput', false);
       warning('%s: %s\n%s---', ME.identifier, ME.message, [stack{:}]);
@@ -108,17 +110,22 @@ for ip = 1 : length(pLevel)
 end % for ip
 end % function
 
-function printConvergence(err, eoc, pLevel)
-fprintf('Err(h)  EOC(h)   Err(u1) EOC(u1)  Err(u2) EOC(u2) | Err(h)  EOC(h)   Err(q1) EOC(q1)  Err(q2) EOC(q2)\n');
-fprintf('==================================================+==================================================\n');
+function printConvergence(filename, err, eoc, pLevel)
+str = sprintf('Err(h)  EOC(h)   Err(u1) EOC(u1)  Err(u2) EOC(u2) | Err(h)  EOC(h)   Err(q1) EOC(q1)  Err(q2) EOC(q2)\n');
+str = [str, sprintf('==================================================+==================================================\n')];
 
 for ip = 1 : length(err)
   N = size(err{ip}, 1);
-  fprintf('----------------------------------------------- p = %d -----------------------------------------------\n', pLevel(ip)); 
+  str = [str, sprintf('----------------------------------------------- p = %d -----------------------------------------------\n', pLevel(ip))];  %#ok<*AGROW>
   for i = 1 : N
-    fprintf('%6.2e %5.2f   %6.2e %5.2f   %6.2e %5.2f  | %6.2e %5.2f   %6.2e %5.2f   %6.2e %5.2f\n', ...
+    str = [str, sprintf('%6.2e %5.2f   %6.2e %5.2f   %6.2e %5.2f  | %6.2e %5.2f   %6.2e %5.2f   %6.2e %5.2f\n', ...
       err{ip}(i,1), eoc{ip}(i,1), err{ip}(i,2), eoc{ip}(i,2), err{ip}(i,3), eoc{ip}(i,3), ...
-      err{ip}(i,4), eoc{ip}(i,4), err{ip}(i,5), eoc{ip}(i,5), err{ip}(i,6), eoc{ip}(i,6));
+      err{ip}(i,4), eoc{ip}(i,4), err{ip}(i,5), eoc{ip}(i,5), err{ip}(i,6), eoc{ip}(i,6))];
   end % for i
 end % for p
+
+fprintf(str);
+fileID = fopen(filename, 'w');
+fprintf(fileID, str);
+fclose(fileID);
 end % function

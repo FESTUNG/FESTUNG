@@ -59,26 +59,24 @@ if problemData.isCouplingDarcy
   problemData.hCouplingQ0E0T = 0;
 end % if
 
-if problemData.isCouplingSWE
-  % Coupling term for vertical velocity component
-  K = problemData.sweData.g.numT;
-  N = problemData.darcyData.N;
-  
-  markAreaE0T = problemData.sweData.g.markE0TbdrCoupling(:, 1) .* problemData.sweData.g.areaE0T(:, 1);
+if problemData.isCouplingSWE  % Coupling term for vertical velocity component
+  qOrd = problemData.qOrd;
   
   % Upper edge (2) in Darcy problem is coupled to lower edge (1) in SWE problem:
   % Darcy values are evaluated on edge 2 and integrated over edge 1 in SWE grid data.
-  [Q, W] = quadRule1D(problemData.qOrd);
+  [Q, W] = quadRule1D(qOrd);
   [Q1, Q2] = gammaMapTetra(2, Q);
   
   % Evaluate K in quadrature points (2x2 cell array of K_PM x R arrays)
   KQ0E0T = cellfun(@(Kij) Kij(t, problemData.darcyData.g.mapRef2Phy(1, Q1, Q2), problemData.darcyData.g.mapRef2Phy(2, Q1, Q2)), problemData.darcyData.KCont, 'UniformOutput', false);
   
   % Evaluate q1, q2 in quadrature points (K_PM x R arrays)
+  K = problemData.darcyData.g.numT;
+  N = problemData.darcyData.N;
   q1Disc = reshape(problemData.darcyData.sysY(1 : K*N), N, K)';
   q2Disc = reshape(problemData.darcyData.sysY(K*N+1 : 2*K*N), N, K)';
-  q1Q0E0T = q1Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2).';
-  q2Q0E0T = q2Disc * problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2).';
+  q1Q0E0T = q1Disc * problemData.darcyData.basesOnQuad.phi1D{qOrd}(:, :, 2).';
+  q2Q0E0T = q2Disc * problemData.darcyData.basesOnQuad.phi1D{qOrd}(:, :, 2).';
   
   % Compute combined values (K_PM x R arrays)
   u1CouplingQ0E0T = KQ0E0T{1,1} .* q1Q0E0T + KQ0E0T{1,2} .* q2Q0E0T;
@@ -86,11 +84,15 @@ if problemData.isCouplingSWE
   u1u1CouplingQ0E0T = u1CouplingQ0E0T .* u1CouplingQ0E0T;
   u1u2CouplingQ0E0T = u1CouplingQ0E0T .* u2CouplingQ0E0T;
   
-  JuCoupling = markAreaE0T .* ((problemData.markE0TE0T * u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)));
+  K = problemData.sweData.g.numT;
+  N = problemData.sweData.N;
+  markAreaE0T = problemData.sweData.g.markE0TbdrCoupling(:, 1) .* problemData.sweData.g.areaE0T(:, 1);
+  
+  JuCoupling = markAreaE0T .* ((problemData.markE0TE0T * u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1)));
   problemData.sweData.globJuCoupling{1} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 1)).', K*N, 1);
   problemData.sweData.globJuCoupling{2} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 2)).', K*N, 1);
-  problemData.sweData.globJwCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.markE0TE0T * u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
-  problemData.sweData.globJuuCoupling{1} = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 1) .* ((problemData.markE0TE0T * u1u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
-  problemData.sweData.globJuuCoupling{2} = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.markE0TE0T * u1u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1)))).', K*N, 1);
+  problemData.sweData.globJwCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.markE0TE0T * u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1)))).', K*N, 1);
+  problemData.sweData.globJuuCoupling{1} = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 1) .* ((problemData.markE0TE0T * u1u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1)))).', K*N, 1);
+  problemData.sweData.globJuuCoupling{2} = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.markE0TE0T * u1u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1)))).', K*N, 1);
 end % if
 end % function

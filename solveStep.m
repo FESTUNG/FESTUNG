@@ -60,22 +60,27 @@ problemData.darcyData = problemData.darcySteps.preprocessStep(problemData.darcyD
 
 % Coupling term for Darcy head
 if problemData.isCouplingDarcy
+  qOrd = problemData.qOrd;
+  
   K = problemData.darcyData.g.numT;
-  N = problemData.sweData.N;
+  N = problemData.darcyData.N;
   
   % Upper edge (2) in Darcy problem is coupled to lower edge (1) in SWE problem:
   % SWE values are evaluated on edge 1 and integrated over edge 2 in Darcy grid data.
-  [~, W] = quadRule1D(problemData.qOrd);
+  [~, W] = quadRule1D(qOrd);
   
   % Integrate boundary condition
   markAreaNuE0T = bsxfun(@times, problemData.darcyData.g.markE0TbdrCoupling(:, 2) .* problemData.darcyData.g.areaE0T(:, 2), squeeze(problemData.darcyData.g.nuE0T(:, 2, :)));
-  globInt = (problemData.markE0TE0T.' * problemData.hCouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.darcyData.basesOnQuad.phi1D{problemData.qOrd}(:, :, 2));
+  globInt = (problemData.markE0TE0T.' * problemData.hCouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.darcyData.basesOnQuad.phi1D{qOrd}(:, :, 2));
   
   % Apply coefficients
   for m = 1 : 2
     problemData.darcyData.globJcouple{m} = reshape((markAreaNuE0T(:, m) .* globInt).', K*N, 1);
   end % for m
-  problemData.darcyData.globKcouple = reshape((problemData.darcyData.g.markE0TbdrCoupling(:, 2) .* globInt).', K*N, 1);
+  
+  if problemData.darcyData.isJumpCoupling
+    problemData.darcyData.globKcouple = reshape((problemData.darcyData.g.markE0TbdrCoupling(:, 2) .* globInt).', K*N, 1);
+  end % if
 end % if
                    
 problemData.darcyData = problemData.darcySteps.solveStep(problemData.darcyData, nStep);
