@@ -58,6 +58,8 @@ t = problemData.t(nSubStep);
 K = problemData.g.numT;
 barK = problemData.g.g1D.numT;
 
+[Q,~] = quadRule1D(problemData.qOrd); numQuad1D = length(Q);
+
 %% Algebraic right hand sides and boundary conditions.
 fuCont = problemData.fuCont;
 fhCont = problemData.fhCont;
@@ -93,10 +95,12 @@ markE0T = problemData.g.markE0Tint | (problemData.g.markE0TbdrRiem & problemData
 globP = assembleMatEdgePhiPhiFuncDiscNu(problemData.g, markE0T, problemData.hatRdiag, problemData.hatRoffdiag, problemData.cDiscRK{nSubStep, 2});
 
 % Advection boundary edge integral (uu) without prescribed Dirichlet data for u (VI)
+% TEST bottom friction: markE0T = problemData.g.markE0TbdrTop | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU) | (~problemData.isCoupling & problemData.isBottomFriction & problemData.g.markE0TbdrBot);
 markE0T = problemData.g.markE0TbdrTop | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrU);
 globPbdr = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, markE0T, problemData.hatRdiag, problemData.cDiscRK{nSubStep, 2});
 
 % Advection boundary edge integral (uu) with prescribed Dirichlet data for u (VI)
+% TEST bottom friction: globJbot = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.isCoupling & ~problemData.isBottomFriction & problemData.g.markE0TbdrBot, { @(x1,x2) u1DCont(t,x1,x2).^2, @(x1,x2) u1DCont(t,x1,x2) .* u2DCont(t,x1,x2) }, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 globJbot = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, { @(x1,x2) u1DCont(t,x1,x2).^2, @(x1,x2) u1DCont(t,x1,x2) .* u2DCont(t,x1,x2) }, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 globJuu = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2).^2, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 globJuuRiem = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU, @(x1,x2) u1DCont(t,x1,x2).^2, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
@@ -112,22 +116,44 @@ globG = assembleMatElemDphiPhiFuncDisc(problemData.g, problemData.hatG, DDisc);
 globR = assembleMatEdgePhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
 
 % Diffusion boundary edge integral without prescribed Dirichlet data (V)
-markE0T = problemData.g.markE0TbdrBot | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ);
+markE0T = (~problemData.isBottomFriction & problemData.g.markE0TbdrBot) | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrQ);
 globRbdr = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, markE0T, problemData.hatRdiag, DDisc);
 
 % Diffusion boundary edge integral with prescribed Dirichlet data (V)
 markE0T = problemData.g.markE0TbdrQ | problemData.g.markE0TbdrTop;
 globJq = assembleVecEdgePhiIntFuncContNu(problemData.g, markE0T, qDCont, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
-% Put together matrices
+%% Assembly of bottom friction term
+globJfric = zeros(K * problemData.N, 1);
+if problemData.isBottomFriction
+  u1Q0E0T = zeros(K, 4, numQuad1D);
+  u1Q0E0T(problemData.g.markE0TbdrBot, 1, :) = problemData.cDiscRK{nSubStep, 2}(problemData.g.markE0TbdrBot, :) * problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 1).';
+   
+  switch problemData.bottomFriction
+    case 'linear'
+      valOnQuad = -problemData.CfConst * u1Q0E0T;
+      
+    case 'quadratic'
+      valOnQuad = -problemData.CfConst * abs(u1Q0E0T) .* u1Q0E0T;
+      
+    otherwise
+      error('Invalid bottom friction type')
+  end % switch
+  
+  globJfric = assembleVecEdgePhiIntVal(problemData.g, problemData.g.markE0TbdrBot, valOnQuad, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+end % if
+
+%% Put together matrices and vectors
 problemData.globEP = cellfun(@(E, P, Pbdr) E - P - Pbdr, globE, globP, globPbdr, 'UniformOutput', false);
 problemData.globGR = cellfun(@(G, R, Rbdr) G - R - Rbdr, globG, globR, globRbdr, 'UniformOutput', false);
-problemData.globJ = globJbot{1} + globJbot{2} + globJuu{1} + 0.5 * globJuuRiem{1} + problemData.gConst * (globJh{1} + 0.5 * globJhRiem{1}) + globJq{1} + globJq{2};
+problemData.globJ = globJfric + globJbot{1} + globJbot{2} + globJuu{1} + 0.5 * globJuuRiem{1} + problemData.gConst * (globJh{1} + 0.5 * globJhRiem{1}) + globJq{1} + globJq{2};
 
 %% Assembly of time-dependent vectors in flux and continuity equation.
 % Boundary edge integrals with prescribed Dirichlet data for u (X, XII)
+% TEST bottom friction: markE0T = (~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU) | (~problemData.isCoupling & ~problemData.isBottomFriction & problemData.g.markE0TbdrBot);
 markE0T = (~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU) | (~problemData.isCoupling & problemData.g.markE0TbdrBot);
 problemData.globJu = assembleVecEdgePhiIntFuncContNu(problemData.g, markE0T, { @(x1,x2) u1DCont(t,x1,x2), @(x1,x2) u2DCont(t,x1,x2) }, problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+% TEST bottom friction: markE0T = problemData.g.markE0TbdrU | (~problemData.isCoupling & ~problemData.isBottomFriction & problemData.g.markE0TbdrBot);
 markE0T = problemData.g.markE0TbdrU | (~problemData.isCoupling & problemData.g.markE0TbdrBot);
 problemData.globJuFlux = assembleVecEdgePhiIntFuncContNu(problemData.g, markE0T, @(x1,x2) u1DCont(t,x1,x2), problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
@@ -142,9 +168,6 @@ problemData.tildeGlobPbdr = problemData.fn_assembleMatEdgeTetraPhiIntPhiIntFuncD
 
 % Boundary edge integrals with prescribed Dirichlet data and Riemann solver for u and h (XII)
 problemData.globJuhRiem = problemData.fn_assembleVecEdgeTetraPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & problemData.g.markE0TbdrH, @(x1,x2) u1DCont(t,x1,x2) .* hDCont(t,x1), problemData.hSmoothV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
-
-% Boundary edge integrals with prescribed Dirichlet data for w (XII)
-% problemData.globJw = assembleVecEdgePhiIntFuncContNu(problemData.g, ~problemData.isCoupling & problemData.g.markE0TbdrBot, @(x1,x2) u2DCont(t,x1,x2), problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 
 % Boundary edge integrals with prescribed Dirichlet Data and no Riemann solver for u or h but not both (XII)
 markE0T = problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & ~problemData.g.markE0TbdrH;
@@ -188,25 +211,22 @@ markV0T = problemData.g.g1D.markV0TbdrRiem & ~problemData.g.g1D.markV0TbdrU & pr
 problemData.barGlobJhRiem = problemData.fn_assembleVecV0T1DPhiIntFuncDiscIntNuHeight(problemData.g.g1D, markV0T, barU1Disc, hSmooth_hDV0T1D, problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 
 %% Assembly of jump terms in Lax-Friedrichs Riemann-solver.
-% 1D quadrature points
-[Q,~] = quadRule1D(problemData.qOrd); 
-numQuad1D = length(Q);
 
 % Horizontal velocity from interior and neighboring element in quadrature points of edges
-u1Q0E0Tint = { []; []; zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1) }; % cDisc{2} in quad points of edges
-u1Q0E0TE0T = { []; []; zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1) }; % cDisc{2} of neighboring element in quad points of edges
-u1Q0E0TbdrRiem = { []; []; zeros(K * numQuad1D, 1); zeros(K * numQuad1D, 1) }; % u1D in quad points of boundary edges with Riemann solver
+u1Q0E0Tint = zeros(K * numQuad1D, 2); % cDisc{2} in quad points of edges
+u1Q0E0TE0T = zeros(K * numQuad1D, 2); % cDisc{2} of neighboring element in quad points of edges
+u1Q0E0TbdrRiem = zeros(K * numQuad1D, 2); % u1D in quad points of boundary edges with Riemann solver
 for n = 3 : 4
-  u1Q0E0Tint{n} = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, n) * problemData.cDiscRK{nSubStep, 2}.', K * numQuad1D, 1);
+  u1Q0E0Tint(:,n-2) = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, n) * problemData.cDiscRK{nSubStep, 2}.', K * numQuad1D, 1);
   
   markQ0E0TbdrRiem = logical(kron(problemData.g.markE0TbdrRiem(:, n) & problemData.g.markE0TbdrU(:, n), true(numQuad1D, 1)));
   [Q1, Q2] = gammaMapTetra(n, Q);
   X1 = reshape(problemData.g.mapRef2Phy(1, Q1, Q2).', K * numQuad1D, 1);
   X2 = reshape(problemData.g.mapRef2Phy(2, Q1, Q2).', K * numQuad1D, 1);
-  u1Q0E0TbdrRiem{n}(markQ0E0TbdrRiem) = u1DCont(t, X1(markQ0E0TbdrRiem), X2(markQ0E0TbdrRiem));
+  u1Q0E0TbdrRiem(markQ0E0TbdrRiem, n-2) = u1DCont(t, X1(markQ0E0TbdrRiem), X2(markQ0E0TbdrRiem));
   
   cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, mapLocalEdgeTetra(n)) * problemData.cDiscRK{nSubStep, 2}.';
-  u1Q0E0TE0T{n} = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{n}.', K * numQuad1D, 1);
+  u1Q0E0TE0T(:, n-2) = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{n}.', K * numQuad1D, 1);
 end % for nn
 
 % Jump in u in momentum equation (VI)
@@ -230,8 +250,8 @@ for n = 3 : 4
   hJmpE0T = problemData.g.g1D.markT2DT * ( ( problemData.hV0T1D(:,nn1D) - problemData.g.g1D.markV0TV0T{nn1D} * problemData.hV0T1D(:,np1D) - hV0T1DbdrRiem ) ./ problemData.hSmoothV0T1D(:,nn1D) );
   
   % Average and jump in horizontal velocity in quadrature points of edges
-  u1AvgQ0E0T = 0.5 * (u1Q0E0Tint{n} + u1Q0E0TE0T{n} + u1Q0E0TbdrRiem{n});
-  u1JmpQ0E0T = u1Q0E0Tint{n} - u1Q0E0TE0T{n} - u1Q0E0TbdrRiem{n};
+  u1AvgQ0E0T = 0.5 * (u1Q0E0Tint(:, n-2) + u1Q0E0TE0T(:, n-2) + u1Q0E0TbdrRiem(:, n-2));
+  u1JmpQ0E0T = u1Q0E0Tint(:, n-2) - u1Q0E0TE0T(:, n-2) - u1Q0E0TbdrRiem(:, n-2);
   
   % Eigenvalue of Jacobian of primitive numerical fluxes in quadrature points of edges
   lambdaQ0E0T = 0.75 * abs(u1AvgQ0E0T) + 0.25 * sqrt( u1AvgQ0E0T .* u1AvgQ0E0T + 4 * problemData.gConst * kron(hAvgE0T, ones(numQuad1D,1)) );

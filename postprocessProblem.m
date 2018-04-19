@@ -67,17 +67,28 @@ if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))
                             @(x1,x2) u2Cont(t, x1, x2), problemData.qOrd + 1, problemData.basesOnQuad2D) ];
 
   fprintf('L2 errors of h, u1, u2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
-  fprintf('Sum, max, min, and MD5-hash of h: %g, %g, %g, %s\n', sum(problemData.cDiscRK{end, 1}(:)), max(problemData.cDiscRK{end, 1}(:)), min(problemData.cDiscRK{end, 1}(:)), DataHash(problemData.cDiscRK{end, 1}));
-  fprintf('Sum, max, min, and MD5-hash of u1: %g, %g, %g, %s\n', sum(problemData.cDiscRK{end, 2}(:)), max(problemData.cDiscRK{end, 2}(:)), min(problemData.cDiscRK{end, 2}(:)), DataHash(problemData.cDiscRK{end, 2}));
-  fprintf('Sum, max, min, and MD5-hash of u2: %g, %g, %g, %s\n', sum(problemData.cDiscRK{end, 3}(:)), max(problemData.cDiscRK{end, 3}(:)), min(problemData.cDiscRK{end, 3}(:)), DataHash(problemData.cDiscRK{end, 3}));
+%   fprintf('Sum, max, min, and MD5-hash of h: %g, %g, %g, %s\n', sum(problemData.cDiscRK{end, 1}(:)), max(problemData.cDiscRK{end, 1}(:)), min(problemData.cDiscRK{end, 1}(:)), DataHash(problemData.cDiscRK{end, 1}));
+%   fprintf('Sum, max, min, and MD5-hash of u1: %g, %g, %g, %s\n', sum(problemData.cDiscRK{end, 2}(:)), max(problemData.cDiscRK{end, 2}(:)), min(problemData.cDiscRK{end, 2}(:)), DataHash(problemData.cDiscRK{end, 2}));
+%   fprintf('Sum, max, min, and MD5-hash of u2: %g, %g, %g, %s\n', sum(problemData.cDiscRK{end, 3}(:)), max(problemData.cDiscRK{end, 3}(:)), min(problemData.cDiscRK{end, 3}(:)), DataHash(problemData.cDiscRK{end, 3}));
 end % if
 
 %% Visualize final state.
 if problemData.isVisGrid, visualizeGridTetra(problemData.g); end
 
 if problemData.isVisSol
+  nOutput = ceil(problemData.numSteps / problemData.outputFrequency);
   cLagr = { projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 2}), ...
             projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 3}) };
-  visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, problemData.numSteps, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+  visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nOutput, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+end % if
+
+%% Save final state.
+t = problemData.tEnd;
+hDisc = problemData.cDiscRK{end, 1}; %#ok<NASGU>
+u1Disc = problemData.cDiscRK{end, 2}; %#ok<NASGU>
+u2Disc = problemData.cDiscRK{end, 3}; %#ok<NASGU>
+hotstartFile = [ problemData.outputBasename '.mat' ];
+save(hotstartFile, 't', 'hDisc', 'u1Disc', 'u2Disc');
+fprintf('Saved hotstart data at t=%g to "%s"\n', t, hotstartFile);
 end % function
 

@@ -8,6 +8,7 @@ problemData.subStepHandles = getStepHandles(problemData.problemName, subStepList
 problemData.N = (problemData.p + 1)^2;  % number of local DOFs on trapezoidals
 problemData.barN = problemData.p + 1;  % number of local DOFs on intervals
 problemData.tau = (problemData.tEnd - problemData.t0) / problemData.numSteps;  % time step size
+problemData.isBottomFriction = ~strcmp(problemData.bottomFriction, 'none');
 
 %% Triangulation.
 problemData.g = problemData.generateGrid(problemData.numElem);
@@ -85,8 +86,9 @@ fprintf('%d time steps from t = %g to %g.\n', problemData.numSteps, problemData.
 fprintf('-------------------------------------------------------------------------------------------\n');
 
 %% Lookup tables for basis function.
-problemData.basesOnQuad1D = computeBasesOnQuad1D(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
-problemData.basesOnQuad2D = computeBasesOnQuadTensorProduct(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
+assert(problemData.qOrd <= problemData.qOrdMax, 'Maximum requested order of quadrature rule must be greater than or equal to qOrd')
+problemData.basesOnQuad1D = computeBasesOnQuad1D(problemData.p, struct, problemData.qOrd : problemData.qOrdMax+1);
+problemData.basesOnQuad2D = computeBasesOnQuadTensorProduct(problemData.p, struct, problemData.qOrd : problemData.qOrdMax+1);
 
 %% Computation of matrices on the reference element.
 problemData.hatM = integrateRefElemTetraPhiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);

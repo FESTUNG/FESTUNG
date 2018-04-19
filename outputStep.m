@@ -54,13 +54,14 @@ function problemData = outputStep(problemData, nStep)
 %% Visualization
 if mod(nStep-1, problemData.outputFrequency) == 0
   isOutput = false;
+  nOutput = (nStep-1) / problemData.outputFrequency;
   
   if problemData.isVisSol
     cLagr = { projectDataDisc2DataLagr1D(problemData.cDiscRK{1, 1}), ...
               projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{1, 2}), ...
               projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{2, 3}) };
-    visualizeDataLagr1D(problemData.g.g1D, cLagr{1}, { 'h' }, [ problemData.outputBasename '_h' ], nStep-1, problemData.outputTypes);
-    visualizeDataLagrTetra(problemData.g, cLagr(2:3), {'u1', 'u2'}, problemData.outputBasename, nStep-1, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+    visualizeDataLagr1D(problemData.g.g1D, cLagr{1}, { 'h' }, [ problemData.outputBasename '_h' ], nOutput, problemData.outputTypes);
+    visualizeDataLagrTetra(problemData.g, cLagr(2:3), {'u1', 'u2'}, problemData.outputBasename, nOutput, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
     isOutput = true;
   end % if
   
@@ -81,7 +82,7 @@ if mod(nStep-1, problemData.outputFrequency) == 0
       cLagr = { projectDataDisc2DataLagrTensorProduct(problemData.pdExact.cDiscRK{end, 2}), ...
                 projectDataDisc2DataLagrTensorProduct(problemData.pdExact.cDiscRK{end, 3}) };
 
-      visualizeDataLagrTetra(problemData.pdExact.g, cLagr, {'u1', 'u2'}, [ problemData.outputBasename '_ex' ], nStep-1, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+      visualizeDataLagrTetra(problemData.pdExact.g, cLagr, {'u1', 'u2'}, [ problemData.outputBasename '_ex' ], nOutput, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
     end % if
     
     problemData.error = [ computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{1, 1}, ...

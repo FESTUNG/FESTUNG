@@ -1,8 +1,43 @@
 function problemData = getTestcase(problemData, problemName)
 
 isAnalytical = true;
+isHotstart = false;
 
 switch problemName
+  case 'showcase'
+    isAnalytical = false;
+    isHotstart = false;
+    hotstartFile = ['swe_2dv' filesep 'showcase_p1_50x10.mat'];
+    
+    domainWidth = 100;
+    idLand = -1; idRad = -1; idRiv = 4; idOS = 2; idBdrRiem = [2,4];
+    
+    gConst = 10;
+    CfConst = 1e-4;
+    rho = 1e-3;
+    
+%     zBotCont = @(x) 0.5 * (x/40 .* (x <= 40) + (40 < x & x < 60) + (100 - x)/40 .* (x >= 60));
+%     zBotCont = @(x) 2 * (-1 * (x/50 - 1).^2 + 1);
+    zBotCont = @(x) 0.25 * (cos((x-50)/30 * pi) + 1) .* (20 <= x & x <= 80);
+    xi0Cont = @(x) 4.75 * ones(size(x));
+    h0Cont = @(x) 5 - zBotCont(x);
+    u10Cont = @(x,z) log(1 + (z - zBotCont(x)) ./ (5 - zBotCont(x)) * (exp(1) - 1));
+%     u10Cont = @(x,z) log(1 + z ./ 5 * (exp(1) - 1));
+%     u10Cont = @(x,z) 0.5 - 0.5 * cos(min(1, (z - zBotCont(x)) ./ (2 - zBotCont(x))) * pi);
+    
+    fhCont = @(t,x) zeros(size(x));
+    fuCont = @(t,x,z) zeros(size(x));
+    
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
+      @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    
+    u1DCont = @(t,x,z) u10Cont(x,z);
+    hDCont = @(t,x) 5 * ones(size(x));
+    u2DCont = @(t,x,z) zeros(size(x));
+    q1DCont = @(t,x,z) zeros(size(x));
+    q2DCont = @(t,x,z) zeros(size(x));
+    
+  
   case {'coupled_constXi', 'coupled_stationary', 'coupled_transient'}
     isAnalytical = true;
     
@@ -987,8 +1022,14 @@ switch problemName
       @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
 end % switch
 
+problemData = setdefault(problemData, 'isHotstart', isHotstart);
+if problemData.isHotstart
+  problemData = setdefault(problemData, 'hotstartFile', hotstartFile);
+end % if
+
 problemData = setdefault(problemData, 'domainWidth', domainWidth);
 problemData = setdefault(problemData, 'gConst', gConst);
+problemData = setdefault(problemData, 'CfConst', CfConst);
 problemData = setdefault(problemData, 'xi0Cont', xi0Cont);
 problemData = setdefault(problemData, 'zBotCont', zBotCont);
 
