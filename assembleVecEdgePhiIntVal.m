@@ -95,18 +95,35 @@
 %> @endparblock
 %
 function ret = assembleVecEdgePhiIntVal(g, markE0T, valOnQuad, N, basesOnQuad, qOrd)
-% Determine quadrature rule
-if nargin < 6,  p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1; end
+% Extract dimensions
+K = g.numT;  nEdges = size(g.E0T, 2);
+
+% Determine quadrature rule and mapping to physical element
+if nargin < 6
+  switch nEdges
+    case 3
+      p = (sqrt(8*N+1)-3)/2;
+    case 4
+      p = sqrt(N)-1;
+    otherwise
+      error('Unknown number of edges')
+  end % switch
+  qOrd = 2*p+1;  
+end % if
 [~, W] = quadRule1D(qOrd);
 
+% Determine quadrature rule
+% if nargin < 6,  p = (sqrt(8*N+1)-3)/2; qOrd = 2*p+1; end
+% [~, W] = quadRule1D(qOrd);
+
 % Check function arguments that are directly used
-validateattributes(markE0T, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0T');
-validateattributes(valOnQuad, {'numeric'}, {'size', [g.numT 3 length(W)]}, mfilename, 'valOnQuad');
+validateattributes(markE0T, {'logical'}, {'size', [K nEdges]}, mfilename, 'markE0T');
+validateattributes(valOnQuad, {'numeric'}, {'size', [K nEdges length(W)]}, mfilename, 'valOnQuad');
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
 % Assemble vector
-ret = zeros(g.numT, N);
-for n = 1 : 3
+ret = zeros(K, N);
+for n = 1 : nEdges
   Kkn = markE0T(:, n) .* g.areaE0T(:,n);
   for i = 1 : N
     ret(:, i) = ret(:, i) + Kkn .* (squeeze(valOnQuad(:, n, :)) * ( W' .* basesOnQuad.phi1D{qOrd}(:,i,n)));
