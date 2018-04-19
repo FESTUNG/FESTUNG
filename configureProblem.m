@@ -1,27 +1,29 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Name of testcase
-problemData = setdefault(problemData, 'testcase', 'coupled_constXi');
+problemData = setdefault(problemData, 'testcase', 'debug_jump');
 
 problemData.eta = 1; % penalty parameter (eta>0)
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [8, 4]);
+problemData = setdefault(problemData, 'numElem', [50, 10]);
 
 % Local polynomial approximation order (0 to 5)
-problemData = setdefault(problemData, 'p', 1);
+problemData = setdefault(problemData, 'p', 0);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
+problemData = setdefault(problemData, 'qOrdMax', problemData.qOrd);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 10);  % end time
-problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.05));  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 10000);  % end time
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.5));  % number of time steps
 
 % Discard time derivative and compute stationary solution
 problemData = setdefault(problemData, 'isStationary', false);  
-problemData = setdefault(problemData, 'isCoupling', false);  
+problemData = setdefault(problemData, 'isCoupling', false);   
+problemData = setdefault(problemData, 'isJumpCoupling', true);
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
@@ -36,7 +38,53 @@ assert(problemData.p >= 0 && problemData.p <= 5, 'Polynomial order must be zero 
 assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
+isHotstart = false;
+
 switch problemData.testcase
+  case 'debug_jump'
+    isHotstart = false;
+    hotstartFile = ['darcy_2dv' filesep 'debug_jump_p0_50x10.mat'];
+    % width and height of computational domain
+    zPMCont = @(x) -6 * ones(size(x));
+    zBotCont = @(x) 0.75 * (cos((x-50)/30 * pi) + 1) .* (20 <= x & x <= 80);
+
+    domainWidth = linspace(0, 100, problemData.numElem(1)+1);
+    domainHeight = [zPMCont(domainWidth); zBotCont(domainWidth)];
+    idDirichlet = 3; idNeumann = [1, 2, 4];
+    
+    k = 0.001;
+    
+    problemData.hDCont = @(t,x,z) 5 * ones(size(x));% - zBotCont(x);
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    problemData.fCont = @(t,x,z) zeros(size(x));
+    problemData.KCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {k, 0; 0, k}, 'UniformOutput', false);
+    
+  case 'showcase'
+    isHotstart = false;
+    hotstartFile = ['darcy_2dv' filesep 'showcase_p0_50x10.mat'];
+    % width and height of computational domain
+%     zPMCont = @(x) -5 * ones(size(x));
+%     zBotCont = @(x) 0.5 * (x/40 .* (x <= 40) + (40 < x & x < 60) + (100 - x)/40 .* (x >= 60));
+%     zPMCont = @(x) -3 * ones(size(x));
+%     zBotCont = @(x) 2 * (-1 * (x/50 - 1).^2 + 1);
+    zPMCont = @(x) -4 * ones(size(x));
+    zBotCont = @(x) 0.25 * (cos((x-50)/30 * pi) + 1) .* (20 <= x & x <= 80);
+
+    domainWidth = linspace(0, 100, problemData.numElem(1)+1);
+    domainHeight = [zPMCont(domainWidth); zBotCont(domainWidth)];
+    idDirichlet = 3; idNeumann = [1, 2, 4];
+    
+    k = 0.001;
+    
+    problemData.h0Cont = @(x,z) 5 * ones(size(x));
+    problemData.q10Cont = @(x,z) zeros(size(x));
+    problemData.q20Cont = @(x,z) zeros(size(x));
+    
+    problemData.hDCont = @(t,x,z) 5 * ones(size(x));
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    problemData.fCont = @(t,x,z) zeros(size(x));
+    problemData.KCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {k, 0; 0, k}, 'UniformOutput', false);
+    
   case {'coupled_constXi', 'coupled_stationary', 'coupled_transient'}
     % Parameters
     aConst = 0;
@@ -327,6 +375,9 @@ switch problemData.testcase
                           dXZKCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.KCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
                           dXZKCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.KCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
 end % switch
+
+problemData = setdefault(problemData, 'isHotstart', isHotstart);
+if problemData.isHotstart, problemData = setdefault(problemData, 'hotstartFile', hotstartFile); end
 
 problemData = setdefault(problemData, 'idNeumann', idNeumann);
 problemData = setdefault(problemData, 'idDirichlet', idDirichlet);

@@ -28,7 +28,7 @@ end % if
 fprintf('-------------------------------------------------------------------------------------------\n');
 
 %% Lookup table for basis function.
-problemData.basesOnQuad = computeBasesOnQuadTensorProduct(problemData.p, struct, [problemData.qOrd, problemData.qOrd+1]);
+problemData.basesOnQuad = computeBasesOnQuadTensorProduct(problemData.p, struct, problemData.qOrd : problemData.qOrdMax+1);
 
 %% Computation of matrices on the reference element.
 problemData.hatM = integrateRefElemTetraPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
@@ -45,7 +45,11 @@ problemData.globH = assembleMatElemDphiPhi(problemData.g, hatH);
 problemData.globQ = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag);
 problemData.globQN = assembleMatEdgePhiIntPhiIntNu(problemData.g, problemData.g.markE0TbdrN, hatSdiag);
 problemData.globS = problemData.eta * assembleMatEdgePhiPhi(problemData.g, problemData.g.markE0Tint, hatSdiag, hatSoffdiag, ones(problemData.g.numT, 4));
-problemData.globSD = problemData.eta * assembleMatEdgePhiIntPhiInt(problemData.g, problemData.g.markE0TbdrD | problemData.g.markE0TbdrCoupling, hatSdiag, ones(problemData.g.numT, 4));
+if problemData.isJumpCoupling
+  problemData.globSD = problemData.eta * assembleMatEdgePhiIntPhiInt(problemData.g, problemData.g.markE0TbdrD | problemData.g.markE0TbdrCoupling, hatSdiag, ones(problemData.g.numT, 4));
+else
+  problemData.globSD = problemData.eta * assembleMatEdgePhiIntPhiInt(problemData.g, problemData.g.markE0TbdrD, hatSdiag, ones(problemData.g.numT, 4));
+end % if
 
 if ~problemData.isStationary
   problemData.sysW = [ sparse(2 * problemData.g.numT * problemData.N, 3 * problemData.g.numT * problemData.N) ; ...

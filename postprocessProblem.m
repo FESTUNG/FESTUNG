@@ -38,17 +38,17 @@
 %> @endparblock
 %
 function problemData = postprocessProblem(problemData)
-if all(isfield(problemData, { 'hCont', 'q1Cont', 'q2Cont' }))
-  K = problemData.g.numT;
-  N = problemData.N;
+K = problemData.g.numT;
+N = problemData.N;
+  
+hDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
+q1Disc = reshape(problemData.sysY(1 : K*N), N, K)';
+q2Disc = reshape(problemData.sysY(K*N+1 : 2*K*N), N, K)';
 
+if all(isfield(problemData, { 'hCont', 'q1Cont', 'q2Cont' }))
   hCont = @(x1,x2) problemData.hCont(problemData.tEnd, x1, x2);
   q1Cont = @(x1,x2) problemData.q1Cont(problemData.tEnd, x1, x2);
   q2Cont = @(x1,x2) problemData.q2Cont(problemData.tEnd, x1, x2);
-
-  hDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
-  q1Disc = reshape(problemData.sysY(1 : K*N), N, K)';
-  q2Disc = reshape(problemData.sysY(K*N+1 : 2*K*N), N, K)';
 
   problemData.error = [ computeL2ErrorTetra(problemData.g, hDisc, hCont, ...
                           problemData.qOrd+1, problemData.basesOnQuad), ...
@@ -60,6 +60,11 @@ if all(isfield(problemData, { 'hCont', 'q1Cont', 'q2Cont' }))
   fprintf('L2 errors of h, q1, q2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
 end % if
 
-fprintf('Sum, max, min, and MD5-hash of sysY: %g, %g, %g, %s\n', sum(problemData.sysY), max(problemData.sysY), min(problemData.sysY), DataHash(problemData.sysY));
+%% Save final state.
+t = problemData.tEnd;
+hotstartFile = [ problemData.outputBasename '.mat' ];
+save(hotstartFile, 't', 'hDisc', 'q1Disc', 'q2Disc');
+fprintf('Saved hotstart data at t=%g to "%s"\n', t, hotstartFile);
+% fprintf('Sum, max, min, and MD5-hash of sysY: %g, %g, %g, %s\n', sum(problemData.sysY), max(problemData.sysY), min(problemData.sysY), DataHash(problemData.sysY));
 end % function
 

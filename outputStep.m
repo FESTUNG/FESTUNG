@@ -56,17 +56,17 @@ N = problemData.N;
 %% Visualization
 if mod(nStep, problemData.outputFrequency) == 0
   isOutput = false;
+  nOutput = nStep / problemData.outputFrequency;
   
   if problemData.isVisSol
     cLagr = { projectDataDisc2DataLagrTensorProduct(reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)'), ...
               projectDataDisc2DataLagrTensorProduct(reshape(problemData.sysY(1 : K*N), N, K)'), ...
               projectDataDisc2DataLagrTensorProduct(reshape(problemData.sysY(K*N+1 : 2*K*N), N, K)') };
-    visualizeDataLagrTetra(problemData.g, cLagr, {'h', 'q1', 'q2'}, problemData.outputBasename, nStep, problemData.outputTypes, struct('q', {{'q1','q2'}}));
+    visualizeDataLagrTetra(problemData.g, cLagr, {'h', 'q1', 'q2'}, problemData.outputBasename, nOutput, problemData.outputTypes, struct('q', {{'q1','q2'}}));
     isOutput = true;
   end % if
     
   if all(isfield(problemData, { 'hCont', 'q1Cont', 'q2Cont' }))
-    t = nStep * problemData.tau;
     hCont = @(x1,x2) problemData.hCont(t, x1, x2);
     q1Cont = @(x1,x2) problemData.q1Cont(t, x1, x2);
     q2Cont = @(x1,x2) problemData.q2Cont(t, x1, x2);
@@ -79,6 +79,14 @@ if mod(nStep, problemData.outputFrequency) == 0
                               q2Cont, problemData.qOrd + 1, problemData.basesOnQuad) ];
 
     fprintf('L2 errors of h, q1, q2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
+    
+    if problemData.isVisSol
+      cLagr = { projectFuncCont2DataDiscTetra(problemData.g, hCont, problemData.qOrd, problemData.globM, problemData.basesOnQuad), ...
+                projectFuncCont2DataDiscTetra(problemData.g, q1Cont, problemData.qOrd, problemData.globM, problemData.basesOnQuad), ...
+                projectFuncCont2DataDiscTetra(problemData.g, q2Cont, problemData.qOrd, problemData.globM, problemData.basesOnQuad) };
+      visualizeDataLagrTetra(problemData.g, cLagr, {'h', 'q1', 'q2'}, [ problemData.outputBasename '_ex' ], nOutput, problemData.outputTypes, struct('q', {{'q1','q2'}}));
+    end % if
+    
     isOutput = true;
   end % if
   
