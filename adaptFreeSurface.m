@@ -41,8 +41,20 @@ if force || any(markModifiedV0T1D(:))
   % Re-generate coordinate-dependent grid data
   problemData.g = problemData.g.generateCoordDependGridData(problemData.g);
   
+  % Determine need for projection
+  isProjectData = all(isfield(problemData, {'globM', 'cDiscRK'}));
+  if isProjectData, oldGlobM = problemData.globM; end
+  
   % Re-assemble static matrices
   problemData = assembleStaticMatrices(problemData);
+  
+  % Project velocity to new grid
+  if isProjectData
+    cSys = [ reshape(problemData.cDiscRK{end, 2}.', [], 1), reshape(problemData.cDiscRK{end, 3}.', [], 1) ];
+    cSys = problemData.globM \ (oldGlobM * cSys);
+    problemData.cDiscRK{end, 2} = reshape(cSys(:, 1), [], problemData.g.numT).';
+    problemData.cDiscRK{end, 3} = reshape(cSys(:, 2), [], problemData.g.numT).';
+  end % if
   
   % Determine smoothed height
   [Q,~] = quadRule1D(problemData.qOrd);
