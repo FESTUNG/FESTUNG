@@ -43,4 +43,4 @@
 	url = https://www1.am.uni-erlangen.de/git/festung-template
 [submodule "advection-diffusion"]
 	path = advection-diffusion
-	url = https://www1.am.uni-erlangen.de/git/festung-adv-diff
+	url = https://www1.am.uni-erlangen.de/git/festung-adv-diff.git
