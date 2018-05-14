@@ -3,14 +3,14 @@
 //! 
 //! @section TAG_REF_1 FESTUNG articles
 //!
-//! @subsection RRAFP2018 [RRAFP2018]
+//! @subsection RRAFK2018 [RRAFK2018]
 //! B. Reuter, A. Rupp, V. Aizinger, F. Frank, P.Knabner,<br>
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous Galerkin 
 //! method, Part IV: Generic problem framework and model-coupling 
 //! interface&rdquo;</b>,<br>
 //! Submitted to Computers & Mathematics with Applications (2018).
 //!
-//! @subsection JRASK2017 [JRASK2017]
+//! @subsection JRASK2018 [JRASK2018]
 //! A. Jaust, B. Reuter, V. Aizinger, J. Schütz, P. Knabner,<br>
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part III: Hybridized discontinuous (HDG) formulation&rdquo;</b>,<br>
