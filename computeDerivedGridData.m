@@ -1,19 +1,19 @@
 % Computes an additional field needed throughout the advection
-% problem presented in @ref JRASK2017 . This field only contains
+% problem presented in @ref JRASK2018 . This field only contains
 % information based on the underlying grid and is therefore constant in
 % time but used in every step. It is saved as part of the grid.
 
 %===============================================================================
-%> @file hdg_advection/computeDerivedGridData.m
+%> @file
 %>
 %> @brief Computes an additional field needed throughout the advection
-%>        problem presented in @ref JRASK2017 . This field only contains
+%>        problem presented in @ref JRASK2018 . This field only contains
 %>        information based on the underlying grid and is therefore constant in
 %>        time but used in every step. It is saved as part of the grid.
 %===============================================================================
 %>
 %> @brief Computes an additional field needed throughout the advection
-%>        problem presented in @ref JRASK2017 . This field only contains
+%>        problem presented in @ref JRASK2018 . This field only contains
 %>        information based on the underlying grid and is therefore constant in
 %>        time but used in every step. It is saved as part of the grid.
 %>

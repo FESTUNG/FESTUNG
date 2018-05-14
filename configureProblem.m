@@ -2,7 +2,7 @@
 % Problem parameters are to be modified inside this routine.
 
 %===============================================================================
-%> @file hdg_advection/configureProblem.m
+%> @file
 %>
 %> @brief Fills the problemData-struct with all basic configuration options.
 %>        Problem parameters are to be modified inside this routine.
@@ -27,7 +27,7 @@
 %> The velocity @f$\mathbf{u}:J\times\Omega\rightarrow\mathbb{R}^2@f$ and 
 %> right hand side@f$f:J\times\Omega\rightarrow \mathbb{R}@f$
 %> may vary in time and space. 
-%> A detailed description can be found in @ref JRASK2017.
+%> A detailed description can be found in @ref JRASK2018.
 %>
 %> Please read the inline-comments in the code for the meaning of each
 %> configuration option.

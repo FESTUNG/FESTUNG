@@ -2,7 +2,7 @@
 % hdg_advection/configureProblem.
 
 %===============================================================================
-%> @file hdg_advection/getTestcase.m
+%> @file
 %>
 %> @brief Defines the test cases that can be selected in 
 %>        hdg_advection/configureProblem.
@@ -12,7 +12,7 @@
 %>        hdg_advection/configureProblem.
 %>
 %> It provides four different test cases:
-%> -# LeVeque's solid body rotation benchmark (see @ref JRASK2017 for details).
+%> -# LeVeque's solid body rotation benchmark (see @ref JRASK2018 for details).
 %> -# A stationary example with analytical solution 
 %>    @f$c(t,\mathbf{x}) = \cos(7x^1)\cos(7x^2)@f$ and velocity field
 %>    @f$\mathbf{u}(t,\mathbf{x}) = [\exp((x^1+x^2)/2), \exp((x^1-x^2)/2)]^T@f$.

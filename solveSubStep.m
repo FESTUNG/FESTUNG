@@ -1,7 +1,7 @@
 % Compute the solution of the current Runge-Kutta stage.
 
 %===============================================================================
-%> @file hdg_advection/solveSubStep.m
+%> @file
 %>
 %> @brief Compute the solution of the current Runge-Kutta stage.
 %===============================================================================
@@ -21,7 +21,7 @@
 %> It assembles the global system and computes the solution at
 %> the next Runge-Kutta level.
 %> It uses static condensation to speed up the computation of the solution
-%> and applies block-wise inversion to the local solves. See @ref JRASK2017
+%> and applies block-wise inversion to the local solves. See @ref JRASK2018
 %> for details.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed

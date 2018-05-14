@@ -1,7 +1,7 @@
 % Third step of the three-part substepping algorithm for each Runge-Kutta stage.
 
 %===============================================================================
-%> @file hdg_advection/postprocessSubStep.m
+%> @file
 %>
 %> @brief Third step of the three-part substepping algorithm for each Runge-Kutta stage.
 %===============================================================================

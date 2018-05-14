@@ -2,7 +2,7 @@
 % matrix to the solution at the old time level.
 
 %===============================================================================
-%> @file hdg_advection/preprocessStep.m
+%> @file
 %>
 %> @brief First step of the four-part algorithm in the main loop. 
 %>        Applies the mass matrix to the solution at the old time level.
@@ -22,7 +22,7 @@
 %> 
 %> This routine is executed first in each loop iteration.
 %> The Advection problem requires substepping due to the Runge-Kutta method
-%> (see solveStep() and @ref JRASK2017 for details). Thus, no terms can be
+%> (see solveStep() and @ref JRASK2018 for details). Thus, no terms can be
 %> assembled here. However, every Runge-Kutta stage requires the solution
 %> at the old time level with the mass matrix applied to it, which is
 %> computed here.
