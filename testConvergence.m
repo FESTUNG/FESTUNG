@@ -1,15 +1,8 @@
-<<<<<<< HEAD
-function [err, eoc] = testConvergence(problemName, varargin)
-oldpath = addpath([pwd filesep 'core']);
-fn_testConvergence = getFunctionHandle([problemName filesep 'testConvergence']);
-[err, eoc] = fn_testConvergence(varargin{:});
-path(oldpath);
-=======
 % Driver routine used to trigger testConvergence() implementations in problem 
 % folders.
 
 %===============================================================================
-%> @file testConvergence.m
+%> @file
 %>
 %> @brief Driver routine used to trigger testConvergence() implementations in 
 %>        problem folders.
@@ -57,7 +50,8 @@ path(oldpath);
 %> @endparblock
 %
 function [err, eoc] = testConvergence(problemName, varargin)
+oldpath = addpath([pwd filesep 'core']);
 fn_testConvergence = getFunctionHandle([problemName filesep 'testConvergence']);
+path(oldpath);
 [err, eoc] = fn_testConvergence(varargin{:});
->>>>>>> master
 end % function

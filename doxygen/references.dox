@@ -14,35 +14,40 @@
 //! B. Reuter, V. Aizinger, M. Wieland, F. Frank, P. Knabner,<br>
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part II: Advection operator and slope limiting&rdquo;</b>,<br>
-//! Computers & Mathematics with Applications 72.7 (2016) 1896–1925.<br>
+//! Computers & Mathematics with Applications 72.7 (2016) 1896-1925.<br>
 //! [<code>doi:10.1016/j.camwa.2016.08.006</code>](https://doi.org/10.1016/j.camwa.2016.08.006).
 //!
 //! @subsection FRAK2015 [FRAK2015]
 //! F. Frank, B. Reuter, V. Aizinger, P. Knabner,<br>
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part I: Diffusion operator&rdquo;</b>,<br>
-//! Computers & Mathematics with Applications 70.1 (2015) 11–46.<br>
+//! Computers & Mathematics with Applications 70.1 (2015) 11-46.<br>
 //! [<code>doi:10.1016/j.camwa.2015.04.013</code>](https://doi.org/10.1016/j.camwa.2015.04.013).
 //!
 //! @section TAG_REF_2 Articles using FESTUNG
 //!
+//! @subsection HHAR2018 [HHAR2018]
+//! H. Hajduk, B.R. Hodges, V. Aizinger, B. Reuter,<br>
+//! <b>&ldquo;Locally Filtered Transport for computational efficiency in multi-component advection-reaction models&rdquo;</b>,<br>
+//! Environmental Modeling & Software 102 (2018), 185-198.<br>
+//! [<code>doi:20.1016/j.envsoft.2018.01.003</code>](https://doi.org/10.1016/j.envsoft.2018.01.003).
+//!
 //! @subsection BAF2017 [BAF2017]
-//! L. Bungert, V. Aizinger , M. Fried,<br> 
+//! L. Bungert, V. Aizinger, M. Fried,<br> 
 //! <b>&ldquo;A Discontinuous Galerkin Method for the Subjective Surfaces Problem&rdquo;</b>,<br>
-//! Journal of Mathematical Imaging and Vision 58.1 (2017), p. 147–161.<br>
+//! Journal of Mathematical Imaging and Vision 58.1 (2017), p. 147-161.<br>
 //! [<code>doi:10.1007/s10851-016-0695-z</code>](https://link.springer.com/article/10.1007/s10851-016-0695-z).
 //! 
 //! @subsection RK2017 [RK2017]
-//! A. Rupp und P. Knabner,<br>
-//! <b>&ldquo;Convergence order estimates of the local discontinuous Galerkin method for
-//! instationary Darcy flow&rdquo;</b>,<br>
-//! Numerical Methods for Partial Differential Equations 33.4 (2017), p. 1374–1394.<br>
+//! A. Rupp, P. Knabner,<br>
+//! <b>&ldquo;Convergence order estimates of the local discontinuous Galerkin method for instationary Darcy flow&rdquo;</b>,<br>
+//! Numerical Methods for Partial Differential Equations 33.4 (2017), p. 1374-1394.<br>
 //! [<code>doi:10.1002/num.22150</code>](https://doi.org/10.1002/num.22150).
 //!
 //! @subsection RRP2017 [RRP2017]
-//! N. Ray, A. Rupp und A. Prechtel,<br>
+//! N. Ray, A. Rupp, A. Prechtel,<br>
 //! <b>&ldquo;Discrete-continuum multiscale model for transport, biomass development and solid restructuring in porous media&rdquo;</b>,<br>
-//! Advances in Water Resources 107.Supplement C (2017), p. 393–404.<br>
+//! Advances in Water Resources 107.Supplement C (2017), p. 393-404.<br>
 //! [<code>doi:10.1016/j.advwatres.2017.04.001</code>](https://doi.org/10.1016/j.advwatres.2017.04.001).
 //!
 //! @section TAG_REF_3 Further references
@@ -50,7 +55,7 @@
 //! @subsection Cools2003 [Cools2003]
 //! R. Cools,<br>
 //! <b>&ldquo;An encyclopaedia of cubature formulas&rdquo;</b>,<br>
-//! Journal of Complexity 19 (3) (2003) 445–453.<br>
+//! Journal of Complexity 19 (3) (2003) 445-453.<br>
 //! [<code>doi:10.1016/S0885-064X(03)00011-6</code>](https://doi.org/10.1016/S0885-064X(03)00011-6).
 //!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

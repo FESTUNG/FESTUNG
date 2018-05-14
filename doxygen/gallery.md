@@ -10,6 +10,8 @@ The routine [visualizeDataLagr.m](visualizeDataLagr_8m.html) writes simulation d
 
 Author: [Hennes Hajduk](http://www.mathematik.tu-dortmund.de/de/personen/person/Hennes+Hajduk.html)
 
+References: \ref HHAR2018
+
 ![Galveston Bay model domain with computational mesh, velocity magnitude, and surface elevation after a 10 days simulation.](doxygen/images/sweBVE.png "Galveston Bay model domain with computational mesh.")
 
 ### Model equations

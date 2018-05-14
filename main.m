@@ -2,7 +2,7 @@
 % as a function argument to start computation.
 
 %===============================================================================
-%> @file main.m
+%> @file
 %>
 %> @brief Generic main program for arbitrary problems. Call with problem 
 %>        name given as a function argument to start computation.
