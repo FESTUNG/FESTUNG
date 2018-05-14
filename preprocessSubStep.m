@@ -1,7 +1,7 @@
 % Preprocessing of the Runge-Kutta step.
 
 %===============================================================================
-%> @file ./advection/preprocessSubStep.m
+%> @file
 %>
 %> @brief Preprocessing of the Runge-Kutta step.
 %===============================================================================

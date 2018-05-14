@@ -1,0 +1,32 @@
+/*!
+ * \dir ./advection/
+ *
+ * \brief This is an implementation of linear advection using an 
+ *        element-wise DG discretization and explicit SSP-Runge Kutta time 
+ *        integration.
+ *
+ * 
+ * Let @f$J = (0,t_\mathrm{end})@f$ be a finite time interval and @f$\Omega 
+ * \subset \mathbb{R}^2@f$ a polygonally bounded domain with boundary 
+ * @f$\partial\Omega@f$. We consider the advection equation
+ * @f{align*}{
+ * \partial_t c  + \nabla\cdot (\mathbf{u}\,c) &\;=\; f            &&\text{in}~J\times\Omega\,,\\
+ * c                                           &\;=\; c_\mathrm{D} &&\text{on}~J\times{\partial\Omega}_{\mathrm{in}}\,,\\
+ * c                                           &\;=\; c^0          &&\text{on}~\{0\}\times\Omega\,.
+ * @f}
+ * The velocity @f$\mathbf{u}:J\times\Omega\rightarrow\mathbb{R}^2@f$ and 
+ * right hand side@f$f:J\times\Omega\rightarrow \mathbb{R}@f$
+ * may vary in time and space. 
+ * 
+ * The implementation uses hierarchical polynomial bases up to fourth order and
+ * explicit strong stability preserving Runge-Kutta methods for time-integration
+ * up to order three.
+ * Furthermore, higher order slope limiting methods including limiting of the 
+ * time-derivative are implemented.
+ * 
+ * See @link ./advection/configureProblem.m @endlink for available configuration options.
+ * 
+ * A detailed description can be found in @ref RAWFK2016.
+ */
+
+

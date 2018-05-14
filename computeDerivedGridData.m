@@ -4,7 +4,7 @@
 % time but used in every step. They are saved as part of the grid.
 
 %===============================================================================
-%> @file ./advection/computeDerivedGridData.m
+%> @file
 %>
 %> @brief Computes various additional fields needed throughout the advection
 %>        problem presented in @ref RAWFK2016 . 
@@ -43,7 +43,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @author Balthasar Reuter, 2015
+%> @author Hennes Hajduk, 2016
 %> 
 %> @par License
 %> @parblock
