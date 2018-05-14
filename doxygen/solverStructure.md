@@ -1,6 +1,4 @@
-Solver structure
-================
-
+# Solver structure
 
 The solver structure of FESTUNG is built around the perception that almost
 every solver for a PDE problem can be subdivided into three major steps:
@@ -29,6 +27,8 @@ working problem definition with do-nothing steps.
 The implemented solver is then executed from the FESTUNG main directory
 using the command 
 
-    $ main('template')
+```matlab
+main('template')
+```
 
 where `'template'` is to be replaced by the name of the folder.

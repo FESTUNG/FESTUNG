@@ -26,18 +26,22 @@ For **variable names and function names** we use the *lower camel case* notation
 
 Some examples:
 
-    phi(...)
-    integrateRefElemPhiPhi(...)
-    dataDisc
-    tEnd
-    eta
+```matlab
+phi(...)
+integrateRefElemPhiPhi(...)
+dataDisc
+tEnd
+eta
+```
 
 For **class names** we use the *upper camel case* notation, i. e., the first letter of the name is always upper case. Since no classes are implemented, yet, this is for future code versions. 
 
 Some examples:
 
-    TimeStepper
-    Quadrature
+```matlab
+TimeStepper
+Quadrature
+```
 
 ## Variable Names
 Use the *lower camel case* notation and use meaningful names. One letter variables can be sufficient (e. g., when abbreviating the number of basis functions as ```N``` all the way through the code) but should be the exception.

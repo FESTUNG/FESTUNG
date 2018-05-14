@@ -3,12 +3,19 @@
 //! 
 //! @section TAG_REF_1 FESTUNG articles
 //!
+//! @subsection RRAFP2018 [RRAFP2018]
+//! B. Reuter, A. Rupp, V. Aizinger, F. Frank, P.Knabner,<br>
+//! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous Galerkin 
+//! method, Part IV: Generic problem framework and model-coupling 
+//! interface&rdquo;</b>,<br>
+//! Submitted to Computers & Mathematics with Applications (2018).
+//!
 //! @subsection JRASK2017 [JRASK2017]
 //! A. Jaust, B. Reuter, V. Aizinger, J. Schütz, P. Knabner,<br>
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
-//! Galerkin method, Part III: Hybridized discontinuous (HDG) formulation&rdquo;</b>.<br>
-//! Submitted to: Computers & Mathematics with Applications.<br>
-//! Preprint on arXiv: https://arxiv.org/abs/1709.04390.
+//! Galerkin method, Part III: Hybridized discontinuous (HDG) formulation&rdquo;</b>,<br>
+//! Computers & Mathematics with Applications (2018) <i>in press</i>.<br>
+//! [<code>doi:10.1016/j.camwa.2018.03.045</code>](https://doi.org/10.1016/j.camwa.2018.03.045).
 //!
 //! @subsection RAWFK2016 [RAWFK2016]
 //! B. Reuter, V. Aizinger, M. Wieland, F. Frank, P. Knabner,<br>
@@ -28,7 +35,7 @@
 //!
 //! @subsection HHAR2018 [HHAR2018]
 //! H. Hajduk, B.R. Hodges, V. Aizinger, B. Reuter,<br>
-//! <b>&ldquo;Locally Filtered Transport for computational efficiency in multi-component advection-reaction models&rdquo;</b>,<br>
+//! <b>&ldquo;Locally Filtered Transport for computational efficiency in multi-component advection-reaction models&rdquo;</b>,\.<br>
 //! Environmental Modeling & Software 102 (2018), 185-198.<br>
 //! [<code>doi:20.1016/j.envsoft.2018.01.003</code>](https://doi.org/10.1016/j.envsoft.2018.01.003).
 //!
