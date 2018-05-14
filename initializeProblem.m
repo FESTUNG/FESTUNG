@@ -1,7 +1,7 @@
 % Fills the problem's data structures with initial data.
 
 %===============================================================================
-%> @file advection_implicit/initializeProblem.m
+%> @file
 %>
 %> @brief Fills the problem's data structures with initial data.
 %===============================================================================

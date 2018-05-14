@@ -2,7 +2,7 @@
 % advection_implicit/configureProblem.
 
 %===============================================================================
-%> @file advection_implicit/getTestcase.m
+%> @file
 %>
 %> @brief Defines the test cases that can be selected in 
 %>        advection_implicit/configureProblem.

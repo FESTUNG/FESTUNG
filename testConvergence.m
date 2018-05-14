@@ -2,7 +2,7 @@
 % for problem 'advection_implicit'.
 
 %===============================================================================
-%> @file advection_implicit/testConvergence.m
+%> @file
 %>
 %> @brief Helper routine for testConvergence() that carries out convergence tests
 %>        for problem 'advection_implicit'.

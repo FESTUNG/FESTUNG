@@ -2,7 +2,7 @@
 % Runge-Kutta steps for a time-step.
 
 %===============================================================================
-%> @file advection_implicit/solveStep.m
+%> @file
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %>        Carries out all Runge-Kutta steps for a time-step.
