@@ -67,6 +67,7 @@ if mod(nStep, problemData.outputFrequency) == 0
   end % if
     
   if all(isfield(problemData, { 'hCont', 'q1Cont', 'q2Cont' }))
+    t = nStep * problemData.tau;  
     hCont = @(x1,x2) problemData.hCont(t, x1, x2);
     q1Cont = @(x1,x2) problemData.q1Cont(t, x1, x2);
     q2Cont = @(x1,x2) problemData.q2Cont(t, x1, x2);
