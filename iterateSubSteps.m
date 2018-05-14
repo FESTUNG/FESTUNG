@@ -2,7 +2,7 @@
 % time step.
 
 %===============================================================================
-%> @file iterateSubSteps.m
+%> @file
 %>
 %> @brief Generic routine for iterating over arbitrary processes during one single
 %>        time step.

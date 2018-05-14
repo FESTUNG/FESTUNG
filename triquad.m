@@ -1,7 +1,7 @@
 % Gaussian quadrature for a triangular domain
 %
 %===============================================================================
-%> @file triquad.m
+%> @file
 %>
 %> @brief Gaussian quadrature for a triangular domain
 %===============================================================================

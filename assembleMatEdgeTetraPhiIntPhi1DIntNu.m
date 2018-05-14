@@ -3,7 +3,7 @@
 % edge normal.
 
 %===============================================================================
-%> @file assembleMatEdgeTetraPhiIntPhi1DIntNu.m
+%> @file
 %>
 %> @brief Assembles two matrices containing integrals over edges of 
 %>        products of a two-dimensional and a one-dimensional basis function 
@@ -24,7 +24,8 @@
 %> with @f$\nu_{kn}@f$ the @f$m@f$-th component (@f$m\in\{1,2\}@f$) of the edge
 %> normal.
 %> To allow for vectorization, the assembly is reformulated as
-%> \mathsf{{Q}}^{m,\mathrm{diag}} = \sum_{n=1}^4
+%> @f[
+%> \mathsf{Q}^{m,\mathrm{diag}} = \sum_{n=1}^4
 %>   \begin{bmatrix}
 %>     \delta_{E_{1n}\in\mathcal{E}_\Omega} &   & \\
 %>     & ~\ddots~ & \\
@@ -35,7 +36,7 @@
 %>     &          & \nu^m_{Kn} | E_{Kn} |
 %>   \end{bmatrix} \otimes [\hat{\mathsf{Q}}^\mathrm{diag}]_{:,:,n}\;,
 %> @f]
-%> where @f$\delta_{E_{kn}\in\mathcal{E}_\Omega} denotes the Kronecker delta, 
+%> where @f$\delta_{E_{kn}\in\mathcal{E}_\Omega}@f$ denotes the Kronecker delta, 
 %> @f$\circ@f$ denotes the Hadamard product, and 
 %> @f$\otimes@f$ denotes the Kronecker product.
 %>

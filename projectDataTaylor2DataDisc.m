@@ -1,7 +1,7 @@
 % Convert the Taylor into a DG/modal basis representation.
 %
 %===============================================================================
-%> @file projectDataTaylor2DataDisc.m
+%> @file
 %>
 %> @brief Convert the Taylor into a DG/modal basis representation.
 %===============================================================================

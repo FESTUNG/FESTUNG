@@ -1,7 +1,7 @@
 % Provides quadrature points and associated weights within the reference triangle.
 
 %===============================================================================
-%> @file quadRule2D.m
+%> @file
 %>
 %> @brief Provides quadrature points and associated weights within the reference 
 %>        triangle.

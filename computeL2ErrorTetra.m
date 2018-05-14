@@ -2,7 +2,7 @@
 % for a given analytical solution.
 
 %===============================================================================
-%> @file computeL2ErrorTetra.m
+%> @file
 %>
 %> @brief Compute the L2-error of a DG/modal basis representation on
 %>        quadrilaterals for a given analytical solution.

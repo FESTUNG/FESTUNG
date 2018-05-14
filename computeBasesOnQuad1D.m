@@ -2,7 +2,7 @@
 % points on the reference interval and stores them in a struct.
 
 %===============================================================================
-%> @file computeBasesOnQuad1D.m
+%> @file
 %>
 %> @brief Evaluate tensor product basis functions and their gradients in 
 %>        quadrature points on the reference interval and stores them in a struct.

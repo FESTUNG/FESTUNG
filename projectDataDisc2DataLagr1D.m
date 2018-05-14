@@ -1,7 +1,7 @@
 % Convert the DG/modal into a Lagrange/nodal basis representation.
 
 %===============================================================================
-%> @file projectDataDisc2DataLagr1D.m
+%> @file
 %>
 %> @brief Convert the DG/modal into a Lagrange/nodal basis representation.
 %===============================================================================

@@ -3,7 +3,7 @@
 % surrounding centroid values.
 %
 %===============================================================================
-%> @file computeVertexBasedLimiter.m
+%> @file
 %>
 %> @brief Computes a vector with correction factors for all elements to restrict
 %>        a discrete function, given as vertex values, within the bounds of 

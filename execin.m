@@ -2,7 +2,7 @@
 % than getFunctionHandle, hence the latter is preferred whenever possible.
 
 %===============================================================================
-%> @file execin.m
+%> @file
 %>
 %> @brief Executes an arbitrary function outside the search path. This is 
 %>        slower than getFunctionHandle, hence the latter is preferred 

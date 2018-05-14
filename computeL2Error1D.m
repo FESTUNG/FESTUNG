@@ -2,7 +2,7 @@
 % elements for a given analytical solution.
 
 %===============================================================================
-%> @file computeL2Error1D.m
+%> @file
 %>
 %> @brief Compute the L2-error of a DG/modal basis representation on
 %>        one-dimensional elements for a given analytical solution.

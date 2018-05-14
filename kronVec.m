@@ -2,7 +2,7 @@
 % operand.
 
 %===============================================================================
-%> @file kronVec.m
+%> @file
 %>
 %> @brief Computes a modified Kronecker product with a vector of matrices 
 %>        as second operand.

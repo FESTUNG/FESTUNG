@@ -2,7 +2,7 @@
 % function given in Taylor basis.
 
 %===============================================================================
-%> @file applySlopeLimiterTaylorHierarchicalVertex.m
+%> @file
 %>
 %> @brief Applies the hierarchical vertex based slope limiter to a discrete 
 %>        function given in Taylor basis.

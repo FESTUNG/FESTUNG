@@ -2,7 +2,7 @@
 % permutations of a basis function with an edge basis function.
 
 %===============================================================================
-%> @file integrateRefEdgePhiIntMu.m
+%> @file
 %>
 %> @brief Compute integrals on the reference interval, whose integrands 
 %> consist of all permutations of a basis function with an edge basis function.

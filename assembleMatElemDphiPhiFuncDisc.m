@@ -3,7 +3,7 @@
 % discontinuous coefficient function.
 
 %===============================================================================
-%> @file assembleMatElemDphiPhiFuncDisc.m
+%> @file
 %>
 %> @brief Assembles two matrices, each containing integrals of products of a 
 %>        basis function with a (spatial) derivative of a basis function

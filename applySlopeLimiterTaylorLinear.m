@@ -2,7 +2,7 @@
 % function given in Taylor basis.
 
 %===============================================================================
-%> @file applySlopeLimiterTaylorLinear.m
+%> @file
 %>
 %> @brief Applies the linear vertex based slope limiter to a discrete 
 %>        function given in Taylor basis.

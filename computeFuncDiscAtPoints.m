@@ -3,7 +3,7 @@
 % basis functions are given.
 
 %===============================================================================
-%> @file computeFuncDiscAtPoints.m
+%> @file
 %>
 %> @brief Assembles a matrix containing the values of a discrete function
 %>        given by a representation matrix evaluated in all points, for

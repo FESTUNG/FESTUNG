@@ -1,7 +1,7 @@
 % Mapping from edge nn to edge np in the reference triangle.
 %
 %===============================================================================
-%> @file theta.m
+%> @file
 %>
 %> @brief Mapping from edge @f$\hat{E}_{n^-}@f$ to edge @f$\hat{E}_{n^+}@f$ in
 %>        the reference triangles.

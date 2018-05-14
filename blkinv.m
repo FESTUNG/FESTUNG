@@ -1,7 +1,7 @@
 % Computes the inverse of a block diagonal matrix.
 
 %===============================================================================
-%> @file blkinv.m
+%> @file
 %>
 %> @brief Computes the inverse of a block diagonal matrix.
 %===============================================================================

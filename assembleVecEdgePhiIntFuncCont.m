@@ -2,7 +2,7 @@
 % function with a continuous function.
 
 %===============================================================================
-%> @file assembleVecEdgePhiIntFuncCont.m
+%> @file
 %>
 %> @brief Assembles a vector containing integrals over edges of products of a 
 %>        basis function with a continuous function.

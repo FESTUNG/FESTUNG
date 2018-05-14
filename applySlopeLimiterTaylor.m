@@ -1,7 +1,7 @@
 % Applies a slope limiter to a discrete function given in Taylor basis.
 
 %===============================================================================
-%> @file applySlopeLimiterTaylor.m
+%> @file
 %>
 %> @brief Applies a slope limiter to a discrete function given in Taylor basis.
 %===============================================================================

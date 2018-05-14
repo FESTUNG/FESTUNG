@@ -3,7 +3,7 @@
 % basis function.
 
 %===============================================================================
-%> @file integrateRefElemDphiPhiPhi.m
+%> @file
 %>
 %> @brief Compute integrals on the reference triangle, whose integrands consist 
 %>        of all permutations of two basis functions with one of the (spatial)

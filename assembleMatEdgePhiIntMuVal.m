@@ -2,7 +2,7 @@
 % function.
 
 %===============================================================================
-%> @file assembleMatEdgePhiIntMuVal.m
+%> @file
 %>
 %> @brief Assembles a matrix containing integrals of products of flux and test 
 %> function.

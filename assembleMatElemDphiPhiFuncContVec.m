@@ -1,7 +1,7 @@
 % Assembles two matrices, each containing integrals of products of the continuous advection velocity, a basis function and a (spatial) derivative of a basis function.
 
 %===============================================================================
-%> @file assembleMatElemDphiPhiFuncContVec.m
+%> @file
 %>
 %> @brief Assembles two matrices, each containing integrals of products of the advection velocity, a basis function and a (spatial) derivative of a basis function.
 %===============================================================================

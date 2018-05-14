@@ -2,7 +2,7 @@
 % consist of all permutations of two basis functions.
 
 %===============================================================================
-%> @file integrateRefElemTetraPhiPhi.m
+%> @file
 %>
 %> @brief Compute integrals on the reference square, whose 
 %>        integrands consist of all permutations of two basis functions.

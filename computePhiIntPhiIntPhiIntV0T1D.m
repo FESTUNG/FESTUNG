@@ -2,7 +2,7 @@
 % unit interval.
 
 %===============================================================================
-%> @file computePhiIntPhiIntPhiIntV0T1D.m
+%> @file
 %>
 %> @brief Evaluate all permutations of three basis functions in the vertices 
 %>        of the unit interval.

@@ -2,7 +2,7 @@
 % properties of a triangulation.
 
 %===============================================================================
-%> @file generateGridData.m
+%> @file
 %>
 %> @brief Assembles lists describing the geometric and topological
 %>        properties of a triangulation.

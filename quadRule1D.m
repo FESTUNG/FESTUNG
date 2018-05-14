@@ -1,7 +1,7 @@
 % Provides Gauss-Legendre quadrature points and associated weights on (0,1).
 
 %===============================================================================
-%> @file quadRule1D.m
+%> @file
 %>
 %> @brief Provides Gauss-Legendre quadrature points and associated weights on (0,1).
 %===============================================================================

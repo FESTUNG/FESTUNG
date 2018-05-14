@@ -2,7 +2,7 @@
 % consist of all permutations of three basis functions.
 
 %===============================================================================
-%> @file integrateRefEdgePhiIntPhiIntPhiInt.m
+%> @file
 %>
 %> @brief Compute integrals over the edges of the reference element, whose 
 %>        integrands consist of all permutations of three basis functions.

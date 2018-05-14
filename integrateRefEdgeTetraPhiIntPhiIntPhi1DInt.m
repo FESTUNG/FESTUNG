@@ -3,7 +3,7 @@
 % function.
 
 %===============================================================================
-%> @file integrateRefEdgeTetraPhiIntPhiIntPhi1DInt.m
+%> @file
 %>
 %> @brief Compute integrals over the edges of the reference square, whose 
 %>        integrands consist of all permutations of two two-dimensional and a 

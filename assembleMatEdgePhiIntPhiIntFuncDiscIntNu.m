@@ -3,7 +3,7 @@
 % representation with a component of the edge normal.
 
 %===============================================================================
-%> @file assembleMatEdgePhiIntPhiIntFuncDiscIntNu.m
+%> @file
 %>
 %> @brief Assembles two matrices containing integrals over edges of products of
 %>        two basis functions from the interior of each element and a function

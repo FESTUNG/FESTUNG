@@ -2,7 +2,7 @@
 % for two given indices of the underlying basis functions.
 
 %===============================================================================
-%> @file mapTensorProductIndex.m
+%> @file
 %>
 %> @brief Computes the one-dimensional (linearized) index of a tensor product
 %>         basis for two given indices of the underlying basis functions.

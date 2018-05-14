@@ -1,7 +1,7 @@
 % Computes the sum of two discrete data sets that may be of different order.
 
 %===============================================================================
-%> @file computeOpDataDiscDataDisc.m
+%> @file
 %>
 %> @brief Computes a given operation on two discrete data sets that may be of  
 %>        different order.

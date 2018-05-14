@@ -3,7 +3,7 @@
 % edge normal.
 
 %===============================================================================
-%> @file assembleMatEdgeTetraPhiPhi1DNu.m
+%> @file
 %>
 %> @brief Assembles two matrices containing integrals over interior edges of 
 %>        products of a two-dimensional and a one-dimensional basis function 

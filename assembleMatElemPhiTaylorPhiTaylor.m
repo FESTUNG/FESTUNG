@@ -2,7 +2,7 @@
 % basis functions.
 
 %===============================================================================
-%> @file assembleMatElemPhiTaylorPhiTaylor.m
+%> @file
 %>
 %> @brief Assembles a matrix, containing integrals of products of two Taylor 
 %>        basis functions. This corresponds to a mass matrix.

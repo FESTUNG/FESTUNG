@@ -2,7 +2,7 @@
 % consist of all permutations of two edge basis functions.
 
 %===============================================================================
-%> @file integrateRefEdgeMuMu.m
+%> @file
 %>
 %> @brief Compute integrals over the reference edge, whose integrands 
 %> consist of all permutations of two edge basis functions.

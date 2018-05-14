@@ -3,7 +3,7 @@
 % normal.
 
 %===============================================================================
-%> @file assembleVecEdgePhiIntFuncContNu.m
+%> @file
 %>
 %> @brief Assembles two vectors containing integrals over edges of products of a 
 %>        basis function with a continuous function and one of the components of

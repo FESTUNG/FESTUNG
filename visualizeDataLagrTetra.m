@@ -1,7 +1,7 @@
 % Write output files in VTK- or Tecplot-format.
 
 %===============================================================================
-%> @file visualizeDataLagrTetra.m
+%> @file
 %>
 %> @brief Write output files in VTK- or Tecplot-format.
 %===============================================================================

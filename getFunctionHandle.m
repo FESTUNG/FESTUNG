@@ -2,7 +2,7 @@
 % search path.
 
 %===============================================================================
-%> @file getFunctionHandle.m
+%> @file
 %>
 %> @brief Returns a function handle for an arbitrary function file outside 
 %>        the search path.

@@ -1,7 +1,7 @@
 % Generates function handles for the steps in the problem solver framework.
 
 %===============================================================================
-%> @file getStepHandles.m
+%> @file
 %>
 %> @brief Generates function handles for the steps in the problem solver framework.
 %===============================================================================

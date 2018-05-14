@@ -1,7 +1,7 @@
 % Evaluates the i-th Taylor basis function in physical domain.
 %
 %===============================================================================
-%> @file phiTaylorPhy.m
+%> @file
 %>
 %> @brief Evaluates the i-th Taylor basis function in physical domain.
 %===============================================================================

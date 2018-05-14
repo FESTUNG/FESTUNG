@@ -2,7 +2,7 @@
 % of a polynomial solution of degree p.
 
 %===============================================================================
-%> @file multiindex.m
+%> @file
 %>
 %> @brief Computes all two-dimensional multi-indices involved in the representation
 %>        of a polynomial solution of degree p.

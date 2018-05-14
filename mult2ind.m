@@ -1,7 +1,7 @@
 % Compute the linear index corresponding to a two-dimensional multiindex.
 %
 %===============================================================================
-%> @file mult2ind.m
+%> @file
 %>
 %> @brief Compute the linear index corresponding to a two-dimensional multiindex.
 %===============================================================================

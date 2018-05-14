@@ -3,7 +3,7 @@
 % derivatives of a two-dimensional basis function.
 
 %===============================================================================
-%> @file integrateRefElemTetraDphiPhi1D.m
+%> @file
 %>
 %> @brief Compute integrals on the reference square, whose integrands consist 
 %>        of all permutations of a one-dimensional basis function with one of 

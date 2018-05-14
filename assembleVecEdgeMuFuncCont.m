@@ -2,7 +2,7 @@
 % basis function with a continuous function.
 
 %===============================================================================
-%> @file assembleVecEdgeMuFuncCont.m
+%> @file
 %>
 %> @brief Assembles a vector containing integrals over edges of products of a 
 %>        edge basis function with a continuous function.

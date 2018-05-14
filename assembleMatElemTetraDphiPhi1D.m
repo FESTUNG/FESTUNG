@@ -3,7 +3,7 @@
 % two-dimensional basis function.
 
 %===============================================================================
-%> @file assembleMatElemTetraDphiPhi1D.m
+%> @file
 %>
 %> @brief Assembles two matrices, each containing integrals of products of a 
 %>        one-dimensional basis function with a (spatial) derivative of a 

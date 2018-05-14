@@ -1,7 +1,7 @@
 % Assembles a matrix, containing integrals of products of two basis functions.
 
 %===============================================================================
-%> @file assembleMatElemPhiPhi.m
+%> @file
 %>
 %> @brief Assembles a matrix, containing integrals of products of two basis 
 %>        functions. This corresponds to a mass matrix.

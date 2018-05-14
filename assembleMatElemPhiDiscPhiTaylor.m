@@ -2,7 +2,7 @@
 % transform a representation matrix between (modal) DG basis and Taylor basis.
 
 %===============================================================================
-%> @file assembleMatElemPhiDiscPhiTaylor.m
+%> @file
 %>
 %> @brief Assembles the global basis transformation matrix, which is required
 %>        to transform a representation matrix between (modal) DG basis and 

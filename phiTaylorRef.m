@@ -2,7 +2,7 @@
 % according to a given point in the reference element.
 %
 %===============================================================================
-%> @file phiTaylorRef.m
+%> @file
 %>
 %> @brief Evaluates the i-th Taylor basis function in on all elements in
 %>        physical domain according to a given point in the reference element.

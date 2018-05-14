@@ -3,7 +3,7 @@
 % at every integration point.
 
 %===============================================================================
-%> @file integrateRefEdgePhiIntMuPerQuad.m
+%> @file
 %>
 %> @brief Compute integral contributions on the reference interval, whose 
 %> integrands consist of all permutations of a basis function with an edge basis

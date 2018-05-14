@@ -2,7 +2,7 @@
 % all edges of the reference square.
 
 %===============================================================================
-%> @file integrateRefEdgeTetraPhi1DIntPerQuad.m
+%> @file
 %>
 %> @brief Evaluates a one-dimensional basis function in all quadrature points 
 %>        of all edges of the reference square.

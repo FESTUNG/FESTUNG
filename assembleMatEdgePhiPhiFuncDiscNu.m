@@ -3,7 +3,7 @@
 % component of the edge normal.
 
 %===============================================================================
-%> @file assembleMatEdgePhiPhiFuncDiscNu.m
+%> @file
 %>
 %> @brief Assembles two matrices containing integrals over interior edges of 
 %>        products of two basis functions with a discontinuous coefficient 

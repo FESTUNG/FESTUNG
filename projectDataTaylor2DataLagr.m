@@ -1,7 +1,7 @@
 % Convert the Taylor into a Lagrange/nodal basis representation.
 %
 %===============================================================================
-%> @file projectDataTaylor2DataLagr.m
+%> @file
 %>
 %> @brief Convert the Taylor into a Lagrange/nodal basis representation.
 %===============================================================================

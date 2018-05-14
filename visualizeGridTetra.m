@@ -1,7 +1,7 @@
 % Visualize the quadrilateral grid with global and local indices.
 
 %===============================================================================
-%> @file visualizeGridTetra.m
+%> @file
 %>
 %> @brief Visualize the quadrilateral grid with global and local indices.
 %===============================================================================

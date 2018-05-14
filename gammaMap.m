@@ -1,7 +1,7 @@
 % Mapping from interval [0,1] to the n-th edge in the reference triangle.
 
 %===============================================================================
-%> @file gammaMap.m
+%> @file
 %>
 %> @brief Mapping from interval [0,1] to the n-th edge in the reference triangle.
 %===============================================================================

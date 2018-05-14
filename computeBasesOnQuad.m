@@ -2,7 +2,7 @@
 % reference triangle and stores them in a struct.
 
 %===============================================================================
-%> @file computeBasesOnQuad.m
+%> @file
 %>
 %> @brief Evaluate basis functions and their gradients in quadrature points on
 %>        the reference triangle and stores them in a struct.

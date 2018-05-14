@@ -2,7 +2,7 @@
 % element.
 
 %===============================================================================
-%> @file computeFuncContV0T.m
+%> @file
 %>
 %> @brief Assembles a matrix containing a function evaluated in vertex of 
 %>        each element.

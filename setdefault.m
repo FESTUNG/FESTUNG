@@ -1,7 +1,7 @@
 % Set a default value for a non-existing field in a struct.
 
 %===============================================================================
-%> @file setdefault.m
+%> @file
 %>
 %> @brief Set a default value for a non-existing field in a struct.
 %===============================================================================

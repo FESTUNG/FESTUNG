@@ -3,7 +3,7 @@
 % below a certain tolerance.
 
 %===============================================================================
-%> @file solveSubStep.m
+%> @file
 %>
 %> @brief Routine that uses the information of the centeroid values of 
 %>        neighbouring elements to determine on which elements the gradient of a

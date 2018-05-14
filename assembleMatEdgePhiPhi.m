@@ -2,7 +2,7 @@
 % basis functions.
 
 %===============================================================================
-%> @file assembleMatEdgePhiPhi.m
+%> @file
 %>
 %> @brief Assembles a matrix containing integrals over interior edges of 
 %>        products of two basis functions.
@@ -98,6 +98,11 @@
 %>                    by <code>integrateRefEdgePhiIntPhiExt()</code>.
 %>                    @f$[N \times N \times n_\mathrm{edges}]@f$ or
 %>                    @f$[N \times N \times n_\mathrm{edges} \times n_\mathrm{edges}]@f$
+%> @param  coefE0T    (optional) A matrix containing a coefficient that is
+%>                    applied to the contribution of each edge on each
+%>                    element. Defaults to <code>g.areaE0T</code>.
+%>                    @f$[K \times n_\mathrm{edges}]@f$
+%>
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>
 %> This file is part of FESTUNG

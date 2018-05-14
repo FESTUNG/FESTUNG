@@ -3,7 +3,7 @@
 % product basis function.
 
 %===============================================================================
-%> @file mapTensorProductIndexInv.m
+%> @file
 %>
 %> @brief Computes the two indices of the underlying one-dimensional basis
 %>        functions for a given linearized index of a two-dimensional basis tensor
@@ -16,7 +16,7 @@
 %>
 %> This is the inverse of <code>mapTensorProductIndex()</code>.
 %> 
-%> @param  m, n  Linearized index of the two-dimensional basis function.
+%> @param  i     Linearized index of the two-dimensional basis function.
 %> @retval m,n   Index of one-dimensional basis functions.
 %>
 %> This file is part of FESTUNG

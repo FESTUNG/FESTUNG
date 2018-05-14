@@ -2,7 +2,7 @@
 % of the patch of elements surrounding each vertex of each element.
 
 %===============================================================================
-%> @file computeMinMaxV0TElementPatch.m
+%> @file
 %>
 %> @brief Assembles two matrices with minimum or maximum centroid values,
 %>        respectively, of the patch of elements surrounding each vertex

@@ -2,7 +2,7 @@
 % analytical solution.
 
 %===============================================================================
-%> @file computeL2Error.m
+%> @file
 %>
 %> @brief Compute the L2-error of a DG/modal basis representation for a given 
 %>        analytical solution.

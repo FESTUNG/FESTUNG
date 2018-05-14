@@ -2,7 +2,7 @@
 % function with a continuous function and a value given for each quadrature point.
 
 %===============================================================================
-%> @file assembleVecEdgePhiIntFuncContVal.m
+%> @file
 %>
 %> @brief Assembles a vector containing integrals over edges of products of a 
 %>        basis function with a continuous function and a value given for each

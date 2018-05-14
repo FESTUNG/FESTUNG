@@ -2,7 +2,7 @@
 % each quadrature point of each edge.
 
 %===============================================================================
-%> @file computeFuncContOnQuadEdge.m
+%> @file
 %>
 %> @brief Assembles a multidimensional array containing a function evaluated
 %>        in each quadrature point of each edge.

@@ -2,7 +2,7 @@
 % in all quadrature points of all edges of the reference triangle.
 
 %===============================================================================
-%> @file integrateRefEdgePhiIntPhiExtPerQuad.m
+%> @file
 %>
 %> @brief Evaluates all permutations of two basis functions from different elements
 %>        in all quadrature points of all edges of the reference triangle.

@@ -2,7 +2,7 @@
 % one-dimensional basis functions.
 
 %===============================================================================
-%> @file phiTensorProduct.m
+%> @file
 %>
 %> @brief Evaluates the i-th basis function built from a tensor-product of two 
 %>        one-dimensional basis functions.

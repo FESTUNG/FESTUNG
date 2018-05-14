@@ -1,7 +1,7 @@
 % Evaluates the derivative of the i-th one-dimensional basis function.
 
 %===============================================================================
-%> @file gradPhi1D.m
+%> @file
 %>
 %> @brief Evaluates the derivative of the i-th one-dimensional basis function.
 %===============================================================================

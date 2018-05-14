@@ -1,7 +1,7 @@
 % Visualize the triangulation with global and local indices.
 %
 %===============================================================================
-%> @file visualizeGrid.m
+%> @file
 %>
 %> @brief Visualize the triangulation with global and local indices.
 %===============================================================================

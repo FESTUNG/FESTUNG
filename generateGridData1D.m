@@ -2,7 +2,7 @@
 % properties of a one-dimensional triangulation.
 
 %===============================================================================
-%> @file generateGridData1D.m
+%> @file
 %>
 %> @brief Assembles lists describing the geometric and topological
 %>        properties of a one-dimensional triangulation.

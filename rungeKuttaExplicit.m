@@ -2,7 +2,7 @@
 % Runge-Kutta methods up to order 3.
 
 %===============================================================================
-%> @file rungeKuttaExplicit.m
+%> @file
 %>
 %> @brief Provides weights and time levels for explicit strong stability 
 %>        preserving (SSP) Runge-Kutta methods up to order 3.

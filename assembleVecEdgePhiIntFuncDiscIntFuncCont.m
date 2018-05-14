@@ -2,7 +2,7 @@
 % function with a discontinuous coefficient function and a continuous function.
 
 %===============================================================================
-%> @file assembleVecEdgePhiIntFuncDiscIntFuncCont.m
+%> @file
 %>
 %> @brief Assembles a vector containing integrals over edges of products of a 
 %>        basis function with a discontinuous coefficient function and a 

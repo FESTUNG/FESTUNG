@@ -2,7 +2,7 @@
 % replacing them with zeros.
 
 %===============================================================================
-%> @file setNaN2Zero.m
+%> @file
 %>
 %> @brief Technical routine required to elimate possible NaN entries in any 
 %>        input by replacing them with zeros.

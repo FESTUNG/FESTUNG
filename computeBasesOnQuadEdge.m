@@ -2,7 +2,7 @@
 % reference edge and stores them in a struct.
 
 %===============================================================================
-%> @file computeBasesOnQuadEdge.m
+%> @file
 %>
 %> @brief Evaluate edge basis functions in quadrature points on the
 %> reference edge and stores them in a struct.

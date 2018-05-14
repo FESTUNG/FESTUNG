@@ -3,7 +3,7 @@
 % one-dimensional basis function from the neighbouring element.
 
 %===============================================================================
-%> @file integrateRefEdgeTetraPhiIntPhi1DExt.m
+%> @file
 %>
 %> @brief Compute integrals over the edges of the reference square, whose 
 %>        integrands consist of all permutations of a two-dimensional basis 

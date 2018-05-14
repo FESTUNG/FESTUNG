@@ -2,7 +2,7 @@
 % product of one-dimensional quadrature rules.
 
 %===============================================================================
-%> @file quadRuleTensorProduct.m
+%> @file
 %>
 %> @brief Provides quadrature points and associated weights built from tensor
 %>        product of one-dimensional quadrature rules.

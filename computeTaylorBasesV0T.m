@@ -2,7 +2,7 @@
 % them in a a struct.
 
 %===============================================================================
-%> @file computeTaylorBasesV0T.m
+%> @file
 %>
 %> @brief Evaluate Taylor basis functions in the vertices of each element 
 %>        and store them in a struct.

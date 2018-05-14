@@ -2,7 +2,7 @@
 %  points on the reference square and stores them in a struct.
 
 %===============================================================================
-%> @file computeBasesOnQuadTensorProduct.m
+%> @file
 %>
 %> @brief Evaluate tensor product basis functions and their gradients in 
 %>        quadrature points on the reference square and stores them in a struct.

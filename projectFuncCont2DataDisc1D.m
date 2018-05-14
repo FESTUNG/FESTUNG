@@ -1,7 +1,7 @@
 % Compute the DG/modal basis representation of an algebraic function.
 
 %===============================================================================
-%> @file projectFuncCont2DataDisc1D.m
+%> @file
 %>
 %> @brief Compute the DG/modal basis representation of an algebraic function.
 %===============================================================================

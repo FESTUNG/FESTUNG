@@ -2,7 +2,7 @@
 % consist of all permutations of two basis functions.
 
 %===============================================================================
-%> @file integrateRefElem1DPhiPhi.m
+%> @file
 %>
 %> @brief Compute integrals on the reference interval, whose 
 %>        integrands consist of all permutations of two basis functions.

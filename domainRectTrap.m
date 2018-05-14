@@ -2,7 +2,7 @@
 % elements per dimension.
 
 %===============================================================================
-%> @file domainRectTrap.m
+%> @file
 %>
 %> @brief Generates a trapezoidal mesh for a polygonal domain with given 
 %>        number of elements per dimension.

@@ -3,7 +3,7 @@
 % basis function.
 
 %===============================================================================
-%> @file integrateRefElemTetraDphiPhi.m
+%> @file
 %>
 %> @brief Compute integrals on the reference square, whose integrands consist 
 %>        of all permutations of a basis function with one of the (spatial)

@@ -2,7 +2,7 @@
 % physical quadrature points of a grid.
 
 %===============================================================================
-%> @file projectDataQ0T2DataDisc.m
+%> @file
 %>
 %> @brief Compute the DG/modal basis representation of a function evaluated 
 %>				in the physical quadrature points of a grid.
@@ -61,10 +61,6 @@
 %> <code>integrateRefElemPhiPhi</code>.\n
 %> Since the right hand side is approximated by quadrature, we have all we need.
 %>
-%> @param  g          The lists describing the geometric and topological 
-%>                    properties of a triangulation (see 
-%>                    <code>generateGridData()</code>) 
-%>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  dataQ0T    A coefficient matrix representing the function @f$d(t)@f$
 %>										where each row contains the evaluations of @f$d(t)@f$
 %>										in the quadrature points of the corresponding element
@@ -74,7 +70,10 @@
 %> @param refElemPhiPhi Local matrix @f$\hat{\mathsf{M}}@f$ as provided
 %>                    by <code>integrateRefElemPhiPhi()</code>.
 %>                    @f$[N \times N]@f$
-%> @param
+%> @param  basesOnQuad  A struct containing precomputed values of the basis
+%>                      functions on quadrature points. Must provide at
+%>                      least phi2D.
+%>
 %> @retval The representation matrix of the DG/modal basis representation.
 %>         @f$[K \times N]@f$
 %>

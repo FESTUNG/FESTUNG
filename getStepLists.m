@@ -1,7 +1,7 @@
 % Obtain the list of step names in the generic problem framework.
 
 %===============================================================================
-%> @file getStepLists.m
+%> @file
 %>
 %> @brief Obtain the list of step names in the generic problem framework.
 %===============================================================================

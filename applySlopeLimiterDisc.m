@@ -1,7 +1,7 @@
 % Applies a slope limiter to a discrete function given in (modal) DG basis.
 
 %===============================================================================
-%> @file applySlopeLimiterDisc.m
+%> @file
 %>
 %> @brief Applies a slope limiter to a discrete function given in (modal) DG basis.
 %===============================================================================

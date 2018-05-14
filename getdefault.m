@@ -2,7 +2,7 @@
 % index if it exists, or a default value otherwise.
 
 %===============================================================================
-%> @file getdefault.m
+%> @file
 %>
 %> @brief Returns the entry of a given datastructure associated with the 
 %>        given index if it exists, or a default value otherwise.

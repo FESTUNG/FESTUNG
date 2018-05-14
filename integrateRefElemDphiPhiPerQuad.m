@@ -3,7 +3,7 @@
 % basis function for every integration point.
 
 %===============================================================================
-%> @file integrateRefElemDphiPhiPerQuad.m
+%> @file
 %>
 %> @brief Compute integral contributions on the reference triangle, whose integrands consist 
 %>        of all permutations of a basis function with one of the (spatial)

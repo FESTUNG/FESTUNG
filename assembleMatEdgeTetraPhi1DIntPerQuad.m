@@ -2,7 +2,7 @@
 % in all quadrature points of the edges.
 
 %===============================================================================
-%> @file assembleMatEdgeTetraPhi1DIntPerQuad.m
+%> @file
 %>
 %> @brief Assembles matrices containing a one-dimensional basis function 
 %>        evaluated in all quadrature points of the edges.

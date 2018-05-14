@@ -3,7 +3,7 @@
 % points on the unit interval.
 
 %===============================================================================
-%> @file integrateRefElem1DDphiPhiPhiPerQuad.m
+%> @file
 %>
 %> @brief Evaluates all permutations of two one-dimensional basis functions and
 %>        the spatial derivative of a one-dimensional basis function in all 

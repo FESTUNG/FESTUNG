@@ -1,7 +1,7 @@
 % Evaluates the m-th component of the gradient of the i-th basis function.
 
 %===============================================================================
-%> @file gradPhiTensorProduct.m
+%> @file
 %>
 %> @brief Evaluates the m-th component of the gradient of the i-th basis 
 %>        function.

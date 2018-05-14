@@ -2,7 +2,7 @@
 % in each quadrature point of each edge, multiplied with the edge normal.
 %
 %===============================================================================
-%> @file computeFuncDiscNuOnQuadEdge.m
+%> @file
 %>
 %> @brief Assembles a multidimensional array containing the values of a discrete 
 %>        function in each quadrature point of each edge, multiplied with the edge normal.
