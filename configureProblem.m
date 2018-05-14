@@ -5,7 +5,7 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'showcase');
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [50, 10]);
+problemData = setdefault(problemData, 'numElem', [32, 8]);
 
 % Local polynomial approximation order (0 to 5)
 problemData = setdefault(problemData, 'p', 1);
@@ -16,27 +16,30 @@ problemData = setdefault(problemData, 'qOrdMax', problemData.qOrd);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 600);  % end time
-problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.001));  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 400);  % end time
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.02));  % number of time steps
 
-% Order of Runge-Kutta method
+% Order of Runge-Kutta method (1 - explicit Euler, 2/3 - multi-stage RK)
 problemData = setdefault(problemData, 'ordRK', 1);
 % problemData = setdefault(problemData, 'ordRK', min(problemData.p+1, 3));
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 500); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputFrequency', 250); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep problemData.problemName '_' problemData.testcase ]); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
 
-% ID of coupling boundary
-problemData = setdefault(problemData, 'isCoupling', false);
-problemData = setdefault(problemData, 'isJumpCoupling', true);
+% Coupling settings
+problemData = setdefault(problemData, 'isCoupling', false);  % Enable coupling
+problemData = setdefault(problemData, 'isJumpCoupling', true);  % Include jump term on coupling interface
+
+% Reduce order of q, u1 to be p/2
+problemData = setdefault(problemData, 'isReducedOrder', false);
 
 % Bottom friction parameterization
-problemData = setdefault(problemData, 'bottomFriction', 'quadratic'); % 'none' (use uDCont), 'linear', 'quadratic'
+problemData = setdefault(problemData, 'bottomFriction', 'none'); % 'none' (use uDCont), 'linear', 'quadratic'
 
 %% Parameter check.
 assert(problemData.p >= 0 && problemData.p <= 5, 'Polynomial order must be zero to five.')
@@ -45,7 +48,6 @@ assert(problemData.numSteps > 0, 'Number of time steps must be positive.')
 
 %% Coefficients and boundary data.
 problemData = execin([problemData.problemName filesep 'getTestcase'], problemData, problemData.testcase);
-
 
 %% Domain and triangulation.
 domainWidth = problemData.domainWidth;

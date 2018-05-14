@@ -13,17 +13,13 @@ switch problemName
     idLand = -1; idRad = -1; idRiv = 4; idOS = 2; idBdrRiem = [2,4];
     
     gConst = 10;
-    CfConst = 1e-4;
-    rho = 1e-3;
+    CfConst = 4.e-3;
+    rho = 8.e-2;
     
-%     zBotCont = @(x) 0.5 * (x/40 .* (x <= 40) + (40 < x & x < 60) + (100 - x)/40 .* (x >= 60));
-%     zBotCont = @(x) 2 * (-1 * (x/50 - 1).^2 + 1);
-    zBotCont = @(x) 0.25 * (cos((x-50)/30 * pi) + 1) .* (20 <= x & x <= 80);
+    zBotCont = @(x) (cos((x-50)/30 * pi) + 1) .* (20 <= x & x <= 80);
     xi0Cont = @(x) 4.75 * ones(size(x));
     h0Cont = @(x) 5 - zBotCont(x);
-    u10Cont = @(x,z) log(1 + (z - zBotCont(x)) ./ (5 - zBotCont(x)) * (exp(1) - 1));
-%     u10Cont = @(x,z) log(1 + z ./ 5 * (exp(1) - 1));
-%     u10Cont = @(x,z) 0.5 - 0.5 * cos(min(1, (z - zBotCont(x)) ./ (2 - zBotCont(x))) * pi);
+    u10Cont = @(x,z) zeros(size(x));
     
     fhCont = @(t,x) zeros(size(x));
     fuCont = @(t,x,z) zeros(size(x));
@@ -31,7 +27,7 @@ switch problemName
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
       @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
     
-    u1DCont = @(t,x,z) u10Cont(x,z);
+    u1DCont = @(t,x,z) log(1 + (z - zBotCont(x)) ./ (5 - zBotCont(x)) * (exp(1) - 1));
     hDCont = @(t,x) 5 * ones(size(x));
     u2DCont = @(t,x,z) zeros(size(x));
     q1DCont = @(t,x,z) zeros(size(x));
@@ -45,6 +41,8 @@ switch problemName
     idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
   
     gConst = 10;
+    CfConst = 0;
+    
     aConst = 0;
     bConst = 0.005;
     cConst = 1;
@@ -71,21 +69,18 @@ switch problemName
         hCont = @(t,x) xiCont(t,x) - zBotCont(x);
 
         dxXiCont = @(t,x) zeros(size(x));
-        dxHCont = @(t,x) dxXiCont(t,x) - bConst;
         dtHCont = @(t,x) zeros(size(x));
       case 'coupled_stationary'
         xiCont = @(t,x) 5 + etaConst * sin(rhoConst * x);
         hCont = @(t,x) xiCont(t,x) - zBotCont(x);
 
         dxXiCont = @(t,x) etaConst * rhoConst * cos(rhoConst * x);
-        dxHCont = @(t,x) dxXiCont(t,x) - bConst;
         dtHCont = @(t,x) zeros(size(x));
       case 'coupled_transient'
         xiCont = @(t,x) 5 + etaConst * sin(rhoConst * x + tauConst * t);
         hCont = @(t,x) xiCont(t,x) - zBotCont(x);
 
         dxXiCont = @(t,x) etaConst * rhoConst * cos(rhoConst * x + tauConst * t);
-        dxHCont = @(t,x) dxXiCont(t,x) - bConst;
         dtHCont = @(t,x) etaConst * tauConst * cos(rhoConst * x + tauConst * t);
     end % switch
     
@@ -106,7 +101,7 @@ switch problemName
         omegaCont = @(t,x) kappaConst * cos(lambdaConst * x + muConst * t);
     end % switch
     
-    q1ZbCont = @(t,x) -dxHCont(t,x) + betaConst * bConst * cos(betaConst * zBotCont(x)) .* omegaCont(t,x);
+    q1ZbCont = @(t,x) -dxXiCont(t,x) + betaConst * bConst * cos(betaConst * zBotCont(x)) .* omegaCont(t,x);
     q2ZbCont = @(t,x) -betaConst * cos(betaConst * zBotCont(x)) .* omegaCont(t,x);
     vCont = @(t,x,z) -dxYCont(t,x) .* ( sin(alphaConst * z) / alphaConst - cos(alphaConst * zBotCont(x)) .* z ) ...
       - alphaConst * bConst * yCont(t,x) .* sin(alphaConst * zBotCont(x)) .* z;
@@ -135,72 +130,6 @@ switch problemName
     
     DCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {dConst, 0; 0, dConst}, 'UniformOutput', false);
     dxzDCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
-    
-%   case 'coupled_stationary'
-%     isAnalytical = true;
-%     
-%     domainWidth = 100;
-%     idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
-%   
-%     gConst = 10;
-%     aConst = 0;
-%     bConst = 0.005;
-%     cConst = 1;
-%     dConst = 0.01;
-%     alphaConst = 0.1;
-%     betaConst = 0.05;
-%     gammaConst = 1;
-%     deltaConst = 0.07;
-%     etaConst = 0.003;
-%     rhoConst = 0.03;
-%     kConst = 0.001;
-%     lambdaConst = 0.05;
-%     
-%     yCont = @(t,x) gammaConst * sin(deltaConst * x) + cConst;
-%     omegaCont = @(t,x) cos(lambdaConst * x);
-%     
-%     xi0Cont = @(x) 5 * ones(size(x));
-%     zBotCont = @(x) aConst + bConst * x;
-%     xiCont = @(t,x) 5 + etaConst * sin(rhoConst * x);
-%     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
-%     
-%     dxXiCont = @(t,x) etaConst * rhoConst * cos(rhoConst * x);
-%     dxHCont = @(t,x) dxXiCont(t,x) - bConst;
-%     dtHCont = @(t,x) zeros(size(x));
-%     
-%     dtYCont = @(t,x) zeros(size(x));
-%     dxYCont = @(t,x) gammaConst * deltaConst * cos(deltaConst * x);
-%     dxdxYCont = @(t,x) -gammaConst * deltaConst * deltaConst * sin(deltaConst * x);
-%     
-%     q1ZbCont = @(t,x) -dxHCont(t,x) + betaConst * bConst * cos(betaConst * zBotCont(x)) .* omegaCont(t,x);
-%     q2ZbCont = @(t,x) -betaConst * cos(betaConst * zBotCont(x)) .* omegaCont(t,x);
-%     vCont = @(t,x,z) -dxYCont(t,x) .* ( sin(alphaConst * z) / alphaConst - cos(alphaConst * zBotCont(x)) .* z ) ...
-%       - alphaConst * bConst * yCont(t,x) .* sin(alphaConst * zBotCont(x)) .* z;
-%     epsCont = @(t,x) kConst * (-bConst * q1ZbCont(t,x) + q2ZbCont(t,x)) - vCont(t,x,zBotCont(x));
-%     
-%     u1Cont = @(t,x,z) yCont(t,x) .* ( cos(alphaConst * z) - cos(alphaConst * zBotCont(x)) );
-%     u2Cont = @(t,x,z) vCont(t,x,z) + epsCont(t,x);
-%     
-%     dtU1Cont = @(t,x,z) dtYCont(t,x) .* ( cos(alphaConst * z) - cos(alphaConst * zBotCont(x)) );
-%     dxU1Cont = @(t,x,z) dxYCont(t,x) .* ( cos(alphaConst * z) - cos(alphaConst * zBotCont(x)) ) ...
-%       + alphaConst * bConst * yCont(t,x) .* sin(alphaConst * zBotCont(x));
-%     dzU1Cont = @(t,x,z) -alphaConst * yCont(t,x) .* sin(alphaConst * z);
-%     dzU2Cont = @(t,x,z) -dxYCont(t,x) .* ( cos(alphaConst * z) - cos(alphaConst * zBotCont(x)) ) ...
-%       - alphaConst * bConst * yCont(t,x) .* sin(alphaConst * zBotCont(x));
-%     
-%     dxdxU1Cont = @(t,x,z) dxdxYCont(t,x) .* ( cos(alphaConst * z) - cos(alphaConst * zBotCont(x)) ) ...
-%       + 2 * alphaConst * bConst * dxYCont(t,x) .* sin(alphaConst * zBotCont(x)) ...
-%       + alphaConst * alphaConst * bConst * bConst * yCont(t,x) .* cos(alphaConst * zBotCont(x));
-%     dxdzU1Cont = @(t,x,z) -alphaConst * dxYCont(t,x) .* sin(alphaConst * z);
-%     dzdzU1Cont = @(t,x,z) -alphaConst * alphaConst * yCont(t,x) .* cos(alphaConst * z);
-%     
-%     dxU1zIntCont = @(t,x) dxYCont(t,x) .* ( 1/alphaConst * ( sin(alphaConst * xiCont(t,x)) - sin(alphaConst * zBotCont(x)) ) ...
-%           - cos(alphaConst * zBotCont(x)) .* hCont(t,x) ) ...
-%         + yCont(t,x) .* ( alphaConst * bConst * sin(alphaConst * zBotCont(x)) .* hCont(t,x) ...
-%           + ( cos(alphaConst * xiCont(t,x)) - cos(alphaConst * zBotCont(x)) ) .* dxXiCont(t,x) );
-%     
-%     DCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {dConst, 0; 0, dConst}, 'UniformOutput', false);
-%     dxzDCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
     
   case 'dambreak'
     isAnalytical = false;
