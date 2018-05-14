@@ -1,7 +1,7 @@
 % Performs all post-processing steps. Nothing done for the diffusion solver.
 
 %===============================================================================
-%> @file diffusion/postprocessProblem.m
+%> @file
 %>
 %> @brief Performs all post-processing tasks. Nothing done for the diffusion solver.
 %===============================================================================

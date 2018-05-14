@@ -2,7 +2,7 @@
 % Problem parameters are to be modified inside this routine.
 
 %===============================================================================
-%> @file diffusion/configureProblem.m
+%> @file
 %>
 %> @brief Fills the problemData-struct with all basic configuration options.
 %>        Problem parameters are to be modified inside this routine.

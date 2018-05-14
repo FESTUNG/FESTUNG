@@ -2,7 +2,7 @@
 % solution at the next time step.
 
 %===============================================================================
-%> @file diffusion/solveStep.m
+%> @file
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %>        Computes the solution at the next time step.

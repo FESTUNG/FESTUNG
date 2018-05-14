@@ -1,7 +1,7 @@
 % Fills the problem's data structures with initial data.
 
 %===============================================================================
-%> @file diffusion/initializeProblem.m
+%> @file
 %>
 %> @brief Fills the problem's data structures with initial data.
 %===============================================================================

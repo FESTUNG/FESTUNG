@@ -4,7 +4,7 @@
 % saved as part of the grid.
 
 %===============================================================================
-%> @file diffusion/computeDerivedGridData.m
+%> @file
 %>
 %> @brief Computes various additional fields needed throughout the diffusion
 %>        problem presented in @ref FRAK2015 . These fields only contain

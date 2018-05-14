@@ -1,7 +1,7 @@
 % First step of the four-part algorithm in the time stepping loop.
 
 %===============================================================================
-%> @file diffusion/preprocessStep.m
+%> @file
 %>
 %> @brief First step of the four-part algorithm in the time stepping loop. 
 %===============================================================================

@@ -1,0 +1,32 @@
+/*!
+ * \dir ./diffusion/
+ *
+ * \brief This is an implementation of the time-dependent diffusion equation
+ *        using an LDG discretization and an implicit Euler time integration.
+ *
+ * 
+ * Let @f$J = (0,t_\mathrm{end})@f$ be a finite time interval and @f$\Omega 
+ * \subset \mathbb{R}^2@f$ a polygonally bounded domain with boundary 
+ * @f$\partial\Omega@f$. We seek approximate solutions
+ * @f$c:\overline{J}\times\overline{\Omega}\rightarrow\mathbb{R}@f$ 
+ * of the diffusion equation
+ * @f{align*}{
+ * \mathbf{z}                                  &\;=\; - \nabla c   &&\text{in}~J\times\Omega\,,\\
+ * \partial_t c  + \nabla\cdot (d\,\mathbf{z}) &\;=\; f            &&\text{in}~J\times\Omega\,,\\
+ * c                                           &\;=\; c_\mathrm{D} &&\text{on}~J\times{\partial\Omega}_{\mathrm{D}}\,,\\
+ * \vec{z}\cdot\vec{\nu}                       &\;=\; g_\mathrm{N} &&\text{on}~J\times{\partial\Omega}_\mathrm{N}\,,\\
+ * c                                           &\;=\; c^0          &&\text{on}~\{0\}\times\Omega\,.
+ * @f}
+ * The vector-valued quantity @f$\mathbf{z}@f$ was introduced as auxiliary unknown.  
+ * The coefficients @f$d:J\times\Omega\rightarrow\mathbb{R}^+@f$ and 
+ * @f$f:J\times\Omega\rightarrow \mathbb{R}@f$ may vary in time and space. 
+ * 
+ * The implementation uses hierarchical polynomial bases up to fourth order and
+ * an implicit Euler method for time-integration.
+ * 
+ * See @link ./diffusion/configureProblem.m @endlink for available configuration options.
+ * 
+ * A detailed description can be found in @ref FRAK2015.
+ */
+
+

@@ -1,7 +1,7 @@
 % Third step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file diffusion/postprocessStep.m
+%> @file
 %>
 %> @brief Third step of the four-part algorithm in the main loop.
 %===============================================================================
