@@ -8,7 +8,9 @@
  * 
  * Let @f$J = (0,t_\mathrm{end})@f$ be a finite time interval and @f$\Omega 
  * \subset \mathbb{R}^2@f$ a polygonally bounded domain with boundary 
- * @f$\partial\Omega@f$. We consider the advection equation
+ * @f$\partial\Omega@f$. We seek approximate solutions
+ * @f$c:\overline{J}\times\overline{\Omega}\rightarrow\mathbb{R}@f$ to
+ * the advection equation
  * @f{align*}{
  * \partial_t c  + \nabla\cdot (\mathbf{u}\,c) &\;=\; f            &&\text{in}~J\times\Omega\,,\\
  * c                                           &\;=\; c_\mathrm{D} &&\text{on}~J\times{\partial\Omega}_{\mathrm{in}}\,,\\
