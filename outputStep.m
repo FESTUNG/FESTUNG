@@ -12,19 +12,27 @@
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
 %> These four steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. @link swe_2dv/preprocessStep.m @endlink
+%>  2. @link swe_2dv/solveStep.m @endlink
+%>  3. @link swe_2dv/postprocessStep.m @endlink
+%>  4. @link swe_2dv/outputStep.m @endlink
 %> 
 %> This routine is executed last in each loop iteration and writes output
 %> files that can later be visualized using TecPlot, Paraview, or others,
-%> depending on the chosen file types in configureProblem().
+%> depending on the chosen file types in @link swe_2dv/configureProblem.m @endlink.
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
-%>                      fields, and solution data structures, as provided 
-%>                      by configureProblem() and preprocessProblem(). 
-%>                      @f$[\text{struct}]@f$
+%> If analytical solution data for @f$h, u^1, u^2@f$ are given, the L2-errors
+%> of the current state are evaluated and printed.
+%>
+%> Furthermore, the current process with respect to the number of executed time
+%> steps is printed.
+%>
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields (either filled with initial data or the solution
+%>                      from the previous loop iteration), as provided by 
+%>                      @link swe_2dv/configureProblem.m @endlink and 
+%>                      @link swe_2dv/preprocessProblem.m @endlink. 
+%%>                     @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
 %> @retval problemData  The input struct enriched with post-processed data
@@ -32,7 +40,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

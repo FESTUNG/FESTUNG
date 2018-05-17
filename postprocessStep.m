@@ -12,19 +12,21 @@
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
 %> These four steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. @link swe_2dv/preprocessStep.m @endlink
+%>  2. @link swe_2dv/solveStep.m @endlink
+%>  3. @link swe_2dv/postprocessStep.m @endlink
+%>  4. @link swe_2dv/outputStep.m @endlink
 %> 
 %> This routine is executed third in each loop iteration.
 %> It decides whether the main loop is to be terminated (i.e., the
 %> end of the simulation time is reached).
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
-%>                      fields, and solution data structures, as provided 
-%>                      by configureProblem() and preprocessProblem(). 
-%>                      @f$[\text{struct}]@f$
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields (either filled with initial data or the solution
+%>                      from the previous loop iteration), as provided by 
+%>                      @link swe_2dv/configureProblem.m @endlink and 
+%>                      @link swe_2dv/preprocessProblem.m @endlink. 
+%%>                     @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
 %> @retval problemData  The input struct enriched with post-processed data
@@ -32,7 +34,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

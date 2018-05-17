@@ -9,25 +9,25 @@
 %> @brief Compute the solution of the current Runge-Kutta stage.
 %>
 %> The routine iterateSubSteps() repeatedly executes three steps until the 
-%> parameter <code>problemData.isSubSteppingFinished</code> becomes 
-%> <code>true</code>.
+%> parameter <tt>problemData.isSubSteppingFinished</tt> becomes 
+%> <tt>true</tt>.
 %> These three steps are:
 %>
-%>  1. preprocessSubStep()
-%>  2. solveSubStep()
-%>  3. postprocessSubStep()
+%>  1. @link swe_2dv/preprocessSubStep.m @endlink
+%>  2. @link swe_2dv/solveSubStep.m @endlink
+%>  3. @link swe_2dv/postprocessSubStep.m @endlink
 %> 
 %> This routine is executed second in each loop iteration.
-%> It assembles the global system, computes the discrete time derivative
-%> and applies slope limiting to it (i.e., applies "selective mass lumping"
-%> as described in @ref RAWFK2016). This is used to compute the solution at
-%> the next Runge-Kutta level, which then is slope-limited itself.
+%> It first solves for @f$\vec{q}_h^{(n)}@f$ and @f$(u^2)^{(n)}@f$ and uses those
+%> to update @f$(u^1)^{(n+1)}@f$ and @f$h^{(n+1)}@f$, with @f$n@f$ being the previous
+%> time level.
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
-%>                      fields, and solution data structures (either filled
-%>                      with initial data or the solution from the previous
-%>                      loop iteration), as provided by configureProblem()  
-%>                      and preprocessProblem(). @f$[\text{struct}]@f$
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields (either filled with initial data or the solution
+%>                      from the previous loop iteration), as provided by 
+%>                      @link swe_2dv/configureProblem.m @endlink and 
+%>                      @link swe_2dv/preprocessProblem.m @endlink. 
+%%>                     @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %> @param  nSubStep     The current iteration number of the substepping.
 %>
@@ -36,7 +36,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

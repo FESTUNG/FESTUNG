@@ -9,24 +9,25 @@
 %> @brief Preprocessing of the Runge-Kutta step.
 %>
 %> The routine iterateSubSteps() repeatedly executes three steps until the 
-%> parameter <code>problemData.isSubSteppingFinished</code> becomes 
-%> <code>true</code>.
+%> parameter <tt>problemData.isSubSteppingFinished</tt> becomes 
+%> <tt>true</tt>.
 %> These three steps are:
 %>
-%>  1. preprocessSubStep()
-%>  2. solveSubStep()
-%>  3. postprocessSubStep()
+%>  1. @link swe_2dv/preprocessSubStep.m @endlink
+%>  2. @link swe_2dv/solveSubStep.m @endlink
+%>  3. @link swe_2dv/postprocessSubStep.m @endlink
 %> 
 %> This routine is executed first in each loop iteration.
 %> It takes care of the assembly of time-dependent matrices and right hand
 %> side vectors. Furthermore, it evaluates the boundary conditions for the 
 %> current Runge-Kutta step.
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
-%>                      fields, and solution data structures (either filled
-%>                      with initial data or the solution from the previous
-%>                      loop iteration), as provided by configureProblem()  
-%>                      and preprocessProblem(). @f$[\text{struct}]@f$
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields (either filled with initial data or the solution
+%>                      from the previous loop iteration), as provided by 
+%>                      @link swe_2dv/configureProblem.m @endlink and 
+%>                      @link swe_2dv/preprocessProblem.m @endlink. 
+%%>                     @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %> @param  nSubStep     The current iteration number of the substepping.
 %>
@@ -35,7 +36,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock
