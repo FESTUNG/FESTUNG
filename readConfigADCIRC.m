@@ -1,7 +1,7 @@
 % Reads model and simualtion parameters from a fort.15-file.
 
 %===============================================================================
-%> @file sweInverse/readConfigADCIRC.m
+%> @file
 %>
 %> @brief Reads model and simualtion parameters from a fort.15-file.
 %===============================================================================

@@ -2,7 +2,7 @@
 % functions with a (spatial) derivative of a discontinuous coefficient function.
 %
 %===============================================================================
-%> @file assembleMatElemPhiPhiDfuncDisc.m
+%> @file
 %>
 %> @brief Assembles two matrices, each containing integrals of products of 
 %>        two basis functions with a (spatial) derivative of a 

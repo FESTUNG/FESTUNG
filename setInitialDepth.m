@@ -1,7 +1,7 @@
 % Sets the initial values for the bathymetry.
 
 %===============================================================================
-%> @file sweInverse/setInitialDepth.m
+%> @file
 %>
 %> @brief Sets the initial values for the bathymetry.
 %===============================================================================

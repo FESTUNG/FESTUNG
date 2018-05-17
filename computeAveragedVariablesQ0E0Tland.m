@@ -2,7 +2,7 @@
 % compute their harmonic averages of Roe-Pike type for land boundary edges.
 %
 %===============================================================================
-%> @file sweInverse/computeAveragedVariablesQ0E0Tland.m
+%> @file
 %>
 %> @brief Uses the evaluation of the unknowns of the 2D Shallow-Water Equations 
 %>        to compute their harmonic averages of Roe-Pike type for land boundary 

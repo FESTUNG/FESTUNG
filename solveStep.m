@@ -1,7 +1,7 @@
 % Second step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file sweInverse/solveStep.m
+%> @file
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %===============================================================================

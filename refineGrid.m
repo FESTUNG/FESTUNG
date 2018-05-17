@@ -2,7 +2,7 @@
 % given by any of the grid generating routines in FESTUNG.
 
 %===============================================================================
-%> @file refineGrid.m
+%> @file
 %>
 %> @brief Routine that uses edge bisection of triangles to refine any triangular  
 %>        grid as as given by any of the grid generating routines in FESTUNG.

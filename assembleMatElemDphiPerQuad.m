@@ -3,7 +3,7 @@
 % quadrature weight.
 %
 %===============================================================================
-%> @file assembleMatElemDphiPerQuad.m
+%> @file
 %>
 %> @brief Assembles two matrices, each containing evaluations of a (spatial) 
 %>        derivative of one basis function in quadrature points multiplied with

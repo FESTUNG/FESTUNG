@@ -2,7 +2,7 @@
 % different triangles.
 
 %===============================================================================
-%> @file applyVertexAveraging.m
+%> @file
 %>
 %> @brief Takes a DG function and smoothens it by averaging the vertex values 
 %>        from different triangles.

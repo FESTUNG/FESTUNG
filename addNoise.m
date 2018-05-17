@@ -2,7 +2,7 @@
 % magnitude.
 
 %===============================================================================
-%> @file addNoise.m
+%> @file
 %>
 %> @brief Perturbes any kind of data with uniformally distributed noise of a 
 %> 		  certain magnitude.

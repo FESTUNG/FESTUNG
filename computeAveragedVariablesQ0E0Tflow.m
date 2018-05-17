@@ -2,7 +2,7 @@
 % compute their harmonic averages of Roe-Pike type for flow boundary edges.
 %
 %===============================================================================
-%> @file sweInverse/computeAveragedVariablesQ0E0Tflow.m
+%> @file
 %>
 %> @brief Uses the evaluation of the unknowns of the 2D Shallow-Water Equations 
 %>        to compute their harmonic averages of Roe-Pike type for flow boundary 

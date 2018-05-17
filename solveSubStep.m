@@ -2,7 +2,7 @@
 % step in the main loop.
 
 %===============================================================================
-%> @file sweInverse/solveSubStep.m
+%> @file
 %>
 %> @brief Second step of the three-part algorithm in the iterateSubSteps loop of
 %>        each step in the main loop.

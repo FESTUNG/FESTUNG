@@ -4,7 +4,7 @@
 % neighbouring element to the local edge of the appropriate edge index.
 
 %===============================================================================
-%> @file assembleMatEdgePhiPerQuad.m
+%> @file
 %>
 %> @brief Assembles nine matrices containing evaluations of one basis function 
 %>        in quadrature points multiplied with the corresponding quadrature 

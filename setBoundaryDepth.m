@@ -1,7 +1,7 @@
 % Set the boundary values for the bathymetry.
 
 %===============================================================================
-%> @file sweInverse/setBoundaryDepth.m
+%> @file
 %>
 %> @brief Set the boundary values for the bathymetry.
 %===============================================================================

@@ -4,7 +4,7 @@
 % time but used in every step. They are stored as part of the grid.
 
 %===============================================================================
-%> @file sweInverse/computeDerivedGridData.m
+%> @file
 %>
 %> @brief Computes various additional fields needed throughout the Shallow-Water
 %>				problem presented in ... . These fields only contain

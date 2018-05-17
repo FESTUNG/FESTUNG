@@ -3,7 +3,7 @@
 % a neighboring element.
 
 %===============================================================================
-%> @file integrateRefEdgePhiIntPhiIntPhiExt.m
+%> @file
 %>
 %> @brief Compute integrals over the edges of the reference triangle, whose 
 %>        integrands consist of all permutations of three basis functions of 

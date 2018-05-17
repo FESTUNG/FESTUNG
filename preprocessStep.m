@@ -1,7 +1,7 @@
 % First step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file sweInverse/preprocessStep.m
+%> @file
 %>
 %> @brief First step of the four-part algorithm in the main loop.
 %===============================================================================

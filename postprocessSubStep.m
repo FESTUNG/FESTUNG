@@ -2,7 +2,7 @@
 % in the main loop.
 
 %===============================================================================
-%> @file sweInverse/postprocessSubStep.m
+%> @file
 %>
 %> @brief Last step of the three-part algorithm in the iterateSubSteps loop of 
 %>        each step in the main loop.

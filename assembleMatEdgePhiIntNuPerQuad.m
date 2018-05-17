@@ -3,7 +3,7 @@
 % with a component of the edge normal and the corresponding quadrature weight.
 
 %===============================================================================
-%> @file assembleMatEdgePhiIntNuPerQuad.m
+%> @file
 %>
 %> @brief Assembles six matrices containing evaluations of one basis function in 
 %>        quadrature points for each of the three local edges of each element 

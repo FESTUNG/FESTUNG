@@ -3,7 +3,7 @@
 % with the corresponding quadrature weight.
 
 %===============================================================================
-%> @file assembleMatEdgePhiIntPerQuad.m
+%> @file
 %>
 %> @brief Assembles three matrices containing evaluations of one basis function 
 %>        in quadrature points for each of the three local edges of each element

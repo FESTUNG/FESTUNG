@@ -1,7 +1,7 @@
 % Auxiliary function for visualization of 2D Shallow-Water Equations output.
 
 %===============================================================================
-%> @file sweInverse/visualizeSolution.m
+%> @file
 %>
 %> @brief Auxiliary function for visualization of 2D Shallow-Water Equations 
 %>        output.

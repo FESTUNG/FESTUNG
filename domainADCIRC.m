@@ -2,7 +2,7 @@
 % a grid as well as fields that store model parameter data.
 
 %===============================================================================
-%> @file sweInverse/domainADCIRC.m
+%> @file
 %>
 %> @brief Reads grid and boundary parameters from fort.14- and fort.17-files and
 %>        creates a grid as well as fields that store model parameter data.

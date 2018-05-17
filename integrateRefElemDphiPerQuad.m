@@ -3,7 +3,7 @@
 % weight.
 
 %===============================================================================
-%> @file integrateRefElemDphiPerQuad.m
+%> @file
 %>
 %> @brief Evaluates the (spatial) derivatives of a basis function in all 
 %>				quadrature points on the reference triangle and multiplies with the 
