@@ -1,7 +1,7 @@
 % Performs all post-processing steps. Error evaluation for analytical problems.
 
 %===============================================================================
-%> @file sweVert/postprocessProblem.m
+%> @file
 %>
 %> @brief Performs all post-processing tasks. Error evaluation for analytical problems.
 %===============================================================================

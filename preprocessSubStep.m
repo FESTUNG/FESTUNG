@@ -1,7 +1,7 @@
 % Preprocessing of the Runge-Kutta step.
 
 %===============================================================================
-%> @file sweVert/preprocessSubStep.m
+%> @file
 %>
 %> @brief Preprocessing of the Runge-Kutta step.
 %===============================================================================
@@ -70,8 +70,13 @@ u2DCont = problemData.u2DCont;
 qDCont = { @(x1,x2) problemData.q1DCont(t,x1,x2); @(x1,x2) problemData.q2DCont(t,x1,x2) };
 
 %% L2-projections of algebraic coefficients and right hand side.
-DDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
-                       problemData.globM, problemData.basesOnQuad2D), problemData.DCont, 'UniformOutput', false);
+if iscell(problemData.DCont)
+  DDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
+                         problemData.globM, problemData.basesOnQuad2D), problemData.DCont, 'UniformOutput', false);
+else
+  DDisc = projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) problemData.DCont(t,x1,x2), problemData.qOrd, ...
+                         problemData.globM, problemData.basesOnQuad2D);
+end % if
 problemData.globLu = reshape(projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) fuCont(t,x1,x2), problemData.qOrd, problemData.globM, problemData.basesOnQuad2D).', [], 1);
 problemData.globLh = reshape(projectFuncCont2DataDisc1D(problemData.g.g1D, @(x1) fhCont(t,x1), problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D).', [], 1);
 

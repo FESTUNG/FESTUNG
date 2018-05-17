@@ -1,7 +1,7 @@
 % Compute the solution of the current Runge-Kutta stage.
 
 %===============================================================================
-%> @file sweVert/solveSubStep.m
+%> @file
 %>
 %> @brief Compute the solution of the current Runge-Kutta stage.
 %===============================================================================

@@ -16,8 +16,8 @@ problemData = setdefault(problemData, 'qOrdMax', problemData.qOrd);
 
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
-problemData = setdefault(problemData, 'tEnd', 400);  % end time
-problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.02));  % number of time steps
+problemData = setdefault(problemData, 'tEnd', 600);  % end time
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.01));  % number of time steps
 
 % Order of Runge-Kutta method (1 - explicit Euler, 2/3 - multi-stage RK)
 problemData = setdefault(problemData, 'ordRK', 1);
@@ -26,14 +26,14 @@ problemData = setdefault(problemData, 'ordRK', 1);
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);  % visualization of solution
-problemData = setdefault(problemData, 'outputFrequency', 250); % no visualization of every timestep
+problemData = setdefault(problemData, 'outputFrequency', 200); % no visualization of every timestep
 problemData = setdefault(problemData, 'outputBasename', ...  % Basename of output files
                          ['output' filesep problemData.problemName '_' problemData.testcase ]); 
 problemData = setdefault(problemData, 'outputTypes', { 'vtk' });  % Type of visualization files ('vtk, 'tec')
 
 % Coupling settings
 problemData = setdefault(problemData, 'isCoupling', false);  % Enable coupling
-problemData = setdefault(problemData, 'isJumpCoupling', true);  % Include jump term on coupling interface
+problemData = setdefault(problemData, 'isJumpCoupling', true);  % Include jump penalty term on coupling interface
 
 % Reduce order of q, u1 to be p/2
 problemData = setdefault(problemData, 'isReducedOrder', false);
