@@ -59,20 +59,25 @@ function problemData = preprocessStep(problemData, nStep)
 t = nStep * problemData.tau;
 
 %% L2-projections of algebraic coefficients.
-KDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
-          problemData.globM, problemData.basesOnQuad), problemData.KCont, 'UniformOutput', false);
+if iscell(problemData.DCont)
+  DDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
+            problemData.globM, problemData.basesOnQuad), problemData.DCont, 'UniformOutput', false);
+else
+  DDisc = projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) problemData.DCont(t,x1,x2), problemData.qOrd, ...
+            problemData.globM, problemData.basesOnQuad);
+end % if
 fDisc = projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) problemData.fCont(t,x1,x2), problemData.qOrd, ...
           problemData.globM, problemData.basesOnQuad);
                              
 %% Assembly of time-dependent global matrices.
-problemData.globG = assembleMatElemDphiPhiFuncDisc(problemData.g, problemData.hatG, KDisc);
+problemData.globG = assembleMatElemDphiPhiFuncDisc(problemData.g, problemData.hatG, DDisc);
 problemData.globR = assembleMatEdgePhiPhiFuncDiscNu(problemData.g, problemData.g.markE0Tint, ...
-                      problemData.hatRdiag, problemData.hatRoffdiag, KDisc);
+                      problemData.hatRdiag, problemData.hatRoffdiag, DDisc);
 
 %% Assembly of Dirichlet boundary contributions.
 hDCont = @(x1,x2) problemData.hDCont(t,x1,x2);
 problemData.globRD = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(problemData.g, ...
-                      problemData.g.markE0TbdrD | problemData.g.markE0TbdrCoupling, problemData.hatRdiag, KDisc);
+                      problemData.g.markE0TbdrD | problemData.g.markE0TbdrCoupling, problemData.hatRdiag, DDisc);
 problemData.globJD = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
                       hDCont, problemData.N, problemData.basesOnQuad, problemData.qOrd);
 problemData.globKD = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrD, ...

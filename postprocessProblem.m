@@ -71,6 +71,5 @@ t = problemData.tEnd;
 hotstartFile = [ problemData.outputBasename '.mat' ];
 save(hotstartFile, 't', 'hDisc', 'q1Disc', 'q2Disc');
 fprintf('Saved hotstart data at t=%g to "%s"\n', t, hotstartFile);
-% fprintf('Sum, max, min, and MD5-hash of sysY: %g, %g, %g, %s\n', sum(problemData.sysY), max(problemData.sysY), min(problemData.sysY), DataHash(problemData.sysY));
 end % function
 
