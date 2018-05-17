@@ -2,7 +2,7 @@
 % step in the main loop.
 %
 %===============================================================================
-%> @file template/preprocessSubStep.m
+%> @file
 %>
 %> @brief First step of the three-part algorithm in the iterateSubSteps loop of 
 %>        each step in the main loop.
