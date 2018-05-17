@@ -2,7 +2,7 @@
 % step in the main loop.
 
 %===============================================================================
-%> @file transport/preprocessSubStep.m
+%> @file
 %>
 %> @brief First step of the three-part algorithm in the iterateSubSteps loop of 
 %>        each step in the main loop.
@@ -23,15 +23,16 @@
 %> to execute preprocessing operations, e.g., evaluate boundary conditions or
 %> right hand side values, assemble time-dependent matrix blocks, etc.
 %>
-%> @param  pd           A struct with problem parameters, precomputed
+%> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
 %>                      with initial data or the solution from the previous
 %>                      loop iteration), as provided by configureProblem()  
 %>                      and preprocessProblem(). @f$[\text{struct}]@f$
+%> @param  nStep        The current iteration number of the main loop. 
 %> @param  nSubStep     The current iteration number of the iterateSubSteps 
 %>                      loop. 
 %>
-%> @retval pd           The input struct enriched with preprocessed data
+%> @retval problemData  The input struct enriched with preprocessed data
 %>                      for this loop iteration. @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
@@ -54,7 +55,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = preprocessSubStep(problemData, ~, nSubStep)
+function problemData = preprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
 N = problemData.N;
 p = problemData.p;

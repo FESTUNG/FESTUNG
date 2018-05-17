@@ -2,7 +2,7 @@
 % step in the main loop.
 
 %===============================================================================
-%> @file template/solveSubStep.m
+%> @file
 %>
 %> @brief Second step of the three-part algorithm in the iterateSubSteps loop of
 %>        each step in the main loop.
@@ -28,6 +28,7 @@
 %>                      with initial data or the solution from the previous
 %>                      loop iteration), as provided by configureProblem()  
 %>                      and preprocessProblem(). @f$[\text{struct}]@f$
+%> @param  nStep        The current iteration number of the main loop. 
 %> @param  nSubStep     The current iteration number of the iterateSubSteps 
 %>                      loop. 
 %>
@@ -55,7 +56,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = solveSubStep(problemData, ~, nSubStep)
+function problemData = solveSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 K = problemData.K;
 N = problemData.N;
 p = problemData.p;

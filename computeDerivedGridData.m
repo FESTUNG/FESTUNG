@@ -1,19 +1,19 @@
 % Computes various additional fields needed throughout the transport
-% problem presented in @ref TODO . These fields only contain
+% problem presented in @ref HHAR2018 . These fields only contain
 % information based on the underlying grid and are therefore constant in
 % time but used in every step. They are saved as part of the grid.
 
 %===============================================================================
-%> @file transport/computeDerivedGridData.m
+%> @file
 %>
 %> @brief Computes various additional fields needed throughout the transport
-%>        problem presented in @ref TODO . These fields only contain
+%>        problem presented in @ref HHAR2018 . These fields only contain
 %>        information based on the underlying grid and are therefore constant in
 %>        time but used in every step. They are saved as part of the grid.
 %===============================================================================
 %>
 %> @brief Computes various additional fields needed throughout the transport
-%>        problem presented in @ref TODO . These fields only contain
+%>        problem presented in @ref HHAR2018 . These fields only contain
 %>        information based on the underlying grid and are therefore constant in
 %>        time but used in every step. They are saved as part of the grid.
 %>
@@ -39,8 +39,10 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Hennes Hajduk, Florian Frank, Balthasar Reuter, Vadym Aizinger
-%> 
+%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @author Balthasar Reuter, 2015
+%> @author Hennes Hajduk, 2016
+%>
 %> @par License
 %> @parblock
 %> This program is free software: you can redistribute it and/or modify

@@ -1,7 +1,7 @@
 % First step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file template/preprocessStep.m
+%> @file
 %>
 %> @brief First step of the four-part algorithm in the main loop.
 %===============================================================================
@@ -49,6 +49,6 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = preprocessStep(problemData, ~)
+function problemData = preprocessStep(problemData, nStep) %#ok<INUSD>
 % No preprocessing necessary.
 end % function

@@ -1,14 +1,14 @@
 % Fills the problem's data structures with initial data (if applicable).
 
 %===============================================================================
-%> @file template/initializeProblem.m
+%> @file
 %>
 %> @brief Fills the problem's data structures with initial data.
 %===============================================================================
 %>
 %> @brief Fills the problem's data structures with initial data.
 %>
-%> This routine is called after template/preprocessProblem.m.
+%> This routine is called after ./transport/preprocessProblem.m.
 %>
 %> Before entering the main loop of the solution algorithm, this routine
 %> fills the problem's data structures with initial data.

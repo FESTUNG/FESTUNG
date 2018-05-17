@@ -2,7 +2,7 @@
 % in the main loop.
 
 %===============================================================================
-%> @file template/postprocessSubStep.m
+%> @file
 %>
 %> @brief Last step of the three-part algorithm in the iterateSubSteps loop of 
 %>        each step in the main loop.
@@ -54,6 +54,6 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = postprocessSubStep(problemData, ~, nSubStep)
+function problemData = postprocessSubStep(problemData, nStep, nSubStep) %#ok<INUSL>
 problemData.isSubSteppingFinished = nSubStep >= length(problemData.omega);
 end % function

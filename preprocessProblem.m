@@ -2,7 +2,7 @@
 % stationary blocks, etc. for the problem solution.
 
 %===============================================================================
-%> @file template/preprocessProblem.m
+%> @file
 %>
 %> @brief Performs all pre-processing tasks, such as grid generation, assembly 
 %>        of stationary blocks, etc. for the problem solution.
@@ -11,7 +11,7 @@
 %> @brief Performs all pre-processing steps, such as grid generation, assembly 
 %>        of stationary blocks, etc. for the problem solution.
 %>
-%> This routine is called after template/configureProblem.m.
+%> This routine is called after ./transport/configureProblem.m.
 %>
 %> Typically, this step consists of grid generation, computation of derived
 %> data structures, pre-computing often needed values (e.g., basis

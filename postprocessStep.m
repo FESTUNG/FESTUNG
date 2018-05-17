@@ -1,7 +1,7 @@
 % Third step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file template/postprocessStep.m
+%> @file
 %>
 %> @brief Third step of the four-part algorithm in the main loop.
 %===============================================================================
