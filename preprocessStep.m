@@ -12,21 +12,21 @@
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
 %> These four steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. darcy_2dv/preprocessStep.m
+%>  2. darcy_2dv/solveStep.m
+%>  3. darcy_2dv/postprocessStep.m
+%>  4. darcy_2dv/outputStep.m
 %> 
 %> This routine is executed first in each loop iteration.
 %> It takes care of the assembly of time-dependent matrices and right hand
 %> side vectors. Furthermore, it evaluates the coefficient functions and
 %> boundary conditions for the current time step.
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
-%>                      fields, and solution data structures (either filled
-%>                      with initial data or the solution from the previous
-%>                      loop iteration), as provided by configureProblem()  
-%>                      and preprocessProblem(). @f$[\text{struct}]@f$
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields (either filled with initial data or the solution
+%>                      from the previous loop iteration), as provided by 
+%>                      darcy_2dv/configureProblem.m and 
+%>                      darcy_2dv/preprocessProblem.m. @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
 %> @retval problemData  The input struct without any modifications.

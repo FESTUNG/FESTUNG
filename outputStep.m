@@ -12,14 +12,14 @@
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
 %> These four steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. darcy_2dv/preprocessStep.m
+%>  2. darcy_2dv/solveStep.m
+%>  3. darcy_2dv/postprocessStep.m
+%>  4. darcy_2dv/outputStep.m
 %> 
 %> This routine is executed last in each loop iteration and writes output
 %> files that can later be visualized using TecPlot, Paraview, or others,
-%> depending on the chosen file types in configureProblem().
+%> depending on the chosen file types in darcy_2dv/configureProblem.m.
 %>
 %> If analytical solution data for @f$h, \vec{q}@f$ are given, the L2-error
 %> of the current state is evaluated and printed.
@@ -27,10 +27,11 @@
 %> Furthermore, the current process with respect to the number of executed time
 %> steps is printed.
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
-%>                      fields, and solution data structures, as provided 
-%>                      by configureProblem() and preprocessProblem(). 
-%>                      @f$[\text{struct}]@f$
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields (either filled with initial data or the solution
+%>                      from the previous loop iteration), as provided by 
+%>                      darcy_2dv/configureProblem.m and 
+%>                      darcy_2dv/preprocessProblem.m. @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
 %> @retval problemData  The input struct enriched with post-processed data

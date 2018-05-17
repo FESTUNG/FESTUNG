@@ -18,8 +18,10 @@
 %> functions on quadrature points), and assembly of time-independent matrix
 %> blocks.
 %>
-%> @param  problemData  A struct with problem parameters, as provided by
-%>                      configureProblem(). @f$[\text{struct}]@f$
+%>
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields, as provided by darcy_2dv/configureProblem.m. 
+%>                      @f$[\text{struct}]@f$
 %>
 %> @retval problemData  A struct with all necessary parameters and definitions
 %>                      for the problem description and precomputed fields.

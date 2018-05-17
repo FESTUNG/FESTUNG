@@ -12,20 +12,21 @@
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
 %> These four steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. darcy_2dv/preprocessStep.m
+%>  2. darcy_2dv/solveStep.m
+%>  3. darcy_2dv/postprocessStep.m
+%>  4. darcy_2dv/outputStep.m
 %> 
 %> This routine is executed third in each loop iteration.
 %> It decides whether the main loop is to be terminated (i.e., the
 %> end of the simulation time is reached).
 %> It also terminates the main loop if the problem is marked to be stationary.
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
-%>                      fields, and solution data structures, as provided 
-%>                      by configureProblem() and preprocessProblem(). 
-%>                      @f$[\text{struct}]@f$
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields (either filled with initial data or the solution
+%>                      from the previous loop iteration), as provided by 
+%>                      darcy_2dv/configureProblem.m and 
+%>                      darcy_2dv/preprocessProblem.m. @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
 %> @retval problemData  The input struct enriched with post-processed data

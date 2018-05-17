@@ -21,8 +21,8 @@
 %> the initial state is written to a visualization file.
 %>
 %> @param  problemData  A struct with problem parameters and precomputed
-%>                      fields, as provided by configureProblem() and 
-%>                      preprocessProblem(). @f$[\text{struct}]@f$
+%>                      fields, as provided by darcy_2dv/configureProblem.m and 
+%>                      darcy_2dv/preprocessProblem.m. @f$[\text{struct}]@f$
 %>
 %> @retval problemData  The input struct enriched with initial data.
 %>                      @f$[\text{struct}]@f$
