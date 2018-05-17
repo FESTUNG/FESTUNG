@@ -17,7 +17,7 @@
 %> the number of local degrees of freedom on an edge is given componentwise by
 %> 
 %> @f[
-%>   [\mathsf{R}_{\mu}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} = \sum_{E_{kn} \in \partial{{T_{k}}} \cap \ensuremath{\mathcal{E}}_{\text{int}} } \int_{E_{kn}}  \mu_{knj} \, \varphi_{ki} \, \text{d}s.
+%>   [\mathsf{R}_{\mu}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} = \sum_{E_{kn} \in \partial{{T_{k}}} \cap {\mathcal{E}}_{\text{int}} } \int_{E_{kn}}  \mu_{knj} \, \varphi_{ki} \, \text{d}s.
 %> @f]
 %> 
 %> The assembled matrix is given as
@@ -25,13 +25,13 @@
 %> @f[
 %> \mathsf{R}_{\mu} 
 %> = \sum_{n=1}^3 \sum_{l=1}^2 \left( \begin{bmatrix}
-%>   \ensuremath{|E_{1n}|}\, \delta_{E_{1n}\in\ensuremath{\mathcal{E}}_{\text{int}}} & & \\
+%>   {|E_{1n}|}\, \delta_{E_{1n}\in{\mathcal{E}}_{\text{int}}} & & \\
 %>   & \ddots & \\
-%>   & & \ensuremath{|E_{Kn}|}\, \delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{int}}}
+%>   & & {|E_{Kn}|}\, \delta_{E_{Kn}\in{\mathcal{E}}_{\text{int}}}
 %> \end{bmatrix} \, \Delta_n \right) \otimes [\mathsf{\hat{R}}_{\mu}]_{:,:,n,l} 
 %> @f]
 %> 
-%> where @f$\delta_{E_{kn}\in\ensuremath{\mathcal{E}}_{\text{int}}}@f$ (\p markE0T) denotes
+%> where @f$\delta_{E_{kn}\in{\mathcal{E}}_{\text{int}}}@f$ (\p markE0T) denotes
 %> a Kronecker delta, @f$\Delta_n@f$ is the permutation matrix described in 
 %> <code>assembleMatEdgePhiIntMuVal()</code> and @f$\otimes@f$ denotes the
 %> Kronecker product. The local matrices 
@@ -49,7 +49,7 @@
 %> 
 % %> @f[
 % %> \int_{E_{kn}}  \varphi_{ki} \, \mu_{knj} \, \text{d}s	=
-% %> \ensuremath{|E_{kn}|}
+% %> {|E_{kn}|}
 % %> \underbrace{\int_{0}^{1} \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(s) \, \text{d}s}_{\eqqcolon [\mathsf{\hat{R}}_{\mu}]_{i,j,n,l}}\,,
 % %> @f]
 % %> 

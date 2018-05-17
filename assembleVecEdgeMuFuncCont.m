@@ -15,7 +15,7 @@
 %> The vector @f${\boldsymbol{K}}_{\mu,\mathrm{in}} \in \mathbb{R}^{\bar{K}\bar{N}}@f$, with @f$\bar{K}@f$ being the number of edges and @f$\bar{N}@f$ being the number of edge degrees of freedom, is defined
 %> component-wise by
 %> @f[
-%> [{\boldsymbol{K}}_{\mu,\mathrm{in}}]_{(\bar{k}-1)\bar{N}+i} = \sum_{E_{kn}\in\partial{T_{k}}\cap\ensuremath{\mathcal{E}}_{\text{in}}} \,
+%> [{\boldsymbol{K}}_{\mu,\mathrm{in}}]_{(\bar{k}-1)\bar{N}+i} = \sum_{E_{kn}\in\partial{T_{k}}\cap{\mathcal{E}}_{\text{in}}} \,
 %> \int_{E_{kn}} c_\mathrm{D}(t) \, \mu_{kni}\, \text{d}s\,.
 %> @f]
 %> 
@@ -23,7 +23,7 @@
 %>
 %> @f[
 %> \int_{E_{kn}} c_\mathrm{D}\,\mu_{kni} \, \text{d}s 
-%> = \ensuremath{|E_{kn}|} \int_0^1 c_\mathrm{D}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{i}(s) \, \text{d}s \,.
+%> = {|E_{kn}|} \int_0^1 c_\mathrm{D}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{i}(s) \, \text{d}s \,.
 %> @f]
 %> 
 %> and using a 1D quadrature rule provided by <code>quadRule1D()</code>. The
@@ -32,18 +32,18 @@
 %> 
 %> @f[
 %> \int_{E_{kn}} c_\mathrm{D}\,\mu_{kni} \, \text{d}s 
-%> \approx \ensuremath{|E_{kn}|} \sum_{r=1}^R \omega_{r} \, c_\mathrm{D}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r) \, \hat{\mu}_{i}(\hat{q}_r) \,.
+%> \approx {|E_{kn}|} \sum_{r=1}^R \omega_{r} \, c_\mathrm{D}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r) \, \hat{\mu}_{i}(\hat{q}_r) \,.
 %> @f]
 %> 
 %> The global vector is then constructed as
 %> 
 %> @f[
 %> {\boldsymbol{K}}_{\mu,\mathrm{in}} = 
-%> \sum_{n=1}^3 \ensuremath{|E_{kn}|} \sum_{r=1}^R \omega_{r} \, \hat{\mu}_{i}(\hat{q}_r) \, {(\mathsf{\Delta}_n)}^\mathrm{T} \, 
-%> \begin{bmatrix} \delta_{E_{1n}\in\ensuremath{\mathcal{E}}_{\text{in}}} & & \\ & \ddots & \\ & & \delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{in}}} \end{bmatrix} [{\boldsymbol{C}}_\mathrm{D}]_{:,n,r} \,,
+%> \sum_{n=1}^3 {|E_{kn}|} \sum_{r=1}^R \omega_{r} \, \hat{\mu}_{i}(\hat{q}_r) \, {(\mathsf{\Delta}_n)}^\mathrm{T} \, 
+%> \begin{bmatrix} \delta_{E_{1n}\in{\mathcal{E}}_{\text{in}}} & & \\ & \ddots & \\ & & \delta_{E_{Kn}\in{\mathcal{E}}_{\text{in}}} \end{bmatrix} [{\boldsymbol{C}}_\mathrm{D}]_{:,n,r} \,,
 %> @f]
 %> 
-%> with @f$\omega_{r}@f$ denoting the integration weights, @f$\hat{q}_{r}@f$ denoting integration points, @f$\mathsf{\Delta}_n@f$ denoting the permutation matrix from element-based to edge-based view as described in <code>assembleMatEdgePhiIntMuVal()</code> and @f$\delta_{E_{kn}\in\ensuremath{\mathcal{E}}_{\text{in}}}@f$ denoting the Kronecker delta.
+%> with @f$\omega_{r}@f$ denoting the integration weights, @f$\hat{q}_{r}@f$ denoting integration points, @f$\mathsf{\Delta}_n@f$ denoting the permutation matrix from element-based to edge-based view as described in <code>assembleMatEdgePhiIntMuVal()</code> and @f$\delta_{E_{kn}\in{\mathcal{E}}_{\text{in}}}@f$ denoting the Kronecker delta.
 %> 
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 

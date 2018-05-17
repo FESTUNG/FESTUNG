@@ -11,19 +11,19 @@
 %> @brief Assembles a matrix containing integrals of products of flux and test 
 %> function.
 %> 
-%> The matrix @f$\mathsf{S}\in\ensuremath\mathbb{R}^{KN\times\bar{K}\bar{N}}@f$
+%> The matrix @f$\mathsf{S}\in\mathbb{R}^{KN\times\bar{K}\bar{N}}@f$
 %> with @f$K@f$ the number of elements, @f$N@f$ the number of local degrees of 
 %> freedom on the element, @f$\bar{K}@f$ the number of edges and @f$\bar{N}@f$ 
 %> the number of local degrees of freedom on an edge 
 %> consists of two kinds of contributions: blocks from flux over interior edges 
 %> 
 %> @f[
-%>   [\mathsf{S}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} =\sum_{E_{kn} \in \partial{{T_{k}}} \cap \ensuremath{\mathcal{E}}_{\text{int}} }  \int_{E_{kn}} ({\boldsymbol{u}}\cdot \boldsymbol{\nu}_{kn}) \,\mu_{knj}\, \varphi_{ki}\,  \text{d}s
+%>   [\mathsf{S}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} =\sum_{E_{kn} \in \partial{{T_{k}}} \cap {\mathcal{E}}_{\text{int}} }  \int_{E_{kn}} ({\boldsymbol{u}}\cdot \boldsymbol{\nu}_{kn}) \,\mu_{knj}\, \varphi_{ki}\,  \text{d}s
 %> @f]
 %> and flux on outflow edges
 %> @f[
 %>   [\mathsf{S}_{\text{out}}]_{(k-1)N+i,(\bar{k}-1)\bar{N}+j} 
-%>   = \sum_{E_{kn}\in\partial{T_{k}}\cap\ensuremath{\mathcal{E}}_{\text{out}}} \int_{E_{kn}} ({\boldsymbol{u}}\cdot\boldsymbol{\nu}_{kn}) \, \mu_{knj} \, \varphi_{ki} \,\text{d}s\,.
+%>   = \sum_{E_{kn}\in\partial{T_{k}}\cap{\mathcal{E}}_{\text{out}}} \int_{E_{kn}} ({\boldsymbol{u}}\cdot\boldsymbol{\nu}_{kn}) \, \mu_{knj} \, \varphi_{ki} \,\text{d}s\,.
 %> @f]
 %> The block of a single edge is given by
 %> @f[
@@ -44,26 +44,26 @@
 %>   \delta_{E_{Kn}=E_{1}} & \dots & \delta_{E_{Kn}=E_{\bar{K}}}
 %> \end{bmatrix}}_{\eqqcolon \mathsf{\Delta}_{n}} \otimes_\mathrm{V} \left( 
 %> \sum_{r=1}^R \sum_{l=1}^2 \begin{bmatrix}
-%>   \delta_{E_{1n}\in\ensuremath{\mathcal{E}}_{\text{int}}\cup\ensuremath{\mathcal{E}}_{\text{out}}} \, \ensuremath{|E_{1n}|} \, 
+%>   \delta_{E_{1n}\in{\mathcal{E}}_{\text{int}}\cup{\mathcal{E}}_{\text{out}}} \, {|E_{1n}|} \, 
 %>     \delta_{\kappa(\rho(1,n),l) = 1} \, [{\boldsymbol{U}}_{\boldsymbol{\nu}}]_{1,n,r} \\
 %>   \vdots \\
-%>   \delta_{E_{Kn}\in\ensuremath{\mathcal{E}}_{\text{int}}\cup\ensuremath{\mathcal{E}}_{\text{out}}} \, \ensuremath{|E_{Kn}|} \, 
+%>   \delta_{E_{Kn}\in{\mathcal{E}}_{\text{int}}\cup{\mathcal{E}}_{\text{out}}} \, {|E_{Kn}|} \, 
 %>     \delta_{\kappa(\rho(K,n),l) = K} \, [{\boldsymbol{U}}_{\boldsymbol{\nu}}]_{1,n,r} 
 %> \end{bmatrix} \otimes [\mathsf{\hat{S}}]_{:,:,n,r,l} \right)
 %> @f]
 %> with 
-%> @f$\mathsf{\Delta}_n\in\ensuremath\mathbb{R}^{K\times\bar{K}}@f$, @f$n\in\{1,2,3\}@f$, being the permutation matrix that has a single entry per row indicating the correspondence 
+%> @f$\mathsf{\Delta}_n\in\mathbb{R}^{K\times\bar{K}}@f$, @f$n\in\{1,2,3\}@f$, being the permutation matrix that has a single entry per row indicating the correspondence 
 %> @f$E_{kn} = E_{\bar{k}}@f$ for all elements and edges.
 %> It takes care of the necessary permutation from the element-based view of the 
 %> assembly towards the edge-based view of the hybrid degrees of freedom. Further 
 %> symbols used are the Kronecker deltas @f$\delta_{E_{1n}=E_{\bar{k}}}@f$,
-%> @f$\delta_{E_{kn}\in\ensuremath{\mathcal{E}}_{\text{int}}\cup\ensuremath{\mathcal{E}}_{\text{out}}}@f$
+%> @f$\delta_{E_{kn}\in{\mathcal{E}}_{\text{int}}\cup{\mathcal{E}}_{\text{out}}}@f$
 %> @f$\delta_{\kappa(\rho(k,n),l) = k}@f$ and the operation @f$\otimes_\mathrm{V}@f$ defined by <code>kronVec()</code>.
 %>
 %> For an efficient assembly of the integral
 %> @f{align*}
 %> \int_{E_{kn}} ({\boldsymbol{u}} \cdot \boldsymbol{\nu}_{kn}) \, \varphi_{ki} \, \mu_{knj} \, \text{d}s 
-%> &= \ensuremath{|E_{kn}|} \int_0^1 \left(({\boldsymbol{u}}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(s)) \cdot \boldsymbol{\nu}_{kn} \right) \, \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(s) \, \text{d}s \\
+%> &= {|E_{kn}|} \int_0^1 \left(({\boldsymbol{u}}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(s)) \cdot \boldsymbol{\nu}_{kn} \right) \, \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(s) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(s) \, \text{d}s \\
 %> &\approx \sum_{r=1}^R \underbrace{\left(({\boldsymbol{u}}(t) \circ \boldsymbol{F}_{k} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r)) \cdot \boldsymbol{\nu}_{kn} \right)}_{\eqqcolon [{\boldsymbol{U}}_{\boldsymbol{\nu}}]_{k,n,r}} \, \underbrace{\omega_{r} \,  \hat{\varphi}_{i} \circ \boldsymbol{\hat{\gamma}}_{n}(\hat{q}_r) \, \hat{\mu}_{j} \circ \hat{\beta}_{kn}(\hat{q}_r)}_{\eqqcolon [\mathsf{\hat{S}}]_{i,j,n,r,l}} \,,
 %> @f}
 %> we precompute the velocity in normal direction at every integration points 
