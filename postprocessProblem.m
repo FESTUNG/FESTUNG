@@ -1,7 +1,7 @@
 % Performs all post-processing steps. Error evaluation for analytical problems.
 
 %===============================================================================
-%> @file darcyVvert/postprocessProblem.m
+%> @file
 %>
 %> @brief Performs all post-processing tasks. Error evaluation for analytical problems.
 %===============================================================================
@@ -9,6 +9,10 @@
 %> @brief Performs all post-processing tasks. Error evaluation for analytical problems.
 %>
 %> This routine is called after the main loop.
+%>
+%> If analytical solutions are availabe, it evaluates the L2-errors.
+%> Furthermore, the final state is written to file, allowing to restart the 
+%> computation from the final state.
 %>
 %> @param  problemData  A struct with problem parameters and solution
 %>                      vectors. @f$[\text{struct}]@f$
@@ -19,7 +23,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

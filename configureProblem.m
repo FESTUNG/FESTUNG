@@ -1,3 +1,88 @@
+% Sets all problem parameters and fills the problemData-struct with all basic 
+% configuration options.
+
+%===============================================================================
+%> @file
+%>
+%> @brief Sets all problem parameters and fills the problemData-struct with
+%>        all basic configuration options.
+%===============================================================================
+%>
+%> @brief Sets all problem parameters and fills the problemData-struct with
+%>        all basic configuration options.
+%>
+%> This routine is called before any other function for the problem.
+%> It defines all problem parameters and should be the only file users have
+%> to adapt to their needs.
+%> 
+%> Let @f$J = (0,t_\mathrm{end})@f$ be a finite time interval and @f$\Omega 
+%> \subset \mathbb{R}^2@f$ a polygonally bounded domain with boundary 
+%> @f$\partial\Omega@f$, subdivided into Dirichlet boundary parts 
+%> @f$\partial\Omega_\mathrm{D}@f$ and Neumann boundary parts
+%> @f$\partial\Omega_\mathrm{N}@f$.
+%>
+%> In this problem we consider the time-dependent Darcy equation
+%> @f[
+%> S_0 \partial_t h - \nabla \cdot (\mathsf{K} \nabla h) = \tilde{f}
+%> @f]
+%> describing water transport through fully saturated porous media, where @f$h@f$ 
+%> is generally understood as the hydraulic head. 
+%> The coefficient @f$S_0@f$ denotes the specific storativity of the porous medium
+%> and @f$K@f$ the permeability. 
+%> Division by @f$S_0@f$ and setting
+%> @f[
+%> \mathsf{D} := \mathsf{K} / S_0\,, \qquad
+%> f := \tilde{f} / S_0
+%> @f]
+%> yields below formulation of the problem:
+%>
+%> We seek approximate solutions 
+%> @f$c:\overline{J}\times\overline{\Omega}\rightarrow\mathbb{R}@f$ 
+%> of the time-dependent diffusion equation
+%> @f{align*}{
+%> \mathbf{q}                                  &\;=\; - \nabla h   &&\text{in}~J\times\Omega\,,\\
+%> \partial_t h  + \nabla\cdot (d\,\mathbf{q}) &\;=\; f            &&\text{in}~J\times\Omega\,,\\
+%> c                                           &\;=\; h_\mathrm{D} &&\text{on}~J\times{\partial\Omega}_{\mathrm{D}}\,,\\
+%> \vec{q}\cdot\vec{\nu}                       &\;=\; g_\mathrm{N} &&\text{on}~J\times{\partial\Omega}_\mathrm{N}\,,\\
+%> c                                           &\;=\; h_0          &&\text{on}~\{0\}\times\Omega\,.
+%> @f}
+%> The vector-valued quantity @f$\mathbf{q}@f$ was introduced as auxiliary unknown.  
+%> The coefficients @f$d:J\times\Omega\rightarrow\mathbb{R}^{2\times2}@f$ and 
+%> @f$f:J\times\Omega\rightarrow \mathbb{R}@f$ may vary in time and space. 
+%>
+%> A detailed description can be found in @ref RRAFK2018.
+%>
+%> Please read the inline-comments in the code for the meaning of each
+%> configuration option.
+%>
+%> @param  problemData  A (probably) empty struct with problem parameters.
+%>                      @f$[\text{struct}]@f$
+%>
+%> @retval problemData  A struct with all necessary parameters and definitions
+%>                      for the problem description. @f$[\text{struct}]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%
 function problemData = configureProblem(problemData)
 %% Parameters.
 % Name of testcase

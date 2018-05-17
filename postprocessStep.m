@@ -1,7 +1,7 @@
 % Third step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file darcy_vert/postprocessStep.m
+%> @file
 %>
 %> @brief Third step of the four-part algorithm in the main loop.
 %===============================================================================
@@ -20,6 +20,7 @@
 %> This routine is executed third in each loop iteration.
 %> It decides whether the main loop is to be terminated (i.e., the
 %> end of the simulation time is reached).
+%> It also terminates the main loop if the problem is marked to be stationary.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures, as provided 
@@ -32,7 +33,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

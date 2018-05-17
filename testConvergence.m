@@ -2,7 +2,7 @@
 % for problem 'hdg_advection'.
 
 %===============================================================================
-%> @file darcy_2dv/testConvergence.m
+%> @file
 %>
 %> @brief Helper routine for testConvergence() that carries out convergence tests
 %>        for problem 'darcy_2dv'.

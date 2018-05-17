@@ -2,7 +2,7 @@
 % solution at the next time step.
 
 %===============================================================================
-%> @file darcy_vert/solveStep.m
+%> @file
 %>
 %> @brief Second step of the four-part algorithm in the main loop.
 %>        Computes the solution at the next time step.
@@ -35,7 +35,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

@@ -1,7 +1,7 @@
 % Last step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file darcyVert/outputStep.m
+%> @file
 %>
 %> @brief Last step of the four-part algorithm in the main loop.
 %===============================================================================
@@ -21,6 +21,12 @@
 %> files that can later be visualized using TecPlot, Paraview, or others,
 %> depending on the chosen file types in configureProblem().
 %>
+%> If analytical solution data for @f$h, \vec{q}@f$ are given, the L2-error
+%> of the current state is evaluated and printed.
+%>
+%> Furthermore, the current process with respect to the number of executed time
+%> steps is printed.
+%>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures, as provided 
 %>                      by configureProblem() and preprocessProblem(). 
@@ -32,7 +38,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock
