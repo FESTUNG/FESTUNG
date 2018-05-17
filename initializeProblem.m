@@ -67,7 +67,7 @@ if problemData.isHotstart
   problemData.cDiscRK{end, 1} = zeros(problemData.g.g1D.numT, problemData.barN);
   problemData.cDiscRK{end, 1}(:, 1:barN) = hotstart.hDisc(:, 1:barN);
 else
-  problemData.cDiscRK{end, 1} = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.h0Cont, problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
+  problemData.cDiscRK{end, 1} = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.h0Cont, problemData.qOrd, problemData.hatBarM, problemData.basesOnQuad1D);
 end % if
 
 %% Mesh adaptivity and assembly of time-independent global matrices.
@@ -88,7 +88,6 @@ if problemData.isHotstart
   problemData.cDiscRK{end, 3}(:, 1:N) = hotstart.u2Disc(:, 1:N);
 else
   problemData.cDiscRK{end, 2} = projectFuncCont2DataDiscTetra(problemData.g, problemData.u10Cont, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
-  % problemData.cDiscRK{end, 3} = projectFuncCont2DataDiscTetra(problemData.g, @(x,z) problemData.u2Cont(0,x,z), problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
   problemData.cDiscRK{end, 3} = zeros(size(problemData.cDiscRK{end, 2}));
 end % if
 

@@ -82,7 +82,7 @@ if mod(nStep-1, problemData.outputFrequency) == 0
     u2Cont = problemData.u2Cont;
         
     if problemData.isVisSol
-      problemData.pdExact.cDiscRK{end, 1} = projectFuncCont2DataDisc1D(problemData.pdExact.g.g1D, @(x1) hCont(t, x1), problemData.qOrd, problemData.barHatM, problemData.basesOnQuad1D);
+      problemData.pdExact.cDiscRK{end, 1} = projectFuncCont2DataDisc1D(problemData.pdExact.g.g1D, @(x1) hCont(t, x1), problemData.qOrd, problemData.hatBarM, problemData.basesOnQuad1D);
 
       problemData.pdExact = problemData.fn_adaptFreeSurface(problemData.pdExact);
 

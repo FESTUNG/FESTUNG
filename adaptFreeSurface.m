@@ -70,18 +70,18 @@ problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
 %% Momentum equation
 % Element integral for height-term in momentum equation (III)
-tildeGlobH = assembleMatElemTetraDphiPhi1D(problemData.g, problemData.g.g1D, problemData.tildeHatH);
+globVeeH = assembleMatElemTetraDphiPhi1D(problemData.g, problemData.g.g1D, problemData.hatVeeH);
 
 % Interior edge integral for height-term in momentum equation (VI)
 markE0T = problemData.g.markE0Tint | (problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH);
-tildeGlobQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, markE0T, problemData.tildeHatQdiag, problemData.tildeHatQoffdiag);
+globVeeQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, markE0T, problemData.hatVeeQdiag, problemData.hatVeeQoffdiag);
 
 % Boundary edge integrals
 markE0T = problemData.g.markE0TbdrTop | problemData.g.markE0TbdrBot | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH);
-tildeGlobQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, markE0T, problemData.tildeHatQdiag);
+globVeeQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, markE0T, problemData.hatVeeQdiag);
 
 % Combine matrices
-problemData.tildeGlobHQ = problemData.gConst * (tildeGlobH{1} - tildeGlobQ{1} - tildeGlobQbdr{1});
+problemData.globVeeHQ = problemData.gConst * (globVeeH{1} - globVeeQ{1} - globVeeQbdr{1});
 
 %% Flux equation
 % Element integral in flux and continuity equation (IX, XI)
@@ -120,5 +120,5 @@ markE0T = (problemData.g.markE0Tint & problemData.g.markE0Tv) | (problemData.g.m
 problemData.globSh = assembleMatEdgePhiIntPerQuad(problemData.g, markE0T, problemData.hatSdiag);
 
 % Helper matrix for jumps over vertices in free surface equation 
-problemData.barGlobS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, markE0T, problemData.barHatSdiag);
+problemData.globBarS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, markE0T, problemData.hatBarSdiag);
 end % function
