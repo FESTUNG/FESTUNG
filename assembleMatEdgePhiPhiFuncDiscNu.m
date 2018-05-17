@@ -297,7 +297,7 @@ if numel(g.markE0TE0T) == nEdges % mapping from nn to np implicitly given
       % Coefficient-function for off-diagonal blocks
       RtildeT = zeros(K*N, N);
       for l = 1 : dataN
-        RtildeT = RtildeT + kron(dataDisc{r, m}(:, l), refEdgePhiIntPhiExtPhiExt(:, :, l, n).');
+        RtildeT = RtildeT + kron(dataDisc{m}(:, l), refEdgePhiIntPhiExtPhiExt(:, :, l, n).');
       end % for l
       % Off-diagonal blocks
       ret{m} = ret{m} + kronVec((spdiags(0.5 * areaNuMarkE0T{m}(:, n), 0, K, K) * g.markE0TE0T{n}).', RtildeT).';

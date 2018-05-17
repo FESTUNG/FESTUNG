@@ -193,8 +193,8 @@ for m = 1 : 2
   for l = 1 : N
     for s = 1 : length(J0T)
       % Multiplying dataDisc here seems to be slightly faster than using spdiags instead of speye in the kronVec
-      Rs = Rs + kron(J0T{s}(dataDisc{m}(markElem,l) .* markElem,3-m,3-m), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
-                kron(J0T{s}(dataDisc{m}(markElem,l) .* markElem,3-m,  m), refElemDphiPhiPhi{s}(:,:,l,3-m));
+      Rs = Rs + kron(dataDisc{m}(markElem,l) .* J0T{s}(markElem,3-m,3-m), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
+                kron(dataDisc{m}(markElem,l) .* J0T{s}(markElem,3-m,  m), refElemDphiPhiPhi{s}(:,:,l,3-m));
     end % for s
   end % for l
   ret{m} = kronVec(speye(Ke, Ke), Rs);
