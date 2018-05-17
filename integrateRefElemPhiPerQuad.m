@@ -2,7 +2,7 @@
 % and multiplies with the associated quadrature weight.
 
 %===============================================================================
-%> @file integrateRefElemPhiPerQuad.m
+%> @file
 %>
 %> @brief Evaluates a basis function in all quadrature points of the reference 
 %>				triangle and multiplies with the associated quadrature weight.

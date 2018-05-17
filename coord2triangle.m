@@ -2,7 +2,7 @@
 % find the triangles that contain these points.
 %
 %===============================================================================
-%> @file coord2triangle.m
+%> @file
 %>
 %> @brief Computes the barycentic coordinates of a number of points and uses 
 %>        them to find the triangles that contain these points.

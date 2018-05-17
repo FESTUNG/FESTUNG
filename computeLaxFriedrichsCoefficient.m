@@ -2,7 +2,7 @@
 % Equations.
 
 %===============================================================================
-%> @file computeLaxFriedrichsCoefficient.m
+%> @file
 %>
 %> @brief Computes the Lax-Friedrichs flux coefficient for the 2D Shallow-
 %>        Water Equations.

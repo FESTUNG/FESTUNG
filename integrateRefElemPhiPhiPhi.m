@@ -2,7 +2,7 @@
 % consist of all permutations of three basis functions.
 
 %===============================================================================
-%> @file integrateRefElemPhiPhiPhi.m
+%> @file
 %>
 %> @brief Compute integrals on the reference triangle, whose 
 %>        integrands consist of all permutations of three basis functions.

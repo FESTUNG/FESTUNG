@@ -2,7 +2,7 @@
 % reference triangle and multiplies with the according quadrature weight.
 
 %===============================================================================
-%> @file integrateRefEdgePhiIntPerQuad.m
+%> @file
 %>
 %> @brief Evaluates a basis function in all quadrature points of all edges of the 
 %>				reference triangle and multiplies with the according quadrature weight.

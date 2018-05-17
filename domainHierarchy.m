@@ -2,7 +2,7 @@
 % given number of times.
 %
 %===============================================================================
-%> @file domainHierarchy.m
+%> @file
 %>
 %> @brief Generates a mesh for a polygonal domain with given mesh width and 
 %>        refines it a given number of times.

@@ -2,7 +2,7 @@
 % solution, etc.
 
 %===============================================================================
-%> @file swe/postprocessProblem.m
+%> @file
 %>
 %> @brief Performs all post-processing tasks, such as error estimates of the 
 %>        final solution, etc.

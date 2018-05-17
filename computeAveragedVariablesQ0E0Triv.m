@@ -2,7 +2,7 @@
 % compute their harmonic averages of Roe-Pike type for river boundary edges.
 %
 %===============================================================================
-%> @file computeAveragedVariablesQ0E0Triv.m
+%> @file
 %>
 %> @brief Uses the evaluation of the unknowns of the 2D Shallow-Water Equations 
 %>        to compute their harmonic averages of Roe-Pike type for river

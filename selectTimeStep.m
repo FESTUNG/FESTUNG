@@ -1,7 +1,7 @@
 % Routine that adapts the time step for the 2D Shallow-Water Equations.
 
 %===============================================================================
-%> @file selectTimeStep.m
+%> @file
 %>
 %> @brief Routine that adapts the time step for the 2D Shallow-Water Equations.
 %===============================================================================

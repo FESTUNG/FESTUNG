@@ -3,7 +3,7 @@
 % triangle.
 %
 %===============================================================================
-%> @file evaluateFuncFromVertexValues.m
+%> @file
 %>
 %> @brief Evaluates a piecewise linear continuous function which is implicitly 
 %>        given by its values in the vertices of a grid in a number of physical 

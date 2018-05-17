@@ -2,7 +2,7 @@
 % with a discontinuous coefficient function.
 
 %===============================================================================
-%> @file assembleMatElemPhiPhiFuncDisc.m
+%> @file
 %>
 %> @brief Assembles a matrix, containing integrals of products of two basis 
 %>        functions with a discontinuous coefficient function.
