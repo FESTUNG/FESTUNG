@@ -1,7 +1,7 @@
 % Last step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file darcy_swe_2dv/outputStep.m
+%> @file
 %>
 %> @brief Last step of the four-part algorithm in the main loop.
 %===============================================================================
@@ -12,19 +12,20 @@
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
 %> These four steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. @link darcy_swe_2dv/preprocessStep.m @endlink
+%>  2. @link darcy_swe_2dv/solveStep.m @endlink
+%>  3. @link darcy_swe_2dv/postprocessStep.m @endlink
+%>  4. @link darcy_swe_2dv/outputStep.m @endlink
 %> 
-%> This routine is executed last in each loop iteration and is intended to
-%> provide output operations for the solution, e.g., write it to a file
-%> for later visualization.
+%> This routine is executed last in each loop iteration. It calls
+%> @link darcy_2dv/outputStep.m @endlink.
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
-%>                      fields, and solution data structures, as provided 
-%>                      by configureProblem() and preprocessProblem(). 
-%>                      @f$[\text{struct}]@f$
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields (either filled with initial data or the solution
+%>                      from the previous loop iteration), as provided by 
+%>                      @link darcy_swe_2dv/configureProblem.m @endlink and 
+%>                      @link darcy_swe_2dv/preprocessProblem.m @endlink. 
+%%>                     @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
 %> @retval problemData  The input struct enriched with post-processed data
@@ -32,7 +33,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

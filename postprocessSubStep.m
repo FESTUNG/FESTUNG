@@ -1,7 +1,7 @@
 % Third step of the three-part substepping algorithm.
 
 %===============================================================================
-%> @file darcy_swe_2dv/postprocessSubStep.m
+%> @file
 %>
 %> @brief Third step of the three-part substepping algorithm.
 %===============================================================================
@@ -13,15 +13,16 @@
 %> <code>true</code>.
 %> These three steps are:
 %>
-%>  1. preprocessSubStep()
-%>  2. solveSubStep()
-%>  3. postprocessSubStep()
+%>  1. darcy_swe_2dv/preprocessSubStep.m
+%>  2. darcy_swe_2dv/solveSubStep.m
+%>  3. darcy_swe_2dv/postprocessSubStep.m
 %> 
-%> This routine is executed third in each loop iteration and is intended to
-%> post-process the solution computed by solveSubStep().
-%> It is also commonly the right place to decide whether the substepping
-%> method has finished and to update
-%> <code>problemData.isSubSteppingFinished</code> accordingly.
+%> This routine calls @link swe_2dv/postprocessStep.m @endlink and
+%> @link swe_2dv/outputStep.m @endlink.
+%> Afterwards, it evaluates the flux term from free flow domain to
+%> subsurface domain for the current time level in each quadrature point on
+%> all edges and adds it to <tt>problemData.hCouplingQ0E0T</tt> to compute
+%> the time-averaged coupling condition.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
@@ -36,7 +37,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

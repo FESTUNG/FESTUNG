@@ -1,31 +1,32 @@
-% First step of the four-part algorithm in the main loop.
+% First step of the four-part algorithm in the main loop. It evaluates the
+% flux from subsurface problem to free surface flow problem.
 
 %===============================================================================
-%> @file darcy_swe_2dv/preprocessStep.m
+%> @file
 %>
-%> @brief First step of the four-part algorithm in the main loop.
+%> @brief First step of the four-part algorithm in the main loop. It evaluates
+%>        the flux from subsurface problem to free surface flow problem.
 %===============================================================================
 %>
 %> @brief First step of the four-part algorithm in the main loop.
 %>
 %> The main loop repeatedly executes four steps until the parameter
-%> <code>problemData.isFinished</code> becomes <code>true</code>.
+%> <tt>problemData.isFinished</tt> becomes <tt>true</tt>.
 %> These four steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. darcy_swe_2dv/preprocessStep.m
+%>  2. darcy_swe_2dv/solveStep.m
+%>  3. darcy_swe_2dv/postprocessStep.m
+%>  4. darcy_swe_2dv/outputStep.m
 %> 
-%> This routine is executed first in each loop iteration and is intended to
-%> execute preprocessing operations, e.g., evaluate boundary conditions or
-%> right hand side values, assemble time-dependent matrix blocks, etc.
+%> This routine is executed first in each loop iteration.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
 %>                      with initial data or the solution from the previous
-%>                      loop iteration), as provided by configureProblem()  
-%>                      and preprocessProblem(). @f$[\text{struct}]@f$
+%>                      loop iteration), as provided by 
+%>                      darcy_swe_2dv/configureProblem.m  and 
+%>                      darcy_swe_2dv/preprocessProblem.m @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
 %> @retval problemData  The input struct enriched with preprocessed data
@@ -33,7 +34,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock
@@ -67,9 +70,6 @@ if problemData.isCouplingSWE  % Coupling term for vertical velocity component
   [Q, W] = quadRule1D(qOrd);
   [Q1, Q2] = gammaMapTetra(2, Q);
   
-  % Evaluate K in quadrature points (2x2 cell array of K_PM x R arrays)
-  KQ0E0T = cellfun(@(Kij) Kij(t, problemData.darcyData.g.mapRef2Phy(1, Q1, Q2), problemData.darcyData.g.mapRef2Phy(2, Q1, Q2)), problemData.darcyData.KCont, 'UniformOutput', false);
-  
   % Evaluate q1, q2 in quadrature points (K_PM x R arrays)
   K = problemData.darcyData.g.numT;
   N = problemData.darcyData.N;
@@ -78,9 +78,24 @@ if problemData.isCouplingSWE  % Coupling term for vertical velocity component
   q1Q0E0T = q1Disc * problemData.darcyData.basesOnQuad.phi1D{qOrd}(:, :, 2).';
   q2Q0E0T = q2Disc * problemData.darcyData.basesOnQuad.phi1D{qOrd}(:, :, 2).';
   
+  % Evaluate D in quadrature points
+  if iscell(problemData.darcyData.DCont)
+    DQ0E0T = cellfun(@(Kij) Kij(t, problemData.darcyData.g.mapRef2Phy(1, Q1, Q2), problemData.darcyData.g.mapRef2Phy(2, Q1, Q2)), problemData.darcyData.DCont, 'UniformOutput', false);
+  else
+    DQ0E0T = problemData.darcyData.DCont(t, problemData.darcyData.g.mapRef2Phy(1, Q1, Q2), problemData.darcyData.g.mapRef2Phy(2, Q1, Q2));
+  end % if    
+  
   % Compute combined values (K_PM x R arrays)
-  u1CouplingQ0E0T = KQ0E0T{1,1} .* q1Q0E0T + KQ0E0T{1,2} .* q2Q0E0T;
-  u2CouplingQ0E0T = KQ0E0T{2,1} .* q1Q0E0T + KQ0E0T{2,2} .* q2Q0E0T;
+  if iscell(DQ0E0T) && ~isvector(DQ0E0T)
+    u1CouplingQ0E0T = DQ0E0T{1,1} .* q1Q0E0T + DQ0E0T{1,2} .* q2Q0E0T;
+    u2CouplingQ0E0T = DQ0E0T{2,1} .* q1Q0E0T + DQ0E0T{2,2} .* q2Q0E0T;
+  elseif iscell(DQ0E0T)
+    u1CouplingQ0E0T = DQ0E0T{1} .* q1Q0E0T;
+    u2CouplingQ0E0T = DQ0E0T{2} .* q2Q0E0T;
+  else
+    u1CouplingQ0E0T = DQ0E0T .* q1Q0E0T;
+    u2CouplingQ0E0T = DQ0E0T .* q2Q0E0T;
+  end % if
   u1u1CouplingQ0E0T = u1CouplingQ0E0T .* u1CouplingQ0E0T;
   u1u2CouplingQ0E0T = u1CouplingQ0E0T .* u2CouplingQ0E0T;
   

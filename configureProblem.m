@@ -1,27 +1,29 @@
-% Fills the problemData-struct with all basic configuration options.
-% Problem parameters are to be modified inside this routine.
+% Sets all problem parameters and fills the problemData-struct with all basic 
+% configuration options.
 
 %===============================================================================
-%> @file darcy_swe_2dv/configureProblem.m
+%> @file
 %>
-%> @brief Fills the problemData-struct with all basic configuration options.
-%>        Problem parameters are to be modified inside this routine.
+%> @brief Sets all problem parameters and fills the problemData-struct with
+%>        all basic configuration options.
 %===============================================================================
 %>
-%> @brief Fills the problemData-struct with all basic configuration options.
-%>        Problem parameters are to be modified inside this routine.
+%> @brief Sets all problem parameters and fills the problemData-struct with
+%>        all basic configuration options.
 %>
 %> This routine is called before any other function for the problem.
-%> It should define all problem parameters.
+%> It defines all problem parameters and should be the only file users have
+%> to adapt to their needs.
 %>
-%> The only requirement for this struct is to provide a boolean parameter 
-%> <code>problemData.isFinished</code> that specifies whether the 
-%> iterative solver has finished (i.e., the parameters value is 
-%> <code>true</code>).
-%> Typically, this parameter is introduced in initializeProblem() and
-%> updated in postprocessStep() according to the progress of the solver.
+%> Here, you can select the direction of the coupling, time stepping
+%> parameterizations etc.
+%> The actual problem definitions are in darcy_2dv/configureProblem.m or
+%> swe_2dv/getTestcase.m
 %>
-%> See main() for more details about the solver structure.
+%> For an outline of the models, see @link darcy_2dv @endlink and
+%> @link swe_2dv @endlink.
+%>
+%> A detailed description can be found in @ref RRAFK2018.
 %>
 %> @param  problemData  A (probably) empty struct with problem parameters.
 %>                      @f$[\text{struct}]@f$
@@ -31,7 +33,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock
@@ -59,7 +63,7 @@ problemData = setdefault(problemData, 'isCouplingDarcy', true);
 problemData = setdefault(problemData, 'isCouplingSWE', true);
 
 % Number of elements in x- and y-direction
-problemData = setdefault(problemData, 'numElem', [50 10]);
+problemData = setdefault(problemData, 'numElem', [32 8]);
 problemData = setdefault(problemData, 'numElemDarcy', problemData.numElem);
 problemData = setdefault(problemData, 'numElemSWE', problemData.numElem);
 
@@ -74,7 +78,7 @@ problemData = setdefault(problemData, 'qOrd', 2 * max(problemData.pDarcy, proble
 % Time stepping parameters
 problemData = setdefault(problemData, 't0', 0);  % start time
 problemData = setdefault(problemData, 'tEnd', 600);  % end time
-problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.01));  % number of time steps
+problemData = setdefault(problemData, 'numSteps', ceil(problemData.tEnd/0.2));  % number of time steps
 problemData = setdefault(problemData, 'numSubSteps', 10); % number of free-flow steps per sub-surface step
 
 % Visualization settings

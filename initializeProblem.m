@@ -1,17 +1,17 @@
-% Fills the problem's data structures with initial data (if applicable).
+% Calls the initialization routines of the subproblems.
 
 %===============================================================================
-%> @file darcy_swe_2dv/initializeProblem.m
+%> @file
 %>
-%> @brief Fills the problem's data structures with initial data (if applicable).
+%> @brief Calls the initialization routines of the subproblems.
 %===============================================================================
 %>
-%> @brief Fills the problem's data structures with initial data (if applicable).
+%> @brief Calls the initialization routines of the subproblems.
 %>
-%> This routine is called after template/preprocessProblem.m.
+%> This routine is called after darcy_swe_2dv/preprocessProblem.m.
 %>
-%> Before entering the main loop of the solution algorithm, this routine
-%> fills the problem's data structures with initial data.
+%> It executes darcy_2dv/initializeProblem.m and @link
+%> swe_2dv/initializeProblem.m @endlink.
 %>
 %> @param  problemData  A struct with problem parameters and precomputed
 %>                      fields, as provided by configureProblem() and 
@@ -22,7 +22,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

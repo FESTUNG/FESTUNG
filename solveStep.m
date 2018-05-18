@@ -1,38 +1,46 @@
-% Second step of the four-part algorithm in the main loop.
+% Second step of the four-part algorithm in the main loop. It solves a
+% number of free-flow time steps and one subsurface time step.
 
 %===============================================================================
-%> @file darcy_swe_2dv/solveStep.m
+%> @file
 %>
-%> @brief Second step of the four-part algorithm in the main loop.
+%> @brief Second step of the four-part algorithm in the main loop. It solves a
+%>        number of free-flow time steps and one subsurface time step.
 %===============================================================================
 %>
-%> @brief Second step of the four-part algorithm in the main loop.
+%> @brief Second step of the four-part algorithm in the main loop. It solves a
+%>        number of free-flow time steps and one subsurface time step.
 %>
 %> The main loop repeatedly executes four steps until the parameter
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
 %> These four steps are:
 %>
-%>  1. preprocessStep()
-%>  2. solveStep()
-%>  3. postprocessStep()
-%>  4. outputStep()
+%>  1. darcy_swe_2dv/preprocessStep.m
+%>  2. darcy_swe_2dv/solveStep.m
+%>  3. darcy_swe_2dv/postprocessStep.m
+%>  4. darcy_swe_2dv/outputStep.m
 %> 
-%> This routine is executed second in each loop iteration and is intended to
-%> produce the solution at the next step, e.g., at a new time-level.
+%> This routine carries out substepping to solve a number of free flow time
+%> steps and afterwards computes the flux from free flow domain to
+%> subsurface domain before executing one time step of the subsurface
+%> problem.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures (either filled
 %>                      with initial data or the solution from the previous
-%>                      loop iteration), as provided by configureProblem()  
-%>                      and preprocessProblem(). @f$[\text{struct}]@f$
+%>                      loop iteration), as provided by 
+%>                      darcy_swe_2dv/configureProblem.m  and 
+%>                      darcy_swe_2dv/preprocessProblem.m @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %>
-%> @retval problemData  The input struct enriched with solution data at
-%>                      the next step. @f$[\text{struct}]@f$
+%> @retval problemData  The input struct enriched with preprocessed data
+%>                      for this loop iteration. @f$[\text{struct}]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

@@ -1,7 +1,7 @@
 % First step of the three-part substepping algorithm.
 
 %===============================================================================
-%> @file darcy_swe_2dv/preprocessSubStep.m
+%> @file
 %>
 %> @brief First step of the three-part substepping algorithm.
 %===============================================================================
@@ -13,19 +13,19 @@
 %> <code>true</code>.
 %> These three steps are:
 %>
-%>  1. preprocessSubStep()
-%>  2. solveSubStep()
-%>  3. postprocessSubStep()
+%>  1. darcy_swe_2dv/preprocessSubStep.m
+%>  2. darcy_swe_2dv/solveSubStep.m
+%>  3. darcy_swe_2dv/postprocessSubStep.m
 %> 
-%> This routine is executed first in each loop iteration and is intended to
-%> execute preprocessing operations, e.g., evaluate boundary conditions or
-%> right hand side values, assemble time-dependent matrix blocks, etc.
+%> This routine is executed first in each loop iteration and calls
+%> @link swe_2dv/preprocessStep.m @endlink
 %>
-%> @param  problemData  A struct with problem parameters, precomputed
-%>                      fields, and solution data structures (either filled
-%>                      with initial data or the solution from the previous
-%>                      loop iteration), as provided by configureProblem()  
-%>                      and preprocessProblem(). @f$[\text{struct}]@f$
+%> @param  problemData  A struct with problem parameters and precomputed
+%>                      fields (either filled with initial data or the solution
+%>                      from the previous loop iteration), as provided by 
+%>                      @link darcy_swe_2dv/configureProblem.m @endlink and 
+%>                      @link darcy_swe_2dv/preprocessProblem.m @endlink. 
+%%>                     @f$[\text{struct}]@f$
 %> @param  nStep        The current iteration number of the main loop. 
 %> @param  nSubStep     The current iteration number of the substepping.
 %>
@@ -34,7 +34,9 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
 %> 
 %> @par License
 %> @parblock

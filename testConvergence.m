@@ -2,7 +2,7 @@
 % for problem 'darcy_swe_2dv'.
 
 %===============================================================================
-%> @file darcy_swe_2dv/testConvergence.m
+%> @file
 %>
 %> @brief Helper routine for testConvergence() that carries out convergence tests
 %>        for problem 'darcy_swe_2dv'.
