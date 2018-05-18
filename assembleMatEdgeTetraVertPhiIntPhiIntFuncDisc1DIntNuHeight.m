@@ -42,7 +42,7 @@
 %>                    properties of a matching 1D triangulation (see 
 %>                    <code>generateGridData1D()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param dataDisc    A representation matrix of the discrete function 
+%> @param dataDisc1D  A representation matrix of the discrete function 
 %>                    @f$h_\Delta(x^1)@f$, e.g., as computed by 
 %>                    <code>projectFuncCont2DataDisc1D()</code>
 %>                    @f$[\overline{K} \times \overline{N}]@f$
@@ -51,10 +51,10 @@
 %> @param  markE0T    <code>logical</code> arrays that mark each elements
 %>                    edges on which the matrix blocks should be
 %>                    assembled @f$[K \times 4]@f$
-%> @param refEdgePhiIntPhi1DInt  Local matrix 
+%> @param refEdgePhiIntPhiIntPhi1DInt  Local matrix 
 %>                    @f$\hat{\mathsf{Q}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgeTetraPhiIntPhi1DInt()</code>.
-%>                    @f$[N \times N \times 4]@f$
+%>                    by <code>integrateRefEdgeTetraPhiIntPhiIntPhi1DInt()</code>.
+%>                    @f$[N \times N \times N \times 4]@f$
 %>
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
 %>

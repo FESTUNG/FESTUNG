@@ -28,6 +28,10 @@
 %> @param  markE0T    <code>logical</code> arrays that mark each elements
 %>                    edges on which the matrix blocks should be
 %>                    assembled @f$[K \times 4]@f$
+%> @param refEdgePhiIntPhiInt Local matrix 
+%>                    @f$\hat{\mathsf{Q}}^\text{diag}@f$ as provided
+%>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
+%>                    @f$[N \times N \times 4]@f$
 %> @param refEdgePhiIntPhiExt Local matrix 
 %>                    @f$\hat{\mathsf{Q}}^\text{offdiag}@f$ as provided
 %>                    by <code>integrateRefEdgePhiIntPhiExt()</code>.
