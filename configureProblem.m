@@ -148,7 +148,7 @@ switch problemData.testcase
     problemData.gNCont = @(t,x,z) zeros(size(x));
     problemData.fCont = @(t,x,z) zeros(size(x));
     problemData.DCont = @(t,x,z) k * ones(size(x));
-    
+
   case {'coupled_constXi', 'coupled_stationary', 'coupled_transient'}
     % Parameters
     aConst = 0;

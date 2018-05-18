@@ -1,15 +1,15 @@
-% Helper routine for testConvergence() that carries out convergence tests
-% for problem 'hdg_advection'.
+% Helper routine for testConvergence.m that carries out convergence tests
+% for problem 'darcy_2dv'.
 
 %===============================================================================
 %> @file
 %>
-%> @brief Helper routine for testConvergence() that carries out convergence tests
+%> @brief Helper routine for testConvergence.m that carries out convergence tests
 %>        for problem 'darcy_2dv'.
 %===============================================================================
 %>
-%> @brief Helper routine for testConvergence() that carries out convergence tests
-%>        for problem 'hdg_advection'.
+%> @brief Helper routine for testConvergence.m that carries out convergence tests
+%>        for problem 'darcy_2dv'.
 %>
 %> It solves a given testcase with continuously refined mesh size and/or
 %> time step size and saves the obtained error estimates to compute
@@ -21,7 +21,7 @@
 %> with @f$j@f$ any of the values in `tLevel`.
 %>
 %> @param  testcase     The name of the testcase to be solved. See
-%>                      getTestcase() for available options.
+%>                      darcy_2dv/getTestcase.m for available options.
 %> @param  pLevel       Vector with polynomial approximation orders to be tested.
 %> @param  hLevel       Vector with mesh refinement levels to be tested.
 %> @param  tLevel       Vector with time step refinement levels to be tested.
