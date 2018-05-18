@@ -118,13 +118,13 @@ problemData.g.g1D.markV0TbdrRiem = problemData.g.g1D.markT2DT.' * double(problem
 %% Function handles for problem-specific functions
 problemData.fn_adaptFreeSurface = getFunctionHandle([problemData.problemName filesep 'adaptFreeSurface']);
 problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraHorizPhiPhiNuBottomUp']);
-problemData.fn_assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraPhiPhiFuncDisc1DNuHeight']);
-problemData.fn_assembleMatEdgeTetraPhiIntPhiIntFuncDisc1DIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraPhiIntPhiIntFuncDisc1DIntNuHeight']);
+problemData.fn_assembleMatEdgeTetraVertPhiPhiFuncDisc1DNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraVertPhiPhiFuncDisc1DNuHeight']);
+problemData.fn_assembleMatEdgeTetraVertPhiIntPhiIntFuncDisc1DIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraVertPhiIntPhiIntFuncDisc1DIntNuHeight']);
 problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatElem1DDphiPhiFuncDiscHeight']);
 problemData.fn_assembleMatV0T1DPhiPhiFuncDiscNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatV0T1DPhiPhiFuncDiscNuHeight']);
 problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight']);
-problemData.fn_assembleVecEdgeTetraPhiIntFuncContHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeTetraPhiIntFuncContHeightNu']);
-problemData.fn_assembleVecEdgeTetraPhiIntFuncDiscIntHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeTetraPhiIntFuncDiscIntHeightNu']);
+problemData.fn_assembleVecEdgeTetraVertPhiIntFuncContHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeTetraVertPhiIntFuncContHeightNu']);
+problemData.fn_assembleVecEdgeTetraVertPhiIntFuncDiscIntHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeTetraVertPhiIntFuncDiscIntHeightNu']);
 problemData.fn_assembleVecV0T1DPhiIntFuncContNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleVecV0T1DPhiIntFuncContNuHeight']);
 problemData.fn_assembleVecV0T1DPhiIntFuncDiscIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleVecV0T1DPhiIntFuncDiscIntNuHeight']);
 
@@ -163,7 +163,7 @@ problemData.hatVeeQoffdiag = integrateRefEdgeTetraPhiIntPhi1DExt([problemData.N 
 problemData.hatVeePdiag = integrateRefEdgeTetraPhiIntPhiIntPhi1DInt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
 problemData.hatVeePoffdiag = integrateRefEdgeTetraPhiIntPhiExtPhi1DExt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
 
-%% One-dimensional mass matrix in free-surface equation (XII)
+%% One-dimensional mass matrix in free-surface equation 
 problemData.globBarM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.hatBarM);
 
 %% Empty vectors and matrices for coupled problem

@@ -1,37 +1,28 @@
-% Assembles a vector containing products of a 1D basis function with a 
-% continuous depth-integrated function, evaluated at the endpoints of the 1D 
-% element, the x1-component of the "normal", and divided by the smoothed mesh height.
+% Assembles a vector containing integrals over vertical edges of products
+% of a basis function with a continuous function, the x1-component
+% of the edge normal, and divided by the smoothed mesh height.
 
 %===============================================================================
 %> @file
 %>
-%> @brief Assembles a vector containing products of a 1D basis function with a 
-%>        continuous depth-integrated function, evaluated at the endpoints of the
-%>        1D element, the x1-component of the "normal", and divided by the 
-%>        smoothed mesh height.
+%> @brief Assembles a vector containing integrals over vertical edges of products
+%>        of a basis function with a continuous function, the @f$x^1@f$-component
+%>        of the edge normal, and divided by the smoothed mesh height @f$H_s@f$.
 %===============================================================================
 %>
-%> @brief Assembles a vector containing products of a 1D basis function with a 
-%>        continuous depth-integrated function, evaluated at the endpoints of the
-%>        1D element, the x1-component of the "normal", and divided by the 
-%>        smoothed mesh height.
+%> @brief Assembles a vector containing integrals over vertical edges of products
+%>        of a basis function with a continuous function, the @f$x^1@f$-component
+%>        of the edge normal, and divided by the smoothed mesh height @f$H_s@f$.
 %>
 %>
-%> The vector @f$\overline{\vec{J}}_\mathrm{D} \in \mathbb{R}^{\overline{KN}}@f$ is defined
+%> The vector @f$\mathbf{J}_\mathrm{D} \in \mathbb{R}^{KN}@f$ is defined
 %> component-wise by
 %> @f[
-%> \left[\overline{\vec{J}}_\mathrm{D}{D}\right]_{(\overline{k}-1)\overline{N}+i} :=
-%> \sum_{E_{kn}\in\Pi^{-1}\partial \overline{T}_{\overline{k}} \cap \mathcal{E}_\mathrm{D}}
-%> \nu_{kn}^1 \int_{E_{kn}} \frac{1}{H_s} \,\phi_{\overline{k}i}  \, 
-%> u_\mathrm{D} \, \mathrm{d}\sigma \,,
+%> [\mathbf{J}_\mathrm{D}]_{(k-1)N+i} =
+%>  \sum_{E_{kn} \in \partial T_k \cap \mathcal{E}^v_D}
+%>  \nu_{kn}^1 \int_{E_{kn}} \frac{1}{H_s} \varphi_{ki} c_\mathrm{D}(t) \mathrm{d}s\,,
 %> @f]
-%> with @f$\nu_{\overline{k}\overline{n}}^1@f$ the @f$x^1@f$-component of the edge
-%> normal (i.e., @f$\pm 1@f$) and @f$u_\mathrm{D}@f$ the @f$(x^1,x^2)@f$-dependent
-%> continuous function and @f$H_s@f$ the smoothed mesh height.
-%>
-%> With @f$\overline{u}_\mathrm{D} := \int_{\zeta_b}^\xi u_\mathrm{D} \mathrm{d}x^2@f$
-%> the depth-integrated function, this simplifies to an evaluation of all 
-%> quantities in the endpoints of the 1D element.
+%> with @f$\nu_{kn}^1@f$ the @f$x^1@f$-component of the edge normal.
 %>
 %> @param  g2D        The lists describing the geometric and topological 
 %>                    properties of a quadrilateral triangulation (see 
@@ -44,16 +35,16 @@
 %> @param  markE0T    <code>logical</code> array that marks each elements
 %>                    edges on which the vector entries should be
 %>                    assembled @f$[K \times 4]@f$
-%> @param  funcCont   A function handle for the continuous function @f$u_\mathrm{D}@f$.
+%> @param  funcCont   A function handle for the continuous function @f$c_\mathrm{D}@f$.
 %> @param heightV0T1D The smoothed mesh height in each node of the 1D grid
 %>                    @f$[\overline{K} \times 2]@f$
-%> @param  barN       The number of local degrees of freedom @f$[\text{scalar}]@f$
+%> @param  N          The number of local degrees of freedom @f$[\text{scalar}]@f$
 %> @param  qOrd       The order of the quadrature rule to be used. 
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                    functions on quadrature points. Must provide at
-%>                    least phi0D.
+%>                    least phi1D.
 %>
-%> @retval ret        The assembled vector @f$[\overline{KN} \times 1]@f$
+%> @retval ret        The assembled vectors @f$[KN \times 1]@f$
 %>
 %> This file is part of FESTUNG
 %>
@@ -77,16 +68,18 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleVecV0T1DPhiIntFuncContNuHeight(g2D, g1D, markE0T, funcCont, heightV0T1D, barN, qOrd, basesOnQuad)
-barK = g1D.numT;
+function ret = assembleVecEdgeTetraVertPhiIntFuncContHeightNu(g2D, g1D, markE0T, funcCont, heightV0T1D, N, qOrd, basesOnQuad)
+K = g2D.numT;
 [Q, W] = quadRule1D(qOrd);
-ret = zeros(barK, barN);
+ret = zeros(K, N);
 for n = 3 : 4
   [Q1, Q2] = gammaMapTetra(n, Q);
   funcQ0E = funcCont(g2D.mapRef2Phy(1, Q1, Q2), g2D.mapRef2Phy(2, Q1, Q2));
   areaNuE0T = markE0T(:,n) .* g2D.areaE0T(:,n) .* g2D.nuE0T(:,n,1);
-  integrand = g1D.markT2DT.' * (areaNuE0T .* (funcQ0E * W.'));
-  ret = ret + (integrand ./ heightV0T1D(:, 5-n)) * basesOnQuad.phi0D{qOrd}(:, 5-n).';
+  areaNuE0THeight = areaNuE0T ./ (g1D.markT2DT * heightV0T1D(:,5-n));
+  for i = 1 : N
+    ret(:, i) = ret(:, i) + areaNuE0THeight .* ( funcQ0E * (W.' .* basesOnQuad.phi1D{qOrd}(:, i, n)) );
+  end  % for i
 end  % for n
-ret = reshape(ret.', barK*barN, 1);
+ret = reshape(ret.', K*N, 1);
 end  % function

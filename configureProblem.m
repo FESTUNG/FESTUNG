@@ -1,3 +1,6 @@
+% Sets all problem parameters and fills the problemData-struct with all basic 
+% configuration options.
+
 %===============================================================================
 %> @file
 %>

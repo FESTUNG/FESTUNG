@@ -1,3 +1,54 @@
+% Adapts the mesh to match the free surface elevation and reassembles static matrices.
+
+%===============================================================================
+%> @file
+%>
+%> @brief Adapts the mesh to match the free surface elevation and reassembles
+%>        static matrices.
+%===============================================================================
+%>
+%> @brief Adapts the mesh to match the free surface elevation and reassembles
+%>        static matrices.
+%>
+%> This routine evaluates the water height @f$h@f$ in each surface vertex of the
+%> mesh and derives the smoothed mesh height @f$H_\mathrm{s}@f$ from it
+%> (see @ref RRAFK2018).
+%> In the case of a difference between the current height of the mesh and the
+%> the computed smoothed mesh height it adapts the @f$x^2@f$ corrdinates of the 
+%> surface vertices, updates mesh data structures accordingly, and calls 
+%> assembleStaticMatrices() to trigger re-assembly of dependent matrices.
+%>
+%> @param  problemData  A struct with problem parameters, basis functions and
+%>                      representation matrices of the current solution
+%>                      @f$[\text{struct}]@f$
+%> @param  force        Force re-assembly of static matrices 
+%>                      @f$[1\times1\text{ bool}]@f$
+%>
+%> @retval problemData  A struct with all necessary parameters and definitions
+%>                      for the problem description. @f$[\text{struct}]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
+%
 function [problemData] = adaptFreeSurface(problemData, force)
 if nargin < 2
   force = false;
@@ -63,6 +114,59 @@ if force || any(markModifiedV0T1D(:))
   problemData.hSmoothQ0T1D = problemData.hSmoothV0T1D(:,1) * (1-Q) + problemData.hSmoothV0T1D(:,2) * Q;
 end % if
 end % function
+
+ 
+% 
+%> @brief Assembles static matrices
+%>
+%> This routine is called by adaptFreeSurface() to (re-)assemble static matrices
+%> after modifying the mesh.
+%>
+%> The following matrices are assembled:
+%> - @f$\mathsf{M}@f$
+%> - @f$\check{\mathsf{H}}@f$
+%> - @f$\check{\mathsf{Q}}@f$
+%> - @f$\check{\mathsf{Q}}_\mathrm{bdr}@f$
+%> - @f$\mathsf{H}@f$
+%> - @f$\mathsf{Q}@f$
+%> - @f$\mathsf{Q}_\mathrm{bdr}@f$
+%> - @f$\mathsf{Q}_\mathrm{top}@f$
+%> - @f$\mathsf{Q}_\mathrm{avg}@f$
+%> - @f$\mathsf{Q}_\mathrm{up}@f$
+%> - @f$\mathsf{S}_u@f$
+%> - @f$\mathsf{S}_h@f$
+%> - @f$\bar{\mathsf{S}}_h@f$
+%>
+%> For a definition of these matrices, see @ref RRAFK2018 .
+%>
+%> @param  problemData  A struct with problem parameters, basis functions and
+%>                      representation matrices of the current solution
+%>                      @f$[\text{struct}]@f$
+%>
+%> @retval problemData  A struct with all necessary parameters and definitions
+%>                      for the problem description. @f$[\text{struct}]@f$
+%>
+%> This file is part of FESTUNG
+%>
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2018
+%> 
+%> @par License
+%> @parblock
+%> This program is free software: you can redistribute it and/or modify
+%> it under the terms of the GNU General Public License as published by
+%> the Free Software Foundation, either version 3 of the License, or
+%> (at your option) any later version.
+%>
+%> This program is distributed in the hope that it will be useful,
+%> but WITHOUT ANY WARRANTY; without even the implied warranty of
+%> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%> GNU General Public License for more details.
+%>
+%> You should have received a copy of the GNU General Public License
+%> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%> @endparblock
 %
 function problemData = assembleStaticMatrices(problemData)
 % Mass matrix (I, VIII)
