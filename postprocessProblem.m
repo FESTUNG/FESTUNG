@@ -1,20 +1,14 @@
-% Performs all post-processing steps, such as error estimates of the final
-% solution, etc.
+% Performs all post-processing steps. Nothing done for the diffusion solver.
 
 %===============================================================================
-%> @file template/postprocessProblem.m
+%> @file advection-diffusion/postprocessProblem.m
 %>
-%> @brief Performs all post-processing tasks, such as error estimates of the 
-%>        final solution, etc.
+%> @brief Performs all post-processing tasks. Nothing done for the diffusion solver.
 %===============================================================================
 %>
-%> @brief Performs all post-processing tasks, such as error estimates of the 
-%>        final solution, etc.
+%> @brief Performs all post-processing tasks. Nothing done for the diffusion solver.
 %>
 %> This routine is called after the main loop.
-%>
-%> It can include things such as error estimates, an output operation of
-%> the final solution, etc.
 %>
 %> @param  problemData  A struct with problem parameters and solution
 %>                      vectors. @f$[\text{struct}]@f$
@@ -44,7 +38,6 @@
 %> @endparblock
 %
 function problemData = postprocessProblem(problemData)
-% Executed at the end of the simulation run. 
-% Put here things that are to be done after the iterative loop.
-end
+% Nothing to be done here
+end % function
 

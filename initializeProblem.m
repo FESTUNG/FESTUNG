@@ -1,17 +1,19 @@
-% Fills the problem's data structures with initial data (if applicable).
+% Fills the problem's data structures with initial data.
 
 %===============================================================================
-%> @file template/initializeProblem.m
+%> @file advection-diffusion/initializeProblem.m
 %>
-%> @brief Fills the problem's data structures with initial data (if applicable).
+%> @brief Fills the problem's data structures with initial data.
 %===============================================================================
 %>
-%> @brief Fills the problem's data structures with initial data (if applicable).
+%> @brief Fills the problem's data structures with initial data.
 %>
-%> This routine is called after template/preprocessProblem.m.
+%> This routine is called after advection-diffusion/preprocessProblem.m.
 %>
 %> Before entering the main loop of the solution algorithm, this routine
 %> fills the problem's data structures with initial data.
+%>
+%> It projects the initial condition and initializes the solution vector.
 %>
 %> @param  problemData  A struct with problem parameters and precomputed
 %>                      fields, as provided by configureProblem() and 
@@ -41,6 +43,27 @@
 %> @endparblock
 %
 function problemData = initializeProblem(problemData)
-% Fill problem data structures with initial data
+
 problemData.isFinished = false;
+%% Initial data.
+problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 2*problemData.p+1, ...
+                                             problemData.hatM, problemData.basesOnQuad);
+if problemData.isSlopeLim
+  cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont(0, x1, x2));
+  problemData.cDisc = applySlopeLimiterDisc(problemData.g, problemData.cDisc, ...
+                        problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
+                        problemData.globMDiscTaylor, problemData.basesOnQuad, ...
+                        problemData.typeSlopeLim);
+end % if
+fprintf('L2 error w.r.t. the initial condition: %g\n', ...
+  computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
+problemData.sysY = [ zeros(2 * problemData.K * problemData.N, 1) ; ...
+                     reshape(problemData.cDisc', problemData.K * problemData.N, 1) ];
+%% visualization of inital condition.
+if problemData.isVisSol
+  cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
+  visualizeDataLagr(problemData.g, cLagrange, 'c_h', problemData.outputBasename, 0, problemData.outputTypes)
+end
+fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
+  problemData.tEnd, problemData.tau, problemData.numSteps)
 end % function

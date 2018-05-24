@@ -1,7 +1,7 @@
 % Last step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file template/outputStep.m
+%> @file advection-diffusion/outputStep.m
 %>
 %> @brief Last step of the four-part algorithm in the main loop.
 %===============================================================================
@@ -17,9 +17,9 @@
 %>  3. postprocessStep()
 %>  4. outputStep()
 %> 
-%> This routine is executed last in each loop iteration and is intended to
-%> provide output operations for the solution, e.g., write it to a file
-%> for later visualization.
+%> This routine is executed last in each loop iteration and writes output
+%> files that can later be visualized using TecPlot, Paraview, or others,
+%> depending on the chosen file types in configureProblem().
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures, as provided 
@@ -50,8 +50,13 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = outputStep(problemData, nStep) %#ok<INUSD>
-% Executed at the end of every loop iteration, e.g., to allow writing the
-% computed solution to file.
+function problemData = outputStep(problemData, nStep)
+K = problemData.K;
+N = problemData.N;
+%% Visualization
+if problemData.isVisSol
+  cDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
+  cLagr = projectDataDisc2DataLagr(cDisc);
+  visualizeDataLagr(problemData.g, cLagr, 'c_h', problemData.outputBasename, nStep, problemData.outputTypes);
+end % if
 end % function
-

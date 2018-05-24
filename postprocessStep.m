@@ -1,7 +1,7 @@
 % Third step of the four-part algorithm in the main loop.
 
 %===============================================================================
-%> @file template/postprocessStep.m
+%> @file advection-diffusion/postprocessStep.m
 %>
 %> @brief Third step of the four-part algorithm in the main loop.
 %===============================================================================
@@ -17,8 +17,9 @@
 %>  3. postprocessStep()
 %>  4. outputStep()
 %> 
-%> This routine is executed third in each loop iteration and is intended to
-%> post-process the solution computed by solveStep().
+%> This routine is executed third in each loop iteration.
+%> It decides whether the main loop is to be terminated (i.e., the
+%> end of the simulation time is reached).
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures, as provided 
@@ -49,8 +50,12 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = postprocessStep(problemData, nStep) %#ok<INUSD>
-% Third step in each loop iteration.
-problemData.isFinished = true;
-end
+function problemData = postprocessStep(problemData, nStep)
+K = problemData.K;
+N = problemData.N;
+
+%% Reshape and store solution in problemData
+problemData.cDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
+problemData.isFinished = nStep >= problemData.numSteps;
+end % function
 
