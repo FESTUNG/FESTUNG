@@ -55,7 +55,6 @@
 %
 function problemData = getTestcase(problemData, problemName)
 
-isAnalytical = true;
 isHotstart = false;
 
 switch problemName
@@ -79,8 +78,6 @@ switch problemName
     fhCont = @(t,x) zeros(size(x));
     fuCont = @(t,x,z) zeros(size(x));
     
-%     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
-%       @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
     
     u1DCont = @(t,x,z) log(1 + (z - zBotCont(x)) ./ (5 - zBotCont(x)) * (exp(1) - 1));
@@ -99,23 +96,23 @@ switch problemName
     gConst = 10;
     CfConst = 0;
     
-    aConst = 0;
-    bConst = 0.005;
-    cConst = 1;
-    dConst = 0.05;
-    alphaConst = 0.1;
-    betaConst = 0.3;
-    gammaConst = 1;
-    deltaConst = 0.07;
+    aConst = 0;  % zBot level
+    bConst = 0.005;  % zBot slope
+    cConst = 1;  % constant for u1
+    dConst = 0.05; % diffusion coefficnet
+    alphaConst = 0.1; % amplitude for x2-dependent part of u2
+    betaConst = 0.3; % frequency for x2-dependent part of hydraulic head
+    gammaConst = 1; % amplitude for x1-dependent part of u1
+    deltaConst = 0.07; % frequency for x1-dependent part of u1
     etaConst = 0.003;
     thetaConst = 0.4;
     rhoConst = 0.08;
     tauConst = 0.08;
-    kConst = 0.01;
-    kappaConst = 1;
-    lambdaConst = 0.07;
+    kConst = 0.01; % diffusion coefficient for subsurface problem
+    kappaConst = 1; % amplitude for x1-dependent part of hydraulic head
+    lambdaConst = 0.07; % frequency for x1-dependent part of hydraulic head
     muConst = 0.07;
-    
+        
     xi0Cont = @(x) 5 * ones(size(x));
     zBotCont = @(x) aConst + bConst * x;
     
@@ -184,10 +181,6 @@ switch problemName
         + yCont(t,x) .* ( alphaConst * bConst * sin(alphaConst * zBotCont(x)) .* hCont(t,x) ...
           + ( cos(alphaConst * xiCont(t,x)) - cos(alphaConst * zBotCont(x)) ) .* dxXiCont(t,x) );
     
-%     DCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {dConst, 0; 0, dConst}, 'UniformOutput', false);
-%     dxzDCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
-%     DCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {dConst, dConst}, 'UniformOutput', false);
-%     dxzDCont = cellfun(@(coef) @(t,x,z) coef * ones(size(x)), {0, 0}, 'UniformOutput', false);
     DCont = @(t,x,z) dConst * ones(size(x));
     dxzDCont = @(t,x,z) zeros(size(x));
     
@@ -208,8 +201,7 @@ switch problemName
     fhCont = @(t,x) zeros(size(x));
     fuCont = @(t,x,z) zeros(size(x));
     
-    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
-      @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
+    DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
     
     hDCont = @(t,x) zeros(size(x));
     u1DCont = @(t,x,z) zeros(size(x));
@@ -218,10 +210,10 @@ switch problemName
     q2DCont = @(t,x,z) zeros(size(x));
   
   case 'convergence'
+    isAnalytical = true;
+    
     domainWidth = 100;
-    idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = -1; idBdrRiem = [2,4];
-    %     idLand = -1; idOS = -1; idRiv = -1; idRad = -1; idRiem = -1;
-    %     idLand = [2,4]; idOS = [2,4]; idRiv = [2,4]; idRad = [2,4]; idRiem = -1;
+    idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
     
     gConst = 10;
     xi0Cont = @(x) zeros(size(x));
@@ -230,6 +222,7 @@ switch problemName
     delta = 0.1;
     epsilon = 0.01;
     rho = 0;%0.001;
+    CfConst = 0;
     
     xiCont = @(t,x) epsilon * sin(omega * (x+t));
     zBotCont = @(x) -2 + dxZb * x;
@@ -257,7 +250,7 @@ switch problemName
       @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
     dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
       @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
-    
+        
   otherwise
     error('ERROR: unknown testcase')
 end % switch
