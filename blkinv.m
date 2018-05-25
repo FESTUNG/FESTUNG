@@ -30,7 +30,7 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
-%> @author Balthasar Reuter, 2017
+%> @author Balthasar Reuter, 2017-2018
 %> @author Florian Frank, 2017
 %> 
 %> @par License
@@ -58,7 +58,6 @@ numBlocks = ceil(n / blockSize);
 idxEnd = (numBlocks - 1) * blockSize;
 
 idxs = mat2cell(1 : idxEnd, 1, ones(1, numBlocks - 1) * blockSize);
-cellA = cellfun(@(X) A(X, X), idxs, 'UniformOutput', false);
-cellInvA = cellfun(@(X) inv(X), cellA, 'UniformOutput', false);
+cellInvA = cellfun(@(X) inv(A(X,X)), idxs, 'UniformOutput', false);
 invA = blkdiag(cellInvA{:}, inv(A(idxEnd + 1 : end, idxEnd + 1 : end)));
 end % function
