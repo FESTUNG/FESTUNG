@@ -139,8 +139,9 @@ assert(isequal(cellfun(@(fun) exist([problemName filesep fun '.m'], 'file'), pos
   'Not all the required functions for the postprocessing of the problem found.')
 %% Pre-process and initialize problem
 tPreprocess = tic;
+preprocessHandles = getStepHandles(problemName, preprocessList);
 for nFunc = 1 : length(preprocessList)
-  problemData = feval(preprocessList{nFunc}, problemData);
+  problemData = preprocessHandles.(preprocessList{nFunc})(problemData);
 end % for
 fprintf('Pre-processing time: %g seconds.\n', toc(tPreprocess));
 %% Enter iterative loop
@@ -148,11 +149,12 @@ fprintf('Entering main loop.\n');
 assert(isstruct(problemData) && isfield(problemData, 'isFinished') && islogical(problemData.isFinished), ...
   'Struct "problemData" must contain a logical variable "isFinished".');
 tLoop = tic;
+stepHandles = getStepHandles(problemName, stepList);
 nStep = 0;
 while ~problemData.isFinished
   nStep = nStep + 1;
   for nFunc = 1 : length(stepList)
-    problemData = feval(stepList{nFunc}, problemData, nStep);
+    problemData = stepHandles.(stepList{nFunc})(problemData, nStep);
   end % for
   % Flush diary
   if mod(nStep, 1000) == 0
@@ -164,8 +166,9 @@ tLoop = toc(tLoop);
 fprintf('Loop time: %d iterations in %g seconds (on avg. %g seconds per iteration).\n', nStep, tLoop, tLoop/nStep);
 %% Post-process problem
 tPostprocess = tic;
+postprocessHandles = getStepHandles(problemName, postprocessList);
 for nFunc = 1 : length(postprocessList)
-  problemData = feval(postprocessList{nFunc}, problemData);
+  problemData = postprocessHandles.(postprocessList{nFunc})(problemData);
 end % for
 fprintf('Post-processing time: %g seconds.\n', toc(tPostprocess))
 %% Assign output variable
