@@ -144,13 +144,22 @@ if exist(fullfile(funcPath, [funcName funcExt]), 'file') ~= 2
 end % if
 
 % Create function handle
-curDir = pwd;
+% Originally, this was done by changing the directory, creating the handle
+% and changing back to the original directory. However, for unknown reasons
+% this leads to Octave not finding the correct functions. 
+% Adding the directory of the desired function to the search path, creating
+% the handle and restoring the original path is a lot slower (10x on
+% Octave, 150x on MATLAB) but works on both.
+oldpath = addpath(funcPath);
+% curDir = pwd;
 try
-  cd(funcPath);
+%   cd(funcPath);
   h = str2func(funcName);
-  cd(curDir);
+  path(oldpath);
+%   cd(curDir);
 catch ME
-  cd(curDir);
+  path(oldpath);
+%   cd(curDir);
   fprintf('%s\n', ME.message);
   error('Could not create function handle for ''%s''.', filename);
 end % try
