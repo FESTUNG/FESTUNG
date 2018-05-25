@@ -103,11 +103,11 @@ if problemData.isCouplingSWE  % Coupling term for vertical velocity component
   N = problemData.sweData.N;
   markAreaE0T = problemData.sweData.g.markE0TbdrCoupling(:, 1) .* problemData.sweData.g.areaE0T(:, 1);
   
-  JuCoupling = markAreaE0T .* ((problemData.markE0TE0T * u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1)));
+  JuCoupling = bsxfun(@times, markAreaE0T, (problemData.markE0TE0T * u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1)));
   problemData.sweData.globJuCoupling{1} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 1)).', K*N, 1);
   problemData.sweData.globJuCoupling{2} = reshape((JuCoupling .* problemData.sweData.g.nuE0T(:, 1, 2)).', K*N, 1);
-  problemData.sweData.globJwCoupling = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.markE0TE0T * u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1)))).', K*N, 1);
-  problemData.sweData.globJuuCoupling{1} = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 1) .* ((problemData.markE0TE0T * u1u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1)))).', K*N, 1);
-  problemData.sweData.globJuuCoupling{2} = reshape((markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2) .* ((problemData.markE0TE0T * u1u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1)))).', K*N, 1);
+  problemData.sweData.globJwCoupling = reshape(bsxfun(@times, markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2), (problemData.markE0TE0T * u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1))).', K*N, 1);
+  problemData.sweData.globJuuCoupling{1} = reshape(bsxfun(@times, markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 1), (problemData.markE0TE0T * u1u1CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1))).', K*N, 1);
+  problemData.sweData.globJuuCoupling{2} = reshape(bsxfun(@times, markAreaE0T .* problemData.sweData.g.nuE0T(:, 1, 2), (problemData.markE0TE0T * u1u2CouplingQ0E0T) * (repmat(W(:), 1, N) .* problemData.sweData.basesOnQuad2D.phi1D{qOrd}(:, :, 1))).', K*N, 1);
 end % if
 end % function

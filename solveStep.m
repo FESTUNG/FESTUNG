@@ -83,11 +83,11 @@ if problemData.isCouplingDarcy
   
   % Apply coefficients
   for m = 1 : 2
-    problemData.darcyData.globJcouple{m} = reshape((markAreaNuE0T(:, m) .* globInt).', K*N, 1);
+    problemData.darcyData.globJcouple{m} = reshape(bsxfun(@times, markAreaNuE0T(:, m), globInt).', K*N, 1);
   end % for m
   
   if problemData.darcyData.isJumpCoupling
-    problemData.darcyData.globKcouple = reshape((problemData.darcyData.g.markE0TbdrCoupling(:, 2) .* globInt).', K*N, 1);
+    problemData.darcyData.globKcouple = reshape(bsxfun(@times, problemData.darcyData.g.markE0TbdrCoupling(:, 2), globInt).', K*N, 1);
   end % if
 end % if
                    
