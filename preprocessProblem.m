@@ -53,7 +53,7 @@ function problemData = preprocessProblem(problemData)
 
 %% Triangulation.
 problemData.g = problemData.generateGrid(problemData.numElem);
-if problemData.isVisGrid, visualizeGridTetra(problemData.g); end
+if problemData.isVisGrid, visualizeGridQuadri(problemData.g); end
 
 %% Globally constant parameters.
 problemData.N = (problemData.p + 1)^2;  % number of local DOFs
@@ -82,9 +82,9 @@ fprintf('-----------------------------------------------------------------------
 problemData.basesOnQuad = computeBasesOnQuadTensorProduct(problemData.p, struct, problemData.qOrd : problemData.qOrdMax+1);
 
 %% Computation of matrices on the reference element.
-problemData.hatM = integrateRefElemTetraPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
-problemData.hatG = integrateRefElemTetraDphiPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
-hatH = integrateRefElemTetraDphiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+problemData.hatM = integrateRefElemQuadriPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+problemData.hatG = integrateRefElemQuadriDphiPhiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
+hatH = integrateRefElemQuadriDphiPhi(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 problemData.hatRdiag = integrateRefEdgePhiIntPhiIntPhiInt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 problemData.hatRoffdiag = integrateRefEdgePhiIntPhiExtPhiExt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
 hatSdiag = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad, problemData.qOrd);
