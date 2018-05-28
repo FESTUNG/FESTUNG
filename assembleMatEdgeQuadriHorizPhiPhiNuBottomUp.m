@@ -23,7 +23,7 @@
 %>
 %> @param  g          The lists describing the geometric and topological 
 %>                    properties of a triangulation (see 
-%>                    <code>generateGridDataTetra()</code>) 
+%>                    <code>domainRectTrap()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param  markE0T    <code>logical</code> arrays that mark each elements
 %>                    edges on which the matrix blocks should be
@@ -61,7 +61,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgeTetraHorizPhiPhiNuBottomUp(g, markE0T, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
+function ret = assembleMatEdgeQuadriHorizPhiPhiNuBottomUp(g, markE0T, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt)
 areaNuMarkE0T = { markE0T(:,1) .* g.areaE0T(:,1) .* g.nuE0T(:,1,2), ...
                   markE0T(:,2) .* g.areaE0T(:,2) .* g.nuE0T(:,2,2) };
 ret = kron(spdiags(areaNuMarkE0T{2}, 0, g.numT, g.numT ), refEdgePhiIntPhiInt(:,:,2)) + ...

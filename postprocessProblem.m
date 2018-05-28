@@ -61,22 +61,22 @@ if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))
   
   problemData.error = [ computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{end, 1}, ...
                             @(x1) hCont(t, x1), problemData.qOrd + 1, problemData.basesOnQuad1D), ...
-                        computeL2ErrorTetra(problemData.g, problemData.cDiscRK{end, 2}, ...
+                        computeL2ErrorQuadri(problemData.g, problemData.cDiscRK{end, 2}, ...
                             @(x1,x2) u1Cont(t, x1, x2), problemData.qOrd + 1, problemData.basesOnQuad2D), ...
-                        computeL2ErrorTetra(problemData.g, problemData.cDiscRK{end, 3}, ...
+                        computeL2ErrorQuadri(problemData.g, problemData.cDiscRK{end, 3}, ...
                             @(x1,x2) u2Cont(t, x1, x2), problemData.qOrd + 1, problemData.basesOnQuad2D) ];
 
   fprintf('L2 errors of h, u1, u2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
 end % if
 
 %% Visualize final state.
-if problemData.isVisGrid, visualizeGridTetra(problemData.g); end
+if problemData.isVisGrid, visualizeGridQuadri(problemData.g); end
 
 if problemData.isVisSol
   nOutput = ceil(problemData.numSteps / problemData.outputFrequency);
   cLagr = { projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 2}), ...
             projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{end, 3}) };
-  visualizeDataLagrTetra(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nOutput, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+  visualizeDataLagrQuadri(problemData.g, cLagr, {'u1', 'u2'}, problemData.outputBasename, nOutput, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
 end % if
 
 %% Save final state.

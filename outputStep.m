@@ -71,7 +71,7 @@ if mod(nStep-1, problemData.outputFrequency) == 0
               projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{1, 2}), ...
               projectDataDisc2DataLagrTensorProduct(problemData.cDiscRK{2, 3}) };
     visualizeDataLagr1D(problemData.g.g1D, cLagr{1}, { 'h' }, [ problemData.outputBasename '_h' ], nOutput, problemData.outputTypes);
-    visualizeDataLagrTetra(problemData.g, cLagr(2:3), {'u1', 'u2'}, problemData.outputBasename, nOutput, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+    visualizeDataLagrQuadri(problemData.g, cLagr(2:3), {'u1', 'u2'}, problemData.outputBasename, nOutput, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
     isOutput = true;
   end % if
   
@@ -86,20 +86,20 @@ if mod(nStep-1, problemData.outputFrequency) == 0
 
       problemData.pdExact = problemData.fn_adaptFreeSurface(problemData.pdExact);
 
-      problemData.pdExact.cDiscRK{end, 2} = projectFuncCont2DataDiscTetra(problemData.pdExact.g, @(x1,x2) u1Cont(t, x1, x2), problemData.qOrd, problemData.pdExact.globM, problemData.basesOnQuad2D);
-      problemData.pdExact.cDiscRK{end, 3} = projectFuncCont2DataDiscTetra(problemData.pdExact.g, @(x1,x2) u2Cont(t, x1, x2), problemData.qOrd, problemData.pdExact.globM, problemData.basesOnQuad2D);
+      problemData.pdExact.cDiscRK{end, 2} = projectFuncCont2DataDiscQuadri(problemData.pdExact.g, @(x1,x2) u1Cont(t, x1, x2), problemData.qOrd, problemData.pdExact.globM, problemData.basesOnQuad2D);
+      problemData.pdExact.cDiscRK{end, 3} = projectFuncCont2DataDiscQuadri(problemData.pdExact.g, @(x1,x2) u2Cont(t, x1, x2), problemData.qOrd, problemData.pdExact.globM, problemData.basesOnQuad2D);
 
       cLagr = { projectDataDisc2DataLagrTensorProduct(problemData.pdExact.cDiscRK{end, 2}), ...
                 projectDataDisc2DataLagrTensorProduct(problemData.pdExact.cDiscRK{end, 3}) };
 
-      visualizeDataLagrTetra(problemData.pdExact.g, cLagr, {'u1', 'u2'}, [ problemData.outputBasename '_ex' ], nOutput, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
+      visualizeDataLagrQuadri(problemData.pdExact.g, cLagr, {'u1', 'u2'}, [ problemData.outputBasename '_ex' ], nOutput, problemData.outputTypes, struct('velocity', {{'u1','u2'}}));
     end % if
     
     problemData.error = [ computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{1, 1}, ...
                               @(x1) hCont(t, x1), problemData.qOrd + 1, problemData.basesOnQuad1D), ...
-                          computeL2ErrorTetra(problemData.g, problemData.cDiscRK{1, 2}, ...
+                          computeL2ErrorQuadri(problemData.g, problemData.cDiscRK{1, 2}, ...
                               @(x1,x2) u1Cont(t, x1, x2), problemData.qOrd + 1, problemData.basesOnQuad2D), ...
-                          computeL2ErrorTetra(problemData.g, problemData.cDiscRK{2, 3}, ...
+                          computeL2ErrorQuadri(problemData.g, problemData.cDiscRK{2, 3}, ...
                               @(x1,x2) u2Cont(t, x1, x2), problemData.qOrd + 1, problemData.basesOnQuad2D) ];
 
     fprintf('L2 errors of h, u1, u2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);

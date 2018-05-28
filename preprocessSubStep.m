@@ -74,13 +74,13 @@ qDCont = { @(x1,x2) problemData.q1DCont(t,x1,x2); @(x1,x2) problemData.q2DCont(t
 
 %% L2-projections of algebraic coefficients and right hand side.
 if iscell(problemData.DCont)
-  DDisc = cellfun(@(c) projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
+  DDisc = cellfun(@(c) projectFuncCont2DataDiscQuadri(problemData.g, @(x1,x2) c(t,x1,x2), problemData.qOrd, ...
                          problemData.globM, problemData.basesOnQuad2D), problemData.DCont, 'UniformOutput', false);
 else
-  DDisc = projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) problemData.DCont(t,x1,x2), problemData.qOrd, ...
+  DDisc = projectFuncCont2DataDiscQuadri(problemData.g, @(x1,x2) problemData.DCont(t,x1,x2), problemData.qOrd, ...
                          problemData.globM, problemData.basesOnQuad2D);
 end % if
-problemData.globLu = reshape(projectFuncCont2DataDiscTetra(problemData.g, @(x1,x2) fuCont(t,x1,x2), problemData.qOrd, problemData.globM, problemData.basesOnQuad2D).', [], 1);
+problemData.globLu = reshape(projectFuncCont2DataDiscQuadri(problemData.g, @(x1,x2) fuCont(t,x1,x2), problemData.qOrd, problemData.globM, problemData.basesOnQuad2D).', [], 1);
 problemData.globLh = reshape(projectFuncCont2DataDisc1D(problemData.g.g1D, @(x1) fhCont(t,x1), problemData.qOrd, problemData.hatBarM, problemData.basesOnQuad1D).', [], 1);
 
 %% Compute depth integrated velocity and water height in surface nodes.
@@ -164,26 +164,26 @@ problemData.globJuFlux = assembleVecEdgePhiIntFuncContNu(problemData.g, markE0T,
 %% Assembly of time-dependent matrices and vectors in continuity equation.
 % Interior edge integrals (averaging uh/Hs)
 markE0T = (problemData.g.markE0Tint & problemData.g.markE0Tv) | (problemData.g.markE0TbdrRiem & (problemData.g.markE0TbdrU | problemData.g.markE0TbdrH));
-problemData.globVeeP = problemData.fn_assembleMatEdgeTetraVertPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.hSmoothV0T1D, markE0T, problemData.hatVeePdiag, problemData.hatVeePoffdiag);
+problemData.globVeeP = problemData.fn_assembleMatEdgeQuadriVertPhiPhiFuncDisc1DNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.hSmoothV0T1D, markE0T, problemData.hatVeePdiag, problemData.hatVeePoffdiag);
 
 % Boundary edge integrals with no prescribed Dirichlet and Riemann solver for u and h
 markE0T = problemData.g.markE0Tbdr & ~(problemData.g.markE0TbdrU | problemData.g.markE0TbdrH);
-problemData.globVeePbdr = problemData.fn_assembleMatEdgeTetraVertPhiIntPhiIntFuncDisc1DIntNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.hSmoothV0T1D, markE0T, problemData.hatVeePdiag);
+problemData.globVeePbdr = problemData.fn_assembleMatEdgeQuadriVertPhiIntPhiIntFuncDisc1DIntNuHeight(problemData.g, problemData.g.g1D, problemData.cDiscRK{nSubStep, 1}, problemData.hSmoothV0T1D, markE0T, problemData.hatVeePdiag);
 
 % Boundary edge integrals with prescribed Dirichlet data and Riemann solver for u and h 
-problemData.globJuhRiem = problemData.fn_assembleVecEdgeTetraVertPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & problemData.g.markE0TbdrH, @(x1,x2) u1DCont(t,x1,x2) .* hDCont(t,x1), problemData.hSmoothV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globJuhRiem = problemData.fn_assembleVecEdgeQuadriVertPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & problemData.g.markE0TbdrH, @(x1,x2) u1DCont(t,x1,x2) .* hDCont(t,x1), problemData.hSmoothV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 % Boundary edge integrals with prescribed Dirichlet Data and no Riemann solver for u or h but not both
 markE0T = problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & ~problemData.g.markE0TbdrH;
-problemData.globVeeJu = problemData.fn_assembleVecEdgeTetraVertPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, markE0T, @(x1,x2) u1DCont(t,x1,x2), hSmooth_hV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globVeeJu = problemData.fn_assembleVecEdgeQuadriVertPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, markE0T, @(x1,x2) u1DCont(t,x1,x2), hSmooth_hV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 markE0T = problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrU & problemData.g.markE0TbdrH;
-problemData.globVeeJh = problemData.fn_assembleVecEdgeTetraVertPhiIntFuncDiscIntHeightNu(problemData.g, problemData.g.g1D, markE0T, problemData.cDiscRK{nSubStep, 2}, hSmooth_hDV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globVeeJh = problemData.fn_assembleVecEdgeQuadriVertPhiIntFuncDiscIntHeightNu(problemData.g, problemData.g.g1D, markE0T, problemData.cDiscRK{nSubStep, 2}, hSmooth_hDV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 % Boundary edge integrals with prescribed Dirichlet Data and Riemann solver for u or h but not both
 markE0T = problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrU & ~problemData.g.markE0TbdrH;
-problemData.globVeeJuRiem = problemData.fn_assembleVecEdgeTetraVertPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, markE0T, @(x1,x2) u1DCont(t,x1,x2), hSmooth_hV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globVeeJuRiem = problemData.fn_assembleVecEdgeQuadriVertPhiIntFuncContHeightNu(problemData.g, problemData.g.g1D, markE0T, @(x1,x2) u1DCont(t,x1,x2), hSmooth_hV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 markE0T = problemData.g.markE0TbdrRiem & ~problemData.g.markE0TbdrU & problemData.g.markE0TbdrH;
-problemData.globVeeJhRiem = problemData.fn_assembleVecEdgeTetraVertPhiIntFuncDiscIntHeightNu(problemData.g, problemData.g.g1D, markE0T, problemData.cDiscRK{nSubStep, 2}, hSmooth_hDV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
+problemData.globVeeJhRiem = problemData.fn_assembleVecEdgeQuadriVertPhiIntFuncDiscIntHeightNu(problemData.g, problemData.g.g1D, markE0T, problemData.cDiscRK{nSubStep, 2}, hSmooth_hDV0T1D, problemData.N, problemData.qOrd, problemData.basesOnQuad2D);
 
 %% Assembly of time-dependent matrices and vectors in free-surface equation.
 % Element integrals (uh/Hs) in free surface equation
@@ -226,12 +226,12 @@ for n = 3 : 4
   u1Q0E0Tint(:,n-2) = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, n) * problemData.cDiscRK{nSubStep, 2}.', K * numQuad1D, 1);
   
   markQ0E0TbdrRiem = logical(kron(problemData.g.markE0TbdrRiem(:, n) & problemData.g.markE0TbdrU(:, n), true(numQuad1D, 1)));
-  [Q1, Q2] = gammaMapTetra(n, Q);
+  [Q1, Q2] = gammaMapQuadri(n, Q);
   X1 = reshape(problemData.g.mapRef2Phy(1, Q1, Q2).', K * numQuad1D, 1);
   X2 = reshape(problemData.g.mapRef2Phy(2, Q1, Q2).', K * numQuad1D, 1);
   u1Q0E0TbdrRiem(markQ0E0TbdrRiem, n-2) = u1DCont(t, X1(markQ0E0TbdrRiem), X2(markQ0E0TbdrRiem));
   
-  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, mapLocalEdgeTetra(n)) * problemData.cDiscRK{nSubStep, 2}.';
+  cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, mapLocalEdgeIndexQuadri(n)) * problemData.cDiscRK{nSubStep, 2}.';
   u1Q0E0TE0T(:, n-2) = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{n}.', K * numQuad1D, 1);
 end % for nn
 
@@ -245,7 +245,7 @@ problemData.globKh = zeros(K * problemData.N, 1);
 problemData.globBarKh = zeros(barK * problemData.barN, 1);
 
 for n = 3 : 4
-  nn1D = 5 - n; np1D = 5 - mapLocalEdgeTetra(n);
+  nn1D = 5 - n; np1D = 5 - mapLocalEdgeIndexQuadri(n);
   markV0TbdrRiem = problemData.g.g1D.markV0TbdrRiem(:, nn1D) & problemData.g.g1D.markV0TbdrH(:, nn1D);
   
   [i, j] = find(markV0TbdrRiem);

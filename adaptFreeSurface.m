@@ -162,15 +162,15 @@ problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
 
 %% Momentum equation
 % Element integral for height-term in momentum equation (III)
-globVeeH = assembleMatElemTetraDphiPhi1D(problemData.g, problemData.g.g1D, problemData.hatVeeH);
+globVeeH = assembleMatElemQuadriDphiPhi1D(problemData.g, problemData.g.g1D, problemData.hatVeeH);
 
 % Interior edge integral for height-term in momentum equation (VI)
 markE0T = problemData.g.markE0Tint | (problemData.g.markE0TbdrRiem & problemData.g.markE0TbdrH);
-globVeeQ = assembleMatEdgeTetraPhiPhi1DNu(problemData.g, problemData.g.g1D, markE0T, problemData.hatVeeQdiag, problemData.hatVeeQoffdiag);
+globVeeQ = assembleMatEdgeQuadriPhiPhi1DNu(problemData.g, problemData.g.g1D, markE0T, problemData.hatVeeQdiag, problemData.hatVeeQoffdiag);
 
 % Boundary edge integrals
 markE0T = problemData.g.markE0TbdrTop | problemData.g.markE0TbdrBot | (problemData.g.markE0Tbdr & ~problemData.g.markE0TbdrH);
-globVeeQbdr = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, markE0T, problemData.hatVeeQdiag);
+globVeeQbdr = assembleMatEdgeQuadriPhiIntPhi1DIntNu(problemData.g, problemData.g.g1D, markE0T, problemData.hatVeeQdiag);
 
 % Combine matrices
 problemData.globVeeHQ = problemData.gConst * (globVeeH{1} - globVeeQ{1} - globVeeQbdr{1});
@@ -196,7 +196,7 @@ globQAvg = assembleMatEdgePhiPhiNu(problemData.g, problemData.g.markE0Tint & pro
 
 % Horizontal interior and top boundary edge integral with second normal component in continuity equation (XII)
 markE0T = (problemData.g.markE0Tint & problemData.g.markE0Th) | problemData.g.markE0TbdrTop;
-globQup = problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp(problemData.g, markE0T, problemData.hatQdiag, problemData.hatQoffdiag);
+globQup = problemData.fn_assembleMatEdgeQuadriHorizPhiPhiNuBottomUp(problemData.g, markE0T, problemData.hatQdiag, problemData.hatQoffdiag);
 
 % Combine matrices
 problemData.globHQup = globH{2} - globQup;
@@ -212,5 +212,5 @@ markE0T = (problemData.g.markE0Tint & problemData.g.markE0Tv) | (problemData.g.m
 problemData.globSh = assembleMatEdgePhiIntPerQuad(problemData.g, markE0T, problemData.hatSdiag);
 
 % Helper matrix for jumps over vertices in free surface equation 
-problemData.globBarS = assembleMatEdgeTetraPhi1DIntPerQuad(problemData.g, problemData.g.g1D, markE0T, problemData.hatBarSdiag);
+problemData.globBarS = assembleMatEdgeQuadriPhi1DIntPerQuad(problemData.g, problemData.g.g1D, markE0T, problemData.hatBarSdiag);
 end % function

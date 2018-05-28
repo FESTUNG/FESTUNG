@@ -20,7 +20,7 @@
 %> The matrix @f$\check{\mathsf{P}}_\mathrm{bdr} \in 
 %>      \mathbb{R}^{KN\times KN}@f$
 %> is essentially the same as the matrix assembled by 
-%> swe_2dv/assembleMatEdgeTetraVertPhiPhiFuncDisc1DNuHeight.m restricted to
+%> swe_2dv/assembleMatEdgeQuadriVertPhiPhiFuncDisc1DNuHeight.m restricted to
 %> diagonal blocks.
 %> These are defined as
 %> @f[
@@ -53,7 +53,7 @@
 %>                    assembled @f$[K \times 4]@f$
 %> @param refEdgePhiIntPhiIntPhi1DInt  Local matrix 
 %>                    @f$\hat{\mathsf{Q}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgeTetraPhiIntPhiIntPhi1DInt()</code>.
+%>                    by <code>integrateRefEdgeQuadriPhiIntPhiIntPhi1DInt()</code>.
 %>                    @f$[N \times N \times N \times 4]@f$
 %>
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
@@ -80,7 +80,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgeTetraVertPhiIntPhiIntFuncDisc1DIntNuHeight(g2D, g1D, dataDisc1D, heightV0T1D, markE0T, refEdgePhiIntPhiIntPhi1DInt)
+function ret = assembleMatEdgeQuadriVertPhiIntPhiIntFuncDisc1DIntNuHeight(g2D, g1D, dataDisc1D, heightV0T1D, markE0T, refEdgePhiIntPhiIntPhi1DInt)
 K = g2D.numT;
 [N, ~, barN, ~] = size(refEdgePhiIntPhiIntPhi1DInt);
 ret = sparse(K*N, K*N);

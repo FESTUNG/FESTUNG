@@ -87,7 +87,7 @@ if problemData.isHotstart
   problemData.cDiscRK{end, 3} = zeros(problemData.g.numT, problemData.N);
   problemData.cDiscRK{end, 3}(:, 1:N) = hotstart.u2Disc(:, 1:N);
 else
-  problemData.cDiscRK{end, 2} = projectFuncCont2DataDiscTetra(problemData.g, problemData.u10Cont, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
+  problemData.cDiscRK{end, 2} = projectFuncCont2DataDiscQuadri(problemData.g, problemData.u10Cont, problemData.qOrd, problemData.globM, problemData.basesOnQuad2D);
   problemData.cDiscRK{end, 3} = zeros(size(problemData.cDiscRK{end, 2}));
 end % if
 
@@ -97,9 +97,9 @@ if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))
 end % if
 
 %% Initial error computation.
-if problemData.isVisGrid, visualizeGridTetra(problemData.g); end
+if problemData.isVisGrid, visualizeGridQuadri(problemData.g); end
 
 fprintf('L2 errors of h, u1 w.r.t. the initial condition: %g, %g\n', ...
   computeL2Error1D(problemData.g.g1D, problemData.cDiscRK{end, 1}, problemData.h0Cont, problemData.qOrd+1, problemData.basesOnQuad1D), ...
-  computeL2ErrorTetra(problemData.g, problemData.cDiscRK{end, 2}, problemData.u10Cont, problemData.qOrd+1, problemData.basesOnQuad2D));
+  computeL2ErrorQuadri(problemData.g, problemData.cDiscRK{end, 2}, problemData.u10Cont, problemData.qOrd+1, problemData.basesOnQuad2D));
 end % function

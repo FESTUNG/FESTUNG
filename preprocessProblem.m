@@ -117,14 +117,14 @@ problemData.g.g1D.markV0TbdrRiem = problemData.g.g1D.markT2DT.' * double(problem
 
 %% Function handles for problem-specific functions
 problemData.fn_adaptFreeSurface = getFunctionHandle([problemData.problemName filesep 'adaptFreeSurface']);
-problemData.fn_assembleMatEdgeTetraHorizPhiPhiNuBottomUp = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraHorizPhiPhiNuBottomUp']);
-problemData.fn_assembleMatEdgeTetraVertPhiPhiFuncDisc1DNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraVertPhiPhiFuncDisc1DNuHeight']);
-problemData.fn_assembleMatEdgeTetraVertPhiIntPhiIntFuncDisc1DIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeTetraVertPhiIntPhiIntFuncDisc1DIntNuHeight']);
+problemData.fn_assembleMatEdgeQuadriHorizPhiPhiNuBottomUp = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeQuadriHorizPhiPhiNuBottomUp']);
+problemData.fn_assembleMatEdgeQuadriVertPhiPhiFuncDisc1DNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeQuadriVertPhiPhiFuncDisc1DNuHeight']);
+problemData.fn_assembleMatEdgeQuadriVertPhiIntPhiIntFuncDisc1DIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatEdgeQuadriVertPhiIntPhiIntFuncDisc1DIntNuHeight']);
 problemData.fn_assembleMatElem1DDphiPhiFuncDiscHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatElem1DDphiPhiFuncDiscHeight']);
 problemData.fn_assembleMatV0T1DPhiPhiFuncDiscNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatV0T1DPhiPhiFuncDiscNuHeight']);
 problemData.fn_assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleMatV0T1DPhiIntPhiIntFuncDiscIntNuHeight']);
-problemData.fn_assembleVecEdgeTetraVertPhiIntFuncContHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeTetraVertPhiIntFuncContHeightNu']);
-problemData.fn_assembleVecEdgeTetraVertPhiIntFuncDiscIntHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeTetraVertPhiIntFuncDiscIntHeightNu']);
+problemData.fn_assembleVecEdgeQuadriVertPhiIntFuncContHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeQuadriVertPhiIntFuncContHeightNu']);
+problemData.fn_assembleVecEdgeQuadriVertPhiIntFuncDiscIntHeightNu = getFunctionHandle([problemData.problemName filesep 'assembleVecEdgeQuadriVertPhiIntFuncDiscIntHeightNu']);
 problemData.fn_assembleVecV0T1DPhiIntFuncContNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleVecV0T1DPhiIntFuncContNuHeight']);
 problemData.fn_assembleVecV0T1DPhiIntFuncDiscIntNuHeight = getFunctionHandle([problemData.problemName filesep 'assembleVecV0T1DPhiIntFuncDiscIntNuHeight']);
 
@@ -142,9 +142,9 @@ problemData.basesOnQuad1D = computeBasesOnQuad1D(problemData.p, struct, problemD
 problemData.basesOnQuad2D = computeBasesOnQuadTensorProduct(problemData.p, struct, problemData.qOrd : problemData.qOrdMax+1);
 
 %% Computation of matrices on the reference element.
-problemData.hatM = integrateRefElemTetraPhiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
-problemData.hatG = integrateRefElemTetraDphiPhiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
-problemData.hatH = integrateRefElemTetraDphiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.hatM = integrateRefElemQuadriPhiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.hatG = integrateRefElemQuadriDphiPhiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
+problemData.hatH = integrateRefElemQuadriDphiPhi(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 problemData.hatQdiag = integrateRefEdgePhiIntPhiInt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 problemData.hatQoffdiag = integrateRefEdgePhiIntPhiExt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
 problemData.hatRdiag = integrateRefEdgePhiIntPhiIntPhiInt(problemData.N, problemData.basesOnQuad2D, problemData.qOrd);
@@ -153,15 +153,15 @@ problemData.hatSdiag = integrateRefEdgePhiIntPerQuad(problemData.N, problemData.
 
 problemData.hatBarM = integrateRefElem1DPhiPhi(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 problemData.hatBarG = integrateRefElem1DDphiPhiPhiPerQuad(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
-problemData.hatBarSdiag = integrateRefEdgeTetraPhi1DIntPerQuad(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
+problemData.hatBarSdiag = integrateRefEdgeQuadriPhi1DIntPerQuad(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 problemData.hatBarPdiag = computePhiIntPhiIntPhiIntV0T1D(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 problemData.hatBarPoffdiag = computePhiIntPhiExtPhiExtV0T1D(problemData.barN, problemData.qOrd, problemData.basesOnQuad1D);
 
-problemData.hatVeeH = integrateRefElemTetraDphiPhi1D([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
-problemData.hatVeeQdiag = integrateRefEdgeTetraPhiIntPhi1DInt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
-problemData.hatVeeQoffdiag = integrateRefEdgeTetraPhiIntPhi1DExt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
-problemData.hatVeePdiag = integrateRefEdgeTetraPhiIntPhiIntPhi1DInt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
-problemData.hatVeePoffdiag = integrateRefEdgeTetraPhiIntPhiExtPhi1DExt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
+problemData.hatVeeH = integrateRefElemQuadriDphiPhi1D([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
+problemData.hatVeeQdiag = integrateRefEdgeQuadriPhiIntPhi1DInt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
+problemData.hatVeeQoffdiag = integrateRefEdgeQuadriPhiIntPhi1DExt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
+problemData.hatVeePdiag = integrateRefEdgeQuadriPhiIntPhiIntPhi1DInt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
+problemData.hatVeePoffdiag = integrateRefEdgeQuadriPhiIntPhiExtPhi1DExt([problemData.N problemData.barN], problemData.qOrd, problemData.basesOnQuad2D, problemData.basesOnQuad1D);
 
 %% One-dimensional mass matrix in free-surface equation 
 problemData.globBarM = assembleMatElemPhiPhi(problemData.g.g1D, problemData.hatBarM);

@@ -57,11 +57,11 @@
 %>                    assembled @f$[K \times 4]@f$
 %> @param refEdgePhiIntPhiIntPhi1DInt  Local matrix 
 %>                    @f$\hat{\mathsf{Q}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgeTetraPhiIntPhiIntPhi1DInt()</code>.
+%>                    by <code>integrateRefEdgeQuadriPhiIntPhiIntPhi1DInt()</code>.
 %>                    @f$[N \times N \times 4]@f$
 %> @param refEdgePhiIntPhiExtPhi1DExt Local matrix 
 %>                    @f$\hat{\mathsf{Q}}^\text{offdiag}@f$ as provided
-%>                    by <code>integrateRefEdgeTetraPhiIntPhiExtPhi1DExt()</code>.
+%>                    by <code>integrateRefEdgeQuadriPhiIntPhiExtPhi1DExt()</code>.
 %>                    @f$[N \times N \times 4]@f$
 %>
 %> @retval ret        The assembled matrix @f$[KN \times KN]@f$
@@ -88,7 +88,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgeTetraVertPhiPhiFuncDisc1DNuHeight(g2D, g1D, dataDisc1D, heightV0T1D, markE0T, refEdgePhiIntPhiIntPhi1DInt, refEdgePhiIntPhiExtPhi1DExt)
+function ret = assembleMatEdgeQuadriVertPhiPhiFuncDisc1DNuHeight(g2D, g1D, dataDisc1D, heightV0T1D, markE0T, refEdgePhiIntPhiIntPhi1DInt, refEdgePhiIntPhiExtPhi1DExt)
 K = g2D.numT;
 [N, ~, barN, ~] = size(refEdgePhiIntPhiIntPhi1DInt);
 ret = sparse(K*N, K*N);
