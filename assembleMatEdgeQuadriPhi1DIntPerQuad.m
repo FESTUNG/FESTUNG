@@ -31,7 +31,7 @@
 %>                    assembled @f$[K \times 4]@f$
 %> @param refEdgePhi1DIntPerQuad  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgeTetraPhi1DIntPerQuad()</code>.
+%>                    by <code>integrateRefEdgeQuadriPhi1DIntPerQuad()</code>.
 %>                    @f$[N \times R \times 4]@f$
 %> @retval ret        The assembled matrices @f$[4\times1 \mathrm{cell}]@f$
 %>
@@ -55,7 +55,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgeTetraPhi1DIntPerQuad(g2D, g1D, markE0T, refEdgePhi1DIntPerQuad)
+function ret = assembleMatEdgeQuadriPhi1DIntPerQuad(g2D, g1D, markE0T, refEdgePhi1DIntPerQuad)
 K = g2D.numT; barK = g1D.numT;
 ret = cell(4,1);
 for nn = 1 : 4

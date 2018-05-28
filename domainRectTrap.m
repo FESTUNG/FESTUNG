@@ -25,7 +25,7 @@
 %> different element counts can be specified for x1- and x2-direction.
 %>
 %> The resulting mesh can be visualized using the function
-%> <code>visualizeGridTetra()</code>.
+%> <code>visualizeGridQuadri()</code>.
 %>
 %> The bottom boundary is assigned id 1, right boundary has id 2, top
 %> boundary has id 3, and left boundary is assigned id 4.
@@ -48,7 +48,7 @@
 %> X2 = [0.0, 0.1, 0.2, 0.1, 0.2; ...
 %>       2.0, 1.8, 1.7, 1.6, 1.5];
 %> g = domainRectTrap(X1, X2, [4, 3]);
-%> visualizeGridTetra(g);
+%> visualizeGridQuadri(g);
 %> @endcode
 %> Creates a mesh for a domain with x1-values from 0 to 3, 
 %> bottom-boundary between 0 and 0.2, and top-boundary between 1.5 and 2.
@@ -147,7 +147,7 @@ g.V0E(g.numE - g.numElem(2) + 1 : end, :) = g.V0T(g.numElem(1) : g.numElem(1) : 
 %% Mapping of neighbouring edges (markE0TE0T)
 g.markE0TE0T = cell(1,4);
 for n = 1 : 4
-  g.markE0TE0T{n} = sparse(bsxfun(@eq, g.E0T(:, n), g.E0T(:, mapLocalEdgeTetra(n))'));
+  g.markE0TE0T{n} = sparse(bsxfun(@eq, g.E0T(:, n), g.E0T(:, mapLocalEdgeIndexQuadri(n))'));
 end % for
 % Fix a bug in GNU Octave 4.0.0's implementation of sparse matrix concatenation
 if isOctave

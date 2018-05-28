@@ -117,7 +117,7 @@ switch nEdges
   case 3
     gamma = @gammaMap;
   case 4
-    gamma = @gammaMapTetra;
+    gamma = @gammaMapQuadri;
   otherwise
     error('Unknown number of edges')
 end % switch

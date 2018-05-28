@@ -55,8 +55,7 @@
 %>                    assembled @f$[K \times n_\mathrm{edges}]@f$
 %> @param refEdgePhiIntPhiInt  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgePhiIntPhiInt()</code> or
-%>                    by <code>integrateRefEdgeTetraPhiIntPhiInt()</code>.
+%>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
 %>                    @f$[N \times N \times n_\mathrm{edges}]@f$
 %> @param coefE0T     (optional) Coefficient vector that is applied to each
 %>                    block. Defaults to <code>g.areaE0T</code>

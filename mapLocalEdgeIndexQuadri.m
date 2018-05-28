@@ -48,7 +48,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function np = mapLocalEdgeTetra(nn)
+function np = mapLocalEdgeIndexQuadri(nn)
 mapE0E = [2 1 4 3];
 np = mapE0E(nn);
 end % function

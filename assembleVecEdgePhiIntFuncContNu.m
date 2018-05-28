@@ -28,7 +28,7 @@
 %> For the implementation, the integrals are backtransformed to the
 %> reference element @f$\hat{T}@f$ and further to the unit interval @f$[0,1]@f$
 %> using the mapping @f$\hat{\mathbf{\gamma}}_n(s)@f$ as provided by 
-%> <code>gammaMap()</code> or <code>gammaMapTetra()</code>.
+%> <code>gammaMap()</code> or <code>gammaMapQuadri()</code>.
 %> This gives the component-wise formulation
 %> @f[
 %>  [\mathbf{J}_\mathrm{D}^m]_{(k-1)N+i} =
@@ -133,7 +133,7 @@ switch nEdges
   case 3
     gamma = @gammaMap;
   case 4
-    gamma = @gammaMapTetra;
+    gamma = @gammaMapQuadri;
   otherwise
     error('Unknown number of edges')
 end % switch

@@ -1,34 +1,32 @@
 % Compute integrals over the edges of the reference square, whose integrands 
 % consist of all permutations of a two-dimensional basis function and a 
-% two-dimensional and a one-dimensional basis function from the
-% neighbouring element.
+% one-dimensional basis function from the neighbouring element.
 
 %===============================================================================
 %> @file
 %>
 %> @brief Compute integrals over the edges of the reference square, whose 
 %>        integrands consist of all permutations of a two-dimensional basis 
-%>        function and a two-dimensional and a one-dimensional basis function 
-%>        from the neighbouring element.
+%>        function and a one-dimensional basis function from the neighbouring
+%>        element.
 %===============================================================================
 %>
 %> @brief Compute integrals over the edges of the reference square, whose 
 %>        integrands consist of all permutations of a two-dimensional basis 
-%>        function and a two-dimensional and a one-dimensional basis function 
-%>        from the neighbouring element.
+%>        function and a one-dimensional basis function from the neighbouring
+%>        element.
 %>
 %> It computes a multidimensional array
-%> @f$\hat{\mathsf{{P}}}^\mathrm{offdiag}\in\mathbb{R}^{N\times\overline{N}\times4}@f$
+%> @f$\hat{\mathsf{{Q}}}^\mathrm{offdiag}\in\mathbb{R}^{N\times\overline{N}\times4}@f$
 %> defined by
 %> @f[
-%> [\hat{\mathsf{{P}}}^\mathrm{offdiag}]_{i,j,l,n^-} =
-%>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_{n^-}(s) \,
-%>   \hat{\varphi}_j \circ \hat{\mathbf{\gamma}}_{n^+}(s) 
-%>   \hat{\phi}_l\circ [\hat{\mathbf{\gamma}}_{n^+}(s)]_1 \mathrm{d}s \,,
+%> [\hat{\mathsf{{Q}}}^\mathrm{offdiag}]_{i,j,n^-} =
+%>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_{n^-}(s) 
+%>   \hat{\phi}_j\circ [\hat{\mathbf{\gamma}}_{n^+}(s)]_1 \mathrm{d}s \,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is given in 
-%> <code>gammaMapTetra()</code> and the index @f$n^+@f$ is given implicitely
-%> as described in <code>mapLocalEdgeTetra()</code>.
+%> <code>gammaMapQuadri()</code> and the index @f$n^+@f$ is given implicitely
+%> as described in <code>mapLocalEdgeIndexQuadri()</code>.
 %>
 %> @param  N            The local number of degrees of freedom 
 %>                      @f$\mathbf{N} = [N, \overline{N}]@f$.
@@ -61,27 +59,20 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgeTetraPhiIntPhiExtPhi1DExt(N, qOrd, basesOnQuad2D, basesOnQuad1D)
+function ret = integrateRefEdgeQuadriPhiIntPhi1DExt(N, qOrd, basesOnQuad2D, basesOnQuad1D)
 [~, W] = quadRule1D(qOrd);
-mapE0E = [2 1 4 3];
-ret = zeros(N(1), N(1), N(2), 4);
+ret = zeros(N(1), N(2), 4);
 for n = 1 : 2
-  np = mapE0E(n);
   for i = 1 : N(1)
-    for j = 1 : N(1)
-      for l = 1 : N(2)
-        ret(i,j,l,n) = W * ( basesOnQuad2D.phi1D{qOrd}(:,i,n) .* basesOnQuad2D.phi1D{qOrd}(:,j,np) .* basesOnQuad1D.phi1D{qOrd}(:,l) );
-      end % for l
+    for j = 1 : N(2)
+      ret(i,j,n) = W * ( basesOnQuad2D.phi1D{qOrd}(:,i,n) .* basesOnQuad1D.phi1D{qOrd}(:,j) );
     end  % for j
   end  % for i
 end  % for n
 for n = 3 : 4
-  np = mapE0E(n);
   for i = 1 : N(1)
-    for j = 1 : N(1)
-      for l = 1 : N(2)
-        ret(i,j,l,n) = W * ( basesOnQuad2D.phi1D{qOrd}(:,i,n) .* basesOnQuad2D.phi1D{qOrd}(:,j,np) * basesOnQuad1D.phi0D{qOrd}(l,n-2) );
-      end % for l
+    for j = 1 : N(2)
+      ret(i,j,n) = W * ( basesOnQuad2D.phi1D{qOrd}(:,i,n) * basesOnQuad1D.phi0D{qOrd}(j,n-2) );
     end  % for j
   end  % for i
 end  % for n

@@ -35,7 +35,7 @@
 %>                    (see <code>generateGridData1D()</code>) 
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param refElemDphiPhi1D Local matrix @f$\hat{\mathsf{H}}@f$ as provided
-%>                    by <code>integrateRefElemTetraDphiPhi1D()</code>.
+%>                    by <code>integrateRefElemQuadriDphiPhi1D()</code>.
 %>                    @f$[N \times \overline{N} \times 2]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
@@ -59,7 +59,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatElemTetraDphiPhi1D(g2D, g1D, refElemDphiPhi1D)
+function ret = assembleMatElemQuadriDphiPhi1D(g2D, g1D, refElemDphiPhi1D)
 K = g2D.numT; barK = g1D.numT; N = size(refElemDphiPhi1D{1});
 ret = { sparse(K*N(1), barK*N(2)), sparse(K*N(1), barK*N(2)) };
 for m = 1 : 2

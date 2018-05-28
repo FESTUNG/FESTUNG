@@ -57,7 +57,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function hatM = integrateRefElemTetraPhiPhi(N, basesOnQuad, qOrd)
+function hatM = integrateRefElemQuadriPhiPhi(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 [Q1, Q2, W] = quadRuleTensorProduct(qOrd);
 hatM = { zeros(N, N), zeros(N, N), zeros(N, N) };

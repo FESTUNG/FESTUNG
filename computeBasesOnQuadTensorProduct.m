@@ -89,7 +89,7 @@ for qOrd = requiredOrders
       basesOnQuad.gradPhi2D{qOrd}(:,i,m) = gradPhiTensorProduct(i, m, Q1, Q2, @phi1D, @phi1D, @gradPhi1D, @gradPhi1D);
     end % for m
     for n = 1 : 4
-      [QS1, QS2] = gammaMapTetra(n, Q);
+      [QS1, QS2] = gammaMapQuadri(n, Q);
       basesOnQuad.phi1D{qOrd}(:,i,n) = phiTensorProduct(i, QS1, QS2, @phi1D, @phi1D);
     end % for n
   end  % for i

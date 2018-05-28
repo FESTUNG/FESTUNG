@@ -83,7 +83,7 @@
 %>                    @f$[1 \times 1 \text{ struct}]@f$
 %> @param refElemDphiPhiPhi Local matrix @f$\hat{\mathsf{G}}@f$ as provided
 %>                    by <code>integrateRefElemDphiPhiPhi()</code> or
-%>                    <code>integrateRefElemTetraDphiPhiPhi()</code>.
+%>                    <code>integrateRefElemQuadriDphiPhiPhi()</code>.
 %>                    @f$[N \times N \times N \times 2]@f$
 %> @param dataDisc    A representation of the discrete function, e.g., as 
 %>                    computed by <code>projectFuncCont2DataDisc()</code>

@@ -26,7 +26,7 @@
 %>                    assembled @f$[K \times n_\mathrm{edges}]@f$
 %> @param refEdgePhiIntPerQuad  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgeTetraPhiIntPerQuad()</code>.
+%>                    by <code>integrateRefEdgePhiIntPerQuad()</code>.
 %>                    @f$[N \times R \times n_\mathrm{edges}]@f$
 %> @retval ret        The assembled matrices @f$[ n_\mathrm{edges}\times1 \mathrm{cell}]@f$
 %>

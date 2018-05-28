@@ -65,8 +65,7 @@
 %>                    assembled @f$[K \times {n_\mathrm{edges}}]@f$
 %> @param refEdgePhiIntPhiInt  Local matrix 
 %>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgePhiIntPhiInt()</code> or
-%>                    <code>integrateRefEdgeTetraPhiIntPhiInt()</code>.
+%>                    by <code>integrateRefEdgePhiIntPhiInt()</code>.
 %>                    @f$[N \times N \times {n_\mathrm{edges}}]@f$
 %> @param areaNuMarkE0T (optional) argument to provide precomputed values
 %>                    for the products of <code>markE0T</code>,

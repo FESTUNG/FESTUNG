@@ -18,7 +18,7 @@
 %> \hat{\varphi}_i\circ\hat{\mathbf{\gamma}}_n(q_r)
 %> @f]
 %> with the mapping @f$\hat{\mathbf{\gamma}}_n@f$ defined in <code>gammaMap()</code> or
-%> <code>gammaMapTetra()</code> and the quadrature points @f$q_r@f$ given by
+%> <code>gammaMapQuadri()</code> and the quadrature points @f$q_r@f$ given by
 %> <code>quadRule1D()</code>
 %>
 %> @param  N            The local number of degrees of freedom

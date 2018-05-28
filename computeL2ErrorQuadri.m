@@ -59,7 +59,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function err = computeL2ErrorTetra(g, dataDisc, funcCont, qOrd, basesOnQuad)
+function err = computeL2ErrorQuadri(g, dataDisc, funcCont, qOrd, basesOnQuad)
 % Determine quadrature rule and physical coordinates
 [Q, W] = quadRule1D(qOrd); [Q1, Q2] = meshgrid(Q); W = W' * W;
 Q1 = Q1(:)'; Q2 = Q2(:)'; W = W(:)';

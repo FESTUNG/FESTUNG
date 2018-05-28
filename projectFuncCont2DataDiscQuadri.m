@@ -82,7 +82,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function dataDisc = projectFuncCont2DataDiscTetra(g, funcCont, qOrd, globM, basesOnQuad)
+function dataDisc = projectFuncCont2DataDiscQuadri(g, funcCont, qOrd, globM, basesOnQuad)
 N = size(globM, 1) / g.numT;
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 assert(nargin(funcCont) == 2, 'funcCont must expect two arguments')

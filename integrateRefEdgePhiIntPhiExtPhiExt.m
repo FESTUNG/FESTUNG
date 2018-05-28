@@ -102,7 +102,7 @@ elseif nEdges == 4
   ret = zeros(N, N, N, 4); % [N x N x N x 4]
 
   for nn = 1 : 4
-    np = mapLocalEdgeTetra(nn);
+    np = mapLocalEdgeIndexQuadri(nn);
     for l = 1 : N
       for i = 1 : N
         for j = 1 : N

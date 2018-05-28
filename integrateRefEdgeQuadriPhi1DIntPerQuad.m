@@ -38,7 +38,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgeTetraPhi1DIntPerQuad(N, qOrd, basesOnQuad)
+function ret = integrateRefEdgeQuadriPhi1DIntPerQuad(N, qOrd, basesOnQuad)
 [~, W] = quadRule1D(qOrd); R = length(W);
 ret = zeros(N, R, 4);
 for n = 1 : 2

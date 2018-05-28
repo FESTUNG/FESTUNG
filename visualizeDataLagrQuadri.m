@@ -36,7 +36,7 @@
 %> dataLagr = { projectDataDisc2DataLagrTensorProduct(cDisc{1}), ...
 %>              projectDataDisc2DataLagrTensorProduct(cDisc{2}), ...
 %>              projectDataDisc2DataLagrTensorProduct(cDisc{3}) };
-%> visualizeDataLagrTetra(g, dataLagr, varName, 'solution', 1, {'vtk', 'tec'}), vecName);
+%> visualizeDataLagrQuadri(g, dataLagr, varName, 'solution', 1, {'vtk', 'tec'}), vecName);
 %> end
 %> @endcode
 %> @endparblock
@@ -82,7 +82,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function visualizeDataLagrTetra(g, dataLagr, varName, fileName, tLvl, fileTypes, vecName)
+function visualizeDataLagrQuadri(g, dataLagr, varName, fileName, tLvl, fileTypes, vecName)
 %% Deduce default arguments
 if nargin < 6 || isempty(fileTypes)
   fileTypes = 'vtk';

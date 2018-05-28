@@ -12,10 +12,10 @@
 %> @parblock
 %> @code
 %> g = domainRectTrap([0, 1], [0, 1], [4, 2]);
-%> visualizeGridTetra(g)
+%> visualizeGridQuadri(g)
 %> @endcode
 %> produces the following output:
-%> @image html  visualizeGridTetra.png
+%> @image html  visualizeGridQuadri.png
 %> @endparblock
 %>
 %> @param  g          The lists describing the geometric and topological 
@@ -43,7 +43,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function visualizeGridTetra(g)
+function visualizeGridQuadri(g)
 figure('Color', [1, 1, 1]); % white background
 hold('on'),  axis('off')
 % daspect([1, 1, 1]) % adjust aspect ration, requires Octave >= 3.8

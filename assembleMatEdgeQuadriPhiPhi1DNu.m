@@ -71,7 +71,7 @@
 %> denote the Kronecker delta, @f$\circ@f$ denotes the Hadamard product, and 
 %> @f$\otimes@f$ denotes the Kronecker product.
 %> The index @f$n^+@f$ is given implicitly by @f$n^-@f$ as described in
-%> <code>mapLocalEdgeTetra()</code>.
+%> <code>mapLocalEdgeIndexQuadri()</code>.
 %>
 %> The entries of matrix 
 %> @f$\hat{\mathsf{Q}}^\mathrm{diag}\in\mathbb{R}^{N\times \overline{N}\times4}@f$
@@ -82,7 +82,7 @@
 %>   \hat{\phi}_j\circ [\hat{\mathbf{\gamma}}_n(s)]_1 \mathrm{d}s \,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is defined in 
-%> <code>gammaMapTetra()</code>. The entries of matrix
+%> <code>gammaMapQuadri()</code>. The entries of matrix
 %> @f$\hat{\mathsf{Q}}^\mathrm{offdiag} \in 
 %>    \mathbb{R}^{N\times \overline{N}\times 4}@f$ are defined as
 %> @f[
@@ -104,11 +104,11 @@
 %>                    assembled @f$[K \times 4]@f$
 %> @param refEdgePhiIntPhi1DInt  Local matrix 
 %>                    @f$\hat{\mathsf{Q}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgeTetraPhiIntPhi1DInt()</code>.
+%>                    by <code>integrateRefEdgeQuadriPhiIntPhi1DInt()</code>.
 %>                    @f$[N \times N \times 4]@f$
 %> @param refEdgePhiIntPhi1DExt Local matrix 
 %>                    @f$\hat{\mathsf{Q}}^\text{offdiag}@f$ as provided
-%>                    by <code>integrateRefEdgeTetraPhiIntPhi1DExt()</code>.
+%>                    by <code>integrateRefEdgeQuadriPhiIntPhi1DExt()</code>.
 %>                    @f$[N \times N \times 4]@f$
 %> @retval ret        The assembled matrices @f$[2 \times 1 \text{ cell}]@f$
 %>
@@ -132,7 +132,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = assembleMatEdgeTetraPhiPhi1DNu(g2D, g1D, markE0T, refEdgePhiIntPhi1DInt, refEdgePhiIntPhi1DExt)
+function ret = assembleMatEdgeQuadriPhiPhi1DNu(g2D, g1D, markE0T, refEdgePhiIntPhi1DInt, refEdgePhiIntPhi1DExt)
 K = g2D.numT; barK = g1D.numT;
 [N, barN, ~] = size(refEdgePhiIntPhi1DInt);
 ret = { sparse(K*N, barK*barN), sparse(K*N, barK*barN) };

@@ -65,7 +65,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefElemTetraDphiPhi1D(N, qOrd, basesOnQuad2D, basesOnQuad1D)
+function ret = integrateRefElemQuadriDphiPhi1D(N, qOrd, basesOnQuad2D, basesOnQuad1D)
 validateattributes(N, {'numeric'}, {'numel', 2}, mfilename, 'N')
 validateattributes(basesOnQuad2D, {'struct'}, {}, mfilename, 'basesOnQuad2D')
 validateattributes(basesOnQuad1D, {'struct'}, {}, mfilename, 'basesOnQuad1D')

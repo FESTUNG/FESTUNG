@@ -96,7 +96,7 @@ elseif nEdges == 4
   ret = zeros(N, N, 4); % [N x N x 4]
 
   for nn = 1 : 4
-    np = mapLocalEdgeTetra(nn);
+    np = mapLocalEdgeIndexQuadri(nn);
     for i = 1 : N
       for j = 1 : N
         ret(i, j, nn) = sum( W' .* basesOnQuad.phi1D{qOrd}(:,i,nn) .* basesOnQuad.phi1D{qOrd}(:,j,np) );

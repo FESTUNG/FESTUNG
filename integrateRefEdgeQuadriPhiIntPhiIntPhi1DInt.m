@@ -25,7 +25,7 @@
 %>   \hat{\phi}_l\circ [\hat{\mathbf{\gamma}}_n(s)]_1 \mathrm{d}s \,,
 %> @f]
 %> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is given in 
-%> <code>gammaMapTetra()</code>.
+%> <code>gammaMapQuadri()</code>.
 %>
 %> @param  N            The local number of degrees of freedom 
 %>                      @f$\mathbf{N} = [N, \overline{N}]@f$.
@@ -58,7 +58,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgeTetraPhiIntPhiIntPhi1DInt(N, qOrd, basesOnQuad2D, basesOnQuad1D)
+function ret = integrateRefEdgeQuadriPhiIntPhiIntPhi1DInt(N, qOrd, basesOnQuad2D, basesOnQuad1D)
 [~, W] = quadRule1D(qOrd);
 ret = zeros(N(1), N(1), N(2), 4);
 for n = 1 : 2
