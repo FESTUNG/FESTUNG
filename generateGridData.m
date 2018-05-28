@@ -106,6 +106,10 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Florian Frank, 2014
+%> @author Balthasar Reuter, 2014-2017
+%> @author Hennes Hajduk, 2018
 %> 
 %> @par License
 %> @parblock
@@ -179,7 +183,13 @@ for nn = 1 : 3
     markEn = g.E0E(:, 2) == nn;  markEp = g.E0E(:, 1) == np;
     idx = markEn & markEp & markEint;
     g.markE0TE0T{nn, np}(sub2ind([g.numT, g.numT], g.T0E(idx, 2), g.T0E(idx, 1))) = 1;
-    g.markV0TV0T{nn,np} = sparse(bsxfun(@eq, g.V0T(:,nn), g.V0T(:,np)'));
+    try
+      g.markV0TV0T{nn,np} = sparse(bsxfun(@eq, g.V0T(:,nn), g.V0T(:,np)'));
+    catch
+      if isfield(g, 'markV0TV0T')
+        g = rmfield(g, 'markV0TV0T');
+      end % if
+    end % try
   end % for
 end % for
 B = g.B; a1 = g.coordV0T(:,1,:);

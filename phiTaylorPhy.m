@@ -47,6 +47,9 @@
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%>
+%> @author Balthasar Reuter, 2016
+%> @author Hennes Hajduk, 2018
 %> 
 %> @par License
 %> @parblock
@@ -74,61 +77,60 @@ qOrd = ceil((sqrt(8*i+1)-3)/2);
 
 % Extract dimensions and compute scaling parameters
 R = length(W); K = g.numT; numP = size(X1, 2);
-dX1 = repmat(2 ./ (max(g.coordV0T(:,:,1),[],2) - min(g.coordV0T(:,:,1),[],2)), [1 numP]);
-dX2 = repmat(2 ./ (max(g.coordV0T(:,:,2),[],2) - min(g.coordV0T(:,:,2),[],2)), [1 numP]);
+dX = repmat(2 ./ sqrt(2 * g.areaT), [1 numP]);
 
 % Evaluate basis functions
 switch i
   case 1 % (0,0)
     ret = ones(K, numP);
   case 2 % (1,0)
-    ret = (X1 - repmat(g.baryT(:, 1), [1 numP])) .* dX1;
+    ret = (X1 - repmat(g.baryT(:, 1), [1 numP])) .* dX;
   case 3 % (0,1)
-    ret = (X2 - repmat(g.baryT(:, 2), [1 numP])) .* dX2;
+    ret = (X2 - repmat(g.baryT(:, 2), [1 numP])) .* dX;
   case 4 % (2,0)
     ret = ( 0.5 * ( X1 - repmat(g.baryT(:, 1), [1 numP]) ).^2 - ...
-          repmat( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ).^2 * W', [1 numP]) ) .* (dX1 .* dX1);
+          repmat( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ).^2 * W', [1 numP]) ) .* dX.^2;
   case 5 % (1,1)
     ret = ( ( X1 - repmat(g.baryT(:, 1), [1 numP]) ) .* ( X2 - repmat(g.baryT(:, 2), [1 numP]) ) - ...
                    repmat( 2 * ( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ) .* ...
-                                 ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ) ) * W', [1 numP]) ) .* (dX1 .* dX2);
+                                 ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ) ) * W', [1 numP]) ) .* dX.^2;
   case 6 % (0,2)
     ret = ( 0.5 * ( X2 - repmat(g.baryT(:, 2), [1 numP]) ).^2 - ...
-          repmat( ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^2 * W', [1 numP]) ) .* (dX2 .* dX2);
+          repmat( ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^2 * W', [1 numP]) ) .* dX.^2;
   case 7 % (3,0)
     ret = ( ( X1 - repmat(g.baryT(:, 1), [1 numP]) ).^3 / 6 - ...
-          repmat( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ).^3 * W' / 3, [1 numP]) ) .* dX1.^3;
+          repmat( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ).^3 * W' / 3, [1 numP]) ) .* dX.^3;
   case 8 % (2,1)
     ret = ( 0.5 * ( X1 - repmat(g.baryT(:, 1), [1 numP]) ).^2 .* ( X2 - repmat(g.baryT(:, 2), [1 numP]) ) - ...
           repmat( ( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ).^2 .* ...
-                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ) ) * W', [1 numP]) ) .* (dX1.^2 .* dX2);
+                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ) ) * W', [1 numP]) ) .* dX.^3;
   case 9 % (1,2)
     ret = ( 0.5 * ( X1 - repmat(g.baryT(:, 1), [1 numP]) ) .* ( X2 - repmat(g.baryT(:, 2), [1 numP]) ).^2 - ...
           repmat( ( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ) .* ...
-                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^2 ) * W', [1 numP]) ) .* (dX1 .* dX2.^2);
+                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^2 ) * W', [1 numP]) ) .* dX.^3;
   case 10 % (0,3)
     ret = ( ( X2 - repmat(g.baryT(:, 2), [1 numP]) ).^3 / 6 - ...
-          repmat( ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^3 * W' / 3, [1 numP]) ) .* dX2.^3;
+          repmat( ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^3 * W' / 3, [1 numP]) ) .* dX.^3;
   case 11 % (4,0)
     ret = ( ( X1 - repmat(g.baryT(:, 1), [1 numP]) ).^4 / 24 - ...
-          repmat( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ).^4 * W' / 12, [1 numP]) ) .* dX1.^4;
+          repmat( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ).^4 * W' / 12, [1 numP]) ) .* dX.^4;
   case 12 % (3,1)
     ret = ( ( X1 - repmat(g.baryT(:, 1), [1 numP]) ).^3 .* ( X2 - repmat(g.baryT(:, 2), [1 numP]) ) / 6 - ...
           repmat( ( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ).^3 .* ...
-                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ) ) * W' / 3, [1 numP]) ) .* (dX1.^3 .* dX2);
+                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ) ) * W' / 3, [1 numP]) ) .* dX.^4;
   case 13 % (2,2)
     ret = ( ( X1 - repmat(g.baryT(:, 1), [1 numP]) ).^2 .* ( X2 - repmat(g.baryT(:, 2), [1 numP]) ).^2 / 4 - ...
           repmat( ( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ).^2 .* ...
-                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^2 ) * W' / 2, [1 numP]) ) .* (dX1 .* dX2).^2;
+                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^2 ) * W' / 2, [1 numP]) ) .* dX.^4;
   case 14 % (1,3)
     ret = ( ( X1 - repmat(g.baryT(:, 1), [1 numP]) ) .* ( X2 - repmat(g.baryT(:, 2), [1 numP]) ).^3 / 6 - ...
           repmat( ( ( g.mapRef2Phy(1, Q1, Q2) - repmat(g.baryT(:, 1), [1 R]) ) .* ...
-                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^3 ) * W' / 3, [1 numP]) ) .* (dX1 .* dX2.^3);
+                    ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^3 ) * W' / 3, [1 numP]) ) .* dX.^4;
   case 15 % (0,4)
     ret = ( ( X2 - repmat(g.baryT(:, 2), [1 numP]) ).^4 / 24 - ...
-          repmat( ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^4 * W' / 12, [1 numP]) ) .* dX2.^4;
+          repmat( ( g.mapRef2Phy(2, Q1, Q2) - repmat(g.baryT(:, 2), [1 R]) ).^4 * W' / 12, [1 numP]) ) .* dX.^4;
   otherwise
     error('Taylor basis functions for p>4 not implemented')
 end % switch
-end
+end % function
 
