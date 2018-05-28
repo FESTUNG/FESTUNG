@@ -150,7 +150,7 @@ for n = 1 : 4
   g.markE0TE0T{n} = sparse(bsxfun(@eq, g.E0T(:, n), g.E0T(:, mapLocalEdgeTetra(n))'));
 end % for
 % Fix a bug in GNU Octave 4.0.0's implementation of sparse matrix concatenation
-if exist('OCTAVE_VERSION','builtin')
+if isOctave
   for n = 1 : 4
     g.markE0TE0T{n} = g.markE0TE0T{n} + 0 * speye(size(g.markE0TE0T{n}, 1), size(g.markE0TE0T{n}, 2));
   end % for n

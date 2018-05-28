@@ -122,7 +122,7 @@ for i = 1 : 3
   markV0TT0V = g.markV0TV0T{i, 1} | g.markV0TV0T{i, 2} | g.markV0TV0T{i, 3}; 
 
   % Fix a bug in GNU Octave 4.0.0's implementation of sparse matrix concatenation
-  if exist('OCTAVE_VERSION','builtin')
+  if isOctave()
     markV0TT0V = markV0TT0V + 0 * speye(size(markV0TT0V, 1), size(markV0TT0V, 2));
   end % if
 
