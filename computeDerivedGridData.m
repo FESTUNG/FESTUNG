@@ -68,7 +68,7 @@ for n = 1 : 3
   % Mark all elements sharing i-th vertex
   g.markV0TT0V{n} = g.markV0TV0T{n, 1} | g.markV0TV0T{n, 2} | g.markV0TV0T{n, 3}; 
   % Fix a bug in GNU Octave 4.0.0's implementation of sparse matrix concatenation
-  if exist('OCTAVE_VERSION','builtin')
+  if isOctave()
     g.markV0TT0V{n} = g.markV0TT0V{n} + 0 * speye(size(g.markV0TT0V{n}, 1), size(g.markV0TT0V{n}, 2));
   end % if
   g.areaE0TbdrD{n} = g.areaE0T(:,n) .* g.markE0TbdrD(:, n);
