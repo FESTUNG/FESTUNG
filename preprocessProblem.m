@@ -53,8 +53,8 @@ problemData.sweData = problemData.sweSteps.preprocessProblem(problemData.sweData
 
 % Coupling matrices for hydraulic head
 g1D = problemData.generateGrid1D(problemData.darcyData.numElem(1), problemData.darcyData.g);
-problemData.darcyData.globVeeQcouple = assembleMatEdgeTetraPhiIntPhi1DIntNu(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.hatVeeQdiag);
-problemData.darcyData.globVeeScouple = assembleMatEdgeTetraPhiIntPhi1DInt(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.hatVeeQdiag, ones(problemData.darcyData.g.numT, 4));
+problemData.darcyData.globVeeQcouple = assembleMatEdgeQuadriPhiIntPhi1DIntNu(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.hatVeeQdiag);
+problemData.darcyData.globVeeScouple = assembleMatEdgeQuadriPhiIntPhi1DInt(problemData.darcyData.g, g1D, problemData.darcyData.g.markE0TbdrCoupling, problemData.sweData.hatVeeQdiag, ones(problemData.darcyData.g.numT, 4));
 
 % Grid data structure for coupling terms
 problemData.markE0TE0T = bsxfun(@and, problemData.sweData.g.g1D.markT2DT, problemData.sweData.g.markE0TbdrCoupling(:, 1)) * ...

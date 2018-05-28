@@ -68,7 +68,7 @@ if problemData.isCouplingSWE  % Coupling term for vertical velocity component
   % Upper edge (2) in Darcy problem is coupled to lower edge (1) in SWE problem:
   % Darcy values are evaluated on edge 2 and integrated over edge 1 in SWE grid data.
   [Q, W] = quadRule1D(qOrd);
-  [Q1, Q2] = gammaMapTetra(2, Q);
+  [Q1, Q2] = gammaMapQuadri(2, Q);
   
   % Evaluate q1, q2 in quadrature points (K_PM x R arrays)
   K = problemData.darcyData.g.numT;
