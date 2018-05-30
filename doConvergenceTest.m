@@ -53,7 +53,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function [err, eoc] = testConvergence(testcase, pLevel, hLevel, tLevel)
+function [err, eoc] = doConvergenceTest(testcase, pLevel, hLevel, tLevel)
 if nargin < 2
   pLevel = 0:4;
 end % if
@@ -61,26 +61,31 @@ if nargin < 3
   hLevel = 1:6;
 end % if
 if nargin < 4
-  tLevel = 1;
+  tLevel = mat2cell((2.^pLevel)' * (250/4 * 2.^(2*hLevel)), ones(1, length(pLevel)), length(hLevel));
 end % if
 
-isSpatConv = length(hLevel) > 1 && length(tLevel) == 1;
-isTimeSpatConv = length(hLevel) == length(tLevel);
+if ~iscell(tLevel)
+  tLevel = cellfun(@(c) tLevel, cell(size(pLevel)), 'UniformOutput', false);
+end % if
+nTimeLevel = cell2mat(cellfun(@(c) length(c), tLevel, 'UniformOutput', false));
+
+isSpatConv = length(hLevel) > 1 && all(1  == cell2mat(cellfun(@(c) length(c), tLevel, 'UniformOutput', false)));
+isTimeSpatConv = all(length(hLevel) == nTimeLevel);
 assert(xor(isSpatConv, isTimeSpatConv), 'Time and space convergence levels must fit to each other!');
-nLevel = max(length(hLevel), length(tLevel));
+nLevel = max(length(hLevel), max(nTimeLevel));
 
 err = cell(size(pLevel));
 eoc = cell(size(pLevel));
 
 for ip = 1 : length(pLevel)
   for level = 1 : nLevel
-    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase);
+    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase, 'tEnd', 5);
     pd.p = pLevel(ip);
     if isSpatConv || isTimeSpatConv
       pd.numElem = [2^hLevel(level), 2^(hLevel(level)-1)];
     end % if
     if ~isSpatConv
-      pd.numSteps = tLevel(level);
+      pd.numSteps = tLevel{ip}(level);
     end % if
     try
       pd = main('swe_2dv', pd);
@@ -91,7 +96,7 @@ for ip = 1 : length(pLevel)
                         repmat((hLevel(2:N) - hLevel(1:N-1))' * log(2), 1, 3) ];
       else
         eoc{ip} = [ zeros(1,3); log(err{ip}(1:N-1, :) ./ err{ip}(2:N, :)) ./ ...
-                        repmat((tLevel(2:N) - tLevel(1:N-1))' * log(2), 1, 3) ];
+                        repmat((tLevel{ip}(2:N) - tLevel{ip}(1:N-1))' * log(2), 1, 3) ];
       end % if
       printConvergence(err, eoc, pLevel);
     catch ME
