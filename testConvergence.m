@@ -51,7 +51,7 @@
 %
 function [err, eoc] = testConvergence(problemName, varargin)
 oldpath = addpath([pwd filesep 'core']);
-fn_testConvergence = getFunctionHandle([problemName filesep 'testConvergence']);
+fn_testConvergence = getFunctionHandle([problemName filesep 'doConvergenceTest']);
 path(oldpath);
 [err, eoc] = fn_testConvergence(varargin{:});
 end % function
