@@ -47,9 +47,18 @@ if problemData.isVisSol
   visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, ...
                     problemData.numSteps, problemData.outputTypes);
 end % if
-%% Error evaluation
-fprintf('L2 error w.r.t. the initial condition: %g\n', ...
-  computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
 
+fprintf('Finished simulation at t_end = %g\n', problemData.tEnd);
+%% Error evaluation
+if problemData.isAnalytical
+  problemData.error = computeL2Error(problemData.g, problemData.cDisc, ...
+    @(x1,x2) problemData.cCont(problemData.tEnd, x1, x2), 2*problemData.p, ...
+    problemData.basesOnQuad);
+  fprintf('L2 error w.r.t. the analytical solution: %g\n', problemData.error)
+else
+  problemData.error = computeL2Error(problemData.g, problemData.cDisc, ...
+    problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad);
+  fprintf('L2 error w.r.t. the initial condition: %g\n', problemData.error)
+end % if
 end % function
 
