@@ -53,7 +53,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function [err, eoc] = testConvergence(testcase, pLevel, hLevel, tLevel)
+function [err, eoc] = doConvergenceTest(testcase, pLevel, hLevel, tLevel)
 if nargin < 2
   pLevel = 0:4;
 end % if
@@ -61,7 +61,7 @@ if nargin < 3
   hLevel = 1:6;
 end % if
 if nargin < 4
-  tLevel = 1;
+  tLevel = hLevel;
 end % if
 
 isSpatConv = length(hLevel) > 1 && length(tLevel) == 1;
@@ -83,7 +83,7 @@ for ip = 1 : length(pLevel)
       pd.numSteps = 10 * 2^tLevel(level);
     end % if
     try
-      pd = main('hdg_advection', pd);
+      pd = main('advection_hdg', pd);
       err{ip}(level) = pd.error;
       N = length(err{ip});
       if isSpatConv
