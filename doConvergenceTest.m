@@ -53,7 +53,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function [err, eoc] = testConvergence(testcase, pLevel, hLevel, tLevel)
+function [err, eoc] = doConvergenceTest(testcase, pLevel, hLevel, tLevel)
 if nargin < 2
   pLevel = 0:4;
 end % if
@@ -61,7 +61,7 @@ if nargin < 3
   hLevel = 1:6;
 end % if
 if nargin < 4
-  tLevel = 1;
+  tLevel = mat2cell((2.^pLevel)' * (25/4 * 2.^(2*hLevel)), ones(1, length(pLevel)), length(hLevel));
 end % if
 
 if ~iscell(tLevel)
@@ -81,7 +81,7 @@ eoc = cell(size(pLevel));
 
 for ip = 1 : length(pLevel)
   for level = 1 : nLevel
-    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase);
+    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase, 'tEnd', 5);
     pd.p = pLevel(ip);
     if isSpatConv || isTimeSpatConv
       pd.numElem = [2^hLevel(level), 2^(hLevel(level)-1)];
