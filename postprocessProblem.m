@@ -38,6 +38,13 @@
 %> @endparblock
 %
 function problemData = postprocessProblem(problemData)
-% Nothing to be done here
+if isfield(problemData, 'cCont')
+  K = problemData.K; N = problemData.N;
+  cDisc = reshape(problemData.sysY(2*K*N+1 : 3*K*N), N, K)';
+  problemData.error = computeL2Error(problemData.g, cDisc, ...
+    @(x1,x2) problemData.cCont(problemData.tEnd, x1, x2), 2*problemData.p + 1, ...
+    problemData.basesOnQuad);
+  fprintf('L2 error w.r.t. the analytical solution: %g\n', problemData.error)
+end % if
 end % function
 

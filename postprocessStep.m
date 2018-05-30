@@ -51,6 +51,6 @@
 %> @endparblock
 %
 function problemData = postprocessStep(problemData, nStep)
-problemData.isFinished = nStep >= problemData.numSteps;
+problemData.isFinished = problemData.isStationary || nStep >= problemData.numSteps;
 end % function
 
