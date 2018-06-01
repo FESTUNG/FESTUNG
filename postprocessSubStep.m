@@ -64,26 +64,13 @@ pd.cDisc(:,:,1) = reshape(pd.cDiscRK(        1 :   K*N), N, K).';
 pd.cDisc(:,:,2) = reshape(pd.cDiscRK(  K*N + 1 : 2*K*N), N, K).';
 pd.cDisc(:,:,3) = reshape(pd.cDiscRK(2*K*N + 1 : 3*K*N), N, K).';
 
-for i = 1 : length(pd.slopeLimList)
-  switch pd.slopeLimList{i}
-    case 'height'
-      hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
-      hV0T = pd.ramp(getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)/86400) * (pd.xiV0Triv + pd.xiV0Tos) - pd.zbLagr;
-      hDisc = applySlopeLimiterDisc(pd.g, hDisc, pd.g.markV0TbdrD, hV0T, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
-      pd.cDisc(:,:,1) = hDisc + pd.zbDisc;
-    case 'momentum'
-      pd.cDisc(:,:,2) = applySlopeLimiterDisc( pd.g, pd.cDisc(:,:,2), pd.g.markV0TbdrRI, pd.ramp(getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)/86400) * pd.uHV0Triv, ...
-                                               pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim );
-      
-      pd.cDisc(:,:,3) = applySlopeLimiterDisc( pd.g, pd.cDisc(:,:,3), pd.g.markV0TbdrRI, pd.ramp(getdefault(pd.tLvls, nSubStep+1, pd.t + pd.dt)/86400) * pd.vHV0Triv, ...
-                                               pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim );
-    otherwise
-      error('Slope limiting not implemented for non primary variables.')
-  end % switch
-end % for
+% Slope Limiting
+if pd.isSlopeLim
+  pd = applySlopeLimiter(pd, pd.slopeLimName, nSubStep);
+end % if
 
 % Ensure water height doesn't fall below threshold
-pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, nStep, pd.zbLagr + pd.minTol, pd.elevTol);
+pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, nStep, pd.zbV0T + pd.minTol, pd.elevTol);
 pd.cDiscRK(1 : pd.K*pd.N) = reshape(pd.cDisc(:,:,1).', N*K, 1);
 
 pd.isSubSteppingFinished = nSubStep >= length(pd.tLvls);

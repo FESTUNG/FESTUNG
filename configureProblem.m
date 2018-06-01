@@ -49,14 +49,14 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'radial1');
+pd = setdefault(pd, 'name', 'analytical');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
 % - 'ADCIRC' reads 'swe/fort_<name>.15'
 % - 'manual' calls configureManualADCIRC()
-pd = setdefault(pd, 'configSource', 'debug');
+pd = setdefault(pd, 'configSource', 'analytical');
 
 %% What kind of grid to use:
 % - 'square' creates a unit square [0,1]x[0,1] with given pd.hmax,
@@ -66,7 +66,10 @@ pd = setdefault(pd, 'configSource', 'debug');
 %   hmax and performs uniform refinement according to parameter 
 %   'refinement'. All boundaries are type 3, i.e river.
 % - 'ADCIRC' reads grid information from 'swe/fort_<name>.{14,17}'.
-pd = setdefault(pd, 'gridSource', 'square');
+% - 'periodicRectangle' creates a structured grid over a rectangle with
+%   periodic boundary conditions on all boundaries
+% - 'load' reads grid information from the mat-file swe/grids/<name>.mat
+pd = setdefault(pd, 'gridSource', 'hierarchical');
 
 %% Polynomial approximation order
 % Piecewise constant (0), piecewise linear (1), or piecewise quadratic (2)
@@ -82,17 +85,21 @@ pd = setdefault(pd, 'isRiemOS', true); % Riemann solver type on open sea boundar
 pd = setdefault(pd, 'isRiemRiv', true); % Riemann solver type on river boundary ('Lax-Friedrichs', 'Roe', or 'none')
 pd = setdefault(pd, 'typeBdrL', 'riemann'); % Flux type on land boundary ('reflected', 'natural', or 'riemann')
 pd = setdefault(pd, 'averagingType', 'semi-harmonic'); % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
+pd = setdefault(pd, 'slopeLimName', 'sequentialSegregated'); % Different approches for slope limiting: 'componentwise', 'sequentialSegregated', 'sequentialVector', 'vector', suffix '+norm'
+pd = setdefault(pd, 'variant', 'transformation'); % Different variants used to obtain a rotation matrix for vector limiting, only in cases 'sequentialVector' or 'vector'
+pd = setdefault(pd, 'angle', 0); % Angle used for backtransformation in vector slope limiting, only in cases 'sequentialVector' or 'vector' and if variant is 'fixed'
 pd = setdefault(pd, 'typeSlopeLim', 'linear'); % Slope limiter type ('linear', 'hierarch_vert', 'strict')
-pd = setdefault(pd, 'slopeLimList', {'height', 'momentum'}); % Apply slope limiter to specified variables ('height', 'momentum')
+pd = setdefault(pd, 'slopeLimList', {'height', 'velocity'}); % Apply slope limiter to specified variables ('height', 'momentum' 'velocity') 'momentum' and 'velocity' are exclusive
 pd = setdefault(pd, 'isCoupling', false); % Compute velocity coefficients and flux of first unknown, e.g., for coupled transport problem
 pd = setdefault(pd, 'elevTol', 20); % maximum absolute value for elevation
 
 %% Visualization parameters
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
-pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
+pd = setdefault(pd, 'isWaitbar', false); % Use waitbar
 pd = setdefault(pd, 'outputTypes', cellstr('vtk')); % Output file type
 pd = setdefault(pd, 'outputList', {'elevation', 'velocity'}); % List of variables to visualize
 pd = setdefault(pd, 'isVisStations', false); % Output stations
+pd = setdefault(pd, 'isOutputGrid', false); % Specify whether the grid should be saved as a mat-file
 
 %% Simulation scenario specific parameters
 switch pd.configSource
@@ -113,23 +120,27 @@ end % function
 %% Debugging
 function pd = configureDebug(pd)
 pd.isSolutionAvail = true;
-pd.isRhsAvail = true;
+pd.isRhsAvail = false;
 pd.isTidalDomain = false;
 pd.isHotstartInput = false;
-pd.isHotstartOutput = false;
+pd.isHotstartOutput = true;
+pd.hotstartOutputFrequency = 20000;
 pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
 pd.isSlopeLim = true;
 
 % Overwrite grid parameters
-pd.gridSource = 'square';
+pd.X1 = [0 1000];
+pd.X2 = [0 1];
 pd.isSpherical = false;
-pd = setdefault(pd, 'hmax', 1/80);
+pd.hx = 1;
+pd.hy = 1;
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd = setdefault(pd, 'numSteps', 1000);  % number of time steps
-pd = setdefault(pd, 'tEnd', 0.5);  % end time
-pd = setdefault(pd, 'outputCount', 100); % Number of outputs over total simulation time
+pd.outputStart = 0 * ones(1,4);
+pd = setdefault(pd, 'numSteps', 20000);  % number of time steps
+pd = setdefault(pd, 'tEnd', 20);  % end time
+pd = setdefault(pd, 'outputCount', 1); % Number of outputs over total simulation time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
@@ -140,7 +151,7 @@ pd.isSteadyState = false; % End simulation upon convergence
 pd.gConst = 9.81;
 pd.minTol = 0.001;
 
-pd.isBottomFrictionNonlinear = true; % NOLIBF
+pd.isBottomFrictionNonlinear = false; % NOLIBF
 pd.isBottomFrictionVarying = false; % NWP
 pd.bottomFrictionCoef = 0;
 
@@ -151,8 +162,15 @@ pd.zbCont = @(x1,x2) -(x1==x1);
 pd.fcCont = @(x1,x2) 0*x1;
 
 % Analytical solution
-pd.xiCont = @(x1,x2,t) 0.5 * (sqrt((x1-0.5).^2+(x2-0.5).^2) < 0.1);
-pd.uCont = @(x1,x2,t) 0*x1;
+cm = 6.23416;
+xA = @(t) 500 - t*sqrt(10*pd.gConst);
+xB = @(t) 500 + t*(2*sqrt(10*pd.gConst) - 3*cm);
+xC = @(t) 500 + t*(2*cm^2*(sqrt(10*pd.gConst) - cm))/(cm^2 - pd.gConst);
+rot = @(x1,x2) x1; % sqrt(x1.^2+x2.^2);
+pd.xiCont = @(x1,x2,t) 9*(rot(x1,x2)<xA(t)) + setNaN2Zero( (4/9/pd.gConst*(sqrt(10*pd.gConst) - (rot(x1,x2)-500)/2/t).^2 - 1) .* (rot(x1,x2)>=xA(t)) .* (rot(x1,x2)<xB(t)) ) ...
+                        + (cm^2/pd.gConst - 1) .* (rot(x1,x2)>=xB(t)) .* (rot(x1,x2)<xC(t));
+pd.uCont = @(x1,x2,t) setNaN2Zero( 2/3*((rot(x1,x2)-500)/t + sqrt(10*9.81)) .* (rot(x1,x2) >= xA(t)) .* (rot(x1,x2) < xB(t)) ...
+                        + 2 * (sqrt(10*9.81) - cm)  .* (rot(x1,x2) >= xB(t)) .* (rot(x1,x2) < xC(t)) );
 pd.vCont = @(x1,x2,t) 0*x1;
 
 % Right hand side functions (derived from analytical solution)
@@ -161,7 +179,7 @@ pd.f1Cont = @(x1,x2,t) 0*x1;
 pd.f2Cont = @(x1,x2,t) 0*x1;
 
 % Boundary conditions
-pd.isOSCont = false;
+pd.isOSCont = true;
 pd.xiOSCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
 pd.isRivCont = false;
 pd.xiRivCont = @(x1,x2,t) pd.xiCont(x1,x2,t);
@@ -178,64 +196,67 @@ pd.isTidalDomain = false;
 pd.isHotstartInput = false;
 pd.isHotstartOutput = false;
 pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
-pd.isSlopeLim = false;
+pd.isSlopeLim = true;
 
 % Overwrite grid parameters
 pd.gridSource = 'hierarchical';
 pd.isSpherical = false; 
 pd = setdefault(pd, 'refinement', 0);
-pd = setdefault(pd, 'hmax', 200);
+pd = setdefault(pd, 'hmax', 10);
 
 % Overwrite time-stepping parameters
 pd.t0 = 0; % Start time of simulation
-pd = setdefault(pd, 'numSteps', 200*2^(pd.refinement+pd.p));  % number of time steps
-pd = setdefault(pd, 'tEnd', 500);  % end time
-pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
+pd = setdefault(pd, 'numSteps', 100*2^(pd.refinement+pd.p));  % number of time steps
+pd = setdefault(pd, 'tEnd', 100);  % end time
+pd = setdefault(pd, 'outputCount', 10);  % Number of outputs over total simulation time
 
 pd.isAdaptiveTimestep = false; % Use adaptive timestep width
 pd.dt = (pd.tEnd - pd.t0) / pd.numSteps;
 
 pd.isSteadyState = false; % End simulation upon convergence
 
-ds = 0.01; % domainScale
-slope = 0.005;
-depth = 2;
-
-A = 0.1;
-B = 0.1;
-C = 0.01;
-
-pd.gConst = 9.81;
+pd.gConst = 1;
 pd.minTol = 0.001;
 
-pd.isBottomFrictionNonlinear = true; % NOLIBF
+pd.isBottomFrictionNonlinear = false; % NOLIBF
 pd.isBottomFrictionVarying = false; % NWP
-pd.bottomFrictionCoef = 0.0001;
+pd.bottomFrictionCoef = 0.0;
 
 % Ramping function, bathymetry, and Coriolis coefficient
 pd.isRamp = false;
 pd.ramp = @(t) 1;
-pd.zbCont = @(x1,x2) slope*(x1+x2) - depth;
-pd.fcCont = @(x1,x2) 0.0001*ds*x1;
+pd.zbCont = @(x1,x2) -(x1==x1);
+pd.fcCont = @(x1,x2) 0*x1;
 
-% Analytical solution
-pd.xiCont = @(x1,x2,t) C*(sin(ds*(x1-t)) + sin(ds*(x2-t)));
-pd.uCont = @(x1,x2,t) A*sin(ds*(x1-t));
-pd.vCont = @(x1,x2,t) B*sin(ds*(x2-t));
+M = 1/2;
+c1 = -0.04;
+c2 = 0.02;
+a = pi/6;
+x0 = 30;
+y0 = 40;
+fCont = @(x,y,t) -c2 * ((x-x0 - M*t*cos(a)).^2 + (y-y0 - M*t*sin(a)).^2);
+f_tCont = @(x,y,t) 2*M*c2 * ((x-x0 - M*t*cos(a))*cos(a) + (y-y0 - M*t*sin(a))*sin(a));
+f_xCont = @(x,y,t) -2*c2 * (x-x0 - M*t*cos(a));
+f_yCont = @(x,y,t) -2*c2 * (y-y0 - M*t*sin(a));
+
+% Analytical solution: For this example the right hand sides are zero
+pd.xiCont = @(x1,x2,t) -c1^2/(4*c2*pd.gConst) * exp(2*fCont(x1,x2,t));
+pd.uCont = @(x1,x2,t) M*cos(a) + c1 * (x2-y0 - M*t*sin(a)) .* exp(fCont(x1,x2,t));
+pd.vCont = @(x1,x2,t) M*sin(a) - c1 * (x1-x0 - M*t*cos(a)) .* exp(fCont(x1,x2,t));
 
 % Auxiliary functions (derivatives etc.)
 pd.hCont = @(x1,x2,t) pd.xiCont(x1,x2,t) - pd.zbCont(x1,x2);
-pd.zb_xCont = @(x1,x2) slope*(x1==x1);
-pd.zb_yCont = @(x1,x2) slope*(x1==x1);
-pd.u_tCont = @(x1,x2,t) -ds*A*cos(ds*(x1-t));
-pd.u_xCont = @(x1,x2,t) ds*A*cos(ds*(x1-t));
-pd.u_yCont = @(x1,x2,t) 0*x1;
-pd.v_tCont = @(x1,x2,t) -ds*B*cos(ds*(x2-t));
-pd.v_xCont = @(x1,x2,t) 0*x1;
-pd.v_yCont = @(x1,x2,t) ds*B*cos(ds*(x2-t));
-pd.h_tCont = @(x1,x2,t) -ds*C*(cos(ds*(x1-t)) + cos(ds*(x2-t)));
-pd.h_xCont = @(x1,x2,t) ds*C*cos(ds*(x1-t)) - pd.zb_xCont(x1,x2);
-pd.h_yCont = @(x1,x2,t) ds*C*cos(ds*(x2-t)) - pd.zb_yCont(x1,x2);
+pd.zb_xCont = @(x1,x2) 0*x1;
+pd.zb_yCont = @(x1,x2) 0*x1;
+pd.u_tCont = @(x1,x2,t)  c1 * (x2-y0 - M*t*sin(a)) .* exp(fCont(x1,x2,t)) .* f_tCont(x1,x2,t) - c1*M*sin(a) * exp(fCont(x1,x2,t));
+pd.u_xCont = @(x1,x2,t)  c1 * (x2-y0 - M*t*sin(a)) .* exp(fCont(x1,x2,t)) .* f_xCont(x1,x2,t);
+pd.u_yCont = @(x1,x2,t)  c1 * (x2-y0 - M*t*sin(a)) .* exp(fCont(x1,x2,t)) .* f_yCont(x1,x2,t) + c1 * exp(fCont(x1,x2,t));
+pd.v_tCont = @(x1,x2,t) -c1 * (x1-x0 - M*t*cos(a)) .* exp(fCont(x1,x2,t)) .* f_tCont(x1,x2,t) + c1*M*cos(a) * exp(fCont(x1,x2,t));
+pd.v_xCont = @(x1,x2,t) -c1 * (x1-x0 - M*t*cos(a)) .* exp(fCont(x1,x2,t)) .* f_xCont(x1,x2,t) - c1 * exp(fCont(x1,x2,t));
+pd.v_yCont = @(x1,x2,t) -c1 * (x1-x0 - M*t*cos(a)) .* exp(fCont(x1,x2,t)) .* f_yCont(x1,x2,t);
+pd.h_tCont = @(x1,x2,t) 2 * pd.xiCont(x1,x2,t) .* f_tCont(x1,x2,t);
+pd.h_xCont = @(x1,x2,t) 2 * pd.xiCont(x1,x2,t) .* f_xCont(x1,x2,t);
+pd.h_yCont = @(x1,x2,t) 2 * pd.xiCont(x1,x2,t) .* f_yCont(x1,x2,t);
 
 % Right hand side functions (derived from analytical solution)
 % This can be used for any solution, the user just has to specify all
@@ -346,9 +367,13 @@ pd.isRivCont = false;
 
 if pd.configADCIRC.NOUTGE
   pd.outputList = [pd.outputList, 'elevation'];
+else
+  pd.outputList = pd.outputList( setdiff( 1:length(pd.outputList), [find(strcmp(pd.outputList, 'elevation')), find(strcmp(pd.outputList, 'height'))] ) );
 end % if
 if pd.configADCIRC.NOUTGV
   pd.outputList = [pd.outputList, 'velocity'];
+else
+  pd.outputList = pd.outputList( setdiff( 1:length(pd.outputList), [find(strcmp(pd.outputList, 'velocity')), find(strcmp(pd.outputList, 'momentum'))] ) );
 end % if
 pd.outputList = unique(pd.outputList);
 

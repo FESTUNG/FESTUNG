@@ -100,5 +100,5 @@ if problemData.isSolutionAvail
   dataDisc = projectDataQ0T2DataDisc(dataQ0T, 2*p, problemData.refElemPhiPhi, problemData.basesOnQuad);
   problemData.err(6) = computeL2Error(problemData.g, dataDisc, vEnd, 2*p+1, problemData.basesOnQuad);
 end % if
-end
+end % function
 

@@ -70,25 +70,10 @@ switch pd.gridSource
     pd.g.idE(pd.g.baryE(:, 1) == 0) = 1; % west
     
     pd.g.idE0T = pd.g.idE(pd.g.E0T);
-    
-    % Store edge counts
-    pd.g.numEint = sum(pd.g.idE == 0);
-    pd.g.numEbdrL = sum(pd.g.idE == 1);
-    pd.g.numEbdrRA = sum(pd.g.idE == 2);
-    pd.g.numEbdrRI = sum(pd.g.idE == 3);
-    pd.g.numEbdrOS = sum(pd.g.idE == 4);
-    
-    if pd.g.numEbdrOS ~= 0 && pd.isOSCont == 0
-      warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
-    end % if
-    
-    if pd.g.numEbdrRI ~= 0 && pd.isRivCont == 0
-      warning('River boundary given but no boundary forcings. Program will use zero boundary condition.')
-    end % if
-    
+
   case 'hierarchical'
     X1 = [0 100 100 0]; X2 = [0 0 100 100];
-    pd.g = execin('swe/domainHierarchy', X1, X2, pd.hmax, pd.refinement);
+    pd.g = domainHierarchy(X1, X2, pd.hmax, pd.refinement);
     
     % Set edge types
     pd.g.idE = zeros(pd.g.numE,1);
@@ -97,25 +82,10 @@ switch pd.gridSource
     pd.g.idE(pd.g.baryE(:, 2) == max(X2)) = 3; % north
     pd.g.idE(pd.g.baryE(:, 1) == min(X1)) = 3; % west
     pd.g.idE0T = pd.g.idE(pd.g.E0T);
-    
-    % Store edge counts
-    pd.g.numEint = sum(pd.g.idE == 0);
-    pd.g.numEbdrL = sum(pd.g.idE == 1);
-    pd.g.numEbdrRA = sum(pd.g.idE == 2);
-    pd.g.numEbdrRI = sum(pd.g.idE == 3);
-    pd.g.numEbdrOS = sum(pd.g.idE == 4);
-    
-    if pd.g.numEbdrOS ~= 0 && pd.isOSCont == 0
-      warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
-    end % if
-    
-    if pd.g.numEbdrRI ~= 0 && pd.isRivCont == 0
-      warning('River boundary given but no boundary forcings. Program will use zero boundary condition.')
-    end % if
-    
+
   case 'ADCIRC'
     projCenter = [pd.configADCIRC.SLAM0, pd.configADCIRC.SFEA0];
-    [ pd.g, depth, forcingOS, flowRateRiv ] = execin('swe/domainADCIRC', ['fortFiles/' pd.name '.14'], ['fortFiles/' pd.name '.17'], pd.configADCIRC.NBFR, pd.isSpherical, projCenter);
+    [ pd.g, depth, forcingOS, flowRateRiv ] = domainADCIRC(['swe/fortFiles/' pd.name '.14'], ['swe/fortFiles/' pd.name '.17'], pd.configADCIRC.NBFR, pd.isSpherical, projCenter);
     
     % Bathymetry
     h = getFunctionHandle('swe/evaluateFuncFromVertexValues');
@@ -197,10 +167,6 @@ switch pd.gridSource
                                                sin( pi/180 * (pd.configADCIRC.FACE(n) - forcingOS(n,:,2)) );
         pd.xiAmpOS{2,n} = xiAmp(pd.g.E0T);
       end % for
-
-      if pd.g.numEbdrOS ~= 0 && numFrequency == 0
-        warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
-      end % if
     end % if
     
     % River inflow
@@ -246,6 +212,15 @@ switch pd.gridSource
     % Clean out ADCIRC config struct
     pd = rmfield(pd, 'configADCIRC');
     
+  case 'periodicRectangle'
+    pd.g = domainRectanglePeriodic(pd.X, pd.Y, pd.h);
+	case 'load'
+		load(['swe' filesep 'grids' filesep pd.name '.mat']);
+    % Robust way to make sure that transformation mapRef2Phydoes not use
+    % some other variables with the same name currently in the workspace
+    B = g.B; a1 = g.coordV0T(:,1,:);
+    g.mapRef2Phy = @(i,X1,X2) B(:,i,1)*X1 + B(:,i,2)*X2 + a1(:,1,i)*ones(size(X1));
+		pd.g = g;
   otherwise
     error('Invalid gridSource given.')
 end % switch
@@ -253,16 +228,26 @@ end % switch
 if pd.isVisGrid,  visualizeGrid(pd.g);  end % if
 
 %% Globally constant parameters
+qOrd1D = 2*pd.p+1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
+
 pd = setdefault(pd, 'outputStart', pd.t0 * ones(1,4));
 pd = setdefault(pd, 'outputEnd', 1.0000001 * pd.tEnd * ones(1,4));
 pd = setdefault(pd, 'outputFrequency', max(floor(pd.numSteps / pd.outputCount), 1) * ones(1,4));
+
 pd.K = pd.g.numT; % number of triangles
 pd.N = nchoosek(pd.p + 2, pd.p); % number of local DOFs
 K = pd.K;
 N = pd.N;
 
-pd.g.markE0Tint = pd.g.idE0T == 0; % [K x 3] mark local edges that are interior
-pd.g.markE0TbdrL = pd.g.idE0T == 1; % [K x 3] mark local edges on the land boundary
+% Store edge counts
+pd.g.numEint   = sum(pd.g.idE == 0);
+pd.g.numEbdrL  = sum(pd.g.idE == 1);
+pd.g.numEbdrRA = sum(pd.g.idE == 2);
+pd.g.numEbdrRI = sum(pd.g.idE == 3);
+pd.g.numEbdrOS = sum(pd.g.idE == 4);
+
+pd.g.markE0Tint   = pd.g.idE0T == 0; % [K x 3] mark local edges that are interior
+pd.g.markE0TbdrL  = pd.g.idE0T == 1; % [K x 3] mark local edges on the land boundary
 pd.g.markE0TbdrRA = pd.g.idE0T == 2; % [K x 3] mark local edges on the radiation boundary
 pd.g.markE0TbdrRI = pd.g.idE0T == 3; % [K x 3] mark local edges on the river boundary
 pd.g.markE0TbdrOS = pd.g.idE0T == 4; % [K x 3] mark local edges on the open sea boundary
@@ -273,9 +258,30 @@ if ~isempty(pd.slopeLimList)
   pd.g.markV0TbdrD = pd.g.markV0TbdrRI | pd.g.markV0TbdrOS;
 end % if
 
-pd.g = execin('swe/computeDerivedGridData', pd.g);
+pd.markQ0E0TbdrL = cell(3,1);
+pd.markQ0E0TbdrRI = cell(3,1);
+pd.markQ0E0TbdrOS = cell(3,1);
+for n = 1 : 3
+  pd.markQ0E0TbdrL{n} = logical(kron(pd.g.markE0TbdrL(:,n), ones(numQuad1D,1)));
+  pd.markQ0E0TbdrRI{n} = logical(kron(pd.g.markE0TbdrRI(:,n), ones(numQuad1D,1)));
+  pd.markQ0E0TbdrOS{n} = logical(kron(pd.g.markE0TbdrOS(:,n), ones(numQuad1D,1)));
+end % for
 
-qOrd1D = 2*pd.p+1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
+if pd.g.numEbdrOS ~= 0 && ( (strcmp(pd.configSource, 'ADCIRC') && numFrequency == 0) || (~strcmp(pd.gridSource, 'ADCIRC') && ~pd.isOSCont) )
+  warning('Open sea boundary given but no boundary forcings. Program will use zero boundary condition.')
+end % if
+
+if pd.g.numEbdrRI ~= 0 && ~pd.isRivCont && ~strcmp(pd.gridSource, 'ADCIRC')
+  warning('River boundary given but no boundary forcings. Program will use zero boundary condition.')
+end % if
+
+pd.g = computeDerivedGridData(pd.g);
+
+if pd.isOutputGrid
+	g = pd.g;
+	save(['swe' filesep 'grids' filesep pd.name '.mat'], 'g');
+end % if
+
 pd.g.nuQ0E0T = cell(3,2);
 pd.g.nuE0Tprod = cell(3,1);
 pd.g.nuE0TsqrDiff = cell(3,1);
@@ -314,6 +320,7 @@ fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n',
 requiredOrders = unique([max(2*pd.p, 1), 2*pd.p+1, 2, 3], 'sorted');
 pd.basesOnQuad = computeBasesOnQuad(N, struct, requiredOrders);
 if ~isempty(pd.slopeLimList)
+  assert(strcmp(pd.slopeLimList{1}, 'height'), 'The first qunatity for slope limiting must be the height of water.')
   pd.basesOnQuad = computeTaylorBasesV0T(pd.g, N, pd.basesOnQuad);
 end % if
 basesOnQuadLin = computeBasesOnQuad(3, struct);
@@ -325,7 +332,7 @@ pd.sysMinValueCorrection = [ phi(1,0,0) phi(1,1,0) phi(1,0,1) ; ...
 
 %% Computation of matrices on the reference triangle.
 pd.refElemPhiPhi = eye(N); %integrateRefElemPhiPhi(N, pd.basesOnQuad);
-refElemPhiPhiPhi = execin('swe/integrateRefElemPhiPhiPhi',N, pd.basesOnQuad);
+refElemPhiPhiPhi = integrateRefElemPhiPhiPhi(N, pd.basesOnQuad);
 refElemDphiPhi = integrateRefElemDphiPhi(N, pd.basesOnQuad);
 
 refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
@@ -333,30 +340,30 @@ refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
 if pd.p == 0
   refElemPhiPhiDphiLin = permute(integrateRefElemDphiPhiPhi([3 N N], basesOnQuadLin), [3 2 1 4]);
   refElemDphiPhiPhiLin = integrateRefElemDphiPhiPhi([N N 3], basesOnQuadLin);
-  refElemPhiPhiPhiLin  = execin('swe/integrateRefElemPhiPhiPhi',[N N 3], basesOnQuadLin);
+  refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], basesOnQuadLin);
 
   refEdgePhiIntPhiIntPhiLin = integrateRefEdgePhiIntPhiIntPhiInt([N N 3], basesOnQuadLin);
-  refEdgePhiIntPhiExtPhiLin = permute(execin('swe/integrateRefEdgePhiIntPhiIntPhiExt',[N 3 N], basesOnQuadLin), [1 3 2 4 5]);
+  refEdgePhiIntPhiExtPhiLin = permute(integrateRefEdgePhiIntPhiIntPhiExt([N 3 N], basesOnQuadLin), [1 3 2 4 5]);
 else
   refElemPhiPhiDphiLin = permute(integrateRefElemDphiPhiPhi([3 N N], pd.basesOnQuad), [3 2 1 4]);
   refElemDphiPhiPhiLin = integrateRefElemDphiPhiPhi([N N 3], pd.basesOnQuad);
-  refElemPhiPhiPhiLin  = execin('swe/integrateRefElemPhiPhiPhi',[N N 3], pd.basesOnQuad);
+  refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], pd.basesOnQuad);
 
   refEdgePhiIntPhiIntPhiLin = integrateRefEdgePhiIntPhiIntPhiInt([N N 3], pd.basesOnQuad);
-  refEdgePhiIntPhiExtPhiLin = permute(execin('swe/integrateRefEdgePhiIntPhiIntPhiExt',[N 3 N], pd.basesOnQuad), [1 3 2 4 5]);
+  refEdgePhiIntPhiExtPhiLin = permute(integrateRefEdgePhiIntPhiIntPhiExt([N 3 N], pd.basesOnQuad), [1 3 2 4 5]);
 end % if
 
 refEdgePhiIntPhiInt = integrateRefEdgePhiIntPhiInt(N, pd.basesOnQuad);
 refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, pd.basesOnQuad);
 
-refElemDphiPerQuad = execin('swe/integrateRefElemDphiPerQuad', N, pd.basesOnQuad);
-refEdgePhiIntPerQuad = execin('swe/integrateRefEdgePhiIntPerQuad', N, pd.basesOnQuad);
+refElemDphiPerQuad = integrateRefElemDphiPerQuad(N, pd.basesOnQuad);
+refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, pd.basesOnQuad, qOrd1D);
 
 %% L2 projections of time-independent algebraic coefficients.
 fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
 pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
 pd.zbDisc = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
-pd.zbLagr = projectDataDisc2DataLagr(pd.zbDiscLin);
+pd.zbV0T = computeFuncContV0T(pd.g, @(x1, x2) pd.zbCont(x1, x2));
 
 % Evaluate zb in each element's quadrature point
 [Q1, Q2, ~] = quadRule2D(max(2*pd.p,1)); numQuad2D = length(Q1);
@@ -388,7 +395,7 @@ if ismember('Coriolis', pd.outputList)
 end % if
 if ismember('bathymetry', pd.outputList)
   varName = [ varName, {'bathymetry'} ];
-  dataLagr = [ dataLagr, {pd.zbLagr} ];
+  dataLagr = [ dataLagr, {pd.zbV0T} ];
 end % if
 if ~isempty(varName)
   visualizeDataLagr(pd.g, dataLagr, varName, ['output' filesep pd.name '_coef'], 0, pd.outputTypes);
@@ -396,8 +403,8 @@ end % if
 
 %% Assembly of time-independent global matrices corresponding to linear contributions.
 % Element matrices
-globD = execin('swe/assembleMatElemPhiPhiFuncDisc',pd.g, refElemPhiPhiPhiLin, fcDisc);
-globG = execin('swe/assembleMatElemPhiPhiDfuncDisc',pd.g, refElemPhiPhiDphiLin, pd.zbDiscLin);
+globD = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhiLin, fcDisc);
+globG = assembleMatElemPhiPhiDfuncDisc(pd.g, refElemPhiPhiDphiLin, pd.zbDiscLin);
 globH = assembleMatElemDphiPhi(pd.g, refElemDphiPhi);
 pd.globM = assembleMatElemPhiPhi(pd.g, pd.refElemPhiPhi);
 globU = assembleMatElemDphiPhiFuncDisc(pd.g, refElemDphiPhiPhiLin, pd.zbDiscLin);
@@ -405,8 +412,8 @@ globU = assembleMatElemDphiPhiFuncDisc(pd.g, refElemDphiPhiPhiLin, pd.zbDiscLin)
 % Interior edge matrices
 switch pd.typeFlux
   case 'Lax-Friedrichs'
-    globQ = assembleMatEdgePhiPhiNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, pd.g.areaNuE0Tint);
-    globO = assembleMatEdgePhiPhiFuncDiscIntNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiIntPhiLin, refEdgePhiIntPhiExtPhiLin, pd.zbDiscLin, pd.g.areaNuE0Tint);
+    globQ = assembleMatEdgePhiPhiNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt);
+    globO = assembleMatEdgePhiPhiFuncDiscIntNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiIntPhiLin, refEdgePhiIntPhiExtPhiLin, pd.zbDiscLin);
   case 'Roe'
     error('not implemented')
     
@@ -415,10 +422,10 @@ switch pd.typeFlux
 end % switch
 
 % Boundary edge matrices
-globQOS = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrOS);
-globQRA = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrRA);
-globOL  = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrL);
-globORA = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin, pd.g.areaNuE0TbdrRA);
+globQOS = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPhiInt);
+globQRA = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiInt);
+globOL  = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin);
+globORA = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiIntPhiLin, pd.zbDiscLin);
 
 % Derived system matrices
 pd.sysW = blkdiag(pd.globM, pd.globM, pd.globM);
@@ -437,11 +444,11 @@ end % if
 
 %% Assembly of time-independent global matrices corresponding to non-linear contributions.
 % Element matrices
-pd.globF = execin('swe/assembleMatElemDphiPerQuad',pd.g, refElemDphiPerQuad);
+pd.globF = assembleMatElemDphiPerQuad(pd.g, refElemDphiPerQuad);
 
 % Edge matrices
-[pd.globRdiag, pd.globRoffdiag] = execin('swe/assembleMatEdgePhiNuPerQuad',pd.g, pd.g.markE0Tint, refEdgePhiIntPerQuad);
-pd.globV = execin('swe/assembleMatEdgePhiPerQuad',pd.g, refEdgePhiIntPerQuad);
+[pd.globRdiag, pd.globRoffdiag] = assembleMatEdgePhiNuPerQuad(pd.g, pd.g.markE0Tint, refEdgePhiIntPerQuad);
+pd.globV = assembleMatEdgePhiPerQuad(pd.g, refEdgePhiIntPerQuad);
 
 % Bottom-friction terms
 if pd.isBottomFrictionVarying
@@ -450,7 +457,7 @@ if pd.isBottomFrictionVarying
     refElemPhiPhiPerQuad = integrateRefElemPhiPhiPerQuad(N, pd.basesOnQuad);
     pd.globE = assembleMatElemPhiFuncDiscPerQuad(pd.g, refElemPhiPhiPerQuad, bottomFrictionDisc);
   else
-    pd.globE = execin('swe/assembleMatElemPhiPhiFuncDisc',pd.g, refElemPhiPhiPhi, bottomFrictionDisc);
+    pd.globE = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhi, bottomFrictionDisc);
   end % if
 else
   if pd.isBottomFrictionNonlinear
@@ -462,7 +469,7 @@ else
     % determinants 2*|T| and the reference block - precisely the same
     % operation as for the assembly of a mass matrix. The corresponding
     % routine assembleMatElemPhiPhi is therefore re-used here.
-    refElemPhiPerQuad = execin('swe/integrateRefElemPhiPerQuad',N, pd.basesOnQuad);
+    refElemPhiPerQuad = integrateRefElemPhiPerQuad(N, pd.basesOnQuad);
     pd.globE = pd.bottomFrictionCoef * assembleMatElemPhiPhi(pd.g, refElemPhiPerQuad);
   else
     pd.globE = pd.bottomFrictionCoef * pd.globM;
@@ -471,23 +478,21 @@ end % if
 
 % Boundary matrices
 if pd.g.numEbdrL > 0 % Land boundaries
-  pd.globRL = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrL);
+  pd.globRL = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad);
   if strcmp(pd.typeBdrL, 'riemann')
-      pd.globVL = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaE0TbdrL);
+      pd.globVL = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad);
   end % if
 end % if
 
 if pd.g.numEbdrRA > 0 % Radiation boundaries
-  globRRA = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRA);
+  globRRA = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPerQuad);
   pd.globRdiag = cellfun(@plus, pd.globRdiag, globRRA, 'UniformOutput', false);
 end % if
 
 pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.g.numEbdrRI > 0 % River boundaries
   if ~pd.isRivCont
-    if any(ismember(pd.slopeLimList, 'momentum'))
-      pd.zbV0T = computeFuncContV0T(pd.g, pd.zbCont);
-
+    if any(ismember(pd.slopeLimList, 'momentum')) || any(ismember(pd.slopeLimList, 'velocity'))
       % To determine the vertex values for all triangles we first compute
       % the vertex values for triangles that have a boundary edge of river
       % type. We average the values from both sides of the vertex if the 
@@ -532,9 +537,17 @@ if pd.g.numEbdrRI > 0 % River boundaries
       end % if
       hV0T = xiV(pd.g.V0T) - pd.zbV0T;
       uV = dataV(:, 2);
-      pd.uHV0Triv = uV(pd.g.V0T) .* hV0T;
       vV = dataV(:, 3);
-      pd.vHV0Triv = vV(pd.g.V0T) .* hV0T;
+      
+      if any(ismember(pd.slopeLimName, 'componentwise')) || any(ismember(pd.slopeLimName, 'vector'))
+          pd.uHV0Triv = uV(pd.g.V0T) .* hV0T;
+          pd.vHV0Triv = vV(pd.g.V0T) .* hV0T;
+      elseif any(ismember(pd.slopeLimName, 'sequentialSegregated')) || any(ismember(pd.slopeLimName, 'sequentialVector'))
+          pd.uV0Triv = uV(pd.g.V0T);
+          pd.vV0Triv = vV(pd.g.V0T);
+      else
+          error('Unsupported slope limiter.');
+      end % if
     elseif any(ismember(pd.slopeLimList, 'height'))
       % To determine the vertex values for all triangles we first compute
       % the vertex values for triangles that have a boundary edge of river
@@ -562,19 +575,15 @@ if pd.g.numEbdrRI > 0 % River boundaries
       xiV = xiV ./ xiVCountRI;
       pd.xiV0Triv = xiV(pd.g.V0T);
     end % if
-
     pd.xiRivQ0E0T = kron(pd.xiRivQ0E0T, ones(numQuad1D,1));
     pd.uRivQ0E0T = kron(pd.uRivQ0E0T, ones(numQuad1D,1));
     pd.vRivQ0E0T = kron(pd.vRivQ0E0T, ones(numQuad1D,1));
-
-  elseif any(ismember(pd.slopeLimList, 'momentum'))
-    pd.zbV0T = computeFuncContV0T(pd.g, pd.zbCont);
   end % if
   
-  pd.globRRI = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
+  pd.globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad);
   
   if pd.isRiemRiv
-    pd.globVRI = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaE0TbdrRI);
+    pd.globVRI = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad);
   end % if
   
   if ~pd.isRamp && ~pd.isRivCont && ~pd.isRiemRiv
@@ -607,6 +616,10 @@ else
   if any(ismember(pd.slopeLimList, 'momentum'))
     pd.uHV0Triv = sparse(K,3);
     pd.vHV0Triv = sparse(K,3);
+  end % if
+  if any(ismember(pd.slopeLimList, 'velocity'))
+    pd.uV0Triv = sparse(K,3);
+    pd.vV0Triv = sparse(K,3);
   end % if
 end % if
 
@@ -642,9 +655,9 @@ if pd.g.numEbdrOS > 0 % Open sea boundaries
     pd.xiV0Tos = xiV(pd.g.V0T);
   end % if
   
-  pd.globROS = execin('swe/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrOS);
+  pd.globROS = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad);
   if pd.isRiemOS
-    pd.globVOS = execin('swe/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaE0TbdrOS);
+    pd.globVOS = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad);
   end % if
 elseif any(ismember(pd.slopeLimList, 'height'))
   pd.xiV0Tos = sparse(K,3);
@@ -658,9 +671,9 @@ end %
 % Assemble Newtonian tide potential matrix
 if pd.isTidalDomain
   if pd.p == 0
-    refElemPhiPhiLeastLinPhiConst = execin('swe/integrateRefElemPhiPhiPhi', [N 3 1], basesOnQuadLin);
+    refElemPhiPhiLeastLinPhiConst = integrateRefElemPhiPhiPhi([N 3 1], basesOnQuadLin);
   else
-    refElemPhiPhiLeastLinPhiConst = execin('swe/integrateRefElemPhiPhiPhi', [N N 1], pd.basesOnQuad);
+    refElemPhiPhiLeastLinPhiConst = integrateRefElemPhiPhiPhi([N N 1], pd.basesOnQuad);
   end % if
   for n = 1 : size(pd.forcingTidal, 3)
     for i = 1 : 2

@@ -77,33 +77,14 @@ else
   pd.cDisc = zeros(K,N,3);
 end % if
 
-for i = 1 : length(pd.slopeLimList)
-  switch pd.slopeLimList{i}
-    case 'height'
-      if pd.isRivCont
-        pd.xiV0Triv = pd.g.markV0TbdrRI .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0));
-      end % if
-      if pd.isOSCont
-        pd.xiV0Tos = pd.g.markV0TbdrOS .* computeFuncContV0T(pd.g, @(x1, x2) pd.xiOSCont(x1, x2, pd.t0));
-      end % if
-      hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
-      hV0T = pd.ramp(pd.t0/86400) * (pd.xiV0Triv + pd.xiV0Tos) - pd.zbLagr;
-      hDisc = applySlopeLimiterDisc(pd.g, hDisc, pd.g.markV0TbdrD, hV0T, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
-      pd.cDisc(:,:,1) = hDisc + pd.zbDisc;
-    case 'momentum'
-      if pd.isRivCont
-        hV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.xiRivCont(x1, x2, pd.t0)) - pd.zbV0T;
-        pd.uHV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.uRivCont(x1, x2, pd.t0)) .* hV0Triv;
-        pd.vHV0Triv = computeFuncContV0T(pd.g, @(x1, x2) pd.vRivCont(x1, x2, pd.t0)) .* hV0Triv;
-      end % if
-      pd.cDisc(:,:,2) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,2), pd.g.markV0TbdrRI, pd.ramp(pd.t0/86400) * pd.uHV0Triv, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
-      pd.cDisc(:,:,3) = applySlopeLimiterDisc(pd.g, pd.cDisc(:,:,3), pd.g.markV0TbdrRI, pd.ramp(pd.t0/86400) * pd.vHV0Triv, pd.globM, pd.globMDiscTaylor, pd.basesOnQuad, pd.typeSlopeLim);
-    otherwise
-      error('Slope limiting not implemented for non primary variables.')
-  end % switch
-end % for
+% Slope Limiting
+if pd.isSlopeLim
+  pd.tLvls = pd.t0;
+  pd = applySlopeLimiter(pd, pd.slopeLimName, 0);
+end % if
 
-pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbLagr + pd.minTol, pd.elevTol);
+% Ensure water height doesn't fall below threshold
+pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.zbV0T + pd.minTol, pd.elevTol);
 
 %% Visualize initial solution.
 pd = pd.visualizeSolution(pd, 0);

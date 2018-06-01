@@ -93,15 +93,6 @@ hQ0E0Text = cellfun(@minus, squeeze(cQ0E0Text(1,:,:)), pd.zbQ0E0Text, 'UniformOu
 % water height (xi - zb) in exterior quad points of edge on neighboring element
 hQ0E0TE0T = cellfun(@minus, squeeze(cQ0E0TE0T(1,:,:)), pd.zbQ0E0TE0T, 'UniformOutput', false);
 
-markQ0E0TbdrL = cell(3,1);
-markQ0E0TbdrRI = cell(3,1);
-markQ0E0TbdrOS = cell(3,1);
-for n = 1 : 3
-  markQ0E0TbdrL{n} = logical(kron(pd.g.markE0TbdrL(:,n), ones(numQuad1D,1)));
-  markQ0E0TbdrRI{n} = logical(kron(pd.g.markE0TbdrRI(:,n), ones(numQuad1D,1)));
-  markQ0E0TbdrOS{n} = logical(kron(pd.g.markE0TbdrOS(:,n), ones(numQuad1D,1)));
-end % for
-
 %% Right hand side contribution
 pd.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.isRhsAvail
@@ -330,7 +321,7 @@ for nn = 1 : 3
         vHriem = -pd.g.nuE0TsqrDiff{nn} .* cQ0E0Tint{3,nn} - 2 * pd.g.nuE0Tprod{nn} .* cQ0E0Tint{2,nn};
         
         cQ0E0Triem = { [], uHriem, vHriem };
-        cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Tland(cQ0E0Tint(:,nn), cQ0E0Triem, hQ0E0Tint{nn}, [], markQ0E0TbdrL{nn}, pd.averagingType);
+        cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Tland(cQ0E0Tint(:,nn), cQ0E0Triem, hQ0E0Tint{nn}, [], pd.markQ0E0TbdrL{nn}, pd.averagingType);
         
         switch pd.typeFlux
           case 'Lax-Friedrichs'
@@ -367,7 +358,7 @@ for nn = 1 : 3
     vHRiv = vRivQ0E0T{nn} .* hRiv;
     
     if pd.isRiemRiv
-      cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Triv(cQ0E0Tint(:,nn), { [], uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, markQ0E0TbdrRI{nn}, pd.averagingType);
+      cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Triv(cQ0E0Tint(:,nn), { [], uHRiv, vHRiv }, hQ0E0Tint{nn}, hRiv, pd.markQ0E0TbdrRI{nn}, pd.averagingType);
       switch pd.typeFlux
         case 'Lax-Friedrichs'
           lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
@@ -426,7 +417,7 @@ for nn = 1 : 3
     gEEOS = pd.gConst * xiOSQ0E0T{nn} .* (0.5 * xiOSQ0E0T{nn} - pd.zbQ0E0Tint{nn});
     
     if pd.isRiemOS
-      cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Tos(cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
+      cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Tos(cQ0E0Tint(:,nn), {}, hQ0E0Tint{nn}, hOSQ0E0T, pd.markQ0E0TbdrOS{nn}, pd.averagingType);
       
       switch pd.typeFlux
         case 'Lax-Friedrichs'

@@ -30,7 +30,8 @@
 %>
 %> @param  N            The local number of degrees of freedom, either as a 
 %>                      scalar for all three basis functions, or as a vector 
-%>                      with three entries, specifying the number of degrees of %>                      freedom for each basis function.
+%>                      with three entries, specifying the number of degrees of 
+%>                      freedom for each basis function.
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
 %>                      least phi1D and thetaPhi1D.

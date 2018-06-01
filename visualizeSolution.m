@@ -64,14 +64,15 @@ dataLagrElev = {};
 dataLagrVel = {};
 
 % Evaluate water depth (h)
-if (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'height')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1)
+if (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'height')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1) % global
   hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
-  varNameElev = [ varNameElev, {'h'} ];
+  varNameElev = [ varNameElev, {'height'} ];
   dataLagrElev = [ dataLagrElev, {projectDataDisc2DataLagr(hDisc)} ];
 end % if
 
 % Evaluate water elevation (xi)
-if ( (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'elevation')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1) ) || ( (mod(nStep, pd.outputFrequency(2)) == 0 || pd.isFinished) && isfield(pd, 'stationElev') && pd.t >= pd.outputStart(2) && pd.t <= pd.outputEnd(2) )
+if ( (mod(nStep, pd.outputFrequency(1)) == 0 || pd.isFinished) && any(ismember(pd.outputList, 'elevation')) && pd.t >= pd.outputStart(1) && pd.t <= pd.outputEnd(1) ) ... % global
+    || ( (mod(nStep, pd.outputFrequency(2)) == 0 || pd.isFinished) && isfield(pd, 'stationElev') && pd.t >= pd.outputStart(2) && pd.t <= pd.outputEnd(2) ) % station
   varNameElev = [ varNameElev, {'elevation'} ];
   dataLagrElev = [ dataLagrElev, {projectDataDisc2DataLagr(pd.cDisc(:,:,1))} ];
 end % if
@@ -90,7 +91,7 @@ if (mod(nStep, pd.outputFrequency(2)) == 0 || pd.isFinished) && isfield(pd, 'sta
 end % if
 
 %% Momentum 
-if (mod(nStep, pd.outputFrequency(3)) == 0 || pd.isFinished) && any(ismember(pd.outputList, {'uH', 'vH', 'momentum'})) && pd.t >= pd.outputStart(3) && pd.t <= pd.outputEnd(3)
+if (mod(nStep, pd.outputFrequency(3)) == 0 || pd.isFinished) && any(ismember(pd.outputList, {'uH', 'vH', 'momentum'})) && pd.t >= pd.outputStart(3) && pd.t <= pd.outputEnd(3) % global
   vecNames.momentum = {'uH', 'vH'};
   varNameVel = [ varNameVel, vecNames.momentum ];    
   dataLagrVel = [ dataLagrVel, {projectDataDisc2DataLagr(pd.cDisc(:,:,2)), projectDataDisc2DataLagr(pd.cDisc(:,:,3))} ];
@@ -98,7 +99,8 @@ end % if
 
 %% Velocity    
 % Evaluate velocity
-if ( (mod(nStep, pd.outputFrequency(3)) == 0 || pd.isFinished) && any(ismember(pd.outputList, {'u', 'v', 'velocity'}))  && pd.t >= pd.outputStart(3) && pd.t <= pd.outputEnd(3) ) || ( (mod(nStep, pd.outputFrequency(4)) == 0 || pd.isFinished) && isfield(pd, 'stationVel') && pd.t >= pd.outputStart(4) && pd.t <= pd.outputEnd(4) )
+if ( (mod(nStep, pd.outputFrequency(3)) == 0 || pd.isFinished) && any(ismember(pd.outputList, {'u', 'v', 'velocity'}))  && pd.t >= pd.outputStart(3) && pd.t <= pd.outputEnd(3) ) ... % global
+    || ( (mod(nStep, pd.outputFrequency(4)) == 0 || pd.isFinished) && isfield(pd, 'stationVel') && pd.t >= pd.outputStart(4) && pd.t <= pd.outputEnd(4) ) % station
   if ~exist('hDisc', 'var')
     hDisc = pd.cDisc(:,:,1) - pd.zbDisc;
   end % if
