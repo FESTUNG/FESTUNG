@@ -27,6 +27,7 @@
 %>
 %> @param  problemData  A struct with problem parameters as provided by 
 %>                      swe_2dv/configureProblem.m . @f$[\text{struct}]@f$
+%> @param  problemName  The name of the testcase to be returned.
 %>
 %> @retval problemData  A struct with all necessary parameters and definitions
 %>                      for the problem description. @f$[\text{struct}]@f$
