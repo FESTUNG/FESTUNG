@@ -19,8 +19,8 @@ git clone --recursive https://github.com/FESTUNG/project
 If you want to obtain the latest updates on an existing copy of FESTUNG, simply update the umbrella project and pull in all changes in the submodules:
 
 ```bash
-git pull --recurse-submodules
-git submodule update
+git pull
+git submodule update --remote
 ```
 
 ## Working on the core
@@ -71,7 +71,7 @@ If you want to implement a new solver it is highly recommended to use a reposito
 For that, simply create a GitHub repository in your own account, possibly by forking from https://github.com/FESTUNG/template, and add it as a new submodule to your project folder:
 
 ```bash
-git submodule add https://github.com/<your name>/<your repository> <problem name>
+git submodule add -b master https://github.com/<your name>/<your repository> <problem name>
 ```
 
 Then continue working on it as described above.
