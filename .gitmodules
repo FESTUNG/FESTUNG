@@ -1,7 +1,7 @@
 [submodule "core"]
 	path = core
 	url = https://www1.am.uni-erlangen.de/git/festung-core
-	branch = development
+	branch = master 
 [submodule "advection"]
 	path = advection
 	url = https://www1.am.uni-erlangen.de/git/festung-advection
