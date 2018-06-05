@@ -90,15 +90,23 @@ switch problemData.testcase
   case 'convergence'
     problemData.isStationary = true;
     
-    problemData.cCont = @(t,x1,x2) cos(7 * x1) .* cos(7 * x2);
-    problemData.dCont = @(t,x1,x2) exp(x1 + x2);
-    problemData.fCont = @(t,x1,x2) 98 * exp(x1 + x2) .* cos(7 * x1) .* cos(7 * x2) ...
-      + 7 * exp(x1 + x2) .* (sin(7 * x1) .* cos(7 * x2) + cos(7 * x1) .* sin(7 * x2));
-    problemData.fCont = @(t,x1,x2) 98 * cos(7 * x1) .* cos(7 * x2);
-    problemData.c0Cont = @(x1,x2) problemData.cCont(0,x1,x2);
-    problemData.cDCont = problemData.cCont;
-    problemData.gNCont = @(t,x1,x2) 7 * cos(7 * x1) .* sin(7 * x2) .* ((x2 > 0.5) - (x2 < 0.5));
+    cCont = @(t,x1,x2) cos(7 * x1) .* cos(7 * x2);
+    dX1cCont = @(t,x1,x2) -7 * sin(7 * x1) .* cos(7 * x2);
+    dX2cCont = @(t,x1,x2) -7 * cos(7 * x1) .* sin(7 * x2);
+    dXdXcCont = @(t,x1,x2) -98 * cCont(t,x1,x2);
+    dCont = @(t,x1,x2) exp(x1 + x2);
+    dX1dCont = dCont;
+    dX2dCont = dCont;
+    gNCont = @(t,x1,x2) 7 * cos(7 * x1) .* sin(7 * x2) .* x2;
     
+    problemData.cCont = cCont;
+    problemData.dCont = dCont;
+    problemData.fCont = @(t,x1,x2) -dCont(t,x1,x2) .* dXdXcCont(t,x1,x2) ...
+      - dX1dCont(t,x1,x2) .* dX1cCont(t,x1,x2) - dX2dCont(t,x1,x2) .* dX2cCont(t,x1,x2);
+    problemData.c0Cont = @(x1,x2) cCont(0,x1,x2);
+    problemData.cDCont = cCont;
+    problemData.gNCont = gNCont;
+
   otherwise
     error('Invalid testcase "%s".', problemData.testcase);
 end % siwtch

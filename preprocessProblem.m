@@ -58,6 +58,7 @@ problemData.tau = problemData.tEnd / problemData. numSteps;  % time step size
 problemData.g.markE0Tint  = problemData.generateMarkE0Tint(problemData.g);
 problemData.g.markE0TbdrN = problemData.generateMarkE0TbdrN(problemData.g);
 problemData.g.markE0TbdrD = problemData.generateMarkE0TbdrD(problemData.g);
+problemData.g.markE0TintBdrD = problemData.g.markE0Tint | problemData.g.markE0TbdrD;
 problemData.g = computeDerivedGridData(problemData.g);
 %% Configuration output.
 fprintf('Computing with polynomial order %d (%d local DOFs) on %d triangles.\n', problemData.p, problemData.N, problemData.K)

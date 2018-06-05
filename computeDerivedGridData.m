@@ -75,11 +75,13 @@ g.areaNuE0T = zeros(K,3,2);
 g.areaNuE0Tint = cell(2,1);
 g.areaNuE0TbdrD = cell(2,1);
 g.areaNuE0TbdrN = cell(2,1);
+g.areaNuE0TintBdrD = cell(2,1);
 g.areaE0TbdrN = g.markE0TbdrN .* g.areaE0T;
 for m = 1 : 2
   g.areaNuE0T(:, :, m) = g.areaE0T .* g.nuE0T(:, :, m);
   g.areaNuE0Tint{m} = g.markE0Tint .* g.areaNuE0T(:, :, m);
   g.areaNuE0TbdrD{m} = g.markE0TbdrD .* g.areaNuE0T(:, :, m);
   g.areaNuE0TbdrN{m} = g.markE0TbdrN .* g.areaNuE0T(:, :, m);
+  g.areaNuE0TintBdrD{m} = g.markE0TintBdrD .* g.areaNuE0T(:, :, m);
 end % for m
 end % function
