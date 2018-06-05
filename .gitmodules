@@ -1,58 +1,58 @@
 [submodule "core"]
 	path = core
-	url = https://www1.am.uni-erlangen.de/git/festung-core
+	url = https://www1.am.uni-erlangen.de/git/festung-core.git
 	branch = master 
 [submodule "advection"]
 	path = advection
-	url = https://www1.am.uni-erlangen.de/git/festung-advection
+	url = https://www1.am.uni-erlangen.de/git/festung-advection.git
 	branch = master
 [submodule "advection_hdg"]
 	path = advection_hdg
-	url = https://www1.am.uni-erlangen.de/git/festung-hdg_advection
+	url = https://www1.am.uni-erlangen.de/git/festung-hdg_advection.git
 	branch = master
 [submodule "advection_implicit"]
 	path = advection_implicit
-	url = https://www1.am.uni-erlangen.de/git/festung-advection_implicit
+	url = https://www1.am.uni-erlangen.de/git/festung-advection_implicit.git
 	branch = master
 [submodule "darcy_swe_2dv"]
 	path = darcy_swe_2dv
-	url = https://www1.am.uni-erlangen.de/git/festung-darcy_swe_2dv
+	url = https://www1.am.uni-erlangen.de/git/festung-darcy_swe_2dv.git
 	branch = master
 [submodule "darcy_2dv"]
 	path = darcy_2dv
-	url = https://www1.am.uni-erlangen.de/git/festung-darcy_2dv
+	url = https://www1.am.uni-erlangen.de/git/festung-darcy_2dv.git
 	branch = master
 [submodule "swe_2dv"]
 	path = swe_2dv
-	url = https://www1.am.uni-erlangen.de/git/festung-swe_2dv
+	url = https://www1.am.uni-erlangen.de/git/festung-swe_2dv.git
 	branch = master
 [submodule "swe"]
 	path = swe
-	url = https://www1.am.uni-erlangen.de/git/festung-swe
+	url = https://www1.am.uni-erlangen.de/git/festung-swe.git
 	branch = master
 [submodule "swe_transport"]
 	path = swe_transport
-	url = https://www1.am.uni-erlangen.de/git/festung-swe_transport
+	url = https://www1.am.uni-erlangen.de/git/festung-swe_transport.git
 	branch = master
 [submodule "transport"]
 	path = transport
-	url = https://www1.am.uni-erlangen.de/git/festung-transport
+	url = https://www1.am.uni-erlangen.de/git/festung-transport.git
 	branch = master
 [submodule "swe_inf"]
 	path = swe_inf
-	url = https://www1.am.uni-erlangen.de/git/festung-swe_inf
+	url = https://www1.am.uni-erlangen.de/git/festung-swe_inf.git
 	branch = master
 [submodule "diffusion"]
 	path = diffusion
-	url = https://www1.am.uni-erlangen.de/git/festung-diffusion
+	url = https://www1.am.uni-erlangen.de/git/festung-diffusion.git
 	branch = master
 [submodule "swe_inverse"]
 	path = swe_inverse
-	url = https://www1.am.uni-erlangen.de/git/festung-swe_inverse
+	url = https://www1.am.uni-erlangen.de/git/festung-swe_inverse.git
 	branch = master
 [submodule "template"]
 	path = template
-	url = https://www1.am.uni-erlangen.de/git/festung-template
+	url = https://www1.am.uni-erlangen.de/git/festung-template.git
 	branch = master
 [submodule "advection-diffusion"]
 	path = advection-diffusion
