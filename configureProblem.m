@@ -215,8 +215,6 @@ switch problemData.testcase
     % - 2x2 cell
     % - 2-element cell, will be interpreted as diagonal matrix
     % - scalar function, will be interpreted as diagonal matrix
-%     problemData.DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {kConst, 0; 0, kConst}, 'UniformOutput', false);
-%     problemData.DCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {kConst, kConst}, 'UniformOutput', false);
     problemData.DCont = @(t,x,z) kConst * ones(size(x));
     
     % Derivatives
@@ -228,7 +226,6 @@ switch problemData.testcase
       - 2 * betaConst * bConst * cos(betaConst * zBotCont(x)) .* dxOmegaCont(t,x) ...
       + (sin(betaConst * z) - sin(betaConst * zBotCont(x))) .* dxdxOmegaCont(t,x);
     dZdZhCont = @(t,x,z) -betaConst * betaConst * sin(betaConst * z) .* omegaCont(t, x);
-    dXdZhCont = @(t,x,z) betaConst * cos(betaConst * z) .* dxOmegaCont(t, x);
     dXZDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
     
     % Boundary conditions
@@ -236,14 +233,6 @@ switch problemData.testcase
     problemData.gNCont = @(t,x,z) zeros(size(x));
     
     % Right hand side
-%     problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
-%                           dXZDCont{1,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.DCont{1,1}(t,x,z) .* dXdXhCont(t,x,z) - ...
-%                           dXZDCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.DCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
-%                           dXZDCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.DCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
-%                           dXZDCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.DCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
-%     problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
-%                           dXZDCont{1}(t,x,z) .* dXhCont(t,x,z)  - problemData.DCont{1}(t,x,z) .* dXdXhCont(t,x,z) - ...
-%                           dXZDCont{2}(t,x,z) .* dZhCont(t,x,z)  - problemData.DCont{2}(t,x,z) .* dZdZhCont(t,x,z);
     problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
                           dXZDCont{1}(t,x,z) .* dXhCont(t,x,z)  - problemData.DCont(t,x,z) .* dXdXhCont(t,x,z) - ...
                           dXZDCont{2}(t,x,z) .* dZhCont(t,x,z)  - problemData.DCont(t,x,z) .* dZdZhCont(t,x,z);
@@ -278,6 +267,37 @@ switch problemData.testcase
                           dXZDCont{1,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.DCont{1,2}(t,x,z) .* dXdZhCont(t,x,z) - ...
                           dXZDCont{2,1}(t,x,z) .* dXhCont(t,x,z)  - problemData.DCont{2,1}(t,x,z) .* dXdZhCont(t,x,z) - ...
                           dXZDCont{2,2}(t,x,z) .* dZhCont(t,x,z)  - problemData.DCont{2,2}(t,x,z) .* dZdZhCont(t,x,z);
+                        
+  case 'convergence_stationary'
+    problemData.isStationary = true;
+    % width and height of computational domain
+    domainWidth = [0, 1];
+    domainHeight = [0, 1];
+    idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
+    % Analytical solution
+    cx = 7 / domainWidth(2); cz = 7 / domainHeight(2);
+    dx = 1 / domainWidth(2); dz = 1 / domainHeight(2);
+    problemData.hCont = @(t,x,z) cos(cx * x) .* cos(cz * z);
+    problemData.q1Cont = @(t,x,z) cx * sin(cx * x) .* cos(cz * z);
+    problemData.q2Cont = @(t,x,z) cz * cos(cx * x) .* sin(cz * z);
+    % Diffusion matrix
+    problemData.DCont = @(t,x,z) exp(dx * x + dz * z);
+    % Derivatives
+    dXhCont = @(t,x,z) -cx * sin(cx * x) .* cos(cz * z);
+    dZhCont = @(t,x,z) -cz * cos(cx * x) .* sin(cz * z);
+    dXdXhCont = @(t,x,z) -cx * cx * cos(cx * x) .* cos(cz * z);
+    dZdZhCont = @(t,x,z) -cz * cz * cos(cx * x) .* cos(cz * z);
+    dXDCont = @(t,x,z) dx * exp(dx * x + dz * z);
+    dZDCont = @(t,x,z) dz * exp(dx * x + dz * z);
+    % Boundary conditions
+    problemData.hDCont = problemData.hCont;
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    % Right hand side
+    problemData.fCont = @(t,x,z) -dXDCont(t,x,z) .* dXhCont(t,x,z) - dZDCont(t,x,z) .* dZhCont(t,x,z) ...
+      - problemData.DCont(t,x,z) .* (dXdXhCont(t,x,z) + dZdZhCont(t,x,z));
+
+  otherwise
+    error('Unknown testcase "%s".\n', problemData.testcase);
 end % switch
 
 problemData = setdefault(problemData, 'isHotstart', isHotstart);

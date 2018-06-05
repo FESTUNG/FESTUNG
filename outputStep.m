@@ -91,9 +91,10 @@ if mod(nStep, problemData.outputFrequency) == 0
     fprintf('L2 errors of h, q1, q2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
     
     if problemData.isVisSol
-      cLagr = { projectFuncCont2DataDiscQuadri(problemData.g, hCont, problemData.qOrd, problemData.globM, problemData.basesOnQuad), ...
+      cDisc = { projectFuncCont2DataDiscQuadri(problemData.g, hCont, problemData.qOrd, problemData.globM, problemData.basesOnQuad), ...
                 projectFuncCont2DataDiscQuadri(problemData.g, q1Cont, problemData.qOrd, problemData.globM, problemData.basesOnQuad), ...
                 projectFuncCont2DataDiscQuadri(problemData.g, q2Cont, problemData.qOrd, problemData.globM, problemData.basesOnQuad) };
+      cLagr = cellfun(@(c) projectDataDisc2DataLagrTensorProduct(c), cDisc, 'UniformOutput', false);
       visualizeDataLagrQuadri(problemData.g, cLagr, {'h', 'q1', 'q2'}, [ problemData.outputBasename '_ex' ], nOutput, problemData.outputTypes, struct('q', {{'q1','q2'}}));
     end % if
     
