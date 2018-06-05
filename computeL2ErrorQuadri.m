@@ -41,8 +41,10 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2017 Balthasar Reuter, Florian Frank, Vadym Aizinger
+%> @copyright 2014-2018 Balthasar Reuter, Florian Frank, Vadym Aizinger
 %> 
+%> @author Balthasar Reuter, 2017-2018
+%>
 %> @par License
 %> @parblock
 %> This program is free software: you can redistribute it and/or modify
@@ -61,8 +63,7 @@
 %
 function err = computeL2ErrorQuadri(g, dataDisc, funcCont, qOrd, basesOnQuad)
 % Determine quadrature rule and physical coordinates
-[Q, W] = quadRule1D(qOrd); [Q1, Q2] = meshgrid(Q); W = W' * W;
-Q1 = Q1(:)'; Q2 = Q2(:)'; W = W(:)';
+[Q1, Q2, W] = quadRuleTensorProduct(qOrd);
 X1 = g.mapRef2Phy(1,Q1,Q2); X2 = g.mapRef2Phy(2,Q1,Q2);
 N = size(dataDisc,2);
 
