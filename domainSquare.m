@@ -12,10 +12,14 @@
 %> square-bounded domain @f$\{(a,a), (b,a), (b,b), (a,b)\}@f$.
 %> If no bounds for @f$x, y@f$ are specified, it defaults to the unit
 %> square @f$[0,1]^2@f$.
+%>
 %> Optionally, the mesh can be transformed such that every element becomes
 %> an equilateral triangle with the same maximum edge length h.  This mesh
 %> is a Voronoi grid.  The square-shaped boundary becomes a parallelogram
-%> in this case.
+%> in this case with exterior unit normals
+%> @f[\vec{n}_1 = \begin{bmatrix}0\\-1\end{bmatrix},\quad\vec{n}_2 = \begin{bmatrix}\sqrt{3}/2\\-1/2\end{bmatrix},
+%>    \quad\vec{n}_3 = \begin{bmatrix}0\\1\end{bmatrix},\quad\vec{n}_4 = \begin{bmatrix}-\sqrt{3}/2\\1/2\end{bmatrix}. @f]
+%> 
 %> 
 %>
 %> @par Example
@@ -71,7 +75,7 @@ if nargin == 4 && isEquilateral == true % Transformation to become equilateral.
   xTrans = repmat((0:h/2:(b-a)/2).', 1, dim+1);
   X = X + xTrans;
   yScale = sqrt(3)/2;
-  Y = (Y-(b-a))*yScale + (b-a);
+  Y = (Y-a)*yScale + a;
 end
 Xlist = reshape(X, length(X)^2, 1);  Ylist = reshape(Y, length(X)^2, 1);
 coordV = [Xlist, Ylist];
@@ -85,9 +89,17 @@ V0T2(dim+1 : dim+1 : dim*(dim+1), :) = [];
 %% Generate grid data and boundary IDs
 g = generateGridData(coordV, [V0T1; V0T2]);
 g.idE = zeros(g.numE, 1);
-g.idE(g.baryE(:, 2) == a) = 1; % south
-g.idE(g.baryE(:, 1) == b) = 2; % east
-g.idE(g.baryE(:, 2) == b) = 3; % north
-g.idE(g.baryE(:, 1) == a) = 4; % west
+tol = 10*eps;
+if nargin == 4 && isEquilateral == true % Transformation to become equilateral.
+  g.idE(abs(g.baryE(:, 2) - a) < tol) = 1; % south   
+  g.idE(abs(a - sqrt(3)*(b - g.baryE(:, 1)) - g.baryE(:, 2)) < tol) = 2; % east
+  g.idE(abs(g.baryE(:, 2) - a - sqrt(3)/2*(b-a)) < tol) = 3; % north
+  g.idE(abs(sqrt(3)*g.baryE(:, 1) + a*(1-sqrt(3)) - g.baryE(:, 2)) < tol) = 4; % west
+else
+  g.idE(abs(g.baryE(:, 2) - a) < tol) = 1; % south
+  g.idE(abs(g.baryE(:, 1) - b) < tol) = 2; % east
+  g.idE(abs(g.baryE(:, 2) - b) < tol) = 3; % north
+  g.idE(abs(g.baryE(:, 1) - a) < tol) = 4; % west
+end
 g.idE0T = g.idE(g.E0T); % local edge IDs
 end % function
