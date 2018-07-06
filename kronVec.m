@@ -22,19 +22,42 @@
 %>  = \mathsf{K} \in \mathbb{R}^{m_b \times n_a n_b}\;.
 %> @f]
 %> It can be understood as a Kronecker product that takes a different right
-%> hand side for every row of the left hand side.
+%> hand side for every row of the left hand side.  The input matrices
+%> @f$\mathsf{A}@f$ and @f$\mathsf{B}@f$ may be sparse or dense.  If at
+%> least one input argument is sparse, @f$\mathsf{K}@f$ will be sparse.
+%>
+%> @par Example
+%> @parblock
+%> @f[
+%>  \mathsf{A} := \begin{bmatrix}1 & 2 \\ 3 & 4\end{bmatrix}~,\quad
+%>  \mathsf{B} := \begin{bmatrix}1 & 1 & 1 \\ 1 & 1 & 1 \\ 1 & 1 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}~.
+%> @f]
+%>
+%> Here, @f$r = 3@f$.  It follows
 %> 
+%> @f[
+%>  \mathsf{K} = \begin{bmatrix}1 & 1 & 1 & 2 & 2 & 2 \\ 
+%>                               1 & 1 & 1 & 2 & 2 & 2 \\
+%>                               1 & 1 & 1 & 2 & 2 & 2 \\
+%>                               3 & 0 & 0 & 0 & 0 & 0 \\
+%>                               0 & 3 & 0 & 0 & 0 & 0 \\
+%>                               0 & 0 & 3 & 0 & 0 & 0
+%>                \end{bmatrix}~. 
+%> @f]
+%> @endparblock
+%>
 %> @note The number of rows of the second operand @f$\mathsf{B}@f$ must be
 %>       the same or a multiple of the number of rows of the first operand
 %>       @f$A@f$.
 %>
+%> 
 %> @param A  The first operand. @f$[m_a \times n_a]@f$
 %> @param B  The second operand. @f$[m_b \times n_b]@f$
 %> @retval K The result of the operation. @f$[m_b \times n_a n_b]@f$
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2018 Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
 %> @par License
 %> @parblock
