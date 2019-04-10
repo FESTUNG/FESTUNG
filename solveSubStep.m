@@ -54,21 +54,42 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function pd = solveSubStep(pd, ~, nSubStep)
+function pd = solveSubStep(pd, nStep, nSubStep)
 K = pd.K;
 N = pd.N;
 dt = pd.dt;
 
 % Build right hand side vector
-sysV = cell2mat(pd.globL) - cell2mat(pd.globLRI) - cell2mat(pd.globLF) - ...
-       [ -pd.nudgingTerm; pd.nonlinearTerms + pd.gravityTerm + pd.bottomFrictionTerms] - ... 
-       pd.riemannTerms;
+sysV = cell2mat(pd.globL(2:3)) - cell2mat(pd.globLRI(2:3)) - cell2mat(pd.globLF(2:3)) - ...
+       pd.nonlinearTerms - pd.gravityTerm - pd.bottomFrictionTerms - pd.riemannTerms;
+
+% read in new surface elevation
+if ~pd.isSteadyState
+	hotstartData = readHotstart([pd.elevationInput '_' num2str((nStep-1)*pd.schemeOrder+nSubStep) '.mat']);
+	assert(isstruct(hotstartData) && isfield(hotstartData, 'cDisc') && isfield (hotstartData, 't'), 'Hotstart data does not contain cDisc or t');
+	xiDisc = hotstartData.cDisc;
+	validateattributes(xiDisc, {'numeric'}, {'size', [K N]}, mfilename, 'xiDisc');
+  % apply noise
+  dataLagr = addNoiseInVertices2DataDisc(pd.g, projectDataDisc2DataLagr(xiDisc), pd.noiseLvl);
+  xiDisc = dataLagr / pd.sysMinValueCorrection;
+  
+  xiDot = pd.massMatMixed * reshape((xiDisc - pd.xiDisc)', K*N, 1) /dt;
+  pd.xiDisc = xiDisc;
+else
+  xiDot = zeros(pd.g.numV,1);
+end % if
 
 % Compute solution at next time step using explicit or semi-implicit scheme
 switch pd.schemeType
   case 'explicit'
-    sysA = sparse(3*K*N,K*N);
-    cDiscDot = pd.sysW \ (sysV - [sysA, pd.linearTerms] * pd.cDiscRK);
+    % Solve continuity equation
+    % for nudging, add " - pd.globMLagr * (pd.zbDOF + pd.zbData)" in rhs
+    % vector and set pd.zbData properly
+%     limitedMat = pd.applyAlgebraicLimiter(pd.g, pd.zbDOF, 1e-15, 1) .* pd.MLagrLagrNoDiag;
+    %(limitedMat * pd.zbDOF - sum(limitedMat, 2) .* pd.zbDOF) );
+    zbDOFDot = pd.massMatLumpedInv .* ( pd.globL{1} + pd.globLRI{1} + pd.globLF{1} - pd.sysMatBathymetry * pd.cDiscRK + pd.artDiffParam * pd.artDiffMat * pd.zbDOF + xiDot );
+    % Solve momentum equations
+    cDiscDot = pd.sysW \ (sysV - pd.linearTerms * pd.cDiscRK);
     
     % Apply slope limiting to time derivative
     for i = 1 : length(pd.slopeLimList)
@@ -93,6 +114,7 @@ switch pd.schemeType
       end % switch
     end % for
     
+    pd.zbDOF   = pd.omega(nSubStep) * pd.zbDOFRK0 + (1 - pd.omega(nSubStep)) * (pd.zbDOF + dt * zbDOFDot);
     pd.cDiscRK = pd.omega(nSubStep) * pd.cDiscRK0 + (1 - pd.omega(nSubStep)) * (pd.cDiscRK + dt * cDiscDot);
 
   case 'semi-implicit'

@@ -57,7 +57,7 @@ problemData = problemData.visualizeSolution(problemData, nStep);
 %% Hot-start file output
 if problemData.isHotstartOutput && ( mod(nStep, problemData.hotstartOutputFrequency) == 0 || problemData.isFinished)
   hotstartStep = mod(nStep / problemData.hotstartOutputFrequency, 2);
-  outputHotstart(['output/' problemData.name '_' num2str(hotstartStep) '.mat'], 'cDisc', problemData.cDisc, 't', problemData.t);
+  outputHotstart(['output/' problemData.name '_' num2str(hotstartStep) '.mat'], 'cDisc', problemData.cDisc, 'zbDOF', problemData.zbDOF, 't', problemData.t);
 end % if
 
 %% Update waitbar.

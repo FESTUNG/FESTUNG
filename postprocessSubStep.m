@@ -59,9 +59,8 @@ K = problemData.K;
 N = problemData.N;
 
 % Reshape linearized vector to solution vectors
-problemData.cDisc(:,:,1) = reshape(problemData.cDiscRK(        1 :   K*N), N, K).';
-problemData.cDisc(:,:,2) = reshape(problemData.cDiscRK(  K*N + 1 : 2*K*N), N, K).';
-problemData.cDisc(:,:,3) = reshape(problemData.cDiscRK(2*K*N + 1 : 3*K*N), N, K).';
+problemData.cDisc(:,:,2) = reshape(problemData.cDiscRK(      1 :   K*N), N, K).';
+problemData.cDisc(:,:,3) = reshape(problemData.cDiscRK(K*N + 1 : 2*K*N), N, K).';
 
 for i = 1 : length(problemData.slopeLimList)
   switch problemData.slopeLimList{i}
@@ -82,32 +81,32 @@ for i = 1 : length(problemData.slopeLimList)
   end % switch
 end % for
 
+% if ~problemData.isSteadyState
+% 	hotstartData = readHotstart([problemData.elevationInput '_' num2str((nStep-1)*problemData.schemeOrder+nSubStep) '.mat']);
+% 	assert(isstruct(hotstartData) && isfield(hotstartData, 'cDisc') && isfield (hotstartData, 't'), 'Hotstart data does not contain cDisc or t');
+% 	problemData.xiDisc = hotstartData.cDisc;
+% 	validateattributes(problemData.xiDisc, {'numeric'}, {'size', [K N]}, mfilename, 'problemData.xiDisc');
+% end % if
+
+% Compute new height of water
+[Q1, Q2] = quadRule2D(max(2*problemData.p,1));
+problemData.zbDisc = projectDataQ0T2DataDisc(problemData.zbDOF(problemData.g.V0T) * [1-Q1-Q2; Q1; Q2], 2*problemData.p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+problemData.cDisc(:,:,1) =  problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.zbDisc;
+
 % Ensure water height doesn't fall below threshold
 problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.minTol, problemData.elevTol);
 
-if ~problemData.isSteadyState
-	hotstartData = readHotstart([problemData.elevationInput '_' num2str(nStep) '.mat']);
-	assert(isstruct(hotstartData) && isfield(hotstartData, 'cDisc') && isfield (hotstartData, 't'), 'Hotstart data does not contain cDisc or t');
-	problemData.xiDisc = hotstartData.cDisc;
-	validateattributes(problemData.xiDisc, {'numeric'}, {'size', [K N]}, mfilename, 'problemData.xiDisc');
-end % if
-% Compute new bathymetry
-zbDisc = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.cDisc(:,:,1);
-% average vertex values to get continuous bathymetry
-[zbDisc, problemData.zbV] = applyVertexAveraging(problemData.g, zbDisc, problemData.averagingOperator, problemData.sysMinValueCorrection);
-% compute difference and update bathymetry ans well as total water height
-problemData.changeL2 = norm(problemData.zbDisc - zbDisc, 2);
-problemData.zbDisc = zbDisc;
-problemData.cDisc(:,:,1) = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.zbDisc;
+% compute difference and update bathymetry as well as total water height
+problemData.changeL2 = norm(problemData.zbDOFRK0 - problemData.zbDOF, 2);
 
-if ~problemData.isSteadyState % apply noise
-  dataLagr = addNoise(projectDataDisc2DataLagr(problemData.cDisc(:,:,1)), problemData.noiseLvl);
-  % compute the coeffcients
-  hDisc = dataLagr / problemData.sysMinValueCorrection;
-  % compute the surface elevation
-  problemData.xiDisc = hDisc + problemData.zbDisc;
-  problemData.zbDisc = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.cDisc(:,:,1);
-end % if
+% if ~problemData.isSteadyState % apply noise
+%   dataLagr = addNoiseInVertices2DataDisc(g, projectDataDisc2DataLagr(pd.cDisc(:,:,1)), pd.noiseLvl);
+%   % compute the coeffcients
+%   hDisc = dataLagr / problemData.sysMinValueCorrection;
+%   % compute the surface elevation
+%   problemData.xiDisc = hDisc + problemData.zbDisc;
+%   problemData.zbDisc = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.cDisc(:,:,1);
+% end % if
 
 problemData.isSubSteppingFinished = nSubStep >= length(problemData.tLvls);
 end % function

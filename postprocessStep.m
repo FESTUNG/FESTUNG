@@ -61,10 +61,12 @@ end % if
 % Check for steady state convergence
 if (problemData.changeL2 < problemData.convergenceCriterion) && (nStep > 1)
   fprintf('Steady state is reached.\n');
-  fprintf('The maximum absolute error in the verticies is %1.2e.\n', max(abs(problemData.zbV + problemData.depth)));
+  fprintf('The maximum absolute error in the verticies is %1.4e.\n', max(abs(problemData.zbDOF + problemData.depth)));
+  fprintf('The maximum relative error in the verticies is %1.4e.\n', max(abs(problemData.zbDOF + problemData.depth)) / max(abs(problemData.depth)));
   problemData.isFinished = true;
 elseif problemData.isFinished
 	fprintf('Steady state not reached.\n');
-  fprintf('The maximum absolute error in the verticies is %1.2e.\n', max(abs(problemData.zbV + problemData.depth)));
+  fprintf('The maximum absolute error in the verticies is %1.4e.\n', max(abs(problemData.zbDOF + problemData.depth)));
+  fprintf('The maximum relative error in the verticies is %1.4e.\n', max(abs(problemData.zbDOF + problemData.depth)) / max(abs(problemData.depth)));
 end % if
 end % function

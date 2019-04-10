@@ -71,8 +71,8 @@ switch problemData.schemeType
 end % switch
 
 % Initialize solution vectors for RK steps
-problemData.cDiscRK0 = [reshape(problemData.cDisc(:,:,1).', K*N, 1); ...
-                        reshape(problemData.cDisc(:,:,2).', K*N, 1); ...
+problemData.zbDOFRK0 = problemData.zbDOF;
+problemData.cDiscRK0 = [reshape(problemData.cDisc(:,:,2).', K*N, 1); ...
                         reshape(problemData.cDisc(:,:,3).', K*N, 1)];
 problemData.cDiscRK = problemData.cDiscRK0;
 

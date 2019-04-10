@@ -49,7 +49,7 @@
 function pd = configureProblem(pd)
 %% Name of the problem
 % Influences name of output files and specifies name of ADCIRC input files
-pd = setdefault(pd, 'name', 'squareCoarse');
+pd = setdefault(pd, 'name', 'channel');
 
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
@@ -78,11 +78,11 @@ pd = setdefault(pd, 'schemeType', 'explicit'); % type of time stepping scheme ('
 %% Model parameters
 % Some may be overwritten by fort.15 config files
 pd = setdefault(pd, 'typeFlux', 'Lax-Friedrichs'); % Type of interior flux ('Lax-Friedrichs', 'Roe')
-pd = setdefault(pd, 'isRiemOS', true); % Riemann solver usage on open sea boundary
-pd = setdefault(pd, 'isRiemRiv', true); % Riemann solver usage on river boundary
-pd = setdefault(pd, 'isRiemFlow', true); % Riemann solver usage on flow boundary
+pd = setdefault(pd, 'isRiemOS', false); % Riemann solver usage on open sea boundary
+pd = setdefault(pd, 'isRiemRiv', false); % Riemann solver usage on river boundary
+pd = setdefault(pd, 'isRiemFlow', false); % Riemann solver usage on flow boundary
 pd = setdefault(pd, 'typeBdrL', 'riemann'); % Flux type on land boundary ('reflected', 'natural', or 'riemann')
-pd = setdefault(pd, 'averagingType', 'full-harmonic'); % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
+pd = setdefault(pd, 'averagingType', 'semi-harmonic'); % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd = setdefault(pd, 'typeSlopeLim', 'linear'); % Slope limiter type ('linear', 'hierarch_vert', 'strict')
 pd = setdefault(pd, 'slopeLimList', {'elevation', 'momentum'}); % Apply slope limiter to specified variables ('xi', 'uH', 'vH')
 pd = setdefault(pd, 'isCoupling', false); % Compute velocity coefficients and flux of first unknown, e.g., for coupled transport problem
@@ -92,7 +92,7 @@ pd = setdefault(pd, 'elevTol', 20); % maximum absolute value for elevation
 pd = setdefault(pd, 'isVisGrid', false); % Visualize computational grid
 pd = setdefault(pd, 'isWaitbar', false); % Use waiting bar
 pd = setdefault(pd, 'outputTypes', 'vtk'); % Output file type
-pd = setdefault(pd, 'outputList', {'bathymetry', 'elevation', 'velocity'}); % List of variables to visualize
+pd = setdefault(pd, 'outputList', {'bathymetry', 'elevation', 'velocity', 'momentum'}); % List of variables to visualize
 pd = setdefault(pd, 'isVisStations', false); % Output stations
 
 %% Simulation scenario specific parameters
@@ -110,10 +110,11 @@ switch pd.configSource
 end % switch
 
 %% sweInverse specific parameters
-pd = setdefault(pd, 'noiseLvl', 0.0); % percentage of uniforamlly distributed noise on free surface
+pd = setdefault(pd, 'noiseLvl', 0.000); % percentage of uniforamlly distributed noise on free surface
 pd = setdefault(pd, 'elevationInput', ['elevation_input' filesep pd.name]); % Location of input data
-pd = setdefault(pd, 'initType',  'constant'); % Type of initial and boundary values for bathymetry
+pd = setdefault(pd, 'initType',  'solve'); % Type of initial and boundary values for bathymetry
 pd = setdefault(pd, 'constValue', 2); % value of initial bathymetry everywhere
+pd = setdefault(pd, 'artDiffParam', 25); % percentage of uniforamlly distributed noise on free surface
 
 % ramping of free surface elevation
 if strcmp(pd.initType, 'exact')
@@ -308,7 +309,7 @@ pd.configADCIRC = h(['sweInverse/configFiles/fort_' pd.name '.15']);
 
 %% Map ADCIRC variables to internal names
 % Constants
-pd.p = pd.configADCIRC.IRK;
+% pd.p = pd.configADCIRC.IRK;
 pd.schemeOrder = min(pd.configADCIRC.IRK+1, 3);
 
 pd.isSlopeLim = mod(pd.configADCIRC.ISLOPE, 2) == 1;
@@ -407,7 +408,7 @@ switch pd.name
     pd.isHotstartOutput = false;
     pd.hotstartOutputFrequency = 1000;
     
-    pd.schemeOrder = 1;
+    pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
     pd.isSlopeLim = false;
     
     % Overwrite grid parameters
@@ -417,7 +418,7 @@ switch pd.name
     
     % Overwrite time-stepping parameters
     pd = setdefault(pd, 't0', 0); % Start time of simulation
-    pd = setdefault(pd, 'tEnd', 4320);  % end time
+    pd = setdefault(pd, 'tEnd', 43200);  % end time
     pd = setdefault(pd, 'dt', 0.1); % Time step size
     pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
     pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
@@ -433,7 +434,7 @@ switch pd.name
     pd.gConst = 9.81;
     pd.minTol = 0.25;
     
-    pd.isBottomFrictionNonlinear = false; % NOLIBF
+    pd.isBottomFrictionNonlinear = true; % NOLIBF
     pd.isBottomFrictionVarying = false; % NWP
     pd.bottomFrictionCoef = 0.001;
     
@@ -452,7 +453,7 @@ switch pd.name
     pd.isRivCont = false;
     
     pd.isFlowCont = true;
-    pd.uHFCont = @(x1,x2,t) 4*cos(pi*t/8640)*(x1==x1);
+    pd.uHFCont = @(x1,x2,t) 0.5*cos(pi*t/8640) + 3.5*(x1==x1);
     pd.vHFCont = @(x1,x2,t) 0*x1;
   case 'square'
     pd.isSolutionAvail = false;
@@ -464,7 +465,7 @@ switch pd.name
     pd.isHotstartOutput = false;
     pd.hotstartOutputFrequency = 1;
     
-    pd.schemeOrder = 1;
+    pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
     pd.isSlopeLim = false;
     
     % Overwrite grid parameters

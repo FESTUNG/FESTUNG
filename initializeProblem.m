@@ -81,26 +81,38 @@ else
   pd.cDisc = zeros(K,N,3); % TODO consistency
 end % if
 pd.xiDisc = pd.cDisc(:,:,1);
-pd.zbDisc = execin('sweInverse/setInitialDepth', pd);
-[~, pd.zbV] = applyVertexAveraging(pd.g, pd.zbDisc, pd.averagingOperator, pd.sysMinValueCorrection);
+pd.zbDOF = execin('sweInverse/setInitialDepth', pd);
+
+[Q1, Q2] = quadRule2D(max(2*pd.p,1));
+pd.zbDisc = projectDataQ0T2DataDisc(pd.zbDOF(pd.g.V0T) * [1-Q1-Q2; Q1; Q2], 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+
 pd.cDisc(:,:,1) =  pd.xiDisc - pd.zbDisc;
 % Ensure water height doesn't fall below threshold
 pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.minTol, pd.elevTol);
 % apply noise
-dataLagr = addNoise(projectDataDisc2DataLagr(pd.cDisc(:,:,1)), pd.noiseLvl);
+dataLagr = addNoiseInVertices2DataDisc(pd.g, projectDataDisc2DataLagr(pd.cDisc(:,:,1)), pd.noiseLvl);
 % compute the coeffcients
-pd.cDisc(:,:,1) = dataLagr / pd.sysMinValueCorrection;
+if pd.p == 1
+  pd.cDisc(:,:,1) = dataLagr / pd.sysMinValueCorrection;
+elseif pd.p == 0
+  pd.cDisc(:,:,1) = dataLagr / phi(1, 1/3, 1/3);
+end % if
 % compute the surface elevation
 pd.xiDisc = pd.cDisc(:,:,1) + pd.zbDisc;
 % compute the bathymetry
-% pd.zbDisc = pd.rampInput(pd.t0) * pd.xiDisc - pd.cDisc(:,:,1); % TODO consistency in case of correction!
+pd.zbDisc = pd.rampInput(pd.t0) * pd.xiDisc - pd.cDisc(:,:,1); % TODO consistency in case of correction!
 
 if ~strcmp(pd.initType, 'exact')
+  %% momentum
+  %% for now: do-nothing
+  
   % sea
 %   pd.cDisc(:,:,2:3) = 0;
-  % channel 
-  pd.cDisc(:,:,2:3) = 0;
-  pd.cDisc(:,:,2) = 2 * pd.cDisc(:,:,1);
+
+%   % channel 
+%   pd.cDisc(:,:,2:3) = 0;
+%   pd.cDisc(:,:,2) = 2 * pd.cDisc(:,:,1);
+%   
   % general
 %   qOrd = max(2*pd.p,1);
 %   dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{qOrd}.') ./ ((pd.cDisc(:,:,1) - pd.zbExact) * pd.basesOnQuad.phi2D{qOrd}.') .* ((pd.cDisc(:,:,1) - pd.zbDisc) * pd.basesOnQuad.phi2D{qOrd}.');

@@ -127,13 +127,13 @@ for n = 1 : 3
 end % for
 
 %% Right hand side contribution
-pd.globL = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
+pd.globL = { sparse(pd.g.numV,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.isRhsAvail
   f0Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f0Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
   f1Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f1Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
   f2Disc = projectFuncCont2DataDisc(pd.g, @(x1,x2) pd.f2Cont(x1,x2,tRhs), 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
   
-  pd.globL{1} = pd.globM * reshape(f0Disc.', K*N, 1);
+  pd.globL{1} = pd.globM * reshape(f0Disc.', K*N, 1); % TODO size
   pd.globL{2} = pd.globM * reshape(f1Disc.', K*N, 1);
   pd.globL{3} = pd.globM * reshape(f2Disc.', K*N, 1);
 end % if
@@ -212,7 +212,7 @@ end % if
 
 %% Compute river boundary values.
 if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont || pd.isRiemRiv)
-  pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
+  pd.globLRI = { sparse(pd.g.numV,1); sparse(K*N,1); sparse(K*N,1) };
   
   xiRivQ0E0T = cell(3,1);
   uRivQ0E0T = cell(3,1);
@@ -247,7 +247,7 @@ if pd.g.numEbdrRI > 0 && (pd.isRamp || pd.isRivCont || pd.isRiemRiv)
 end % if
 
 %% Compute flow boundary values.
-pd.globLF = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
+pd.globLF = { sparse(pd.g.numV,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.g.numEbdrF > 0
   
   uHFQ0E0T = cell(3,1);
@@ -297,7 +297,7 @@ uvH = cQ0T{2} .* cQ0T{3} ./ cQ0T{1};
 vvH = cQ0T{3} .* cQ0T{3} ./ cQ0T{1};
 gEE = 0.5 * pd.gConst * (cQ0T{4} .* cQ0T{4});
 
-pd.riemannTerms = sparse(3*K*N, 1);
+pd.riemannTerms = sparse(2*K*N, 1);
 pd.nonlinearTerms = [ -pd.globF{1} * (uuH+gEE) - pd.globF{2} * uvH ; ...
                       -pd.globF{1} * uvH - pd.globF{2} * (vvH+gEE) ];
 
@@ -309,6 +309,9 @@ globO   = assembleMatEdgePhiPhiFuncDiscIntNu(pd.g, pd.g.markE0Tint, pd.refEdgePh
 globOL  = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrL, pd.refEdgePhiIntPhiIntPhi, pd.zbDisc, pd.g.areaNuE0TbdrL);
 globORA = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrRA, pd.refEdgePhiIntPhiIntPhi, pd.zbDisc, pd.g.areaNuE0TbdrRA);
 globOF  = assembleMatEdgePhiIntPhiIntFuncDiscIntNu(pd.g, pd.g.markE0TbdrF, pd.refEdgePhiIntPhiIntPhi, pd.zbDisc, pd.g.areaNuE0TbdrF);
+
+% TVD
+% pd.artDiffMat = -pd.artDiffParam * assembleMatElemDphiLagrDphiLagrVal(pd.g, pd.refElemDphiLagrDphiLagr, pd.zbDOF, pd.diffKoeff);
 
 pd.gravityTerm = pd.gConst * [ globG{1} + globU{1} - globO{1} - globOL{1} - globORA{1} - globOF{1} ; ...
                                globG{2} + globU{2} - globO{2} - globOL{2} - globORA{2} - globOF{2} ] * pd.rampInput(pd.t) * reshape(pd.xiDisc.', K*N, 1);
@@ -345,8 +348,7 @@ for nn = 1 : 3
           
         lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
         pd.riemannTerms = pd.riemannTerms + ...
-          [ pd.globV{nn,np} * (lambda .* (cQ0E0Tint{1,nn} - cQ0E0TE0T{1,nn,np})) ; ...
-            pd.globV{nn,np} * (lambda .* (cQ0E0Tint{2,nn} - cQ0E0TE0T{2,nn,np})) ; ...
+          [ pd.globV{nn,np} * (lambda .* (cQ0E0Tint{2,nn} - cQ0E0TE0T{2,nn,np})) ; ...
             pd.globV{nn,np} * (lambda .* (cQ0E0Tint{3,nn} - cQ0E0TE0T{3,nn,np})) ];
 
         if pd.isCoupling
@@ -452,9 +454,8 @@ for nn = 1 : 3
           
           uRiv = cQ0E0Tint{2,nn} + uHRiv;
           vRiv = cQ0E0Tint{3,nn} + vHRiv;
-          jump = lambda .* (cQ0E0Tint{1,nn} - hRiv);
 
-          pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRRI{nn,1} * uRiv + pd.globRRI{nn,2} * vRiv + pd.globVRI{nn} * jump );
+          pd.globLRI{1} = pd.globLRI{1} + 0.5 * ( pd.globRLagrRI{nn,1} * uRiv + pd.globRLagrRI{nn,2} * vRiv);
           pd.globLRI{2} = pd.globLRI{2} + 0.5 * ( pd.globRRI{nn,1} * (uuHRiv+gEERiv) + pd.globRRI{nn,2} * uvHRiv ... 
                                                 + pd.globVRI{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHRiv)) );
           pd.globLRI{3} = pd.globLRI{3} + 0.5 * ( pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv+gEERiv) ...
@@ -462,7 +463,7 @@ for nn = 1 : 3
           
           if pd.isCoupling
             pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, 0.5 * permute( reshape( uRiv .* pd.g.nuQ0E0T{nn,1} + ...
-                                              vRiv .* pd.g.nuQ0E0T{nn,2} + jump, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRI(:,nn) );
+                                              vRiv .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrRI(:,nn) );
           end % if
           
         case 'Roe'
@@ -478,7 +479,7 @@ for nn = 1 : 3
       vvHRiv = vRivQ0E0T{nn} .* vHRiv;
       gEERiv = pd.gConst * xiRivQ0E0T{nn} .* (0.5 * xiRivQ0E0T{nn} - zbD{nn});
 
-      pd.globLRI{1} = pd.globLRI{1} + pd.globRRI{nn,1} * uHRiv + pd.globRRI{nn,2} * vHRiv;
+      pd.globLRI{1} = pd.globLRI{1} + pd.globRLagrRI{nn,1} * uHRiv + pd.globRLagrRI{nn,2} * vHRiv;
       pd.globLRI{2} = pd.globLRI{2} + pd.globRRI{nn,1} * (uuHRiv+gEERiv) + pd.globRRI{nn,2} * uvHRiv;
       pd.globLRI{3} = pd.globLRI{3} + pd.globRRI{nn,1} * uvHRiv + pd.globRRI{nn,2} * (vvHRiv+gEERiv);
       
@@ -492,6 +493,7 @@ for nn = 1 : 3
   % Open Sea boundary contributions
   if pd.g.numEbdrOS > 0
     hOSQ0E0T = xiOSQ0E0T{nn} - cQ0E0Tint{5,nn};
+%     hOSQ0E0T = cQ0E0Tint{4,nn} - cQ0E0Tint{5,nn};
     validateattributes(hOSQ0E0T, {'numeric'}, {'>', 0})
     uuHOS = cQ0E0Tint{2,nn} .* cQ0E0Tint{2,nn} ./ hOSQ0E0T;
     uvHOS = cQ0E0Tint{2,nn} .* cQ0E0Tint{3,nn} ./ hOSQ0E0T;
@@ -499,8 +501,6 @@ for nn = 1 : 3
     gEEOS = pd.gConst * xiOSQ0E0T{nn} .* (0.5 * xiOSQ0E0T{nn} - cQ0E0Tint{5,nn});
     
     if pd.isRiemOS
-      cAvgQ0E0T = pd.computeAveragedVariablesQ0E0Tos(cQ0E0Tint(1:3,nn), {}, cQ0E0Tint{1,nn}, hOSQ0E0T, markQ0E0TbdrOS{nn}, pd.averagingType);
-      
       switch pd.typeFlux
         case 'Lax-Friedrichs'
           gEEOS = gEE + gEEOS - pd.gConst * cQ0E0Tint{4,nn} .* cQ0E0Tint{5,nn};
@@ -508,13 +508,9 @@ for nn = 1 : 3
           pd.nonlinearTerms = pd.nonlinearTerms + 0.5 * [ pd.globROS{nn,1} * (uuH + uuHOS + gEEOS) + pd.globROS{nn,2} * (uvH + uvHOS); ...
                                                           pd.globROS{nn,1} * (uvH + uvHOS) + pd.globROS{nn,2} * (vvH + vvHOS + gEEOS) ];
           
-          lambda = pd.computeLaxFriedrichsCoefficient(cAvgQ0E0T, pd.g.nuQ0E0T(nn,:), pd.gConst);
-          pd.riemannTerms(1:K*N) = pd.riemannTerms(1:K*N) + 0.5 * pd.globVOS{nn} * (lambda .* (cQ0E0Tint{1,nn} - hOSQ0E0T));
-          
           if pd.isCoupling
             pd.massFluxQ0E0T(:,nn,:) = pd.massFluxQ0E0T(:,nn,:) + bsxfun(@times, permute( reshape( cQ0E0Tint{2,nn} .* pd.g.nuQ0E0T{nn,1} + ...
-                                          cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2} + 0.5 * lambda .* (cQ0E0Tint{1,nn} - hOSQ0E0T), [numQuad1D, K, 1] ), ...
-                                          [2 3 1] ), pd.g.markE0TbdrOS(:,nn) );
+                                          cQ0E0Tint{3,nn} .* pd.g.nuQ0E0T{nn,2}, [numQuad1D, K, 1] ), [2 3 1] ), pd.g.markE0TbdrOS(:,nn) );
           end % if
           
         case 'Roe'
@@ -553,7 +549,7 @@ for nn = 1 : 3
           uvHF = uvH + uHF .* vHF ./ hF;
           vvHF = vvH + vHF .* vHF ./ hF;
           
-          pd.globLF{1} = pd.globLF{1} + 0.5 * ( pd.globRF{nn,1} * (uHF  + cQ0E0Tint{2,nn}) + pd.globRF{nn,2} * (vHF  + cQ0E0Tint{3,nn}) + pd.globVF{nn} * (lambda .* (cQ0E0Tint{1,nn} - hF)) );
+          pd.globLF{1} = pd.globLF{1} + 0.5 * ( pd.globRLagrF{nn,1} * (uHF  + cQ0E0Tint{2,nn}) + pd.globRLagrF{nn,2} * (vHF  + cQ0E0Tint{3,nn}) );
           pd.globLF{2} = pd.globLF{2} + 0.5 * ( pd.globRF{nn,1} * (uuHF + 2 * gEE) + pd.globRF{nn,2} * uvHF + pd.globVF{nn} * (lambda .* (cQ0E0Tint{2,nn} - uHF)));
           pd.globLF{3} = pd.globLF{3} + 0.5 * ( pd.globRF{nn,1} * uvHF + pd.globRF{nn,2} * (vvHF + 2 * gEE) + pd.globVF{nn} * (lambda .* (cQ0E0Tint{3,nn} - vHF)));
         case 'Roe'
@@ -567,7 +563,7 @@ for nn = 1 : 3
       uvHF = uHF .* vHF ./ hF;
       vvHF = vHF .* vHF ./ hF;
 
-      pd.globLF{1} = pd.globLF{1} + pd.globRF{nn,1} * uHF + pd.globRF{nn,2} * vHF;
+      pd.globLF{1} = pd.globLF{1} + pd.globRLagrF{nn,1} * uHF + pd.globRLagrF{nn,2} * vHF;
       pd.globLF{2} = pd.globLF{2} + pd.globRF{nn,1} * (uuHF + gEE) + pd.globRF{nn,2} * uvHF;
       pd.globLF{3} = pd.globLF{3} + pd.globRF{nn,1} * uvHF + pd.globRF{nn,2} * (vvHF + gEE);
     end % if

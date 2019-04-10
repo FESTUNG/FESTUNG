@@ -36,31 +36,27 @@
 %> @endparblock
 %
 function ret = setInitialDepth(pd)
-K = pd.K;
-N = pd.N;
-ret = zeros(K, N);
 switch pd.initType
 	case 'exact'
-		ret = pd.zbExact;
+    ret = -pd.depth;
 	case 'constant'
-		ret(:,1) = -pd.constValue / sqrt(2);
+		ret = -pd.constValue * ones(pd.g.numV,1);
   case 'linear'
-    ret = projectFuncCont2DataDisc(pd.g, @(x1,x2) 0.001* x1 - 2, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
-%     ret = projectFuncCont2DataDisc(pd.g, @(x1,x2) -x1/1000-2, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
-%     ret = projectFuncCont2DataDisc(pd.g, @(x1,x2) -0.000175*sqrt(x1.^2+x2.^2)+25, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    ret = projectFuncCont2DataDisc(pd.g, @(x1,x2) 0.001* x1 - 2, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad); %TODO
   case 'error'
     [~, depth] = domainADCIRC(['fort_' pd.name 'Mid.14'], ['fort_' pd.name '.17'], 1);
-    zbCont = @(x1,x2) evaluateFuncFromVertexValues(pd.g, -depth, x1,x2);
-    
-    assert(max( max( abs(depth(pd.g.V0T) + zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2))) ) ) < 1.e-5, ...
-           'Bathymetry incorrectly constructed!');
-    ret = projectFuncCont2DataDisc(pd.g, zbCont, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+    ret = -depth;
+  case 'solve'
+    ret = zeros(pd.g.numV,1);
+    idV = union(pd.g.V0E(pd.g.idE==5,1), pd.g.V0E(pd.g.idE==5,2));
+    ret(idV) = -pd.depth(idV);
+    rhs = - pd.artDiffMat * ret; 
+    idV = setdiff(1:pd.g.numV, idV);
+    ret(idV) = pd.artDiffMat(idV,idV) \ rhs(idV);
   otherwise
 		error('Unknown type of data initialisation.');
 end % switch
-if ~strcmp(pd.initType, 'exact')
-%   ret = ret + setInitialBoundaryDepth(pd, constValue);
-end % if
+
 end % function
 
 function ret = setInitialBoundaryDepth(pd)

@@ -397,28 +397,11 @@ end % if
 %% Assembly of time-independent global matrices corresponding to linear contributions.
 % Element matrices
 globD = execin('sweInverse/assembleMatElemPhiPhiFuncDisc', pd.g, refElemPhiPhiPhiLin, fcDisc);
-globH = assembleMatElemDphiPhi(pd.g, refElemDphiPhi);
 pd.globM = assembleMatElemPhiPhi(pd.g, pd.refElemPhiPhi);
 
-% Interior edge matrices
-switch pd.typeFlux
-  case 'Lax-Friedrichs'
-    globQ = assembleMatEdgePhiPhiNu(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, pd.g.areaNuE0Tint);
-  case 'Roe'
-    error('not implemented')
-    
-  otherwise
-    error('Unknown flux type')
-end % switch
-
-% Boundary edge matrices
-globQOS = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrOS);
-globQRA = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrRA);
-
 % Derived system matrices
-pd.sysW = blkdiag(pd.globM, pd.globM, pd.globM);
-pd.linearTerms = [ globQ{1} + globQOS{1} + globQRA{1} - globH{1}, globQ{2} + globQOS{2} + globQRA{2} - globH{2}; ...
-                   sparse(K*N,K*N), -globD; ...
+pd.sysW = blkdiag(pd.globM, pd.globM);
+pd.linearTerms = [ sparse(K*N,K*N), -globD; ...
                    globD, sparse(K*N,K*N) ];
 
 % Slope limiting matrices
@@ -475,7 +458,7 @@ if pd.g.numEbdrRA > 0 % Radiation boundaries
   pd.globRdiag = cellfun(@plus, pd.globRdiag, globRRA, 'UniformOutput', false);
 end % if
 
-pd.globLRI = { sparse(K*N,1); sparse(K*N,1); sparse(K*N,1) };
+pd.globLRI = { sparse(pd.g.numV,1); sparse(K*N,1); sparse(K*N,1) };
 if pd.g.numEbdrRI > 0 % River boundaries
   if ~pd.isRivCont
     if any(ismember(pd.slopeLimList, 'momentum'))
@@ -677,11 +660,51 @@ if pd.isTidalDomain
   end % for
 end % if
 
+%% Assembly of linear Lagrange FE contributions
+refElemDphiLagrPhi = integrateRefElemDphiLagrPhi(N, pd.basesOnQuad);
+massMatLumped = assembleVecElemPhiLagr(pd.g);
+pd.massMatLumpedInv = massMatLumped.^-1;
+
+% this is for time-dependent surface profiles
+refElemPhiLagrPhi = integrateRefElemPhiLagrPhi(N, pd.basesOnQuad);
+pd.massMatMixed = assembleMatElemPhiLagrPhi(pd.g, refElemPhiLagrPhi);
+
+refEdgePhiLagrPhiInt = integrateRefEdgePhiLagrPhiInt(N, pd.basesOnQuad);
+globHLagr = assembleMatElemDphiLagrPhi(pd.g, refElemDphiLagrPhi);
+globQRALagr = assembleMatEdgePhiLagrPhiIntNu(pd.g, pd.g.markE0TbdrRA, refEdgePhiLagrPhiInt, pd.g.areaNuE0TbdrRA);
+globQOSLagr = assembleMatEdgePhiLagrPhiIntNu(pd.g, pd.g.markE0TbdrOS, refEdgePhiLagrPhiInt, pd.g.areaNuE0TbdrOS);
+
+refEdgePhiLagrPerQuad = integrateRefEdgePhiLagrPerQuad(N);
+pd.globRLagrRI = assembleMatEdgePhiLagrNu(pd.g, pd.g.markE0TbdrRI, refEdgePhiLagrPerQuad, pd.g.areaNuE0TbdrRI);
+pd.globRLagrF = assembleMatEdgePhiLagrNu(pd.g, pd.g.markE0TbdrF, refEdgePhiLagrPerQuad, pd.g.areaNuE0TbdrF);
+
+pd.sysMatBathymetry = [globHLagr{1}-globQRALagr{1}-globQOSLagr{1}, globHLagr{2}-globQRALagr{2}-globQOSLagr{2}];
+
+%% consistent minus lumped mass matrix
+refElemPhiLagrPhiLagr = integrateRefElemPhiLagrPhiLagr();
+%% without nudging
+pd.artDiffMat = assembleMatElemPhiLagrPhiLagr(pd.g, refElemPhiLagrPhiLagr) - spdiags(massMatLumped, 0, pd.g.numV, pd.g.numV);
+% with nudging
+% pd.globMLagr = assembleMatElemPhiLagrPhiLagr(pd.g, refElemPhiLagrPhiLagr);
+% pd.artDiffMat = pd.globMLagr - spdiags(massMatLumped, 0, pd.g.numV, pd.g.numV);
+
+% poisson
+% refElemDphiLagrDphiLagr = integrateRefElemDphiLagrDphiLagr(N);
+% pd.artDiffMat = -assembleMatElemDphiLagrDphiLagr(pd.g, refElemDphiLagrDphiLagr);
+
+% TVD
+% pd.refElemDphiLagrDphiLagr = integrateRefElemDphiLagrDphiLagr(N);
+% pd.diffKoeff = @(x) (x(1)^2+x(2)^2+1e-10)^-0.5;
+
+% algebraic Limter
+% globMLagrLagr = assembleMatElemPhiLagrPhiLagr(pd.g, refElemPhiLagrPhiLagr);
+% pd.MLagrLagrNoDiag = pd.artDiffParam * (globMLagrLagr - spdiags(diag(globMLagrLagr), 0, pd.g.numV, pd.g.numV));
+% pd.MDiffLumpedLagr = pd.artDiffParam * spdiags(massMatLumped - diag(globMLagrLagr), 0, pd.g.numV, pd.g.numV);
+
 %% Nudging preprocessing
-pd.observationVertices = ones(pd.g.numV,1);%round(rand(pd.g.numV,1)/100 + 0.491);
+pd.observationVertices = ones(pd.g.numV,1); % round(rand(pd.g.numV,1)/100 + 0.491);
 refElemPhiPhiLagr = execin('sweInverse/integrateRefElemPhiPhiLagr', N, pd.basesOnQuad);
 pd.matElemPhiPhiLagr = assembleMatElemPhiPhi(pd.g, refElemPhiPhiLagr);
-pd.nudgingTerm = sparse(K*N,1);
 
 %% Variable timestepping preparation.
 if pd.isAdaptiveTimestep
@@ -694,6 +717,7 @@ end % if
 
 %% Function handles
 pd.visualizeSolution = getFunctionHandle('sweInverse/visualizeSolution');
+pd.applyAlgebraicLimiter = getFunctionHandle('sweInverse/applyAlgebraicLimiter');
 pd.computeAveragedVariablesQ0E0Tint = getFunctionHandle('sweInverse/computeAveragedVariablesQ0E0Tint');
 pd.computeAveragedVariablesQ0E0Tland = getFunctionHandle('sweInverse/computeAveragedVariablesQ0E0Tland');
 pd.computeAveragedVariablesQ0E0Triv = getFunctionHandle('sweInverse/computeAveragedVariablesQ0E0Triv');
