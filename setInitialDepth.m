@@ -12,8 +12,8 @@
 %>                      fields, as provided by configureProblem() and 
 %>                      preprocessProblem(). @f$[\text{struct}]@f$
 %>
-%> @retval ret					The discrete data representing the bathymetry.
-%>											@f$[K \times N]@f$
+%> @retval ret					The vertex values of the bathymetry.
+%>											@f$[numV 1]@f$
 %>
 %> This file is part of FESTUNG
 %>
@@ -49,7 +49,7 @@ switch pd.initType
 %     ret = projectFuncCont2DataDisc(pd.g, @(x1,x2) -x1/1000-2, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
 %     ret = projectFuncCont2DataDisc(pd.g, @(x1,x2) -0.000175*sqrt(x1.^2+x2.^2)+25, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
   case 'error'
-    [~, depth] = domainADCIRC(['fort_' pd.name '10%.14'],['fort_' pd.name '.17'],5);
+    [~, depth] = domainADCIRC(['fort_' pd.name 'Mid.14'], ['fort_' pd.name '.17'], 1);
     zbCont = @(x1,x2) evaluateFuncFromVertexValues(pd.g, -depth, x1,x2);
     
     assert(max( max( abs(depth(pd.g.V0T) + zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2))) ) ) < 1.e-5, ...

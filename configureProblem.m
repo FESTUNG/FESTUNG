@@ -54,7 +54,7 @@ pd = setdefault(pd, 'name', 'squareCoarse');
 %% Configuration to use: 
 % - 'debug' calls configureDebug()
 % - 'analytical' calls configureAnalyticalTest()
-% - 'ADCIRC' reads 'swe_inverse/fort_<name>.15'
+% - 'ADCIRC' reads 'sweInverse/configFiles/fort_<name>.15'
 % - 'manual' calls configureManualADCIRC()
 pd = setdefault(pd, 'configSource', 'ADCIRC');
 
@@ -65,7 +65,7 @@ pd = setdefault(pd, 'configSource', 'ADCIRC');
 % - 'hierarchical' creates a unit square [0,100]x[0,100] with specified 
 %   hmax and performs uniform refinement according to parameter 
 %   'refinement'. All boundaries are type 3, i.e river.
-% - 'ADCIRC' reads grid information from 'swe_inverse/fort_<name>.{14,17}'.
+% - 'ADCIRC' reads grid information from 'sweInverse/configFiles/fort_<name>.{14,17}'.
 pd = setdefault(pd, 'gridSource', 'ADCIRC');
 
 %% Polynomial approximation order
@@ -80,7 +80,7 @@ pd = setdefault(pd, 'schemeType', 'explicit'); % type of time stepping scheme ('
 pd = setdefault(pd, 'typeFlux', 'Lax-Friedrichs'); % Type of interior flux ('Lax-Friedrichs', 'Roe')
 pd = setdefault(pd, 'isRiemOS', true); % Riemann solver usage on open sea boundary
 pd = setdefault(pd, 'isRiemRiv', true); % Riemann solver usage on river boundary
-pd = setdefault(pd, 'isRiemFlow', false); % Riemann solver usage on flow boundary
+pd = setdefault(pd, 'isRiemFlow', true); % Riemann solver usage on flow boundary
 pd = setdefault(pd, 'typeBdrL', 'riemann'); % Flux type on land boundary ('reflected', 'natural', or 'riemann')
 pd = setdefault(pd, 'averagingType', 'full-harmonic'); % Averaging type for variables when computing flux ('full-harmonic', 'semi-harmonic', 'mean')
 pd = setdefault(pd, 'typeSlopeLim', 'linear'); % Slope limiter type ('linear', 'hierarch_vert', 'strict')
@@ -109,22 +109,19 @@ switch pd.configSource
     error('Invalid config source.')
 end % switch
 
-%% swe_inverse specific parameters
-pd = setdefault(pd, 'noiseLvl', 0.); % percentage of uniforamlly distributed noise on free surface
-pd.isDiffusion = false;
-pd.diffCoef = [100; 100; 100];
-
-pd.penaltyParam = -0.;
+%% sweInverse specific parameters
+pd = setdefault(pd, 'noiseLvl', 0.0); % percentage of uniforamlly distributed noise on free surface
 pd = setdefault(pd, 'elevationInput', ['elevation_input' filesep pd.name]); % Location of input data
 pd = setdefault(pd, 'initType',  'constant'); % Type of initial and boundary values for bathymetry
-pd = setdefault(pd, 'constValue', 2.); % value of initial bathymetry everywhere
+pd = setdefault(pd, 'constValue', 2); % value of initial bathymetry everywhere
 
 % ramping of free surface elevation
 if strcmp(pd.initType, 'exact')
   pd = setdefault(pd, 'rampInput', @(t) 1);
 else
-  pd = setdefault(pd, 'drampInput', 55); % duration of ramping of free surface elevation
-  pd = setdefault(pd, 'rampInput', @(t) ((t - pd.t0)/pd.drampInput) * (t < pd.t0 + pd.drampInput) + (t >= pd.t0 + pd.drampInput)); % ramping of free surface elevation
+  pd = setdefault(pd, 'drampInput', 35); % duration of ramping of free surface elevation
+  pd = setdefault(pd, 'rampInput', @(t) 1);
+%   pd = setdefault(pd, 'rampInput', @(t) ((t - pd.t0)/pd.drampInput) * (t < pd.t0 + pd.drampInput) + (t >= pd.t0 + pd.drampInput)); % ramping of free surface elevation
 end % if
 
 if ~pd.isSlopeLim
@@ -301,18 +298,18 @@ pd.isSolutionAvail = false;
 pd.isRhsAvail = false;
 
 % Verify input files exist
-assert(exist(['swe_inverse/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe_inverse/fort_' pd.name '.14" not found!'])
-assert(exist(['swe_inverse/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe_inverse/fort_' pd.name '.17" not found!'])
-assert(exist(['swe_inverse/fort_' pd.name '.15'], 'file') == 2, ['Config file "swe_inverse/fort_' pd.name '.15" not found!'])
+assert(exist(['sweInverse/configFiles/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "sweInverse/configFiles/fort_' pd.name '.14" not found!'])
+assert(exist(['sweInverse/configFiles/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "sweInverse/configFiles/fort_' pd.name '.17" not found!'])
+assert(exist(['sweInverse/configFiles/fort_' pd.name '.15'], 'file') == 2, ['Config file "sweInverse/configFiles/fort_' pd.name '.15" not found!'])
 
 %% Read parameter file
-h = getFunctionHandle('swe_inverse/readConfigADCIRC');
-pd.configADCIRC = h(['swe_inverse/fort_' pd.name '.15']);
+h = getFunctionHandle('sweInverse/readConfigADCIRC');
+pd.configADCIRC = h(['sweInverse/configFiles/fort_' pd.name '.15']);
 
 %% Map ADCIRC variables to internal names
 % Constants
 pd.p = pd.configADCIRC.IRK;
-pd.schemeOrder = 1; % min(pd.configADCIRC.IRK+1, 3);
+pd.schemeOrder = min(pd.configADCIRC.IRK+1, 3);
 
 pd.isSlopeLim = mod(pd.configADCIRC.ISLOPE, 2) == 1;
 
@@ -393,406 +390,22 @@ end % function
 function pd = configureManualADCIRC(pd)
 
 % Verify input files exist
-assert(exist(['swe_inverse/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "swe_inverse/fort_' pd.name '.14" not found!'])
-assert(exist(['swe_inverse/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "swe_inverse/fort_' pd.name '.17" not found!'])
+assert(exist(['sweInverse/configFiles/fort_' pd.name '.14'], 'file') == 2, ['Mesh file "sweInverse/configFiles/fort_' pd.name '.14" not found!'])
+assert(exist(['sweInverse/configFiles/fort_' pd.name '.17'], 'file') == 2, ['Mesh file "sweInverse/configFiles/fort_' pd.name '.17" not found!'])
 
 % Overwrite grid config source
 pd.gridSource = 'ADCIRC';
 
 switch pd.name
-  case 'bahamasF'
-    pd.isSolutionAvail = false;
-    pd.isRhsAvail = false;
-    pd.isTidalDomain = false;
-    
-    pd.isHotstartInput = true;
-    pd.isHotstartOutput = false;
-    pd = setdefault(pd, 'schemeOrder', 1);
-    pd.isSlopeLim = false;
-
-    % Overwrite grid parameters
-    pd.isSpherical = false;
-    pd.configADCIRC.SLAM0 = 0;
-    pd.configADCIRC.SFEA0 = 0;
-
-    % Overwrite time-stepping parameters
-    pd = setdefault(pd, 't0', 0); % Start time of simulation
-    pd = setdefault(pd, 'tEnd', 1036800);  % end time
-    pd = setdefault(pd, 'dt', 15); % Time step size
-    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
-    pd = setdefault(pd, 'outputCount', 240); % Number of outputs over total simulation time
-
-    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
-
-    pd.isSteadyState = false; % free surface elevation is not time-dependent
-    pd.convergenceCriterion = 1e-6;
-
-    % Solution parameters
-    pd.gConst = 9.81;
-    pd.minTol = 0.25;
-
-    pd.isBottomFrictionNonlinear = true; % NOLIBF
-    pd.isBottomFrictionVarying = false; % NWP
-    pd.bottomFrictionCoef = 0.0090;
-    
-    % Ramping function
-    pd.isRamp = false;
-    pd.ramp = @(t_days) 1;
-
-    % Coriolis coefficient
-    pd.configADCIRC.NCOR = 0;
-    pd.configADCIRC.CORI = 3.19e-5;
-
-    % Boundary conditions
-    pd.isOSCont = false;
-    pd.isFlowCont = true;
-    pd.uHFCont = @(x1,x2,t)  -0.307768*sin(0.0001*t)*(x1==x1);
-    pd.vHFCont = @(x1,x2,t)  -0.428640*sin(0.0001*t)*(x1==x1);
-
-    pd.configADCIRC.NBFR = 0;
-
-    pd.isRivCont = false;
-  case 'test2'
-    pd.isSolutionAvail = false;
-    pd.isRhsAvail = false;
-    pd.isTidalDomain = false;
-    
-    pd.isHotstartInput = true;
-    pd.hotstartInput = [pd.name '_initialCondition_lin.mat'];
-    pd.isHotstartOutput = false;
-    
-    pd = setdefault(pd, 'schemeOrder', min(pd.p+1,3));
-    pd.isSlopeLim = true;
-    
-    % Overwrite grid parameters
-    pd.isSpherical = false;
-    pd.configADCIRC.SLAM0 = 0;
-    pd.configADCIRC.SFEA0 = 0;
-    
-    % Overwrite time-stepping parameters
-    pd = setdefault(pd, 't0', 0); % Start time of simulation
-    pd = setdefault(pd, 'tEnd', 259.2);  % end time
-    pd = setdefault(pd, 'dt', 0.1); % Time step size
-    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
-    pd = setdefault(pd, 'outputCount', 72); % Number of outputs over total simulation time
-
-    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
-    
-    pd.isSteadyState = false; % free surface elevation is not time-dependent
-    pd.convergenceCriterion = 0.0031;
-    
-    % Solution parameters
-    pd.gConst = 0.16;
-    pd.minTol = 0.05;
-    
-    pd.isBottomFrictionNonlinear = false; % NOLIBF
-    pd.isBottomFrictionVarying = false; % NWP
-    pd.bottomFrictionCoef = 0.0;
-    
-    % Ramping function
-    pd.isRamp = false;
-    pd.ramp = @(t_days) 1;
-    
-    % Coriolis coefficient
-    pd.configADCIRC.NCOR = 0;
-    pd.configADCIRC.CORI = 0.0;
-    
-    pd.configADCIRC.NBFR = 0;
-    pd.isOSCont = false;
-    
-    pd.isRivCont = true;
-    pd.xiRivCont = @(x1,x2,t) 0*x1;
-    pd.uRivCont = @(x1,x2,t) x1==x1;
-    pd.vRivCont = @(x1,x2,t) 0*x1;
-  case 'galvF'
-    pd.isSolutionAvail = false;
-    pd.isRhsAvail = false;
-    pd.isTidalDomain = false;
-    
-    pd.isHotstartInput = true;
-    pd.hotstartInput = 'output/galv_1.mat';
-    pd.isHotstartOutput = false;
-    pd = setdefault(pd, 'schemeOrder', 1);
-    pd.isSlopeLim = false;
-
-    % Overwrite grid parameters
-    pd.isSpherical = false;
-    pd.configADCIRC.SLAM0 = 0;
-    pd.configADCIRC.SFEA0 = 0;
-
-    % Overwrite time-stepping parameters
-    pd = setdefault(pd, 't0', 0); % Start time of simulation
-    pd = setdefault(pd, 'tEnd', 432000);  % end time
-    pd = setdefault(pd, 'dt', 5); % Time step size
-    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
-    pd = setdefault(pd, 'outputCount', 200); % Number of outputs over total simulation time
-
-    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
-
-    pd.isSteadyState = false; % free surface elevation is not time-dependent
-
-    % Solution parameters
-    pd.gConst = 9.81;
-    pd.minTol = 0.25;
-
-    pd.isBottomFrictionNonlinear = true; % NOLIBF
-    pd.isBottomFrictionVarying = false; % NWP
-    pd.bottomFrictionCoef = 0.0040;
-    
-    % Ramping function
-    pd.isRamp = false;
-    pd.ramp = @(t_days) 1;
-
-    % Coriolis coefficient
-    pd.configADCIRC.NCOR = 0;
-    pd.configADCIRC.CORI = 7.07E-5;
-
-    % Boundary conditions
-    pd.isOSCont = true;
-    pd.xiOSCont = @(x1,x2,t)  ( 0.075 * cos(0.000067597751162*t - pi/180*194.806 ) ...
-                              + 0.095 * cos(0.000072921165921*t - pi/180*206.265 ) ...
-                              + 0.10  * cos(0.000137879713787*t - pi/180*340.0   ) ...
-                              + 0.395 * cos(0.000140518917083*t - pi/180*  0.0   ) ...
-                              + 0.06  * cos(0.000145444119418*t - pi/180*42.97180) ) * (x1==x1);
-    
-    pd.configADCIRC.NBFR = 5;
-
-    pd.isRivCont = false;
-    pd.isFlowCont = true;
-    n = [117.25; 503.5];
-    n = n / norm(n);
-    pd.uHFCont = @(x1,x2,t) -0.5 * 1.573170662 * n(1) * (x1==x1);
-    pd.vHFCont = @(x1,x2,t) -0.5 * 1.573170662 * n(2) * (x1==x1);
-  case 'channel0'
-    pd.isSolutionAvail = false;
-    pd.isRhsAvail = false;
-    pd.isTidalDomain = false;
-    
-    pd.isHotstartInput = true;
-    pd.isHotstartOutput = false;
-    
-    pd.schemeOrder = 1;
-    pd.isSlopeLim = false;
-    
-    % Overwrite grid parameters
-    pd.isSpherical = false;
-    pd.configADCIRC.SLAM0 = 0;
-    pd.configADCIRC.SFEA0 = 0;
-    
-    % Overwrite time-stepping parameters
-    pd = setdefault(pd, 't0', 0); % Start time of simulation slow: 7.833819447923908e-04
-    pd = setdefault(pd, 'tEnd', 40);  % end time
-    pd = setdefault(pd, 'dt', 0.005); % Time step size
-    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
-    pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
-    pd = setdefault(pd, 'outputFrequency', 100 * ones(1,4));
-
-    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
-    
-    pd.isSteadyState = false; % free surface elevation is not time-dependent
-    pd.convergenceCriterion = 1.e-14;
-    
-    % Solution parameters
-    pd.gConst = 9.81;
-    pd.minTol = 0.05;
-    
-    pd.isBottomFrictionNonlinear = false; % NOLIBF
-    pd.isBottomFrictionVarying = false; % NWP
-    pd.bottomFrictionCoef = 0.0;
-    
-    % Ramping function
-    pd.isRamp = false;
-    pd.ramp = @(t_days) 1;
-    
-    % Coriolis coefficient
-    pd.configADCIRC.NCOR = 0;
-    pd.configADCIRC.CORI = 0.0;
-    
-    pd.configADCIRC.NBFR = 0;
-    pd.isOSCont = false;
-    
-    pd.isRivCont = true;
-    pd.xiRivCont = @(x1,x2,t) sin(0.25*t)*(x1==x1);
-    pd.uRivCont = @(x1,x2,t) 2.21*(x1==x1);
-    pd.vRivCont = @(x1,x2,t) 0*x1;
-  case 'quarter2'
-    pd.isSolutionAvail = false;
-    pd.isRhsAvail = false;
-    pd.isTidalDomain = false;
-    
-    pd.isHotstartInput = true;
-%     pd.hotstartInput = 'swe/quarter2.mat';
-    pd.isHotstartOutput = false;
-    pd.hotstartOutputFrequency = 1;
-    
-    pd.schemeOrder = 1;
-    pd.isSlopeLim = false;
-    
-    % Overwrite grid parameters
-    pd.isSpherical = false;
-    pd.configADCIRC.SLAM0 = 0;
-    pd.configADCIRC.SFEA0 = 0;
-    
-    % Overwrite time-stepping parameters
-    pd = setdefault(pd, 't0', 86400); % Start time of simulation
-    pd = setdefault(pd, 'tEnd', 172800);  % end time
-    pd = setdefault(pd, 'dt', 1.8); % Time step size
-    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
-    pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
-    pd = setdefault(pd, 'outputFrequency', 1000 * ones(1,4));
-
-    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
-    
-    % Steady state simulation
-    pd.isSteadyState = false;
-    pd.convergenceCriterion = 0.00001;
-    
-    % Solution parameters
-    pd.gConst = 32.17;
-    pd.minTol = 0.05;
-    
-    pd.isBottomFrictionNonlinear = false; % NOLIBF
-    pd.isBottomFrictionVarying = false; % NWP
-    pd.bottomFrictionCoef = 0.0001;
-    
-    % Ramping function
-    pd.isRamp = false;
-    pd.ramp = @(t_days) 1;
-    
-    % Coriolis coefficient
-    pd.configADCIRC.NCOR = 0;
-    pd.configADCIRC.CORI = 0.0;
-    
-    pd.configADCIRC.NBFR = 0;
-    pd.isOSCont = false;
-    
-    pd.isRivCont = true;
-    pd.xiRivCont = @(x1,x2,t) sin(0.001*t)*(x1==x1);
-    pd.uRivCont = @(x1,x2,t) 0*x1;
-    pd.vRivCont = @(x1,x2,t) (x1==x1);
-  case 'channel'
-    pd.isSolutionAvail = false;
-    pd.isRhsAvail = false;
-    pd.isTidalDomain = false;
-    
-    pd.isHotstartInput = true;
-%     pd.hotstartInput = 'swe/channel_lin.mat';
-    pd.isHotstartOutput = false;
-%     pd.hotstartOutputFrequency = 1;
-    
-    pd.schemeOrder = 1;
-    pd.isSlopeLim = false;
-    
-    % Overwrite grid parameters
-    pd.isSpherical = false;
-    pd.configADCIRC.SLAM0 = 0;
-    pd.configADCIRC.SFEA0 = 0;
-    
-    % Overwrite time-stepping parameters
-    pd = setdefault(pd, 't0', 0); % Start time of simulation
-    pd = setdefault(pd, 'tEnd', 8640);  % end time
-    pd = setdefault(pd, 'dt', 0.1); % Time step size
-    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
-    pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
-    pd = setdefault(pd, 'outputFrequency', 100 * ones(1,4));
-
-    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
-    
-    % Steady state simulation
-    pd.isSteadyState = false;
-    pd.convergenceCriterion = 1.e-14;
-    
-    % Solution parameters
-    pd.gConst = 9.81;
-    pd.minTol = 0.25;
-    
-    pd.isBottomFrictionNonlinear = false; % NOLIBF
-    pd.isBottomFrictionVarying = false; % NWP
-    pd.bottomFrictionCoef = 0.000;
-    
-    % Ramping function
-    pd.isRamp = false;
-    pd.ramp = @(t_days) 1;
-    
-    % Coriolis coefficient
-    pd.configADCIRC.NCOR = 0;
-    pd.configADCIRC.CORI = 0.0;
-    
-    pd.configADCIRC.NBFR = 1;
-    pd.isOSCont = true;
-    pd.xiOSCont = @(x1,x2,t) 0*x1;
-    
-    pd.isRivCont = false;
-    
-    pd.isFlowCont = true;
-    pd.uHFCont = @(x1,x2,t) 4*cos(pi*t/8640)*(x1==x1);
-    pd.vHFCont = @(x1,x2,t) 0*x1;
-  case 'channel_test'
-    pd.isSolutionAvail = false;
-    pd.isRhsAvail = false;
-    pd.isTidalDomain = false;
-    
-    pd.isHotstartInput = true;
-%     pd.hotstartInput = 'swe/channel_lin.mat';
-    pd.isHotstartOutput = false;
-%     pd.hotstartOutputFrequency = 1;
-    
-    pd.schemeOrder = 1;
-    pd.isSlopeLim = false;
-    
-    % Overwrite grid parameters
-    pd.isSpherical = false;
-    pd.configADCIRC.SLAM0 = 0;
-    pd.configADCIRC.SFEA0 = 0;
-    
-    % Overwrite time-stepping parameters
-    pd = setdefault(pd, 't0', 0); % Start time of simulation
-    pd = setdefault(pd, 'tEnd', 8640);  % end time
-    pd = setdefault(pd, 'dt', 0.05); % Time step size
-    pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
-    pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
-    pd = setdefault(pd, 'outputFrequency', 100 * ones(1,4));
-
-    pd.isAdaptiveTimestep = false; % Use adaptive timestep width
-    
-    % Steady state simulation
-    pd.isSteadyState = false;
-    pd.convergenceCriterion = 1.e-13;
-    
-    % Solution parameters
-    pd.gConst = 9.81;
-    pd.minTol = 0.25;
-    
-    pd.isBottomFrictionNonlinear = false; % NOLIBF
-    pd.isBottomFrictionVarying = false; % NWP
-    pd.bottomFrictionCoef = 0.000;
-    
-    % Ramping function
-    pd.isRamp = false;
-    pd.ramp = @(t_days) 1;
-    
-    % Coriolis coefficient
-    pd.configADCIRC.NCOR = 0;
-    pd.configADCIRC.CORI = 0.0;
-    
-    pd.configADCIRC.NBFR = 1;
-    pd.isOSCont = true;
-    pd.xiOSCont = @(x1,x2,t) 0*x1;
-    
-    pd.isRivCont = false;
-    
-    pd.isFlowCont = true;
-    pd.uHFCont = @(x1,x2,t) 4*cos(pi*t/8640)*(x1==x1);
-    pd.vHFCont = @(x1,x2,t) 0*x1;
   case 'squareCoarse'
     pd.isSolutionAvail = false;
     pd.isRhsAvail = false;
     pd.isTidalDomain = false;
     
     pd.isHotstartInput = true;
-%     pd.hotstartInput = 'swe/channel_lin.mat';
+    pd.hotstartInput = 'sweInverse/squareCoarse.mat';
     pd.isHotstartOutput = false;
-%     pd.hotstartOutputFrequency = 1;
+    pd.hotstartOutputFrequency = 1000;
     
     pd.schemeOrder = 1;
     pd.isSlopeLim = false;
@@ -804,7 +417,7 @@ switch pd.name
     
     % Overwrite time-stepping parameters
     pd = setdefault(pd, 't0', 0); % Start time of simulation
-    pd = setdefault(pd, 'tEnd', 86400);  % end time
+    pd = setdefault(pd, 'tEnd', 4320);  % end time
     pd = setdefault(pd, 'dt', 0.1); % Time step size
     pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
     pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time
@@ -814,7 +427,7 @@ switch pd.name
     
     % Steady state simulation
     pd.isSteadyState = false;
-    pd.convergenceCriterion = 1.e-6;
+    pd.convergenceCriterion = 1.e-8;
     
     % Solution parameters
     pd.gConst = 9.81;
@@ -839,7 +452,7 @@ switch pd.name
     pd.isRivCont = false;
     
     pd.isFlowCont = true;
-    pd.uHFCont = @(x1,x2,t) (0.11*cos(pi*t/8640)^2 - 0.01)*(x1==x1);
+    pd.uHFCont = @(x1,x2,t) 4*cos(pi*t/8640)*(x1==x1);
     pd.vHFCont = @(x1,x2,t) 0*x1;
   case 'square'
     pd.isSolutionAvail = false;
@@ -847,9 +460,9 @@ switch pd.name
     pd.isTidalDomain = false;
     
     pd.isHotstartInput = true;
-%     pd.hotstartInput = 'swe/channel_lin.mat';
+    pd.hotstartInput = 'swe/channel_lin.mat';
     pd.isHotstartOutput = false;
-%     pd.hotstartOutputFrequency = 1;
+    pd.hotstartOutputFrequency = 1;
     
     pd.schemeOrder = 1;
     pd.isSlopeLim = false;
@@ -861,7 +474,7 @@ switch pd.name
     
     % Overwrite time-stepping parameters
     pd = setdefault(pd, 't0', 0); % Start time of simulation
-    pd = setdefault(pd, 'tEnd', 8640);  % end time
+    pd = setdefault(pd, 'tEnd', 4320);  % end time
     pd = setdefault(pd, 'dt', 0.05); % Time step size
     pd = setdefault(pd, 'numSteps', round((pd.tEnd - pd.t0) / pd.dt));
     pd = setdefault(pd, 'outputCount', 10); % Number of outputs over total simulation time

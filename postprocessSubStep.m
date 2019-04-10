@@ -82,23 +82,32 @@ for i = 1 : length(problemData.slopeLimList)
   end % switch
 end % for
 
+% Ensure water height doesn't fall below threshold
+problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.minTol, problemData.elevTol);
+
 if ~problemData.isSteadyState
 	hotstartData = readHotstart([problemData.elevationInput '_' num2str(nStep) '.mat']);
 	assert(isstruct(hotstartData) && isfield(hotstartData, 'cDisc') && isfield (hotstartData, 't'), 'Hotstart data does not contain cDisc or t');
-	problemData.xiDisc = addNoise(hotstartData.cDisc, problemData.noiseLvl);
+	problemData.xiDisc = hotstartData.cDisc;
 	validateattributes(problemData.xiDisc, {'numeric'}, {'size', [K N]}, mfilename, 'problemData.xiDisc');
 end % if
-
-% Compute change
+% Compute new bathymetry
 zbDisc = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.cDisc(:,:,1);
+% average vertex values to get continuous bathymetry
 [zbDisc, problemData.zbV] = applyVertexAveraging(problemData.g, zbDisc, problemData.averagingOperator, problemData.sysMinValueCorrection);
+% compute difference and update bathymetry ans well as total water height
 problemData.changeL2 = norm(problemData.zbDisc - zbDisc, 2);
 problemData.zbDisc = zbDisc;
+problemData.cDisc(:,:,1) = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.zbDisc;
 
-problemData.cDisc(:,:,1) = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc(:,:,1) - problemData.zbDisc;
-% Ensure water height doesn't fall below threshold
-problemData.cDisc(:,:,1) = correctMinValueExceedanceDisc(problemData.cDisc(:,:,1), problemData.sysMinValueCorrection, nStep, problemData.minTol, problemData.elevTol);
-problemData.zbDisc = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.cDisc(:,:,1); % TODO consistency in case of correction!
+if ~problemData.isSteadyState % apply noise
+  dataLagr = addNoise(projectDataDisc2DataLagr(problemData.cDisc(:,:,1)), problemData.noiseLvl);
+  % compute the coeffcients
+  hDisc = dataLagr / problemData.sysMinValueCorrection;
+  % compute the surface elevation
+  problemData.xiDisc = hDisc + problemData.zbDisc;
+  problemData.zbDisc = problemData.rampInput(problemData.t+problemData.dt) * problemData.xiDisc - problemData.cDisc(:,:,1);
+end % if
 
 problemData.isSubSteppingFinished = nSubStep >= length(problemData.tLvls);
 end % function

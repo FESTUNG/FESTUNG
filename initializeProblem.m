@@ -48,7 +48,6 @@ function pd = initializeProblem(pd)
 p = pd.p;
 K = pd.K;
 N = pd.N;
-% qOrd = max(2*pd.p,1);
 
 %% Initialize time stepping
 pd.isFinished = false;
@@ -75,26 +74,39 @@ elseif pd.isSolutionAvail
   vH0Cont = @(x1,x2) h0Cont(x1,x2) .* pd.vCont(x1,x2,pd.t0);
   
   pd.cDisc = zeros(K,N,3);
-  pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g,  H0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
+  pd.cDisc(:,:,1) = projectFuncCont2DataDisc(pd.g,  H0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad); % TODO consistency
   pd.cDisc(:,:,2) = projectFuncCont2DataDisc(pd.g, uH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
   pd.cDisc(:,:,3) = projectFuncCont2DataDisc(pd.g, vH0Cont, 2*p, pd.refElemPhiPhi, pd.basesOnQuad);
 else
-  pd.cDisc = zeros(K,N,3);
+  pd.cDisc = zeros(K,N,3); % TODO consistency
 end % if
-pd.zbDisc = setInitialDepth(pd);
-[pd.zbDisc, pd.zbV] = applyVertexAveraging(pd.g, pd.zbDisc, pd.averagingOperator, pd.sysMinValueCorrection);
-pd.xiDisc = addNoise(pd.cDisc(:,:,1) + pd.zbExact, pd.noiseLvl);
-pd.cDisc(:,:,1) = pd.rampInput(pd.t0) * pd.xiDisc(:,:,1) - pd.zbDisc;
+pd.xiDisc = pd.cDisc(:,:,1);
+pd.zbDisc = execin('sweInverse/setInitialDepth', pd);
+[~, pd.zbV] = applyVertexAveraging(pd.g, pd.zbDisc, pd.averagingOperator, pd.sysMinValueCorrection);
+pd.cDisc(:,:,1) =  pd.xiDisc - pd.zbDisc;
 % Ensure water height doesn't fall below threshold
 pd.cDisc(:,:,1) = correctMinValueExceedanceDisc(pd.cDisc(:,:,1), pd.sysMinValueCorrection, 0, pd.minTol, pd.elevTol);
-pd.zbDisc = pd.rampInput(pd.t0) * pd.xiDisc - pd.cDisc(:,:,1); % TODO consistency in case of correction!
+% apply noise
+dataLagr = addNoise(projectDataDisc2DataLagr(pd.cDisc(:,:,1)), pd.noiseLvl);
+% compute the coeffcients
+pd.cDisc(:,:,1) = dataLagr / pd.sysMinValueCorrection;
+% compute the surface elevation
+pd.xiDisc = pd.cDisc(:,:,1) + pd.zbDisc;
+% compute the bathymetry
+% pd.zbDisc = pd.rampInput(pd.t0) * pd.xiDisc - pd.cDisc(:,:,1); % TODO consistency in case of correction!
 
 if ~strcmp(pd.initType, 'exact')
   % sea
 %   pd.cDisc(:,:,2:3) = 0;
   % channel 
   pd.cDisc(:,:,2:3) = 0;
-  pd.cDisc(:,:,2) = 0.1 * pd.cDisc(:,:,1);
+  pd.cDisc(:,:,2) = 2 * pd.cDisc(:,:,1);
+  % general
+%   qOrd = max(2*pd.p,1);
+%   dataQ0T = (pd.cDisc(:,:,2) * pd.basesOnQuad.phi2D{qOrd}.') ./ ((pd.cDisc(:,:,1) - pd.zbExact) * pd.basesOnQuad.phi2D{qOrd}.') .* ((pd.cDisc(:,:,1) - pd.zbDisc) * pd.basesOnQuad.phi2D{qOrd}.');
+%   pd.cDisc(:,:,2) = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
+%   dataQ0T = (pd.cDisc(:,:,3) * pd.basesOnQuad.phi2D{qOrd}.') ./ ((pd.cDisc(:,:,1) - pd.zbExact) * pd.basesOnQuad.phi2D{qOrd}.') .* ((pd.cDisc(:,:,1) - pd.zbDisc) * pd.basesOnQuad.phi2D{qOrd}.');
+%   pd.cDisc(:,:,3) = projectDataQ0T2DataDisc(dataQ0T, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
 end % if
 
 % hQ0T = (pd.rampInput(pd.t0) * pd.xiDisc - pd.zbDisc) * pd.basesOnQuad.phi2D{qOrd}.';

@@ -77,7 +77,7 @@ switch pd.gridSource
     
   case 'hierarchical'
     X1 = [0 100 100 0]; X2 = [0 0 100 100];
-    pd.g = domainHierarchy(X1, X2, pd.hmax, pd.refinement);
+    pd.g = execin('sweInverse/domainHierarchy', X1, X2, pd.hmax, pd.refinement);
     
     % Set edge types
     pd.g.idE = zeros(pd.g.numE,1);
@@ -104,11 +104,11 @@ switch pd.gridSource
     
   case 'ADCIRC'
     projCenter = [pd.configADCIRC.SLAM0, pd.configADCIRC.SFEA0];
-    [ pd.g, pd.depth, forcingOS, flowRateRiv, flowRate ] = domainADCIRC(['swe_inverse/fort_' pd.name '.14'], ['swe_inverse/fort_' pd.name '.17'], ...
+    [ pd.g, pd.depth, forcingOS, flowRateRiv, flowRate ] = execin('sweInverse/domainADCIRC', ['configFiles/fort_' pd.name '.14'], ['configFiles/fort_' pd.name '.17'], ...
 																																								          pd.configADCIRC.NBFR, pd.isSpherical, projCenter);
     
     % Bathymetry
-    h = getFunctionHandle('swe_inverse/evaluateFuncFromVertexValues');
+    h = getFunctionHandle('sweInverse/evaluateFuncFromVertexValues');
     pd.zbCont = @(x1,x2) h(pd.g, -pd.depth, x1,x2);
     
     assert(max( max( abs(pd.depth(pd.g.V0T) + pd.zbCont(pd.g.coordV0T(:,:,1), pd.g.coordV0T(:,:,2))) ) ) < 1.e-5, ...
@@ -256,6 +256,7 @@ if pd.isVisGrid,  visualizeGrid(pd.g);  end % if
 pd = setdefault(pd, 'outputStart', pd.t0 * ones(1,4));
 pd = setdefault(pd, 'outputEnd', pd.tEnd * ones(1,4));
 pd = setdefault(pd, 'outputFrequency', max(floor(pd.numSteps / pd.outputCount), 1) * ones(1,4));
+
 pd.K = pd.g.numT; % number of triangles
 pd.N = nchoosek(pd.p + 2, pd.p); % number of local DOFs
 K = pd.K;
@@ -274,7 +275,7 @@ if ~isempty(pd.slopeLimList)
   pd.g.markV0TbdrD = pd.g.markV0TbdrRI | pd.g.markV0TbdrOS;
 end % if
 
-pd.g = computeDerivedGridData(pd.g);
+pd.g = execin('sweInverse/computeDerivedGridData', pd.g);
 
 qOrd1D = 2*pd.p+1; [~, W] = quadRule1D(qOrd1D); numQuad1D = length(W);
 pd.g.nuQ0E0T = cell(3,2);
@@ -330,31 +331,30 @@ pd.averagingOperator = bsxfun(@rdivide, pd.averagingOperator, sum(pd.averagingOp
 
 %% Computation of matrices on the reference triangle.
 pd.refElemPhiPhi = eye(N); %integrateRefElemPhiPhi(N, pd.basesOnQuad);
-refElemPhiPhiPhi = integrateRefElemPhiPhiPhi(N, pd.basesOnQuad);
+refElemPhiPhiPhi = execin('sweInverse/integrateRefElemPhiPhiPhi',N, pd.basesOnQuad);
 refElemDphiPhi = integrateRefElemDphiPhi(N, pd.basesOnQuad);
 
 refElemPhiLinPhiLin = integrateRefElemPhiPhi(3, basesOnQuadLin);
 
 if pd.p == 0
-  refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], basesOnQuadLin);
+  refElemPhiPhiPhiLin  = execin('sweInverse/integrateRefElemPhiPhiPhi',[N N 3], basesOnQuadLin);
 else
-  refElemPhiPhiPhiLin  = integrateRefElemPhiPhiPhi([N N 3], pd.basesOnQuad);
+  refElemPhiPhiPhiLin  = execin('sweInverse/integrateRefElemPhiPhiPhi',[N N 3], pd.basesOnQuad);
 end % if
 
 pd.refElemPhiPhiDphi = permute(integrateRefElemDphiPhiPhi(N, pd.basesOnQuad), [3 2 1 4]);
 pd.refElemDphiPhiPhi = integrateRefElemDphiPhiPhi(N, pd.basesOnQuad);
 pd.refEdgePhiIntPhiIntPhi = integrateRefEdgePhiIntPhiIntPhiInt(N, pd.basesOnQuad);
-pd.refEdgePhiIntPhiExtPhi = permute(integrateRefEdgePhiIntPhiIntPhiExt(N, pd.basesOnQuad), [1 3 2 4 5]);
+pd.refEdgePhiIntPhiExtPhi = permute(execin('sweInverse/integrateRefEdgePhiIntPhiIntPhiExt',N, pd.basesOnQuad), [1 3 2 4 5]);
 
 refEdgePhiIntPhiInt = integrateRefEdgePhiIntPhiInt(N, pd.basesOnQuad);
 refEdgePhiIntPhiExt = integrateRefEdgePhiIntPhiExt(N, pd.basesOnQuad);
 
-refElemDphiPerQuad = integrateRefElemDphiPerQuad(N, pd.basesOnQuad);
-refEdgePhiIntPerQuad = integrateRefEdgePhiIntPerQuad(N, pd.basesOnQuad);
+refElemDphiPerQuad = execin('sweInverse/integrateRefElemDphiPerQuad', N, pd.basesOnQuad);
+refEdgePhiIntPerQuad = execin('sweInverse/integrateRefEdgePhiIntPerQuad', N, pd.basesOnQuad);
 
 %% L2 projections of time-independent algebraic coefficients.
 fcDisc = projectFuncCont2DataDisc(pd.g, pd.fcCont, 2, refElemPhiLinPhiLin, basesOnQuadLin);
-% pd.zbDiscLin = projectFuncCont2DataDisc(pd.g, pd.zbCont, 3, refElemPhiLinPhiLin, basesOnQuadLin);
 
 % analytical solution
 pd.zbExact = projectFuncCont2DataDisc(pd.g, pd.zbCont, 2*pd.p, pd.refElemPhiPhi, pd.basesOnQuad);
@@ -390,17 +390,13 @@ if ismember('Coriolis', pd.outputList)
   varName = [ varName, {'Coriolis'} ];
   dataLagr = [ dataLagr, {projectDataDisc2DataLagr(fcDisc)} ];
 end % if
-% if ismember('bathymetry', pd.outputList)
-%   varName = [ varName, {'bathymetry'} ];
-%   dataLagr = [ dataLagr, {pd.zbLagr} ];
-% end % if
 if ~isempty(varName)
   visualizeDataLagr(pd.g, dataLagr, varName, ['output' filesep pd.name '_coef'], 0, pd.outputTypes);
 end % if
 
 %% Assembly of time-independent global matrices corresponding to linear contributions.
 % Element matrices
-globD = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhiLin, fcDisc);
+globD = execin('sweInverse/assembleMatElemPhiPhiFuncDisc', pd.g, refElemPhiPhiPhiLin, fcDisc);
 globH = assembleMatElemDphiPhi(pd.g, refElemDphiPhi);
 pd.globM = assembleMatElemPhiPhi(pd.g, pd.refElemPhiPhi);
 
@@ -425,28 +421,6 @@ pd.linearTerms = [ globQ{1} + globQOS{1} + globQRA{1} - globH{1}, globQ{2} + glo
                    sparse(K*N,K*N), -globD; ...
                    globD, sparse(K*N,K*N) ];
 
-if pd.isDiffusion
-  pd.globDiffusion = cell(2,1);
-  pd.globDiffusion{1} = blkdiag(globH{1} - globQ{1}, globH{1} - globQ{1}, globH{1} - globQ{1});
-  pd.globDiffusion{2} = blkdiag(globH{2} - globQ{2}, globH{2} - globQ{2}, globH{1} - globQ{1});
-  
-  globQL = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrL);
-  globQF = assembleMatEdgePhiIntPhiIntNu(pd.g, pd.g.markE0TbdrF, refEdgePhiIntPhiInt, pd.g.areaNuE0TbdrF);
-  
-  pd.globDiffusion2Mom = cell(2,1);
-  pd.globDiffusion2Mom{1} = kron(diag(pd.diffCoef), speye(K*N)) .* (pd.globDiffusion{1} - blkdiag(globQF{1}, globQF{1}, globQF{1}));
-  pd.globDiffusion2Mom{2} = kron(diag(pd.diffCoef), speye(K*N)) .* (pd.globDiffusion{2} - blkdiag(globQF{2}, globQF{2}, globQF{2}));
-  
-  pd.globDiffusion{1} = pd.globDiffusion{1} - blkdiag(globQL{1} + globQF{1}, globQL{1} + globQOS{1}, globQL{1} + globQOS{1});
-  pd.globDiffusion{2} = pd.globDiffusion{2} - blkdiag(globQL{2} + globQF{2}, globQL{2} + globQOS{2}, globQL{2} + globQOS{2});
-  
-  pd.rhsDiffusion = cell(3,1); pd.rhsDiffusion{1} = cell(2,1); pd.rhsDiffusion{2} = cell(2,1); pd.rhsDiffusion{3} = cell(2,1);
-  pd.rhsDiffusion{2}{1} = sparse(K*N,1); pd.rhsDiffusion{2}{2} = sparse(K*N,1);
-  pd.rhsDiffusion{3}{1} = sparse(K*N,1); pd.rhsDiffusion{3}{2} = sparse(K*N,1);
-end % if
-
-pd.penalty = pd.penaltyParam * assembleMatEdgePhiPhi(pd.g, pd.g.markE0Tint, refEdgePhiIntPhiInt, refEdgePhiIntPhiExt);
-
 % Slope limiting matrices
 if ~isempty(pd.slopeLimList)
   globMTaylor = assembleMatElemPhiTaylorPhiTaylor(pd.g, N);
@@ -456,11 +430,11 @@ end % if
 
 %% Assembly of time-independent global matrices corresponding to non-linear contributions.
 % Element matrices
-pd.globF = assembleMatElemDphiPerQuad(pd.g, refElemDphiPerQuad);
+pd.globF = execin('sweInverse/assembleMatElemDphiPerQuad',pd.g, refElemDphiPerQuad);
 
 % Edge matrices
-[pd.globRdiag, pd.globRoffdiag] = assembleMatEdgePhiNuPerQuad(pd.g, pd.g.markE0Tint, refEdgePhiIntPerQuad);
-pd.globV = assembleMatEdgePhiPerQuad(pd.g, refEdgePhiIntPerQuad);
+[pd.globRdiag, pd.globRoffdiag] = execin('sweInverse/assembleMatEdgePhiNuPerQuad',pd.g, pd.g.markE0Tint, refEdgePhiIntPerQuad);
+pd.globV = execin('sweInverse/assembleMatEdgePhiPerQuad',pd.g, refEdgePhiIntPerQuad);
 
 % Bottom-friction terms
 if pd.isBottomFrictionVarying
@@ -469,7 +443,7 @@ if pd.isBottomFrictionVarying
     refElemPhiPhiPerQuad = integrateRefElemPhiPhiPerQuad(N, pd.basesOnQuad);
     pd.globE = assembleMatElemPhiFuncDiscPerQuad(pd.g, refElemPhiPhiPerQuad, bottomFrictionDisc);
   else
-    pd.globE = assembleMatElemPhiPhiFuncDisc(pd.g, refElemPhiPhiPhi, bottomFrictionDisc);
+    pd.globE = execin('sweInverse/assembleMatElemPhiPhiFuncDisc',pd.g, refElemPhiPhiPhi, bottomFrictionDisc);
   end % if
 else
   if pd.isBottomFrictionNonlinear
@@ -481,7 +455,7 @@ else
     % determinants 2*|T| and the reference block - precisely the same
     % operation as for the assembly of a mass matrix. The corresponding
     % routine assembleMatElemPhiPhi is therefore re-used here.
-    refElemPhiPerQuad = integrateRefElemPhiPerQuad(N, pd.basesOnQuad);
+    refElemPhiPerQuad = execin('sweInverse/integrateRefElemPhiPerQuad',N, pd.basesOnQuad);
     pd.globE = pd.bottomFrictionCoef * assembleMatElemPhiPhi(pd.g, refElemPhiPerQuad);
   else
     pd.globE = pd.bottomFrictionCoef * pd.globM;
@@ -490,14 +464,14 @@ end % if
 
 % Boundary matrices
 if pd.g.numEbdrL > 0 % Land boundaries
-  pd.globRL = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrL);
+  pd.globRL = execin('sweInverse/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrL);
   if strcmp(pd.typeBdrL, 'riemann')
-      pd.globVL = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaE0TbdrL);
+      pd.globVL = execin('sweInverse/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrL, refEdgePhiIntPerQuad, pd.g.areaE0TbdrL);
   end % if
 end % if
 
 if pd.g.numEbdrRA > 0 % Radiation boundaries
-  globRRA = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRA);
+  globRRA = execin('sweInverse/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrRA, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRA);
   pd.globRdiag = cellfun(@plus, pd.globRdiag, globRRA, 'UniformOutput', false);
 end % if
 
@@ -590,10 +564,10 @@ if pd.g.numEbdrRI > 0 % River boundaries
     pd.zbV0T = computeFuncContV0T(pd.g, pd.zbCont);
   end % if
   
-  pd.globRRI = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
+  pd.globRRI = execin('sweInverse/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrRI);
   
   if pd.isRiemRiv
-    pd.globVRI = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaE0TbdrRI);
+    pd.globVRI = execin('sweInverse/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrRI, refEdgePhiIntPerQuad, pd.g.areaE0TbdrRI);
   end % if
   
   if ~pd.isRamp && ~pd.isRivCont && ~pd.isRiemRiv
@@ -661,9 +635,9 @@ if pd.g.numEbdrOS > 0 % Open sea boundaries
     pd.xiV0Tos = xiV(pd.g.V0T);
   end % if
   
-  pd.globROS = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrOS);
+  pd.globROS = execin('sweInverse/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrOS);
   if pd.isRiemOS
-    pd.globVOS = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaE0TbdrOS);
+    pd.globVOS = execin('sweInverse/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrOS, refEdgePhiIntPerQuad, pd.g.areaE0TbdrOS);
   end % if
 elseif any(ismember(pd.slopeLimList, 'elevation'))
   pd.xiV0Tos = sparse(K,3);
@@ -675,10 +649,10 @@ if pd.g.numEbdrF > 0 % Flow boundaries
     pd.vHFQ0E0T = kron(pd.vHFQ0E0T, ones(numQuad1D,1));
   end % if
   
-  pd.globRF = assembleMatEdgePhiIntNuPerQuad(pd.g, pd.g.markE0TbdrF, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrF);
+  pd.globRF = execin('sweInverse/assembleMatEdgePhiIntNuPerQuad',pd.g, pd.g.markE0TbdrF, refEdgePhiIntPerQuad, pd.g.areaNuE0TbdrF);
   
   if pd.isRiemFlow
-    pd.globVF = assembleMatEdgePhiIntPerQuad(pd.g, pd.g.markE0TbdrF, refEdgePhiIntPerQuad, pd.g.areaE0TbdrF);
+    pd.globVF = execin('sweInverse/assembleMatEdgePhiIntPerQuad',pd.g, pd.g.markE0TbdrF, refEdgePhiIntPerQuad, pd.g.areaE0TbdrF);
   end % if
 end % if
 
@@ -690,9 +664,9 @@ end %
 % Assemble Newtonian tide potential matrix
 if pd.isTidalDomain
   if pd.p == 0
-    refElemPhiPhiLeastLinPhiConst = integrateRefElemPhiPhiPhi([N 3 1], basesOnQuadLin);
+    refElemPhiPhiLeastLinPhiConst = execin('sweInverse/integrateRefElemPhiPhiPhi', [N 3 1], basesOnQuadLin);
   else
-    refElemPhiPhiLeastLinPhiConst = integrateRefElemPhiPhiPhi([N N 1], pd.basesOnQuad);
+    refElemPhiPhiLeastLinPhiConst = execin('sweInverse/integrateRefElemPhiPhiPhi', [N N 1], pd.basesOnQuad);
   end % if
   for n = 1 : size(pd.forcingTidal, 3)
     for i = 1 : 2
@@ -705,8 +679,9 @@ end % if
 
 %% Nudging preprocessing
 pd.observationVertices = ones(pd.g.numV,1);%round(rand(pd.g.numV,1)/100 + 0.491);
-refElemPhiPhiLagr = integrateRefElemPhiPhiLagr(N, pd.basesOnQuad);
+refElemPhiPhiLagr = execin('sweInverse/integrateRefElemPhiPhiLagr', N, pd.basesOnQuad);
 pd.matElemPhiPhiLagr = assembleMatElemPhiPhi(pd.g, refElemPhiPhiLagr);
+pd.nudgingTerm = sparse(K*N,1);
 
 %% Variable timestepping preparation.
 if pd.isAdaptiveTimestep
@@ -718,11 +693,11 @@ if pd.isAdaptiveTimestep
 end % if
 
 %% Function handles
-pd.visualizeSolution = getFunctionHandle('swe_inverse/visualizeSolution');
-pd.computeAveragedVariablesQ0E0Tint = getFunctionHandle('swe_inverse/computeAveragedVariablesQ0E0Tint');
-pd.computeAveragedVariablesQ0E0Tland = getFunctionHandle('swe_inverse/computeAveragedVariablesQ0E0Tland');
-pd.computeAveragedVariablesQ0E0Triv = getFunctionHandle('swe_inverse/computeAveragedVariablesQ0E0Triv');
-pd.computeAveragedVariablesQ0E0Tos = getFunctionHandle('swe_inverse/computeAveragedVariablesQ0E0Tos');
-pd.computeAveragedVariablesQ0E0Tflow = getFunctionHandle('swe_inverse/computeAveragedVariablesQ0E0Tflow');
-pd.computeLaxFriedrichsCoefficient = getFunctionHandle('swe_inverse/computeLaxFriedrichsCoefficient');
+pd.visualizeSolution = getFunctionHandle('sweInverse/visualizeSolution');
+pd.computeAveragedVariablesQ0E0Tint = getFunctionHandle('sweInverse/computeAveragedVariablesQ0E0Tint');
+pd.computeAveragedVariablesQ0E0Tland = getFunctionHandle('sweInverse/computeAveragedVariablesQ0E0Tland');
+pd.computeAveragedVariablesQ0E0Triv = getFunctionHandle('sweInverse/computeAveragedVariablesQ0E0Triv');
+pd.computeAveragedVariablesQ0E0Tos = getFunctionHandle('sweInverse/computeAveragedVariablesQ0E0Tos');
+pd.computeAveragedVariablesQ0E0Tflow = getFunctionHandle('sweInverse/computeAveragedVariablesQ0E0Tflow');
+pd.computeLaxFriedrichsCoefficient = getFunctionHandle('sweInverse/computeLaxFriedrichsCoefficient');
 end % function

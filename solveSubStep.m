@@ -59,25 +59,16 @@ K = pd.K;
 N = pd.N;
 dt = pd.dt;
 
-diffusionTerms = sparse(3*K*N,1);
-if pd.isDiffusion
-  for m = 1:2
-    q = pd.sysW \ ( pd.globDiffusion{m} * pd.cDiscRK - [pd.rhsDiffusion{1}{m}; pd.rhsDiffusion{2}{m}; pd.rhsDiffusion{3}{m}] );
-    diffusionTerms = diffusionTerms - pd.globDiffusion2Mom{m} * q;
-  end % for
-end % if
-
 % Build right hand side vector
 sysV = cell2mat(pd.globL) - cell2mat(pd.globLRI) - cell2mat(pd.globLF) - ...
-       [ -pd.nudgingTerm + pd.penalty * reshape(pd.zbDisc.', N*K, 1); pd.nonlinearTerms + pd.bottomFrictionTerms ] ... 
-       - pd.riemannTerms - diffusionTerms;
-
-sysA = pd.gravityTerm - [pd.tidalTerms{1}; pd.tidalTerms{2}];
+       [ -pd.nudgingTerm; pd.nonlinearTerms + pd.gravityTerm + pd.bottomFrictionTerms] - ... 
+       pd.riemannTerms;
 
 % Compute solution at next time step using explicit or semi-implicit scheme
 switch pd.schemeType
   case 'explicit'
-    cDiscDot = pd.sysW \ (sysV - [ [sparse(K*N,K*N); sysA], pd.linearTerms ] * pd.cDiscRK);
+    sysA = sparse(3*K*N,K*N);
+    cDiscDot = pd.sysW \ (sysV - [sysA, pd.linearTerms] * pd.cDiscRK);
     
     % Apply slope limiting to time derivative
     for i = 1 : length(pd.slopeLimList)
@@ -106,7 +97,8 @@ switch pd.schemeType
 
   case 'semi-implicit'
     sysA = [ sparse(K*N,3*K*N); pd.tidalTerms{1}, sparse(K*N,2*K*N); pd.tidalTerms{2}, sparse(K*N,2*K*N) ];
-    pd.cDiscRK = (pd.sysW + dt * (pd.linearTerms + sysA)) \ (pd.sysW * pd.cDiscRK + dt * sysV);
+    pd.cDiscRK = (pd.sysW + dt * (pd.linearTerms - sysA)) \ (pd.sysW * pd.cDiscRK + dt * sysV);
+
   otherwise
     error('Invalid time-stepping scheme')
 end % switch
