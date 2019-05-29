@@ -65,7 +65,7 @@ switch problemName
     hotstartFile = ['swe_2dv' filesep 'showcase_p1_50x10.mat'];
     
     domainWidth = 100;
-    idLand = -1; idRad = -1; idRiv = 4; idOS = 2; idBdrRiem = [2,4];
+    idLand = -1; idRad = -1; idRiv = 4; idOS = 2; idBdrRiem = [4, 2];
     
     gConst = 10;
     CfConst = 4.e-3;
@@ -278,7 +278,7 @@ if ~isequal([exist('idBdrU', 'var'), exist('idBdrH', 'var'), exist('idBdrQ', 'va
   assert(~any(intersect(idRiv(:), idOS(:)) > 0), 'River and Open Sea on same boundary specified.')
   fprintf('Converting physical to numerical boundary conditions.\n')
   idBdrU = sort([idLand, idRiv]);
-  idBdrH = sort([idRiv, idOS]);
+  idBdrH = sort(idOS);
   idBdrQ = sort([idRad, idOS]);
 end % if
 

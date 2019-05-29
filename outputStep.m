@@ -111,4 +111,29 @@ if mod(nStep-1, problemData.outputFrequency) == 0
   end % if
   fprintf('%3.0f %% done\n', nStep / problemData.numSteps * 100);
 end % if
+
+%% Norms for stability estimate
+% if mod(nStep-1, 100) == 0
+%   K = problemData.g.numT;
+%   [Q, W] = quadRule1D(problemData.qOrd); numQuad1D = length(Q);
+  
+%   xiDisc = reshape((problemData.cDiscRK{1, 1} + problemData.zBotDisc).', [], 1);
+%   normXi = xiDisc.' * (problemData.globBarM * xiDisc);
+  
+%   uDisc = reshape(problemData.cDiscRK{1, 2}.', [], 1);
+%   normU = uDisc.' * (problemData.globM * uDisc);
+  
+%   u1Q0E0Tint = reshape(problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, 3) * bsxfun( ...
+%                       @times, problemData.g.markE0Tint(:, 3), problemData.cDiscRK{1, 2}).', ...
+%                   K * numQuad1D, 1);
+%   cDiscThetaPhi = problemData.basesOnQuad2D.phi1D{problemData.qOrd}(:, :, mapLocalEdgeIndexQuadri(3)) * problemData.cDiscRK{1, 2}.';
+%   u1Q0E0TE0T = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{3}.', K * numQuad1D, 1);
+%   u1JmpQ0E0T = u1Q0E0Tint - u1Q0E0TE0T;
+%   normJumpU = sum(problemData.g.areaE0T{3} .* (reshape((u1JmpQ0E0T.^2), numQuad1D, K).' * W(:)));
+  
+%   filename = [problemData.outputBasename '_norms.dat'];
+%   norm_file = fopen(filename, 'at');
+%   fprintf(norm_file, '  %16.10e  %16.10e  %16.10e  %16.10e  %16.10e  %16.10e\n', problemData.t(1), normXi, normU, problemData.normQ(1), problemData.normQ(2), normJumpU);
+%   fclose(norm_file);
+% end % if
 end % function

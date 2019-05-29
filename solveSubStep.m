@@ -81,6 +81,10 @@ for m = 1 : 2
   end % if
 end % for m
 
+% if nSubStep == 1
+%   problemData.normQ = [qSys{1}.' * (problemData.globM * qSys{1}), qSys{2}.' * (problemData.globM * qSys{2})];
+% end % if
+
 % Vertical velocity
 cSys{3} = problemData.globHQup \ (problemData.globJu{1} + problemData.globJu{2} + problemData.globVeeJu + problemData.globVeeJh + ...
                                    0.5 * (problemData.globVeeJuRiem + problemData.globVeeJhRiem + problemData.globJuhRiem) + ...

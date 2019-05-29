@@ -69,7 +69,6 @@ if problemData.isHotstart
 else
   problemData.cDiscRK{end, 1} = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.h0Cont, problemData.qOrd, problemData.hatBarM, problemData.basesOnQuad1D);
 end % if
-
 %% Mesh adaptivity and assembly of time-independent global matrices.
 problemData = problemData.fn_adaptFreeSurface(problemData, true);
 
@@ -95,6 +94,13 @@ end % if
 if all(isfield(problemData, { 'hCont', 'u1Cont', 'u2Cont' }))
   problemData.pdExact = problemData;
 end % if
+
+%% Preparation for computation of norms
+% problemData.zBotDisc = projectFuncCont2DataDisc1D(problemData.g.g1D, problemData.zBotCont, problemData.qOrd, problemData.hatBarM, problemData.basesOnQuad1D);
+% filename = [problemData.outputBasename '_norms.dat'];
+% norm_file = fopen(filename, 'wt');
+% fprintf(norm_file, '# t                 |Xi|^2_L2         |U|^2_L2          |Q1|^2_L2         |Q2|^2_L2         1/dx*|JmpU|^2_lat\n');
+% fclose(norm_file);
 
 %% Initial error computation.
 if problemData.isVisGrid, visualizeGridQuadri(problemData.g); end
