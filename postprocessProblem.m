@@ -66,6 +66,35 @@ if all(isfield(problemData, { 'hCont', 'q1Cont', 'q2Cont' }))
   fprintf('L2 errors of h, q1, q2 w.r.t. the analytical solution: %g, %g, %g\n', problemData.error);
 end % if
 
+%% Norms for stability estimate
+% [Q, W] = quadRule1D(problemData.qOrd); numQuad1D = length(Q);
+
+% hDisc = problemData.sysY(2*K*N+1 : 3*K*N);
+% normH = hDisc.' * (problemData.globM * hDisc);
+
+% q1Disc = problemData.sysY(1 : K*N);
+% normQ1 = q1Disc.' * (problemData.globM * q1Disc);
+
+% q2Disc = problemData.sysY(K*N+1 : 2*K*N);
+% normQ2 = q2Disc.' * (problemData.globM * q2Disc);
+
+% normJumpH = 0;
+% hDisc = reshape(hDisc, N, K)';
+% for n = 2 : 3
+%   hQ0E0Tint = reshape(problemData.basesOnQuad.phi1D{problemData.qOrd}(:, :, n) * bsxfun( ...
+%                       @times, problemData.g.markE0Tint(:, n), hDisc).', ...
+%                   K * numQuad1D, 1);
+%   cDiscThetaPhi = problemData.basesOnQuad.phi1D{problemData.qOrd}(:, :, mapLocalEdgeIndexQuadri(3)) * hDisc.';
+%   hQ0E0TE0T = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{n}.', K * numQuad1D, 1);
+%   hJmpQ0E0T = hQ0E0Tint - hQ0E0TE0T;
+%   normJumpH = sum(reshape((hJmpQ0E0T.^2), numQuad1D, K).' * W(:));
+% end
+
+% filename = [problemData.outputBasename '_norms.dat'];
+% norm_file = fopen(filename, 'at');
+% fprintf(norm_file, '  %16.10e  %16.10e  %16.10e  %16.10e  %16.10e\n', problemData.tEnd, normH, normQ1, normQ2, normJumpH);
+% fclose(norm_file);
+
 %% Save final state.
 t = problemData.tEnd;
 hotstartFile = [ problemData.outputBasename '.mat' ];

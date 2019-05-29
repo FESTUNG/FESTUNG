@@ -131,7 +131,7 @@ switch problemData.testcase
     hotstartFile = ['darcy_2dv' filesep 'showcase_p0_50x10.mat'];
     
     % width and height of computational domain
-    zPMCont = @(x) -4 * ones(size(x));
+    zPMCont = @(x) -20 * ones(size(x));
     zBotCont = @(x) (cos((x-50)/30 * pi) + 1) .* (20 <= x & x <= 80);
 
     domainWidth = linspace(0, 100, problemData.numElem(1)+1);

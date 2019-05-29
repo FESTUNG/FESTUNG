@@ -121,4 +121,34 @@ if problemData.isVisSol
   visualizeDataLagrQuadri(problemData.g, cLagr, {'h', 'q1', 'q2'}, problemData.outputBasename, 0, problemData.outputTypes, struct('q', {{'q1','q2'}}));
 end % if
 
+%% Preparation for computation of norms
+% filename = [problemData.outputBasename '_norms.dat'];
+% norm_file = fopen(filename, 'wt');
+% fprintf(norm_file, '# t                 |H|^2_L2          |Q1|^2_L2         |Q2|^2_L2         1/dx*|JmpH|^2_int\n');
+
+% [Q, W] = quadRule1D(problemData.qOrd); numQuad1D = length(Q);
+
+% hDisc = problemData.sysY(2*K*N+1 : 3*K*N);
+% normH = hDisc.' * (problemData.globM * hDisc);
+
+% q1Disc = problemData.sysY(1 : K*N);
+% normQ1 = q1Disc.' * (problemData.globM * q1Disc);
+
+% q2Disc = problemData.sysY(K*N+1 : 2*K*N);
+% normQ2 = q2Disc.' * (problemData.globM * q2Disc);
+
+% normJumpH = 0;
+% hDisc = reshape(hDisc, N, K)';
+% for n = 2 : 3
+%   hQ0E0Tint = reshape(problemData.basesOnQuad.phi1D{problemData.qOrd}(:, :, n) * bsxfun( ...
+%                       @times, problemData.g.markE0Tint(:, n), hDisc).', ...
+%                   K * numQuad1D, 1);
+%   cDiscThetaPhi = problemData.basesOnQuad.phi1D{problemData.qOrd}(:, :, mapLocalEdgeIndexQuadri(3)) * hDisc.';
+%   hQ0E0TE0T = reshape(cDiscThetaPhi * problemData.g.markE0TE0T{n}.', K * numQuad1D, 1);
+%   hJmpQ0E0T = hQ0E0Tint - hQ0E0TE0T;
+%   normJumpH = sum(reshape((hJmpQ0E0T.^2), numQuad1D, K).' * W(:));
+% end
+
+% fprintf(norm_file, '  %16.10e  %16.10e  %16.10e  %16.10e  %16.10e\n', 0, normH, normQ1, normQ2, normJumpH);
+% fclose(norm_file);
 end % function
