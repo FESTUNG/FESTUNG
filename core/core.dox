@@ -1,0 +1,8 @@
+/*!
+ * \dir ./core/
+ *
+ * \brief This is the core library with a large number of useful functions that
+ *        are employed by the problem implementations.
+ */
+
+
