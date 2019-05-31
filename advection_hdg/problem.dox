@@ -1,0 +1,33 @@
+/*!
+ * \dir ./advection_hdg/
+ *
+ * \brief This is an implementation of linear advection using a hybridized
+ *        DG discretization and implicit DIRK time integration.
+ *
+ * 
+ * Let @f$J = (0,t_\mathrm{end})@f$ be a finite time interval and @f$\Omega 
+ * \subset \mathbb{R}^2@f$ a polygonally bounded domain with boundary 
+ * @f$\partial\Omega@f$. We seek approximate solutions
+ * @f$c:\overline{J}\times\overline{\Omega}\rightarrow\mathbb{R}@f$ to
+ * the advection equation
+ * @f{align*}{
+ * \partial_t c  + \nabla\cdot (\mathbf{u}\,c) &\;=\; f            &&\text{in}~J\times\Omega\,,\\
+ * c                                           &\;=\; c_\mathrm{D} &&\text{on}~J\times{\partial\Omega}_{\mathrm{in}}\,,\\
+ * c                                           &\;=\; c^0          &&\text{on}~\{0\}\times\Omega\,.
+ * @f}
+ * The velocity @f$\mathbf{u}:J\times\Omega\rightarrow\mathbb{R}^2@f$ and 
+ * right hand side@f$f:J\times\Omega\rightarrow \mathbb{R}@f$
+ * may vary in time and space. 
+ * 
+ * The implementation uses hierarchical polynomial bases up to fourth order and
+ * diaogonally implicit Runge-Kutta (DIRK) methods for time-integration
+ * up to order four.
+ * Static condensation is applied to the resulting linear system to enhance
+ * computational performance.
+ * 
+ * See @link ./advection_hdg/configureProblem.m @endlink for available configuration options.
+ * 
+ * A detailed description can be found in @ref JRASK2018.
+ */
+
+
