@@ -1,0 +1,32 @@
+/*!
+ * \dir ./template/
+ *
+ * \brief This is a template for implementing a model in the generic problem
+ *        implementation framework of FESTUNG.
+ *
+ * Before starting a new problem implementation make yourself familiar with
+ * the solver structure.
+ * 
+ * To implement your own model in the FESTUNG framework, simply create copies of
+ * the following files in a new folder:
+ *   - template/configureProblem.m
+ *   - template/preprocessProblem.m
+ *   - template/initializeProblem.m
+ *   - template/preprocessStep.m
+ *   - template/solveStep.m
+ *   - template/postprocessStep.m
+ *   - template/outputStep.m
+ *   - template/postprocessProblem.m
+ *   
+ * If you are using some kind of substepping (e.g., a Newton's method, 
+ * multi-stage Runge-Kutta schemes or similar), you might also find the 
+ * following files useful:
+ *   - template/preprocessSubStep.m
+ *   - template/solveSubStep.m
+ *   - template/postprocessSubStep.m
+ *   
+ * An introduction to the generic problem framework and how to use it to
+ * implement coupled problems is given in @ref RRAFK2018.
+ */
+
+
