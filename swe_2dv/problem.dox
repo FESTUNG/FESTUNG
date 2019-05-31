@@ -1,0 +1,97 @@
+/*!
+ * \dir ./swe_2dv
+ *
+ * \brief This is an implementation of the primitive hydrostatic equations in a 
+ *        vertical slice (2Dv shallow water equations) using a local DG 
+ *        discretization and explicit SSP-Runge Kutta time integration. It can
+ *        be coupled to subsurface flows using problem darcy_swe_2dv.
+ *
+ * 
+ * Let @f$J = (0,t_\mathrm{end})@f$ be a finite time interval and @f$\Omega(t) 
+ * \subset \mathbb{R}^2@f$ a polygonally bounded domain with boundary 
+ * @f$\partial\Omega(t)@f$.
+ * The boundary of the free-flow domain @f$\partial\Omega(t)@f$ is assumed to 
+ * consist of top @f$\partial\Omega_\mathrm{top}(t)@f$, 
+ * bottom @f$\partial\Omega_\mathrm{bot}@f$, and lateral sections with the latter
+ * subdivided into land @f$\partial\Omega_\mathrm{land}(t)@f$, 
+ * open sea @f$\partial\Omega_\mathrm{os}(t)@f$, 
+ * river @f$\partial\Omega_\mathrm{riv}(t)@f$, and 
+ * radiation @f$\partial\Omega_\mathrm{rad}(t)@f$ parts. 
+ * All boundaries except @f$\partial\Omega_\mathrm{bot}@f$ are regarded as 
+ * time-dependent, but, for brevity, the time variable is omitted in the following.
+ * 
+ * Let @f$\mathcal{T}_{\Delta}@f$ be a regular family of non-overlapping partitions 
+ * of @f$\Omega(t)@f$ into @f$K@f$ closed elements @f$T@f$ such that @f$\Omega=\cup T@f$.
+ * Denoting by @f$\Pi@f$ the standard orthogonal projection operator onto the 
+ * @f$x^1@f$-axis, this geometry and arrangement of mesh elements produces a 
+ * non-overlapping partition of @f$\Pi \Omega@f$ denoted by @f$\Pi \mathcal{T}_{\Delta}@f$ 
+ * by simply projecting elements of @f$\mathcal{T}_{\Delta}@f$.
+ * 
+ * Then the 2Dv shallow water equations for velocity 
+ * @f$\vec{u}(t,\vec{x}) = [u^1, u^2]^\mathrm{T}@f$ and total water height 
+ * @f$h(t, x^1) = \xi(t, x^1) - \zeta_\mathrm{b}(x^1)@f$ are given as
+ * @f{align*}{
+ * &\partial_t h(t, x^1) + \partial_{x^1} \bigg( 
+ *  \int_{\zeta_\mathrm{b}(x^1)}^{\xi (t, x^1)} u^1(t, \vec{x})  \mathrm{d} x^2 \bigg) = 0 
+ *  &&\text{in } J\times \Pi \Omega \;, \\
+ * &\partial_t u^1(t, \vec{x}) + \nabla \cdot \left( u^1(t, \vec{x})  
+ *  \vec{u}(t, \vec{x}) \right) + g\partial_{x^1} h(t, \vec{x})  - 
+ *  \nabla \cdot \left( \mathsf{D}(t,\vec{x})  \nabla u^1(t, \vec{x}) \right) 
+ *  = f(t, \vec{x}) - g  \partial_{x^1} \zeta_\mathrm{b} (t, x^1) 
+ *  &&\text{in } J\times\Omega(t) \;, \\
+ * &\nabla \cdot \vec{u}(t, \vec{x}) = 0 &&\text{in } J\times\Omega(t) \;,
+ * @f}
+ * where @f$g@f$ denotes the acceleration due to gravity, @f$f@f$ is a source term,
+ * @f$\xi@f$ and @f$\zeta_\mathrm{b}@f$ are the free surface elevation and the 
+ * bathymetry with respect to some datum, respectively, and @f$\mathsf{D}@f$ 
+ * is a diffusion tensor.
+ * 
+ * The following boundary and initial conditions are specified:
+ * @f{align*}{
+ * u^1(t,\vec{x}) &\;=\; u^1_\mathrm{D}(t,\vec{x}) 
+ *  &&\text{on } J\times  ( \partial\Omega_\mathrm{land} \cup 
+ *  \partial\Omega_\mathrm{riv} \cup \partial\Omega_\mathrm{bot} ),\\
+ * u^2(t,\vec{x}) &\;=\; u^2_\mathrm{D}(t,\vec{x}) 
+ *  &&\text{on } J\times\partial\Omega_\mathrm{bot},\\
+ * - \mathsf{D}(t,\vec{x}) \nabla u^1(t,\vec{x})\cdot\vec{\nu} 
+ *  &\;=\; q_\mathrm{D}(t,\vec{x}) &&\text{on } J\times ( \partial\Omega_\mathrm{top}
+ *   \cup \partial\Omega_\mathrm{os} \cup \partial\Omega_\mathrm{rad}  ),\\
+ * h(t,x^1) &\;=\; h_\mathrm{D}(t,x^1) &&\text{on } J\times\Pi (\partial\Omega_\mathrm{os}
+ *  \cup \partial\Omega_\mathrm{riv}  ),\\
+ * u^1(0,\vec{x}) &\;=\; u^1_0 (\vec{x}) &&\text{in } \Omega(0),\\
+ * h(0,x^1) &\;=\; h_0 (x^1) &&\text{in } \Pi \Omega.
+ * @f}
+ * 
+ * The implementation uses tensor product polynomial bases up to fourth order on
+ * trapezoidal elements and explicit SSP-Runge Kutta method up to third order
+ * for time integration.
+ * 
+ * To summarize the different types of boundary conditions, note the following:
+ * 
+ * - Bottom boundary @f$\partial\Omega_\mathrm{bot}@f$: no-slip 
+ *   (@f$\vec{u}\cdot\vec{\tau} = 0@f$ with tangential vector @f$\vec{\tau}@f$) and 
+ *   prescribed normal flow @f$\vec{u}\cdot\vec{\nu}@f$, which translates to 
+ *   @f$u^1_\mathrm{D} = u^2_\mathrm{D} = 0@f$;
+ * - free surface @f$\partial\Omega_\mathrm{top}@f$ and radiation boundary 
+ *   @f$\partial\Omega_\mathrm{rad}@f$: vanishing normal derivative of the flow, 
+ *   i.e., @f$q_\mathrm{D} = 0@f$;
+ * - land boundary @f$\partial\Omega_\mathrm{land}@f$: no normal flow resulting in 
+ *   @f$u^1_\mathrm{D} = 0@f$ due to the strictly vertical boundary;
+ * - open sea boundary @f$\partial\Omega_\mathrm{os}@f$: prescribed water height 
+ *   @f$h_\mathrm{os}@f$ (e.g., due to tidal forcing), i.e., 
+ *   @f$h_\mathrm{D} = h_\mathrm{os}@f$ and vanishing normal derivative of the flow, 
+ *   @f$q_\mathrm{D} = 0@f$;
+ * - river boundary @f$\partial\Omega_\mathrm{riv}@f$: prescribed horizontal 
+ *   velocity @f$u^1_\mathrm{D} = u^1_\mathrm{riv}@f$ and water height 
+ *   @f$h_\mathrm{D} = h_\mathrm{riv}@f$.
+ *   
+ * Note that different types of boundaries should be pieced together in a 
+ * compatible manner in order to ensure well-posedness of the 
+ * initial-boundary-value problem.
+
+ * See @link ./swe_2dv/configureProblem.m @endlink for available configuration options.
+ * 
+ * A detailed description can be found in @ref RRAFK2018.
+ */
+
+
