@@ -9,10 +9,10 @@ Have a look at our [gallery](doxygen/gallery.md) for example applications that u
 ![](doxygen/images/features.png)
 
 ## Get it
-* The latest published version can always be downloaded from the [GitHub repository](https://github.com/FESTUNG/project).
+* The latest published version can always be downloaded from the [GitHub repository](https://github.com/FESTUNG/FESTUNG).
 To check out the latest version, run 
 ```bash
-git clone --recursive https://github.com/FESTUNG/project.git
+git clone https://github.com/FESTUNG/FESTUNG.git
 ```
 
 * Tarballs of previous code versions and further information about the project can be found on our [Project page](https://math.fau.de/FESTUNG).
@@ -53,17 +53,17 @@ The main developers of FESTUNG are [Florian Frank](http://frank.ink), [Balthasar
 
 ### Third party libraries
 * FESTUNG makes extensive use of the built-in routines in MATLAB / GNU Octave.
-* [triquad](https://github.com/FESTUNG/project/blob/master/triquad.m) was written by Greg von Winckel. See [triquad.txt](https://github.com/FESTUNG/project/blob/master/triquad.txt) for license details.
-* [m2cpp.pl](https://github.com/FESTUNG/project/blob/master/thirdParty/doxygenMatlab/m2cpp.pl) by Fabrice to generate a [Doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation. See [license.txt](https://github.com/FESTUNG/project/blob/master/thirdParty/doxygenMatlab/license.txt) for license details.
+* [triquad](https://github.com/FESTUNG/FESTUNG/blob/master/triquad.m) was written by Greg von Winckel. See [triquad.txt](https://github.com/FESTUNG/FESTUNG/blob/master/triquad.txt) for license details.
+* [m2cpp.pl](https://github.com/FESTUNG/FESTUNG/blob/master/thirdParty/doxygenMatlab/m2cpp.pl) by Fabrice to generate a [Doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation. See [license.txt](https://github.com/FESTUNG/FESTUNG/blob/master/thirdParty/doxygenMatlab/license.txt) for license details.
 
 ## License 
 FESTUNG is published under GPLv3, see [License](license.md) file.
 
 ## Version 
-* Version 0.1 as published in the paper *Frank, Reuter, Aizinger, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part I: Diffusion operator". *In: Computers & Mathematics with Applications 70 (2015) 11-46, Available online 15 May 2015, ISSN 0898-1221, http://dx.doi.org/10.1016/j.camwa.2015.04.013.*
-* Version 0.2 as published in the paper *Reuter, Aizinger, Wieland, Frank, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part II: Advection operator and slope limiting". *In: Computers & Mathematics with Applications 72 (2016) 1896-1925, Available online 25 August 2016, ISSN 0898-1221, http://dx.doi.org/doi:10.1016/j.camwa.2016.08.006.*
-* Version 0.3 as published in the paper *Jaust, Reuter, Aizinger, Schuetz, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part III: Hybridized discontinuous Galerkin (HDG) formulation". *In: Computers & Mathematics with Applications (2018) in press, Available online 2 May 2018, ISSN 0898-1221, https://doi.org/10.1016/j.camwa.2018.03.045.*
-* Version 0.4 as published in the paper *Reuter, Rupp, Aizinger, Frank, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part IV: Generic problem framework and model-coupling interface". *Submitted to Computers & Mathematics with Applications (2018).*
+* Version 0.1 as published in the paper *Frank, Reuter, Aizinger, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part I: Diffusion operator". *In: Computers & Mathematics with Applications 70 (2015) 11-46, Available online 15 May 2015, ISSN 0898-1221, https://doi.org/10.1016/j.camwa.2015.04.013 .*
+* Version 0.2 as published in the paper *Reuter, Aizinger, Wieland, Frank, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part II: Advection operator and slope limiting". *In: Computers & Mathematics with Applications 72 (2016) 1896-1925, Available online 25 August 2016, ISSN 0898-1221, https://doi.org/10.1016/j.camwa.2016.08.006 .*
+* Version 0.3 as published in the paper *Jaust, Reuter, Aizinger, Schuetz, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part III: Hybridized discontinuous Galerkin (HDG) formulation". *In: Computers & Mathematics with Applications 75.12 (2018) 4505-4533, Available online 2 May 2018, ISSN 0898-1221, https://doi.org/10.1016/j.camwa.2018.03.045 .*
+* Version 0.4 as published in the preprint *Reuter, Rupp, Aizinger, Frank, Knabner:* "FESTUNG: A MATLAB / GNU Octave toolbox for the discontinuous Galerkin method. Part IV: Generic problem framework and model-coupling interface". *https://arxiv.org/abs/1806.03908 .*
 
 ## Contact
 Homepage: [https://math.fau.de/FESTUNG](https://math.fau.de/FESTUNG)

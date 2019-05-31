@@ -8,13 +8,13 @@
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous Galerkin 
 //! method, Part IV: Generic problem framework and model-coupling 
 //! interface&rdquo;</b>,<br>
-//! Submitted to Computers & Mathematics with Applications (2018).
+//! Preprint, available at [arXiv:1806.03908](https://arxiv.org/abs/1806.03908) (2018).
 //!
 //! @subsection JRASK2018 [JRASK2018]
 //! A. Jaust, B. Reuter, V. Aizinger, J. Schütz, P. Knabner,<br>
 //! <b>&ldquo;FESTUNG: A MATLAB/GNU Octave toolbox for the discontinuous 
 //! Galerkin method, Part III: Hybridized discontinuous (HDG) formulation&rdquo;</b>,<br>
-//! Computers & Mathematics with Applications (2018) <i>in press</i>.<br>
+//! Computers & Mathematics with Applications 75.12 (2018) 4505-4533.<br>
 //! [<code>doi:10.1016/j.camwa.2018.03.045</code>](https://doi.org/10.1016/j.camwa.2018.03.045).
 //!
 //! @subsection RAWFK2016 [RAWFK2016]
@@ -32,6 +32,12 @@
 //! [<code>doi:10.1016/j.camwa.2015.04.013</code>](https://doi.org/10.1016/j.camwa.2015.04.013).
 //!
 //! @section TAG_REF_2 Articles using FESTUNG
+//!
+//! @subsection RRAK2019 [RRAK2019]
+//! B. Reuter, A. Rupp, V. Aizinger, P.Knabner,<br>
+//! <b>&ldquo;Discontinuous Galerkin method for coupling hydrostatic free surface flows to saturated subsurface systems&rdquo;</b>,\.<br>
+//! Computers & Mathematics with Applications 77.9 (2018) 2291-2309.<br>
+//! [<code>doi:10.1016/j.camwa.2018.12.020</code>](https://doi.org/10.1016/j.camwa.2018.12.020).
 //!
 //! @subsection HHAR2018 [HHAR2018]
 //! H. Hajduk, B.R. Hodges, V. Aizinger, B. Reuter,<br>
@@ -64,6 +70,12 @@
 //! <b>&ldquo;An encyclopaedia of cubature formulas&rdquo;</b>,<br>
 //! Journal of Complexity 19 (3) (2003) 445-453.<br>
 //! [<code>doi:10.1016/S0885-064X(03)00011-6</code>](https://doi.org/10.1016/S0885-064X(03)00011-6).
+//! 
+//! @subsection ROE1985 [ROE1985]
+//! J. Pike, P.L. Roe,<br>
+//! <b>&ldquo;Accelerated convergence of Jameson's finite-volume Euler scheme using van der Houwen integrators&rdquo;</b>,<br>
+//! Computers & Fluids 13.2 (1985) 223-236.<br>
+//! [<code>doi:10.1016/0045-7930(85)90027-1</code>](https://doi.org/10.1016/0045-7930(85)90027-1).
 //!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
