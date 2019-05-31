@@ -1,0 +1,29 @@
+/*!
+ * \dir darcy_swe_2dv
+ *
+ * \brief This is an implementation of the time-dependent Darcy equation coupled to
+ *        the primitive hydrostatic equations.
+ *
+ * 
+ * For a description of the individual models, see @link darcy_2dv @endlink and
+ * @link swe_2dv @endlink.
+ * 
+ * The coupling conditions at the interface boundary impose the continuity of 
+ * the normal flux and the continuity of the dynamic pressure / head @f$\tilde{h}@f$:
+ * @f{align*}{ 
+ *  {\frac{1}{S_0}} \vec{u}(t,\vec{x}) \cdot \vec{\nu} & \; = \; 
+ *    \mathsf{\widetilde D}(t,\vec{x}) \, \nabla \tilde{h}(t,\vec{x}) \cdot \tilde{\vec{\nu}}
+ *     & & \mathrm{on}~J \times \Gamma_\mathrm{int} \,, \\
+ *  \tilde{h}(t,\vec{x}) & \; = \; \xi(t,x^1) + {\frac{1}{2\,g}} 
+ *    \left( u^{1} \right)^2 & & \mathrm{on}~J \times \Gamma_\mathrm{int} \,,
+ * @f}
+ * where @f$\vec{\nu}@f$ and @f$\tilde{\vec{\nu}}@f$ denote the outward unit 
+ * normals on @f$\Gamma_\mathrm{int}@f$ with respect to free flow domain 
+ * @f$\Omega(t)@f$ and subsurface domain @f$\tilde{\Omega}@f$, correspondingly.
+ * 
+ * See @link ./darcy_swe_2dv/configureProblem.m @endlink for available configuration options.
+ * 
+ * A detailed description can be found in @ref RRAFK2018.
+ */
+
+
