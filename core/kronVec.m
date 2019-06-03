@@ -50,21 +50,14 @@
 %>       the same or a multiple of the number of rows of the first operand
 %>       @f$A@f$.
 %>
-<<<<<<< HEAD
-=======
 %> 
->>>>>>> github_new
 %> @param A  The first operand. @f$[m_a \times n_a]@f$
 %> @param B  The second operand. @f$[m_b \times n_b]@f$
 %> @retval K The result of the operation. @f$[m_b \times n_a n_b]@f$
 %>
 %> This file is part of FESTUNG
 %>
-<<<<<<< HEAD
-%> @copyright 2014-2016 Florian Frank, Balthasar Reuter, Vadym Aizinger
-=======
 %> @copyright 2014-2018 Florian Frank, Balthasar Reuter, Vadym Aizinger
->>>>>>> github_new
 %> 
 %> @par License
 %> @parblock
