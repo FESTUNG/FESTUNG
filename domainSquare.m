@@ -103,4 +103,3 @@ else
 end
 g.idE0T = g.idE(g.E0T); % local edge IDs
 end % function
-
