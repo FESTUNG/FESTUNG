@@ -188,8 +188,11 @@ if problemData.zalesak
   for n = 1 : 3
     suppressedFluxes(:,n) = (globFe{n} * phiVec) ./ sqrt(2);
   end
-  [problemData.sysY, ZalSufficient] = Zalesak(problemData.sysY, lowOrderMeans, suppressedFluxes, problemData.g.markE0TE0T, K, N, ...
-      problemData.tau, problemData.g.areaT, problemData.zalesakSteps);
+  umin = -1;
+  umax = +1;
+  [problemData.sysY, ZalSufficient] = fractStepLimiterZalesak(problemData.g, umin, umax,...
+      problemData.sysY, lowOrderMeans, suppressedFluxes,  K, N, ...
+      problemData.tau, problemData.zalesakSteps);
 end % if zalesak
 
 % Adaptive time stepping
