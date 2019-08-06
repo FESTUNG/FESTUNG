@@ -14,24 +14,16 @@
 %>          flux-corrected transport algorithm for the computation of worst-case
 %>          correction factors.
 %>
-%> The matrices @f$\mathsf{{S}}^n \in \mathbb{R}^{KN\times KR}@f$are defined as 
-%> @f[
-%> [\mathsf{{S}}^n]_{(k-1)N+i,(k-1)N+r} =
-%>  w_r \varphi_{ki}(\mathbf{q}_r) \,.
-%> @f]
+%> Foo bar
 %>
-%> @param  g          The lists describing the geometric and topological 
-%>                    properties of a triangulation (see 
-%>                    <code>domainRectTrap()</code>) 
-%>                    @f$[1 \times 1 \text{ struct}]@f$
-%> @param  markE0T    <code>logical</code> arrays that mark each elements
-%>                    edges on which the matrix blocks should be
-%>                    assembled @f$[K \times n_\mathrm{edges}]@f$
-%> @param refEdgePhiIntPerQuad  Local matrix 
-%>                    @f$\hat{\mathsf{{S}}}^\text{diag}@f$ as provided
-%>                    by <code>integrateRefEdgePhiIntPerQuad()</code>.
-%>                    @f$[N \times R \times n_\mathrm{edges}]@f$
-%> @retval ret        The assembled matrices @f$[ n_\mathrm{edges}\times1 \mathrm{cell}]@f$
+%> @param  g             Grid/triangulation (see 
+%>                       <code>generateGridData()</code>) 
+%>                       @f$[1 \times 1 \text{ struct}]@f$
+%> @param  umin          Lower solution bound.
+%> @param  umax          Upper solution bound.
+%> @param  highOrderSol  DG/modal basis representation of high-order solution. @f$[K\cdot N \times 1]@f$
+%> @param  lowOrderMeans Mean values of low-order solution. @f$[K \times 1]@f$
+%>
 %>
 %> This file is part of FESTUNG
 %>
@@ -55,45 +47,49 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 
-function [highOrderSol, success] = fractStepLimiterZalesak(highOrderSol, lowOrderMeans, suppressedFluxes, markE0TE0T, K, N, tau, areaT, maxCounter)
+function [highOrderSol, success] = fractStepLimiterZalesak(g, umin, umax, highOrderSol, lowOrderMeans, ...
+  suppressedFluxes, K, N, tau, maxIter)
 
-% K, N, tau, areaT are elements of problemData
+%% Asserts.
+assert(umin < umax)
+% assert(isequal(size(highOrderSol), [K*N, 1]))
+assert(isequal(size(lowOrderMeans), [K, 1]))
 
 %% Set parameters.
-Cmax = +1; Cmin = -1; epsilon = 1e-8; residualCrit = 1e-7;% maxCounter = 100;
+epsilon = 1e-8; residualCrit = 1e-7; 
 
-%% Initialize alphaEface and First residual
-alphaEface = zeros(K,3);
+%% Initialize alphaEface and initial residual.
+alphaEface = zeros(K, 3);
 residual = norm(norm(suppressedFluxes, Inf), Inf);
-counter = 0;
+numIter = 0;
 
-%% Start iteration
-while residual > residualCrit && counter < maxCounter
+%% Start iteration.
+while (residual > residualCrit) && (numIter < maxIter)
   
-  counter = counter + 1;
+  numIter = numIter + 1;
   oldSuppressedFluxes = suppressedFluxes;
   
-  % Compute the alpha_E
-  assert(all((Cmin - epsilon <= lowOrderMeans) & (lowOrderMeans <= Cmax + epsilon)), 'cMean: %.3e %.3e', [max(max(lowOrderMeans)), min(min(lowOrderMeans))])
-  alphaEplus = min( 1, areaT .* max(0, Cmax - lowOrderMeans) ./ ( -sum( suppressedFluxes .* (suppressedFluxes < 0) , 2 ) * tau + epsilon) );
-  alphaEminus = min( 1, areaT .* max(0, lowOrderMeans - Cmin) ./ ( sum( suppressedFluxes .* (suppressedFluxes > 0) , 2 ) * tau + epsilon) );
+  % Compute element correction factors alpha_E
+  assert(all((umin - epsilon <= lowOrderMeans) & (lowOrderMeans <= umax + epsilon)), 'uMean: %.3e %.3e', [max(max(lowOrderMeans)), min(min(lowOrderMeans))])
+  alphaEplus = min( 1, g.areaT .* max(0, umax - lowOrderMeans) ./ ( -sum( suppressedFluxes .* (suppressedFluxes < 0) , 2 ) * tau + epsilon) );
+  alphaEminus = min( 1, g.areaT .* max(0, lowOrderMeans - umin) ./ ( sum( suppressedFluxes .* (suppressedFluxes > 0) , 2 ) * tau + epsilon) );
   
-  % Compute the alpah_E,E'
+  % Compute edge correction factors alpha_E,E'
   indexVecHelp = (1 : K).';
   for nn = 1 : 3
     for np = 1 : 3
-      indexVec = markE0TE0T{nn, np} * indexVecHelp;
+      indexVec = g.markE0TE0T{nn, np} * indexVecHelp;
       helperVec = (indexVec > 0);
       alphaEface(helperVec,nn) = min( alphaEplus(helperVec), alphaEminus(indexVec(helperVec)) ) .* (suppressedFluxes(helperVec,nn) < 0) ...
         + min( alphaEminus(helperVec), alphaEplus(indexVec(helperVec)) ) .* (suppressedFluxes(helperVec,nn) > 0) ;
     end % for np
   end % for nn
   
-  assert(all(all((0 <= alphaEface) & (alphaEface <= 1))), 'alphaEface: %.3e %.3e', [max(max(alphaEface)) - Cmax, min(min(alphaEface)) - Cmin])
+  assert(all(all((0 <= alphaEface) & (alphaEface <= 1))), 'alphaEface: %.3e %.3e', [max(max(alphaEface)) - umax, min(min(alphaEface)) - umin])
   
   % Compute the updated solution and fluxes
   for n = 1 : 3
-    lowOrderMeans = lowOrderMeans - tau * alphaEface(:,n) .* suppressedFluxes(:,n) ./ areaT;
+    lowOrderMeans = lowOrderMeans - tau * alphaEface(:,n) .* suppressedFluxes(:,n) ./ g.areaT;
     suppressedFluxes(:,n) = (1 - alphaEface(:,n)) .* suppressedFluxes(:,n);
   end
   
@@ -101,7 +97,7 @@ while residual > residualCrit && counter < maxCounter
   residual = norm(norm(suppressedFluxes, Inf), Inf);
   deltaSuppressed = norm(norm(oldSuppressedFluxes - suppressedFluxes, Inf), Inf);
   if deltaSuppressed < residualCrit
-    break;
+    break
   end
   
 end % while norm > residualCrit
@@ -110,6 +106,6 @@ highOrderSol(1:N:K*N) = lowOrderMeans ./ sqrt(2); % sqrt(2) is the value of the 
 
 success = (residual < residualCrit);
 
-fprintf('Zalesak: residual = %d, counter = %d, delta suppressed flux = %d.\n', residual, counter, deltaSuppressed);
+fprintf('Zalesak: residual = %d, numIter = %d, delta suppressed flux = %d.\n', residual, numIter, deltaSuppressed);
 
-end % function getFluxLimitingParameter
+end % function fractStepLimiterZalesak
