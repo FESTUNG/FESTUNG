@@ -5,19 +5,28 @@
 %===============================================================================
 %> @file
 %>
-%> @brief % Fractional step flux limiter to correct local mean values using Zalesak's
-%>          flux-corrected transport algorithm for the computation of worst-case
-%>          correction factors.
+%> @brief Fractional step flux limiter to correct local mean values using Zalesak's
+%>        flux-corrected transport algorithm for the computation of worst-case
+%>        correction factors.
 %===============================================================================
 %>
-%> @brief % Fractional step flux limiter to correct local mean values using Zalesak's
-%>          flux-corrected transport algorithm for the computation of worst-case
-%>          correction factors.
+%> @brief Fractional step flux limiter to correct local mean values using Zalesak's
+%>        flux-corrected transport algorithm for the computation of worst-case
+%>        correction factors.
 %>
-%> Foo bar
+%> The Algorithm is taken from Frank, Rupp, Kuzmin, 2019, "Bound-preserving flux 
+%> limiting schemes for DG~discretizations of conservation laws with applications
+%> to the Cahn-Hilliard equation".
+%>
+%> The implemented stopping criteria are:
+%> - Criterion 0: @f$\max_{E,E'}|\mathcal{H}_{E,E'}^{(m)}| < \mathrm{epsSupprFlux}@f$
+%> - Criterion 1: @f$\max_{E,E'}|\mathcal{H}_{E,E'}^{(m)} - \mathcal{H}_{E,E'}^{(m-1)}| < \mathrm{epsSupprDelta}@f$ 
+%> - Criterion 2: @f$m = \mathrm{maxIter}@f$ 
+%>
 %>
 %> @retval highOrderSol  Flux-corrected high-order solution (in modal basis) @f$[K\cdot N \times 1]@f$.
-%> @retval isSuccess
+%> @retval flag          The number of the stopping criterion that triggered, see description.
+%>
 %> @param  g             Grid/triangulation (see 
 %>                       <code>generateGridData()</code>) 
 %>                       @f$[1 \times 1 \text{ struct}]@f$
@@ -25,10 +34,12 @@
 %> @param  umax          Upper solution bound.
 %> @param  highOrderSol  DG/modal basis representation of high-order solution @f$[K\cdot N \times 1]@f$.
 %> @param  lowOrderMeans Mean values of low-order solution. @f$[K \times 1]@f$
-%> @param  supprFluxes   Target flux, i.e., difference of high order and low order fluxes [???].
+%> @param  supprFluxes   Target flux, i.e., difference of high order and low order fluxes @f$[K \times 3]@f$.
 %> @param  N             Local degrees of freedom.
+%> @param  tau           Time step size.
 %> @param  epsSupprFlux  Tolerance for the suppressed flux.
 %> @param  epsSupprDelta Tolerance for the abs. distance of suppressed fluxes in two iterations.
+%> @param  maxIter       Maximum number of iterations; if reached,
 %>
 %> This file is part of FESTUNG
 %>
@@ -52,7 +63,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 
-function [highOrderSol, isSuccess] = fractStepLimiterZalesak(g, umin, umax, ...
+function [highOrderSol, flag] = fractStepLimiterZalesak(g, umin, umax, ...
   highOrderSol, lowOrderMeans, supprFluxes, N, tau, ...
   epsSupprFlux, epsSupprDelta, maxIter)
 
@@ -69,12 +80,11 @@ assert(isequal(size(lowOrderMeans), [K, 1]))
 %% Initialize alphaEface and initial residual.
 alphaEface = zeros(K, 3);
 normSupprFlux = norm(norm(supprFluxes, Inf), Inf);
-numIter = 0;
 
 %% Start iteration.
-while (normSupprFlux > epsSupprFlux) && (numIter < maxIter)
+for numIter = 1 : maxIter
   
-  numIter = numIter + 1;
+  % Save suppressed fluxes.
   oldSuppressedFluxes = supprFluxes;
   
   % Verify that all means are within [umin, umax] (up to arithmetic errors).
@@ -105,20 +115,28 @@ while (normSupprFlux > epsSupprFlux) && (numIter < maxIter)
     supprFluxes(:,n) = (1 - alphaEface(:,n)) .* supprFluxes(:,n);
   end
   
-  % Check new normSupprFlux.
+  % Compute new errors.
   normSupprFlux  = norm(norm(supprFluxes, Inf), Inf);
   normSupprDelta = norm(norm(oldSuppressedFluxes - supprFluxes, Inf), Inf);
-  if normSupprDelta < epsSupprDelta
+  
+  % Check stopping criteria.
+  if normSupprFlux < epsSupprFlux
+    flag = 0;
+    break
+  elseif normSupprDelta < epsSupprDelta
+    flag = 1;
+    break
+  elseif numIter == maxIter
+    flag = 2;
     break
   end
-  
-end % while norm > epsSupprFlux
+end % for
 
-highOrderSol(1:N:K*N) = lowOrderMeans ./ sqrt(2); % sqrt(2) is the value of the first trial function
-isSuccess = (normSupprFlux < epsSupprFlux);
+% Scale coefficient vector.
+highOrderSol(1:N:K*N) = lowOrderMeans ./ sqrt(2); % sqrt(2) is the value of the first trial function, i.e., phi(1,0,0).
 
-% Todo: The delta should only be printed if suppressed flux is unequal to
-% zero.
-fprintf('Zalesak: suppressed flux: %d, iterations: %d, delta suppressed flux: %d.\n', normSupprFlux, numIter, normSupprDelta);
+% Print information.
+fprintf('FSL: flag: %d, suppressed flux: %.3e, delta suppressed flux: %.3e, iterations: %d.\n', ...
+  flag, normSupprFlux, normSupprDelta, numIter);
 
 end % function fractStepLimiterZalesak

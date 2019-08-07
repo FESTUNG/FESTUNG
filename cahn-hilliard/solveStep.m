@@ -190,13 +190,13 @@ if problemData.zalesak
   end
   umin = -1;
   umax = +1;
-  [problemData.sysY, ZalSufficient] = fractStepLimiterZalesak(problemData.g, umin, umax,...
-      problemData.sysY, lowOrderMeans, suppressedFluxes,  K, N, ...
-      problemData.tau, problemData.zalesakSteps);
+  [problemData.sysY(1:K*N), flag] = fractStepLimiterZalesak(problemData.g, umin, umax,...
+      problemData.sysY(1:K*N), lowOrderMeans, suppressedFluxes, N, problemData.tau, ...
+      1e-7, 1e-7, problemData.zalesakSteps);
 end % if zalesak
 
 % Adaptive time stepping
-if problemData.adaptiveStepping && ~ZalSufficient
+if problemData.adaptiveStepping && (flag == 0)
   problemData.tau = problemData.tau * problemData.tauDecr;
   if problemData.tau < problemData.tauMin
     cDisc = reshape(problemData.sysY(1 : K*N), N, K)';
