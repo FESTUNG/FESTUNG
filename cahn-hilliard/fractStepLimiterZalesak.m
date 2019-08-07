@@ -68,8 +68,7 @@ function [highOrderSol, flag] = fractStepLimiterZalesak(g, umin, umax, ...
   epsSupprFlux, epsSupprDelta, maxIter)
 
 %% Set parameters.
-deltaBound = 1e-8; 
-deltaDenom = 1e-8;
+deltaBound = 10*eps(umin); % Arithmetic perturbations may violate the bounds, therefore, damping. 
 K = g.numT;
 
 %% Asserts.
@@ -83,17 +82,18 @@ normSupprFlux = norm(norm(supprFluxes, Inf), Inf);
 
 %% Start iteration.
 for numIter = 1 : maxIter
-  
+ 
   % Save suppressed fluxes.
   oldSuppressedFluxes = supprFluxes;
   
-  % Verify that all means are within [umin, umax] (up to arithmetic errors).
-  assert(all((umin - deltaBound <= lowOrderMeans) & (lowOrderMeans <= umax + deltaBound)), ...
-    'Mean values exceed bounds (possibly in small digits): %.3e %.3e', max(max(lowOrderMeans)), min(min(lowOrderMeans)))
+  % Verify that all means are within [umin, umax].
+  assert(all((umin <= lowOrderMeans) & (lowOrderMeans <= umax)), ...
+    'Mean values exceed bounds before iteration %d (possibly in small digits): %.16f %.16f', numIter, min(min(lowOrderMeans)), max(max(lowOrderMeans)))
   
-  % Compute element correction factors alpha_E.
-  alphaEplus  = min(1, g.areaT .* max(0, umax - lowOrderMeans) ./ (-sum( supprFluxes .* (supprFluxes < 0), 2 ) * tau + deltaDenom) );
-  alphaEminus = min(1, g.areaT .* max(0, lowOrderMeans - umin) ./ ( sum( supprFluxes .* (supprFluxes > 0), 2 ) * tau + deltaDenom) );
+  % Compute element correction factors alpha_E. In Matlab, zero instead of eps 
+  % would also work, since the denominator then is -0 + +0 = +0.
+  alphaEplus  = min(1, g.areaT .* max(0, (umax - deltaBound) - lowOrderMeans) ./ (-sum( supprFluxes .* (supprFluxes < 0), 2) * tau + eps) );
+  alphaEminus = min(1, g.areaT .* max(0, lowOrderMeans - (umin + deltaBound)) ./ ( sum( supprFluxes .* (supprFluxes > 0), 2) * tau + eps) );
   
   % Compute edge correction factors alpha_E,E'.
   indexVecHelp = (1 : K).';
@@ -107,7 +107,7 @@ for numIter = 1 : maxIter
   end % for nn
   
   % Verify that all correction factors are within [0,1].
-  assert(all(all((0 <= alphaEface) & (alphaEface <= 1))), 'alphaEface: %.3e %.3e', max(max(alphaEface)) - umax, min(min(alphaEface)) - umin)
+  assert(all(all((0 <= alphaEface) & (alphaEface <= 1))), 'alphaEface: %.16f %.16f', min(min(alphaEface)), max(max(alphaEface)))
   
   % Compute the updated solution and fluxes.
   for n = 1 : 3
@@ -132,8 +132,13 @@ for numIter = 1 : maxIter
   end
 end % for
 
+% Verify that all means are within [umin, umax].
+assert(all((umin <= lowOrderMeans) & (lowOrderMeans <= umax)), ...
+  'Mean values exceed bounds after iteration %d (possibly in small digits): %.16f %.16f', numIter, min(min(lowOrderMeans)), max(max(lowOrderMeans)))
+
 % Scale coefficient vector.
 highOrderSol(1:N:K*N) = lowOrderMeans ./ sqrt(2); % sqrt(2) is the value of the first trial function, i.e., phi(1,0,0).
+% highOrderSol(1:N:K*N) = lowOrderMeans; 
 
 % Print information.
 fprintf('FSL: flag: %d, suppressed flux: %.3e, delta suppressed flux: %.3e, iterations: %d.\n', ...

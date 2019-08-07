@@ -179,7 +179,7 @@ end % problemData.implicit
 
 if problemData.zalesak
   cDisc = reshape( problemData.sysY(1:K*N), N, K ).';
-  lowOrderMeans = sqrt(2) * yOld(1:N:K*N);
+  
   globFe = assembleCellEdgeTermsLimiting(problemData.g, problemData.basesOnQuad, cDisc, ...
       problemData.mobilityCont, problemData.hatTmobdiag, problemData.hatTmoboffdiag, problemData.hatSdiag, ...
       problemData.hatSoffdiag, problemData.eta, problemData.sigma);
@@ -190,9 +190,12 @@ if problemData.zalesak
   end
   umin = -1;
   umax = +1;
+  lowOrderMeans = sqrt(2) * yOld(1:N:K*N);
   [problemData.sysY(1:K*N), flag] = fractStepLimiterZalesak(problemData.g, umin, umax,...
       problemData.sysY(1:K*N), lowOrderMeans, suppressedFluxes, N, problemData.tau, ...
       1e-7, 1e-7, problemData.zalesakSteps);
+   % Store mean values to restore them after slope limiting below.
+   sysYmeansAfterFSL = problemData.sysY(1:N:K*N);
 end % if zalesak
 
 % Adaptive time stepping
@@ -219,6 +222,10 @@ end % if adaptiveStepping && convergence/divergence cases
 if problemData.standardLim
   problemData.sysY = slopeLimiterFct(problemData, problemData.sysY);
 end % if slope Limiter
+% The slope limiter slighlty perturbes the mean values (in the final digit), which
+% accumulates over time steps.  Therefore, the mean values are stored after the
+% flux limiting and restored after slope limiting.
+problemData.sysY(1:N:K*N) = sysYmeansAfterFSL;
   
 end % function solveStep
 
