@@ -52,29 +52,31 @@ function [highOrderSol, success] = fractStepLimiterZalesak(g, umin, umax, highOr
 
 %% Asserts.
 assert(umin < umax)
-% assert(isequal(size(highOrderSol), [K*N, 1]))
+assert(isequal(size(highOrderSol), [K*N, 1]))
 assert(isequal(size(lowOrderMeans), [K, 1]))
 
 %% Set parameters.
-epsilon = 1e-8; residualCrit = 1e-7; 
+epsilon = 1e-8; 
+epsilonSupprDelta = 1e-7;
+epsilonSupprFlux  = 1e-7;
 
 %% Initialize alphaEface and initial residual.
 alphaEface = zeros(K, 3);
-residual = norm(norm(suppressedFluxes, Inf), Inf);
+normSupprFlux = norm(norm(suppressedFluxes, Inf), Inf);
 numIter = 0;
 
 %% Start iteration.
-while (residual > residualCrit) && (numIter < maxIter)
+while (normSupprFlux > epsilonSupprFlux) && (numIter < maxIter)
   
   numIter = numIter + 1;
   oldSuppressedFluxes = suppressedFluxes;
   
-  % Compute element correction factors alpha_E
+  % Compute element correction factors alpha_E.
   assert(all((umin - epsilon <= lowOrderMeans) & (lowOrderMeans <= umax + epsilon)), 'uMean: %.3e %.3e', [max(max(lowOrderMeans)), min(min(lowOrderMeans))])
-  alphaEplus = min( 1, g.areaT .* max(0, umax - lowOrderMeans) ./ ( -sum( suppressedFluxes .* (suppressedFluxes < 0) , 2 ) * tau + epsilon) );
-  alphaEminus = min( 1, g.areaT .* max(0, lowOrderMeans - umin) ./ ( sum( suppressedFluxes .* (suppressedFluxes > 0) , 2 ) * tau + epsilon) );
+  alphaEplus = min(1, g.areaT .* max(0, umax - lowOrderMeans) ./ ( -sum( suppressedFluxes .* (suppressedFluxes < 0) , 2 ) * tau + epsilon) );
+  alphaEminus = min(1, g.areaT .* max(0, lowOrderMeans - umin) ./ ( sum( suppressedFluxes .* (suppressedFluxes > 0) , 2 ) * tau + epsilon) );
   
-  % Compute edge correction factors alpha_E,E'
+  % Compute edge correction factors alpha_E,E'.
   indexVecHelp = (1 : K).';
   for nn = 1 : 3
     for np = 1 : 3
@@ -87,25 +89,27 @@ while (residual > residualCrit) && (numIter < maxIter)
   
   assert(all(all((0 <= alphaEface) & (alphaEface <= 1))), 'alphaEface: %.3e %.3e', [max(max(alphaEface)) - umax, min(min(alphaEface)) - umin])
   
-  % Compute the updated solution and fluxes
+  % Compute the updated solution and fluxes.
   for n = 1 : 3
     lowOrderMeans = lowOrderMeans - tau * alphaEface(:,n) .* suppressedFluxes(:,n) ./ g.areaT;
     suppressedFluxes(:,n) = (1 - alphaEface(:,n)) .* suppressedFluxes(:,n);
   end
   
-  % Check new residual
-  residual = norm(norm(suppressedFluxes, Inf), Inf);
-  deltaSuppressed = norm(norm(oldSuppressedFluxes - suppressedFluxes, Inf), Inf);
-  if deltaSuppressed < residualCrit
+  % Check new normSupprFlux.
+  normSupprFlux  = norm(norm(suppressedFluxes, Inf), Inf);
+  normSupprDelta = norm(norm(oldSuppressedFluxes - suppressedFluxes, Inf), Inf);
+  if normSupprDelta < epsilonSupprDelta
     break
   end
   
-end % while norm > residualCrit
+end % while norm > epsilonSupprFlux
 
 highOrderSol(1:N:K*N) = lowOrderMeans ./ sqrt(2); % sqrt(2) is the value of the first trial function
 
-success = (residual < residualCrit);
+success = (normSupprFlux < epsilonSupprFlux);
 
-fprintf('Zalesak: residual = %d, numIter = %d, delta suppressed flux = %d.\n', residual, numIter, deltaSuppressed);
+% Todo: The delta should only be printed if suppressed flux is unequal to
+% zero.
+fprintf('Zalesak: suppressed flux: %d, iterations: %d, delta suppressed flux: %d.\n', normSupprFlux, numIter, normSupprDelta);
 
 end % function fractStepLimiterZalesak
