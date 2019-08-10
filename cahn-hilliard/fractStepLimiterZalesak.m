@@ -68,7 +68,7 @@ function [highOrderSol, flag] = fractStepLimiterZalesak(g, umin, umax, ...
   epsSupprFlux, epsSupprDelta, maxIter)
 
 %% Set parameters.
-deltaBound = 10*eps(umin); % Arithmetic perturbations may violate the bounds, therefore, damping. 
+deltaBound = 10*eps(max(umax,umin)); % Arithmetic perturbations may violate the bounds, therefore, damping. 
 K = g.numT;
 
 %% Asserts.
