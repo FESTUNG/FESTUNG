@@ -44,7 +44,9 @@
 %> @endparblock
 %
 function problemData = postprocessProblem(problemData)
-% Executed at the end of the simulation run. 
-% Put here things that are to be done after the iterative loop.
+problemData.error = computeL2Error(problemData.g, problemData.uDisc, ...
+  @(x1,x2) problemData.uCont(problemData.tEnd, x1, x2), 2 * problemData.p + 1, ...
+  problemData.basesOnQuad);
+fprintf('L2 error w.r.t. the analytical solution: %g\n', problemData.error)
 end
 

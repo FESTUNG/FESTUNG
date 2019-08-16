@@ -93,7 +93,7 @@ if problemData.isIP  % use IP discretization of diffusion
   problemData.refEdgeDphiIntPhiExtPerQuad = integrateRefEdgeDphiIntPhiExtPerQuad(problemData.N, problemData.basesOnQuad);
   if problemData.symparam == 0
     problemData.globBsym = sparse(problemData.g.numT * problemData.N, problemData.g.numT * problemData.N);
-    problemData.Jsym = zeros(problemData.g.numT * problemData.N, 1);
+    problemData.globJsym = zeros(problemData.g.numT * problemData.N, 1);
   end % if
 else                 % use LDG discretization of diffusion
   refElemDphiPhi = integrateRefElemDphiPhi(problemData.N, problemData.basesOnQuad);
