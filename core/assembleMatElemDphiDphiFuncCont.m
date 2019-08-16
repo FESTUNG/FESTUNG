@@ -70,6 +70,6 @@ for r = 1 : R
                   - kron(2 * g.B(:,1,2) .* g.B(:,1,1) .* valOnQuad, refElemDphiDphiPerQuad{1,2}(:, :, r)) ...
                   + kron(g.B(:,1,1) .* g.B(:,1,1) .* valOnQuad, refElemDphiDphiPerQuad{2,2}(:, :, r));
 end % for
-ret{1} = kronVec(spdiags(0.5 ./ g.areaT, 0, K, K), ret{1});
-ret{2} = kronVec(spdiags(0.5 ./ g.areaT, 0, K, K), ret{2});
+ret{1} = kronVec(spdiags(1 ./ g.detJ0T, 0, K, K), ret{1});
+ret{2} = kronVec(spdiags(1 ./ g.detJ0T, 0, K, K), ret{2});
 end % function

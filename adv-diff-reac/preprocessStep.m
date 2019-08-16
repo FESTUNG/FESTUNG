@@ -76,30 +76,32 @@ problemData.sysF = reshape(projectFuncCont2DataDisc(problemData.g, fCont, 2*prob
 %% Assemble diffusion matrices/vectors
 problemData.globJN = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrN, gNCont, ...
   problemData.N, problemData.basesOnQuad);
-problemData.globJjmp = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrD, uDCont, ...
-  problemData.N, problemData.basesOnQuad, 2 * problemData.p + 1, ones(problemData.g.numT, 3));
+if problemData.penparam ~= 0
+  problemData.globJjmp = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrD, uDCont, ...
+    problemData.N, problemData.basesOnQuad, 2 * problemData.p + 1, ones(problemData.g.numT, 3));
+end % if
 if problemData.isIP  % IP-specific matrices/vectors
   problemData.globAIP = assembleMatElemDphiDphiFuncCont(problemData.g, problemData.refElemDphiDphiPerQuad, dCont);
   problemData.globAIP = problemData.globAIP{1} + problemData.globAIP{2};
-  problemData.globBIP = assembleMatEdgeDphiPhiFuncContNu(problemData.g, problemData.g.markE0Tint, ...
+  %
+  globBSymIP = assembleMatEdgeDphiPhiFuncContNu(problemData.g, problemData.g.markE0Tint, ...
     problemData.refEdgeDphiIntPhiIntPerQuad, problemData.refEdgeDphiIntPhiExtPerQuad, dCont);
-  problemData.globBIP = 0.5 * (problemData.globBIP{1}' + problemData.globBIP{2}');
-  problemData.globBIPD = assembleMatEdgeDphiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
-                                                          problemData.refEdgeDphiIntPhiIntPerQuad, dCont);
-  problemData.globBIPD = 0.5 * (problemData.globBIPD{1}' + problemData.globBIPD{2}');
-  problemData.globBsym = assembleMatEdgeDphiPhiFuncContNu(problemData.g, ~problemData.g.markE0TbdrN, ...
-    problemData.refEdgeDphiIntPhiIntPerQuad, problemData.refEdgeDphiIntPhiExtPerQuad, dCont);
-  problemData.globBsym = problemData.globBsym{1} + problemData.globBsym{2};
-  problemData.globJsym = assembleVecEdgeDphiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
-    @(x1,x2) dCont(x1,x2) .* uDCont(x1,x2), problemData.N, problemData.basesOnQuad);
-  problemData.globJsym = problemData.globJsym{1} + problemData.globJsym{2};
+  globBSymIPD = assembleMatEdgeDphiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
+    problemData.refEdgeDphiIntPhiIntPerQuad, dCont);
+  problemData.globBIP = 0.5 * ((globBSymIP{1} + globBSymIP{2}) + globBSymIPD{1} + globBSymIPD{2}).';
+  if problemData.symparam ~= 0
+    problemData.globBsym = 0.5 * (globBSymIP{1} + globBSymIP{2}) + globBSymIPD{1} + globBSymIPD{2};
+    globJsym = assembleVecEdgeDphiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
+      @(x1,x2) dCont(x1,x2) .* uDCont(x1,x2), problemData.N, problemData.basesOnQuad);
+    problemData.globJsym = globJsym{1} + globJsym{2};
+  end % if
 else                 % LDG-specific matrices/vectors
   problemData.globAu = assembleMatElemDphiPhiFuncContVec(problemData.g, problemData.refElemDphiPhiPerQuad, dCont, dCont);
   problemData.globBu = assembleMatEdgePhiPhiFuncContNu(problemData.g, problemData.g.markE0Tint, ...
     problemData.refEdgePhiIntPhiIntPerQuad, problemData.refEdgePhiIntPhiExtPerQuad, dCont);
   problemData.globBuD = assembleMatEdgePhiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
-                                                              problemData.refEdgePhiIntPhiIntPerQuad, dCont);
+    problemData.refEdgePhiIntPhiIntPerQuad, dCont);
   problemData.globJD = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, uDCont, ...
-                                                       problemData.N, problemData.basesOnQuad);
+    problemData.N, problemData.basesOnQuad);
 end
 end % function

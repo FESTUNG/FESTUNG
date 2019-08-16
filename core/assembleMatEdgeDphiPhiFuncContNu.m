@@ -80,7 +80,7 @@ for nn = 1 : 3
   [Q1, Q2] = gammaMap(nn, Q);
   valOnQuad = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   
-  Rkn = 0.5 * markE0Tbdr(:, nn) .* g.areaE0T(:, nn) ./ g.areaT;
+  Rkn = markE0Tbdr(:, nn) .* g.areaE0T(:, nn) ./ g.detJ0T;
   % Diagonal blocks
   for r = 1 : R
     markRknValOnQuad = Rkn .* valOnQuad(:, r);
