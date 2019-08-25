@@ -78,18 +78,19 @@ problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'adv-d
 problemData = setdefault(problemData, 'outputTypes', {'vtk'});  % type of output files
 problemData = setdefault(problemData, 'outputFrequency', 1e3);  % output frequency
 %% Coefficients and boundary data.
-uCont = @(t,x1,x2) cos(7*x1 + 10*t) .* cos(7*x2);
+uCont = @(t,x1,x2) cos(7*x1) .* cos(7*x2) + 3*t;
 problemData.uCont = uCont;
 problemData.u0Cont = @(x1,x2) uCont(0,x1,x2);
 problemData.uDCont = uCont;
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
-problemData.rCont = @(t,x1,x2) exp(0.5 * (x1 - x2));
+problemData.rCont = @(t,x1,x2) sin(5*x1) .* sin(5*x2);
 problemData.dCont = @(t,x1,x2) exp(0.5 * (x1 + x2));
-problemData.v1Cont = @(t,x1,x2) exp(0.5 * (x1 + x2));
-problemData.v2Cont = @(t,x1,x2) exp(0.5 * (x1 - x2));
-problemData.fCont = @(t,x1,x2) 0.5 * (exp(0.5 * (x1 - x2)) + 197 * exp(0.5 * (x1 + x2))) .* uCont(t,x1,x2) ...
-                      - 7/2 * exp(0.5 * (x1 + x2)) .* sin(7*x1 + 10*t) .* cos(7*x2) ...
-                      + 7/2 * (exp(0.5 * (x1 + x2)) - 2 * exp(0.5 * (x1 - x2))) .* cos(7*x1 + 10*t) .* sin(7*x2); 
+problemData.v1Cont = @(t,x1,x2) -sin(3*x1) .* sin(3*x2) + 2;
+problemData.v2Cont = @(t,x1,x2) -cos(3*x1) .* cos(3*x2) + 2;
+problemData.fCont = @(t,x1,x2) 7 * ( (sin(3*x1) .* sin(3*x2) + 2 - 0.5 * exp(0.5 * (x1+x2))) .* sin(7*x1) .* cos(7*x2) + ...
+                                     (cos(3*x1) .* cos(3*x2) + 2 - 0.5 * exp(0.5 * (x1+x2))) .* cos(7*x1) .* cos(7*x2) ) - ...
+                               98 * exp(0.5 * (x1+x2)) .* cos(7*x1) .* cos(7*x2) + ...
+                               sin(5*x1) .* sin(5*x2) .* (cos(7*x1) .* cos(7*x2) + 3*t);
 %% Domain and triangulation configuration.
 % Select domain and triangulation
 problemData.generateGridData = @domainSquare;
