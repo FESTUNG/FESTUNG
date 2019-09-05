@@ -44,6 +44,9 @@ function problemData = initializeProblem(problemData)
 problemData.isFinished = false;
 problemData.uDisc = projectFuncCont2DataDisc(problemData.g, problemData.u0Cont, ...
                       2 * problemData.p, problemData.refElemPhiPhi, problemData.basesOnQuad);
+%% Configuration output.
+fprintf('Starting time integration from t=%g to %g with %d time steps.\n', ...
+        problemData.t0, problemData.tEnd, problemData.numSteps)
 if problemData.isVisSol
   uLagr = projectDataDisc2DataLagr(problemData.uDisc);
   visualizeDataLagr(problemData.g, uLagr, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)

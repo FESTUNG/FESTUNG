@@ -75,13 +75,13 @@ eoc = cell(size(pLevel));
 
 for ip = 1 : length(pLevel)
   for level = 1 : nLevel
-    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase, 'tEnd', 1);
+    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase, 'tEnd', .01);
     pd.p = pLevel(ip);
     if isSpatConv || isTimeSpatConv
       pd.hmax = 2^-hLevel(level) / 3;
     end % if
     if ~isSpatConv
-      pd.numSteps = 2^pLevel(ip) * 50 * 2^tLevel(level);
+      pd.numSteps = 2^pLevel(ip) * 1e3 * 2^tLevel(level);
     end % if
     try
       pd = main('adv-diff-reac', pd);

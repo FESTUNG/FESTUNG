@@ -70,8 +70,8 @@ problemData = setdefault(problemData, 'numSteps', 5e3);         % number of time
 problemData = setdefault(problemData, 'isVisGrid', false);      % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);        % visualization of solution
 problemData = setdefault(problemData, 'symparam', 1);           % symmetrization parameter (theta)
-problemData = setdefault(problemData, 'penparam', 10);           % penalty parameter (eta>0)
-problemData = setdefault(problemData, 'isIP', true);           % use interior penalty dG instead of LDG
+problemData = setdefault(problemData, 'penparam', 1);           % penalty parameter (eta>0)
+problemData = setdefault(problemData, 'isIP', false);           % use interior penalty dG instead of LDG
 problemData = setdefault(problemData, 'deltaAdvReac', 0);       % time stepping parameter for advection (0, 1)
 problemData = setdefault(problemData, 'deltaDiff', 0);          % time stepping parameter for diffusion (0, 1)
 problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'adv-diff-reac']); % basename of output files
@@ -79,23 +79,36 @@ problemData = setdefault(problemData, 'outputTypes', {'vtk'});  % type of output
 problemData = setdefault(problemData, 'outputFrequency', 1e3);  % output frequency
 %% Coefficients and boundary data.
 uCont = @(t,x1,x2) cos(7*x1) .* cos(7*x2) + 3*t;
+rCont = @(t,x1,x2) sin(5*x1) .* sin(5*x2);
+dCont = @(t,x1,x2) exp(0.5 * (x1 + x2));
+v1Cont = @(t,x1,x2) -sin(3*x1) .* sin(3*x2) - 2;
+v2Cont = @(t,x1,x2) -cos(3*x1) .* cos(3*x2) - 2;
+% Derivatives
+dx1U = @(t,x1,x2) -7 * sin(7*x1) .* cos(7*x2);
+dx2U = @(t,x1,x2) -7 * cos(7*x1) .* sin(7*x2);
+ddU = @(t,x1,x2) -98 * cos(7*x1) .* cos(7*x2);
+dtU = 3;
+dx1d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
+dx2d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
+% Right hand side
+fCont = @(t,x1,x2) dtU + (v1Cont(t,x1,x2) - dx1d(t,x1,x2)) .* dx1U(t,x1,x2) ...
+                   + (v2Cont(t,x1,x2) - dx2d(t,x1,x2)) .* dx2U(t,x1,x2) ...
+                   - dCont(t,x1,x2) .* ddU(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
+% Assign continuous functions
 problemData.uCont = uCont;
 problemData.u0Cont = @(x1,x2) uCont(0,x1,x2);
 problemData.uDCont = uCont;
 problemData.gNCont = @(t,x1,x2) zeros(size(x1));
-problemData.rCont = @(t,x1,x2) sin(5*x1) .* sin(5*x2);
-problemData.dCont = @(t,x1,x2) exp(0.5 * (x1 + x2));
-problemData.v1Cont = @(t,x1,x2) -sin(3*x1) .* sin(3*x2) + 2;
-problemData.v2Cont = @(t,x1,x2) -cos(3*x1) .* cos(3*x2) + 2;
-problemData.fCont = @(t,x1,x2) 7 * ( (sin(3*x1) .* sin(3*x2) + 2 - 0.5 * exp(0.5 * (x1+x2))) .* sin(7*x1) .* cos(7*x2) + ...
-                                     (cos(3*x1) .* cos(3*x2) + 2 - 0.5 * exp(0.5 * (x1+x2))) .* cos(7*x1) .* cos(7*x2) ) - ...
-                               98 * exp(0.5 * (x1+x2)) .* cos(7*x1) .* cos(7*x2) + ...
-                               sin(5*x1) .* sin(5*x2) .* (cos(7*x1) .* cos(7*x2) + 3*t);
+problemData.rCont = rCont;
+problemData.dCont = dCont;
+problemData.v1Cont = v1Cont;
+problemData.v2Cont = v2Cont;
+problemData.fCont = fCont;
 %% Domain and triangulation configuration.
 % Select domain and triangulation
 problemData.generateGridData = @domainSquare;
 % Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrN = @(g) g.idE0T == 4 | g.idE0T == 3; %false(g.numT,3);
+problemData.generateMarkE0TbdrN = @(g) g.idE0T == 4 | g.idE0T == 1; %false(g.numT,3);
 problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 end % function
