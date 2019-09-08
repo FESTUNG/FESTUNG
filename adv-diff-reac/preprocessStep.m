@@ -53,14 +53,17 @@
 %
 function problemData = preprocessStep(problemData, nStep)
 %% Compute current time level and create function handles
-t = problemData.t0 + problemData.dt * nStep;
-dCont = @(x1,x2) problemData.dCont(t,x1,x2);
-rCont = @(x1,x2) problemData.rCont(t,x1,x2);
-v1Cont = @(x1,x2) problemData.v1Cont(t,x1,x2);
-v2Cont = @(x1,x2) problemData.v2Cont(t,x1,x2);
-uDCont = @(x1,x2) problemData.uDCont(t,x1,x2);
-gNCont = @(x1,x2) problemData.gNCont(t,x1,x2);
-fCont = @(x1,x2) problemData.fCont(t,x1,x2);
+tAdvReac = problemData.t0 + problemData.dt * (nStep + problemData.deltaAdvReac);
+tDiff = problemData.t0 + problemData.dt * (nStep + problemData.deltaDiff);
+dCont = @(x1,x2) problemData.dCont(tDiff,x1,x2);
+rCont = @(x1,x2) problemData.rCont(tAdvReac,x1,x2);
+v1Cont = @(x1,x2) problemData.v1Cont(tAdvReac,x1,x2);
+v2Cont = @(x1,x2) problemData.v2Cont(tAdvReac,x1,x2);
+uDContAdv = @(x1,x2) problemData.uDCont(tAdvReac,x1,x2);
+uDContDiff = @(x1,x2) problemData.uDCont(tDiff,x1,x2);
+gNCont = @(x1,x2) problemData.gNCont(tDiff,x1,x2);
+fCont = @(x1,x2) problemData.fCont(tAdvReac,x1,x2) ...
+                  + problemData.fContAdvReac(tAdvReac,x1,x2) + problemData.fContDiff(tDiff,x1,x2);
 %% Assemble advection and reaction matrices/vectors
 % Evaluate normal velocity in quadrature points of edges
 vNormalOnQuadEdge = computeFuncContNuOnQuadEdge(problemData.g, v1Cont, v2Cont, 2*problemData.p+1);
@@ -69,15 +72,15 @@ problemData.globAreac = assembleMatElemPhiPhiFuncCont(problemData.g, problemData
 problemData.globBadv = assembleMatEdgePhiPhiValUpwind(problemData.g, true(problemData.g.numT, 3), ...
   problemData.refEdgePhiIntPhiIntPerQuad, problemData.refEdgePhiIntPhiExtPerQuad, vNormalOnQuadEdge);
 problemData.globJadv = assembleVecEdgePhiIntFuncContVal(problemData.g, problemData.g.markE0TbdrD, ...
-  uDCont, vNormalOnQuadEdge, problemData.N, problemData.basesOnQuad);
+  uDContAdv, vNormalOnQuadEdge, problemData.N, problemData.basesOnQuad);
 %% Assemble right hand side vector
-problemData.sysF = reshape(projectFuncCont2DataDisc(problemData.g, fCont, 2*problemData.p, ...
+problemData.globF = problemData.globM * reshape(projectFuncCont2DataDisc(problemData.g, fCont, 2*problemData.p, ...
                            problemData.refElemPhiPhi, problemData.basesOnQuad)', [], 1);
 %% Assemble diffusion matrices/vectors
 problemData.globJN = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrN, gNCont, ...
   problemData.N, problemData.basesOnQuad);
 if problemData.penparam ~= 0
-  problemData.globJjmp = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrD, uDCont, ...
+  problemData.globJjmp = assembleVecEdgePhiIntFuncCont(problemData.g, problemData.g.markE0TbdrD, uDContDiff, ...
     problemData.N, problemData.basesOnQuad, 2 * problemData.p + 1, ones(problemData.g.numT, 3));
 end % if
 if problemData.isIP  % IP-specific matrices/vectors
@@ -92,7 +95,7 @@ if problemData.isIP  % IP-specific matrices/vectors
   if problemData.symparam ~= 0
     problemData.globBsym = 0.5 * (globBSymIP{1} + globBSymIP{2}) + globBSymIPD{1} + globBSymIPD{2};
     globJsym = assembleVecEdgeDphiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
-      @(x1,x2) dCont(x1,x2) .* uDCont(x1,x2), problemData.N, problemData.basesOnQuad);
+      @(x1,x2) dCont(x1,x2) .* uDContDiff(x1,x2), problemData.N, problemData.basesOnQuad);
     problemData.globJsym = globJsym{1} + globJsym{2};
   end % if
 else                 % LDG-specific matrices/vectors
@@ -101,7 +104,7 @@ else                 % LDG-specific matrices/vectors
     problemData.refEdgePhiIntPhiIntPerQuad, problemData.refEdgePhiIntPhiExtPerQuad, dCont);
   problemData.globBuD = assembleMatEdgePhiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
     problemData.refEdgePhiIntPhiIntPerQuad, dCont);
-  problemData.globJD = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, uDCont, ...
+  problemData.globJD = assembleVecEdgePhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, uDContDiff, ...
     problemData.N, problemData.basesOnQuad);
 end
 end % function

@@ -72,8 +72,8 @@ problemData = setdefault(problemData, 'isVisSol', true);        % visualization 
 problemData = setdefault(problemData, 'symparam', 1);           % symmetrization parameter (theta)
 problemData = setdefault(problemData, 'penparam', 1);           % penalty parameter (eta>0)
 problemData = setdefault(problemData, 'isIP', false);           % use interior penalty dG instead of LDG
-problemData = setdefault(problemData, 'deltaAdvReac', 0);       % time stepping parameter for advection (0, 1)
-problemData = setdefault(problemData, 'deltaDiff', 0);          % time stepping parameter for diffusion (0, 1)
+problemData = setdefault(problemData, 'deltaAdvReac', 0);       % time stepping parameter for advection (0 or 1)
+problemData = setdefault(problemData, 'deltaDiff', 1);          % time stepping parameter for diffusion (0 or 1)
 problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'adv-diff-reac']); % basename of output files
 problemData = setdefault(problemData, 'outputTypes', {'vtk'});  % type of output files
 problemData = setdefault(problemData, 'outputFrequency', 1e3);  % output frequency
@@ -91,9 +91,14 @@ dtU = 3;
 dx1d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
 dx2d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
 % Right hand side
-fCont = @(t,x1,x2) dtU + (v1Cont(t,x1,x2) - dx1d(t,x1,x2)) .* dx1U(t,x1,x2) ...
-                   + (v2Cont(t,x1,x2) - dx2d(t,x1,x2)) .* dx2U(t,x1,x2) ...
-                   - dCont(t,x1,x2) .* ddU(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
+fCont = @(t,x1,x2) dtU * ones(sizeof(x1));
+fContAdvReac = @(t,x1,x2) v1Cont(t,x1,x2) .* dx1U(t,x1,x2) ...
+                  + v2Cont(t,x1,x2) .* dx2U(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
+fContDiff = @(t,x1,x2) - dx1d(t,x1,x2) .* dx1U(t,x1,x2) - dx2d(t,x1,x2) .* dx2U(t,x1,x2) ...
+                  - dCont(t,x1,x2) .* ddU(t,x1,x2);
+% fCont = @(t,x1,x2) dtU + (v1Cont(t,x1,x2) - dx1d(t,x1,x2)) .* dx1U(t,x1,x2) ...
+%                    + (v2Cont(t,x1,x2) - dx2d(t,x1,x2)) .* dx2U(t,x1,x2) ...
+%                    - dCont(t,x1,x2) .* ddU(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
 % Assign continuous functions
 problemData.uCont = uCont;
 problemData.u0Cont = @(x1,x2) uCont(0,x1,x2);
@@ -104,6 +109,8 @@ problemData.dCont = dCont;
 problemData.v1Cont = v1Cont;
 problemData.v2Cont = v2Cont;
 problemData.fCont = fCont;
+problemData.fContAdvReac = fContAdvReac;
+problemData.fContDiff = fContDiff;
 %% Domain and triangulation configuration.
 % Select domain and triangulation
 problemData.generateGridData = @domainSquare;
