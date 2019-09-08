@@ -87,11 +87,11 @@ v2Cont = @(t,x1,x2) -cos(3*x1) .* cos(3*x2) - 2;
 dx1U = @(t,x1,x2) -7 * sin(7*x1) .* cos(7*x2);
 dx2U = @(t,x1,x2) -7 * cos(7*x1) .* sin(7*x2);
 ddU = @(t,x1,x2) -98 * cos(7*x1) .* cos(7*x2);
-dtU = 3;
+dtU = 0; % 3;
 dx1d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
 dx2d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
 % Right hand side
-fCont = @(t,x1,x2) dtU * ones(sizeof(x1));
+fCont = @(t,x1,x2) dtU * ones(size(x1));
 fContAdvReac = @(t,x1,x2) v1Cont(t,x1,x2) .* dx1U(t,x1,x2) ...
                   + v2Cont(t,x1,x2) .* dx2U(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
 fContDiff = @(t,x1,x2) - dx1d(t,x1,x2) .* dx1U(t,x1,x2) - dx2d(t,x1,x2) .* dx2U(t,x1,x2) ...
