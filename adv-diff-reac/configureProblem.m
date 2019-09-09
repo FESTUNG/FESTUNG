@@ -62,48 +62,95 @@
 %
 function problemData = configureProblem(problemData)
 %% Parameters.
+problemData = setdefault(problemData, 'testcase', 'convergence'); % name of testcase
 problemData = setdefault(problemData, 'hmax', 2^-3);            % maximum edge length of triangle
 problemData = setdefault(problemData, 'p', 1);                  % local polynomial degree
 problemData = setdefault(problemData, 't0', 0);                 % start time
-problemData = setdefault(problemData, 'tEnd', .05);               % end time
-problemData = setdefault(problemData, 'numSteps', 5e3);         % number of time steps
+problemData = setdefault(problemData, 'tEnd', .005);               % end time
+problemData = setdefault(problemData, 'numSteps', 1e1);         % number of time steps
 problemData = setdefault(problemData, 'isVisGrid', false);      % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);        % visualization of solution
-problemData = setdefault(problemData, 'symparam', 1);           % symmetrization parameter (theta)
+problemData = setdefault(problemData, 'symparam', 0);           % symmetrization parameter (theta)
 problemData = setdefault(problemData, 'penparam', 1);           % penalty parameter (eta>0)
-problemData = setdefault(problemData, 'isIP', false);           % use interior penalty dG instead of LDG
+problemData = setdefault(problemData, 'isIP', ~true);           % use interior penalty dG instead of LDG
 problemData = setdefault(problemData, 'deltaAdvReac', 0);       % time stepping parameter for advection (0 or 1)
 problemData = setdefault(problemData, 'deltaDiff', 1);          % time stepping parameter for diffusion (0 or 1)
 problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'adv-diff-reac']); % basename of output files
 problemData = setdefault(problemData, 'outputTypes', {'vtk'});  % type of output files
 problemData = setdefault(problemData, 'outputFrequency', 1e3);  % output frequency
 %% Coefficients and boundary data.
-uCont = @(t,x1,x2) cos(7*x1) .* cos(7*x2) + 3*t;
-rCont = @(t,x1,x2) sin(5*x1) .* sin(5*x2);
-dCont = @(t,x1,x2) exp(0.5 * (x1 + x2));
-v1Cont = @(t,x1,x2) -sin(3*x1) .* sin(3*x2) - 2;
-v2Cont = @(t,x1,x2) -cos(3*x1) .* cos(3*x2) - 2;
-% Derivatives
-dx1U = @(t,x1,x2) -7 * sin(7*x1) .* cos(7*x2);
-dx2U = @(t,x1,x2) -7 * cos(7*x1) .* sin(7*x2);
-ddU = @(t,x1,x2) -98 * cos(7*x1) .* cos(7*x2);
-dtU = 0; % 3;
-dx1d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
-dx2d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
-% Right hand side
-fCont = @(t,x1,x2) dtU * ones(size(x1));
-fContAdvReac = @(t,x1,x2) v1Cont(t,x1,x2) .* dx1U(t,x1,x2) ...
-                  + v2Cont(t,x1,x2) .* dx2U(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
-fContDiff = @(t,x1,x2) - dx1d(t,x1,x2) .* dx1U(t,x1,x2) - dx2d(t,x1,x2) .* dx2U(t,x1,x2) ...
-                  - dCont(t,x1,x2) .* ddU(t,x1,x2);
-% fCont = @(t,x1,x2) dtU + (v1Cont(t,x1,x2) - dx1d(t,x1,x2)) .* dx1U(t,x1,x2) ...
-%                    + (v2Cont(t,x1,x2) - dx2d(t,x1,x2)) .* dx2U(t,x1,x2) ...
-%                    - dCont(t,x1,x2) .* ddU(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
+switch problemData.testcase
+  case 'convergence'
+    dtU = 3;
+    uCont = @(t,x1,x2) cos(7*x1) .* cos(7*x2) + dtU*t;
+    rCont = @(t,x1,x2) sin(5*x1) .* sin(5*x2);
+    dCont = @(t,x1,x2) exp(0.5 * (x1 + x2));
+    v1Cont = @(t,x1,x2) -sin(3*x1) .* sin(3*x2) - 2;
+    v2Cont = @(t,x1,x2) -cos(3*x1) .* cos(3*x2) - 2;
+    gNCont = @(t,x1,x2) zeros(size(x1));
+    % Derivatives
+    dx1U = @(t,x1,x2) -7 * sin(7*x1) .* cos(7*x2);
+    dx2U = @(t,x1,x2) -7 * cos(7*x1) .* sin(7*x2);
+    ddU = @(t,x1,x2) -98 * cos(7*x1) .* cos(7*x2);
+    dx1d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
+    dx2d = @(t,x1,x2) 0.5 * exp(0.5 * (x1  + x2));
+    % Right hand side
+    fCont = @(t,x1,x2) dtU * ones(size(x1));
+    fContAdvReac = @(t,x1,x2) v1Cont(t,x1,x2) .* dx1U(t,x1,x2) ...
+                      + v2Cont(t,x1,x2) .* dx2U(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
+    fContDiff = @(t,x1,x2) - dx1d(t,x1,x2) .* dx1U(t,x1,x2) - dx2d(t,x1,x2) .* dx2U(t,x1,x2) ...
+                      - dCont(t,x1,x2) .* ddU(t,x1,x2);
+    % fCont = @(t,x1,x2) dtU + (v1Cont(t,x1,x2) - dx1d(t,x1,x2)) .* dx1U(t,x1,x2) ...
+    %                    + (v2Cont(t,x1,x2) - dx2d(t,x1,x2)) .* dx2U(t,x1,x2) ...
+    %                    - dCont(t,x1,x2) .* ddU(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
+  case 'constant'
+    uCont = @(t,x1,x2) ones(size(x1));
+    rCont = @(t,x1,x2) ones(size(x1));
+    dCont = @(t,x1,x2) ones(size(x1));
+    v1Cont = @(t,x1,x2) -ones(size(x1));
+    v2Cont = @(t,x1,x2) -ones(size(x1));
+    gNCont = @(t,x1,x2) zeros(size(x1));
+    % Derivatives
+    dx1U = @(t,x1,x2) zeros(size(x1));
+    dx2U = @(t,x1,x2) zeros(size(x1));
+    ddU = @(t,x1,x2) zeros(size(x1));
+    dtU = 0;
+    dx1d = @(t,x1,x2) zeros(size(x1));
+    dx2d = @(t,x1,x2) zeros(size(x1));
+    % Right hand side
+    fCont = @(t,x1,x2) dtU * ones(size(x1));
+    fContAdvReac = @(t,x1,x2) v1Cont(t,x1,x2) .* dx1U(t,x1,x2) ...
+                      + v2Cont(t,x1,x2) .* dx2U(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
+    fContDiff = @(t,x1,x2) - dx1d(t,x1,x2) .* dx1U(t,x1,x2) - dx2d(t,x1,x2) .* dx2U(t,x1,x2) ...
+                      - dCont(t,x1,x2) .* ddU(t,x1,x2);
+  case 'linear'
+    uCont = @(t,x1,x2) 2-x1-x2;
+    rCont = @(t,x1,x2) ones(size(x1));
+    dCont = @(t,x1,x2) ones(size(x1));
+    v1Cont = @(t,x1,x2) -ones(size(x1));
+    v2Cont = @(t,x1,x2) -ones(size(x1));
+    gNCont = @(t,x1,x2) -ones(size(x1));
+    % Derivatives
+    dx1U = @(t,x1,x2) -ones(size(x1));
+    dx2U = @(t,x1,x2) -ones(size(x1));
+    ddU = @(t,x1,x2) zeros(size(x1));
+    dtU = 0;
+    dx1d = @(t,x1,x2) zeros(size(x1));
+    dx2d = @(t,x1,x2) zeros(size(x1));
+    % Right hand side
+    fCont = @(t,x1,x2) dtU * ones(size(x1));
+    fContAdvReac = @(t,x1,x2) v1Cont(t,x1,x2) .* dx1U(t,x1,x2) ...
+                      + v2Cont(t,x1,x2) .* dx2U(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
+    fContDiff = @(t,x1,x2) - dx1d(t,x1,x2) .* dx1U(t,x1,x2) - dx2d(t,x1,x2) .* dx2U(t,x1,x2) ...
+                      - dCont(t,x1,x2) .* ddU(t,x1,x2);
+  otherwise
+    error(['Invalid testcase "'  problemData.testcase '"'])
+end % switch 
 % Assign continuous functions
 problemData.uCont = uCont;
 problemData.u0Cont = @(x1,x2) uCont(0,x1,x2);
 problemData.uDCont = uCont;
-problemData.gNCont = @(t,x1,x2) zeros(size(x1));
+problemData.gNCont = gNCont;
 problemData.rCont = rCont;
 problemData.dCont = dCont;
 problemData.v1Cont = v1Cont;

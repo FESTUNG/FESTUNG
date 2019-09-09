@@ -68,7 +68,7 @@ if problemData.deltaAdvReac == 1
   sysA = sysAadv;
   sysV = sysV + sysVadv;
 else
-  sysV = sysV - sysA * sysU + sysVadv;
+  sysV = sysV - sysAadv * sysU + sysVadv;
 end % if
 
 if problemData.isIP
@@ -88,9 +88,9 @@ if problemData.isIP
 else
   % System matrix and right-hand side from diffusion using IP discretization
   sysAdiffUU = problemData.penparam * problemData.globBjmp;
-  sysAdiffUQ = { -problemData.globAu{1} + problemData.globBu{1} + problemData.globBuD{1}, ...
+  sysAdiffUQ = { -problemData.globAu{1} + problemData.globBu{1} + problemData.globBuD{1} ; ...
                  -problemData.globAu{2} + problemData.globBu{2} + problemData.globBuD{2} };
-  sysAdiffQ = { -problemData.globAq{1} + problemData.globBq{1} + problemData.globBqN{1}; ...
+  sysAdiffQ = { -problemData.globAq{1} + problemData.globBq{1} + problemData.globBqN{1} ; ...
                 -problemData.globAq{2} + problemData.globBq{2} + problemData.globBqN{2} };
   sysVdiff = -problemData.globJN + problemData.penparam * problemData.globJjmp;
 
@@ -100,12 +100,12 @@ else
              sparse(K * N, 2 * K * N), problemData.globM ];
     sysA = [ problemData.globM    , sparse(K * N, K * N) , sysAdiffQ{1} ; ...
              sparse(K * N, K * N) , problemData.globM    , sysAdiffQ{2} ; ...
-             sysAdiffUQ{1}        , sysAdiffUQ{2}        , sysAdiffUU ];
+             sysAdiffUQ{1}        , sysAdiffUQ{2}        , sysAdiffUU + sysA ];
     sysV = [ -problemData.globJD{1} ; -problemData.globJD{2} ; sysV + sysVdiff ];
     sysU = [ zeros(2 * K * N, 1) ; sysU ];
   else
-    sysQ = { problemData.globM \ (sysAdiffQ{1} * sysU - problemData.globJD{1}); ...
-             problemData.globM \ (sysAdiffQ{2} * sysU - problemData.globJD{2}) };
+    sysQ = { problemData.globM \ (-sysAdiffQ{1} * sysU - problemData.globJD{1}); ...
+             problemData.globM \ (-sysAdiffQ{2} * sysU - problemData.globJD{2}) };
     sysV = sysV - sysAdiffUU * sysU - sysAdiffUQ{1} * sysQ{1} - sysAdiffUQ{2} * sysQ{2} + sysVdiff;
   end % if
 end % if

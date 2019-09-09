@@ -81,7 +81,7 @@ for ip = 1 : length(pLevel)
       pd.hmax = 2^-hLevel(level) / 3;
     end % if
     if ~isSpatConv
-      pd.numSteps = 2^pLevel(ip) * 1e1 * 2^tLevel(level);
+      pd.numSteps = 2^pLevel(ip) * 2e1 * 2^tLevel(level);
     end % if
     try
       pd = main('adv-diff-reac', pd);
