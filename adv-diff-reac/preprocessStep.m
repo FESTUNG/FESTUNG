@@ -91,7 +91,7 @@ if problemData.isIP  % IP-specific matrices/vectors
     problemData.refEdgeDphiIntPhiIntPerQuad, problemData.refEdgeDphiIntPhiExtPerQuad, dCont);
   globBSymIPD = assembleMatEdgeDphiIntPhiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...
     problemData.refEdgeDphiIntPhiIntPerQuad, dCont);
-  problemData.globBIP = 0.5 * ((globBSymIP{1} + globBSymIP{2}) + globBSymIPD{1} + globBSymIPD{2}).';
+  problemData.globBIP = (0.5 * (globBSymIP{1} + globBSymIP{2}) + globBSymIPD{1} + globBSymIPD{2}).';
   if problemData.symparam ~= 0
     problemData.globBsym = 0.5 * (globBSymIP{1} + globBSymIP{2}) + globBSymIPD{1} + globBSymIPD{2};
     globJsym = assembleVecEdgeDphiIntFuncContNu(problemData.g, problemData.g.markE0TbdrD, ...

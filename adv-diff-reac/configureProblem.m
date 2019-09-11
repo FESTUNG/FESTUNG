@@ -66,13 +66,13 @@ problemData = setdefault(problemData, 'testcase', 'convergence'); % name of test
 problemData = setdefault(problemData, 'hmax', 2^-3);            % maximum edge length of triangle
 problemData = setdefault(problemData, 'p', 1);                  % local polynomial degree
 problemData = setdefault(problemData, 't0', 0);                 % start time
-problemData = setdefault(problemData, 'tEnd', .005);               % end time
+problemData = setdefault(problemData, 'tEnd', .0025);               % end time
 problemData = setdefault(problemData, 'numSteps', 1e1);         % number of time steps
 problemData = setdefault(problemData, 'isVisGrid', false);      % visualization of grid
 problemData = setdefault(problemData, 'isVisSol', true);        % visualization of solution
-problemData = setdefault(problemData, 'symparam', 0);           % symmetrization parameter (theta)
-problemData = setdefault(problemData, 'penparam', 1);           % penalty parameter (eta>0)
-problemData = setdefault(problemData, 'isIP', ~true);           % use interior penalty dG instead of LDG
+problemData = setdefault(problemData, 'symparam', 1);           % symmetrization parameter (theta)
+problemData = setdefault(problemData, 'penparam', 10);           % penalty parameter (eta>0)
+problemData = setdefault(problemData, 'isIP', true);           % use interior penalty dG instead of LDG
 problemData = setdefault(problemData, 'deltaAdvReac', 0);       % time stepping parameter for advection (0 or 1)
 problemData = setdefault(problemData, 'deltaDiff', 1);          % time stepping parameter for diffusion (0 or 1)
 problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'adv-diff-reac']); % basename of output files
@@ -134,6 +134,26 @@ switch problemData.testcase
     dx1U = @(t,x1,x2) -ones(size(x1));
     dx2U = @(t,x1,x2) -ones(size(x1));
     ddU = @(t,x1,x2) zeros(size(x1));
+    dtU = 0;
+    dx1d = @(t,x1,x2) zeros(size(x1));
+    dx2d = @(t,x1,x2) zeros(size(x1));
+    % Right hand side
+    fCont = @(t,x1,x2) dtU * ones(size(x1));
+    fContAdvReac = @(t,x1,x2) v1Cont(t,x1,x2) .* dx1U(t,x1,x2) ...
+                      + v2Cont(t,x1,x2) .* dx2U(t,x1,x2) + rCont(t,x1,x2) .* uCont(t,x1,x2);
+    fContDiff = @(t,x1,x2) - dx1d(t,x1,x2) .* dx1U(t,x1,x2) - dx2d(t,x1,x2) .* dx2U(t,x1,x2) ...
+                      - dCont(t,x1,x2) .* ddU(t,x1,x2);
+  case 'zeroBdr'
+    uCont = @(t,x1,x2) sin(2*pi*x1).*sin(2*pi*x2);
+    rCont = @(t,x1,x2) zeros(size(x1));
+    dCont = @(t,x1,x2) ones(size(x1));
+    v1Cont = @(t,x1,x2) zeros(size(x1));
+    v2Cont = @(t,x1,x2) zeros(size(x1));
+    gNCont = @(t,x1,x2) zeros(size(x1));
+    % Derivatives
+    dx1U = @(t,x1,x2) 2*pi*cos(2*pi*x1).*sin(2*pi*x2);
+    dx2U = @(t,x1,x2) 2*pi*sin(2*pi*x1).*cos(2*pi*x2);
+    ddU = @(t,x1,x2) -8*pi*pi*sin(2*pi*x1).*sin(2*pi*x2);
     dtU = 0;
     dx1d = @(t,x1,x2) zeros(size(x1));
     dx2d = @(t,x1,x2) zeros(size(x1));

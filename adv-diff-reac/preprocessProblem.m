@@ -81,7 +81,7 @@ problemData.refEdgePhiIntPhiExtPerQuad = integrateRefEdgePhiIntPhiExtPerQuad(pro
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.refElemPhiPhi);
 if problemData.penparam == 0
   problemData.globBjmp = sparse(problemData.g.numT * problemData.N, problemData.g.numT * problemData.N);
-  problemData.globJmp = zeros(problemData.g.numT * problemData.N, 1);
+  problemData.globJjmp = zeros(problemData.g.numT * problemData.N, 1);
 else
   problemData.globBjmp = assembleMatEdgePhiPhi(problemData.g, ~problemData.g.markE0TbdrN, ...
     refEdgePhiIntPhiInt, refEdgePhiIntPhiExt, ones(problemData.g.numT, 3));
