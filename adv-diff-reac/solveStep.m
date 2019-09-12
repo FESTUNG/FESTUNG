@@ -118,31 +118,5 @@ if ~problemData.isIP && problemData.deltaDiff == 1
   sysU = sysU(2 * K * N + 1 : 3 * K * N);
 end % if
 
-% % System matrix from advection-reaction
-% sysA = -problemData.globAadv{1} - problemData.globAadv{2} + problemData.globAreac + problemData.globBadv;
-
-% if problemData.isIP
-%   sysA = sysA + problemData.globAIP - problemData.globBIP ...
-%           + problemData.symparam * problemData.globBsym + problemData.penparam * problemData.globBjmp;
-%   sysU = sysU + problemData.dt * (problemData.sysF - problemData.globM \ ( ...
-%           sysA * sysU + problemData.globJadv - problemData.symparam * problemData.globJsym + ...
-%           problemData.globJN - problemData.penparam * problemData.globJjmp ));
-% else
-%   % Compute Q from previous time level
-%   sysQ = cell(2,1);
-%   for m = 1 : 2
-%     sysAq = problemData.globAq{m} - problemData.globBq{m} - problemData.globBqN{m};
-%     sysQ{m} =  problemData.globM \ ( sysAq * sysU - problemData.globJD{m} );
-%   end % for
-  
-%   % Compute U at next time level
-%   sysAu = sysA + problemData.penparam * problemData.globBjmp;
-%   sysAq = { -problemData.globAu{1} + problemData.globBu{1} + problemData.globBuD{1}, ...
-%             -problemData.globAu{2} + problemData.globBu{2} + problemData.globBuD{2} };
-%   sysU = sysU + problemData.dt * (problemData.sysF - problemData.globM \ ( ...
-%           sysAu * sysU + sysAq{1} * sysQ{1} + sysAq{2} * sysQ{2} + ...
-%           problemData.globJadv + problemData.globJN - problemData.penparam * problemData.globJjmp ));
-% end % if
-
 problemData.uDisc = reshape(sysU, problemData.N, K)';
 end % function

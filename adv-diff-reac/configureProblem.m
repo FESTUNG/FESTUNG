@@ -63,18 +63,18 @@
 function problemData = configureProblem(problemData)
 %% Parameters.
 problemData = setdefault(problemData, 'testcase', 'convergence'); % name of testcase
-problemData = setdefault(problemData, 'hmax', 2^-3);            % maximum edge length of triangle
-problemData = setdefault(problemData, 'p', 1);                  % local polynomial degree
-problemData = setdefault(problemData, 't0', 0);                 % start time
-problemData = setdefault(problemData, 'tEnd', .0025);               % end time
-problemData = setdefault(problemData, 'numSteps', 1e1);         % number of time steps
-problemData = setdefault(problemData, 'isVisGrid', false);      % visualization of grid
-problemData = setdefault(problemData, 'isVisSol', true);        % visualization of solution
-problemData = setdefault(problemData, 'symparam', 1);           % symmetrization parameter (theta)
-problemData = setdefault(problemData, 'penparam', 10);           % penalty parameter (eta>0)
-problemData = setdefault(problemData, 'isIP', true);           % use interior penalty dG instead of LDG
-problemData = setdefault(problemData, 'deltaAdvReac', 0);       % time stepping parameter for advection (0 or 1)
-problemData = setdefault(problemData, 'deltaDiff', 1);          % time stepping parameter for diffusion (0 or 1)
+problemData = setdefault(problemData, 'hmax', 2^-3);       % maximum edge length of triangle
+problemData = setdefault(problemData, 'p', 1);             % local polynomial degree
+problemData = setdefault(problemData, 't0', 0);            % start time
+problemData = setdefault(problemData, 'tEnd', 1);          % end time
+problemData = setdefault(problemData, 'numSteps', 5e2);    % number of time steps
+problemData = setdefault(problemData, 'isVisGrid', false); % visualization of grid
+problemData = setdefault(problemData, 'isVisSol', true);   % visualization of solution
+problemData = setdefault(problemData, 'symparam', 1);      % symmetrization parameter (theta)
+problemData = setdefault(problemData, 'penparam', 10);     % penalty parameter (eta>0)
+problemData = setdefault(problemData, 'isIP', true);       % use interior penalty dG instead of LDG
+problemData = setdefault(problemData, 'deltaAdvReac', 0);  % time stepping parameter for advection
+problemData = setdefault(problemData, 'deltaDiff', 1);     % time stepping parameter for diffusion
 problemData = setdefault(problemData, 'outputBasename', ['output' filesep 'adv-diff-reac']); % basename of output files
 problemData = setdefault(problemData, 'outputTypes', {'vtk'});  % type of output files
 problemData = setdefault(problemData, 'outputFrequency', 1e3);  % output frequency
@@ -183,6 +183,6 @@ problemData.fContDiff = fContDiff;
 problemData.generateGridData = @domainSquare;
 % Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrN = @(g) g.idE0T == 4 | g.idE0T == 1; %false(g.numT,3);
+problemData.generateMarkE0TbdrN = @(g) g.idE0T == 4 | g.idE0T == 1;
 problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 end % function
