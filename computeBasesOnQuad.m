@@ -2,7 +2,7 @@
 % reference triangle and stores them in a struct.
 
 %===============================================================================
-%> @file
+%> @file computeBasesOnQuad.m
 %>
 %> @brief Evaluate basis functions and their gradients in quadrature points on
 %>        the reference triangle and stores them in a struct.
@@ -34,6 +34,8 @@
 %> - <code>phi2D</code>: @f$\hat{\varphi}_i(\mathbf{q}_r) \; [R \times N]@f$
 %> - <code>gradPhi2D</code>: @f$\hat{\nabla} \hat{\varphi}_i(\mathbf{q}_r)
 %>                               \; [R \times N \times 2]@f$
+%> - <code>gradPhi1D</code>
+%> - <code>thetaGradPhi1D</code>
 %> 
 %> @param  N          The number of local degrees of freedom. For polynomial
 %>                    order @f$p@f$, it is given as @f$N = (p+1)(p+2)/2@f$
@@ -47,8 +49,10 @@
 %>
 %> This file is part of FESTUNG
 %>
-%> @copyright 2014-2015 Florian Frank, Balthasar Reuter, Vadym Aizinger
+%> @copyright 2014-2019 Florian Frank, Balthasar Reuter, Vadym Aizinger
 %> 
+%> @author Florian Frank, Balthasar Reuter, Andreas Rupp
+%>
 %> @par License
 %> @parblock
 %> This program is free software: you can redistribute it and/or modify
@@ -82,10 +86,12 @@ if nargin < 3
 end % if
 
 % Initialize global variables
-basesOnQuad.phi2D = cell(max(requiredOrders),1);  
-basesOnQuad.gradPhi2D  = cell(max(requiredOrders),1);
-basesOnQuad.phi1D = cell(max(requiredOrders),1);  
-basesOnQuad.thetaPhi1D = cell(max(requiredOrders),1);
+basesOnQuad.phi2D          = cell(max(requiredOrders),1);  
+basesOnQuad.gradPhi2D      = cell(max(requiredOrders),1);
+basesOnQuad.phi1D          = cell(max(requiredOrders),1);
+basesOnQuad.thetaPhi1D     = cell(max(requiredOrders),1);
+basesOnQuad.gradPhi1D      = cell(max(requiredOrders),1);
+basesOnQuad.thetaGradPhi1D = cell(max(requiredOrders),1);
 
 % Fill global variables
 for it = 1 : length(requiredOrders)
@@ -103,15 +109,24 @@ for it = 1 : length(requiredOrders)
   end % for
   [Q, ~] = quadRule1D(ord);
   basesOnQuad.phi1D{ord} = zeros(length(Q), N, 3);
+  basesOnQuad.gradPhi1D{ord} = zeros(length(Q), N, 3, 2);
+  basesOnQuad.thetaPhi1D{ord} = zeros(length(Q), N, 3, 3);
+  basesOnQuad.thetaGradPhi1D{ord} = zeros(length(Q), N, 3, 3, 2);
   for nn = 1 : 3
     [Q1, Q2] = gammaMap(nn, Q);
     for i = 1 : N
       basesOnQuad.phi1D{ord}(:, i, nn) = phi(i, Q1, Q2);
+      for m = 1 : 2
+        basesOnQuad.gradPhi1D{ord}(:, i, nn, m) = gradPhi(i,m,Q1,Q2);
+      end
     end
     for np = 1 : 3
       [QP1,QP2] = theta(nn, np, Q1, Q2);
       for i = 1 : N
         basesOnQuad.thetaPhi1D{ord}(:, i, nn, np) = phi(i, QP1, QP2);
+        for m = 1 : 2
+          basesOnQuad.thetaGradPhi1D{ord}(:, i, nn, np, m) = gradPhi(i,m,QP1,QP2);
+        end
       end % for
     end % for
   end % for
