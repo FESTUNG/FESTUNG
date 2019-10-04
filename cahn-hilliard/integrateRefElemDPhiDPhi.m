@@ -2,7 +2,7 @@
 % consist of all permutations of derivatives of two basis functions.
 
 %===============================================================================
-%> @file ./core/integrateRefElemDPhiDPhi.m
+%> @file
 %>
 %> @brief Compute integrals on the reference triangle, whose 
 %>        integrands consist of all permutations of two basis functions.

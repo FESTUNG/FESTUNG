@@ -1,44 +1,42 @@
+% AUTOR: TIM ROITH
 % Compute integrals over the edges of the reference element, whose integrands 
-% consist of all permutations of a basis function's derivative and a basis function
+% consist of all permutations of two basis functions.
 
 %===============================================================================
-%> @file ./core/integrateRefEdgeDPhiIntPhiInt.m
+%> @file
 %>
-%> @brief Compute integrals over the edges of the reference element, whose
-%>        integrands consist of all permutations of a basis function's
-%>        derivative and a basis function
+%> @brief Compute integrals over the edges of the reference element, whose 
+%>        integrands consist of all permutations of two basis functions.
 %===============================================================================
 %>
-%> @brief Compute integrals over the edges of the reference element, whose
-%>        integrands consist of all permutations of a basis function's
-%>        derivative and a basis function
+%> @brief Compute integrals over the edges of the reference element 
+%>        @f$\hat{T}@f$, whose integrands consist of all permutations of two
+%>        basis functions.
 %>
-%> It computes a size-two cell of third order tensors @f$\hat{\mathsf{{T}}}^\mathrm{offdiag} 
-%>    \in \mathbb{R}^{N\times N\times {n_\mathrm{edges}}}@f$, 
-%> which is defined by
+%> It computes a multidimensional array
+%> @f$\hat{\mathsf{{S}}}^\mathrm{diag}\in\mathbb{R}^{N\times N\times {n_\mathrm{edges}}@f$
+%> defined by
 %> @f[
-%> [\hat{\mathsf{{T}}}^\mathrm{offdiag}]^m_{i,j,n^-} =
-%>   \int_0^1 \partial_m \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_{n^-}(s) 
-%>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_{n^-}(s) \mathrm{d}s \,,
+%> [\hat{\mathsf{{S}}}^\mathrm{diag}]_{i,j,n} =
+%>   \int_0^1 \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_n(s) 
+%>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_n(s) \mathrm{d}s \,,
 %> @f]
-%> with the mapping @f$\hat{\mathbf{\gamma}}_n@f$ defined in 
-%> <code>gammaMap()</code> and the mapping 
-%> @f$\hat{\mathbf{\vartheta}}_{n^-n^+}@f$ as described in <code>theta()</code>.
+%> where the mapping @f$\hat{\mathbf{\gamma}}_n@f$ is given in 
+%> <code>gammaMap()</code>.
 %>
 %> @param  N            The local number of degrees of freedom
 %> @param  basesOnQuad  A struct containing precomputed values of the basis
 %>                      functions on quadrature points. Must provide at
-%>                      least phi1D and thetaPhi1D.
+%>                      least phi1D.
 %> @param  qOrd         (optional) The order of the quadrature rule to be used. 
 %>                      Defaults to @f$2p+1 @f$.
-%> @retval ret  The computed size-two cell with fourt order tensors
-%>              @f$[N\times N\times {n_\mathrm{edges}}\times {n_\mathrm{edges}}]@f$
+%> @retval ret  The computed array @f$[N\times N\times {n_\mathrm{edges}}]@f$
 %>
 %> This file is part of FESTUNG
 %>
 %> @copyright 2014-2017 Florian Frank, Balthasar Reuter, Vadym Aizinger
 %>
-%> @author Andreas Rupp, 2018.
+%> @author Balthasar Reuter, 2017
 %> 
 %> @par License
 %> @parblock
@@ -56,7 +54,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgeDPhiIntPhiInt(N, basesOnQuad, qOrd)
+function ret = integrateRefEdgeDPhiIntPhiIntPerQuad(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 nEdges = size(basesOnQuad.phi1D{end}, 3);
 
@@ -72,16 +70,16 @@ if nargin < 3
   qOrd = 2*p+1;  
 end % if
 
-[~, W] = quadRule1D(qOrd);
+[~, W] = quadRule1D(qOrd); R = length(W);
 ret = cell(2,1);
-ret{1} = zeros(N, N, nEdges); % [N x N x nEdges]
-ret{2} = zeros(N, N, nEdges); % [N x N x nEdges]
+ret{1} = zeros(N, N, nEdges, R); % [N x N x nEdges x R]
+ret{2} = zeros(N, N, nEdges, R); % [N x N x nEdges x R]
 
 for n = 1 : nEdges
   for i = 1 : N
     for j = 1 : N
       for m = 1 : 2
-        ret{m}(i,j,n) = W * ( basesOnQuad.gradPhi1D{qOrd}(:,i,n,m) .* basesOnQuad.phi1D{qOrd}(:,j,n) );
+        ret{m}(i,j,n,:) = ( basesOnQuad.gradPhi1D{qOrd}(:,i,n,m) .* basesOnQuad.phi1D{qOrd}(:,j,n) ) .* W.';
       end
     end  % for j
   end  % for i

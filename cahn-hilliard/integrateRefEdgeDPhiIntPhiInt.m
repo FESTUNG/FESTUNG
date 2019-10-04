@@ -1,27 +1,25 @@
 % Compute integrals over the edges of the reference element, whose integrands 
-% consist of all permutations of derivatives of basis functions from element
-% and basis functions on other element.
+% consist of all permutations of a basis function's derivative and a basis function
 
 %===============================================================================
-%> @file ./core/integrateRefEdgeDPhiIntPhiExt.m
+%> @file
 %>
 %> @brief Compute integrals over the edges of the reference element, whose
-%>        integrands consist of all permutations of derivatives of basis
-%>        functions from element and basis functions on other element.
+%>        integrands consist of all permutations of a basis function's
+%>        derivative and a basis function
 %===============================================================================
 %>
 %> @brief Compute integrals over the edges of the reference element, whose
-%>        integrands consist of all permutations of derivatives of basis
-%>        functions from element and basis functions on other element.
+%>        integrands consist of all permutations of a basis function's
+%>        derivative and a basis function
 %>
-%> It computes a size-two cell of fourth order tensors @f$\hat{\mathsf{{T}}}^\mathrm{offdiag} 
-%>    \in \mathbb{R}^{N\times N\times {n_\mathrm{edges}}\times {n_\mathrm{edges}}}@f$, 
+%> It computes a size-two cell of third order tensors @f$\hat{\mathsf{{T}}}^\mathrm{offdiag} 
+%>    \in \mathbb{R}^{N\times N\times {n_\mathrm{edges}}}@f$, 
 %> which is defined by
 %> @f[
-%> [\hat{\mathsf{{T}}}^\mathrm{offdiag}]^m_{i,j,n^-,n^+} =
+%> [\hat{\mathsf{{T}}}^\mathrm{offdiag}]^m_{i,j,n^-} =
 %>   \int_0^1 \partial_m \hat{\varphi}_i \circ \hat{\mathbf{\gamma}}_{n^-}(s) 
-%>   \hat{\varphi}_j\circ \hat{\mathbf{\vartheta}}_{n^-n^+} \circ
-%>   \hat{\mathbf{\gamma}}_{n^-}(s) \mathrm{d}s \,,
+%>   \hat{\varphi}_j\circ \hat{\mathbf{\gamma}}_{n^-}(s) \mathrm{d}s \,,
 %> @f]
 %> with the mapping @f$\hat{\mathbf{\gamma}}_n@f$ defined in 
 %> <code>gammaMap()</code> and the mapping 
@@ -58,7 +56,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function ret = integrateRefEdgeDPhiIntPhiExt(N, basesOnQuad, qOrd)
+function ret = integrateRefEdgeDPhiIntPhiInt(N, basesOnQuad, qOrd)
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 nEdges = size(basesOnQuad.phi1D{end}, 3);
 
@@ -76,27 +74,17 @@ end % if
 
 [~, W] = quadRule1D(qOrd);
 ret = cell(2,1);
+ret{1} = zeros(N, N, nEdges); % [N x N x nEdges]
+ret{2} = zeros(N, N, nEdges); % [N x N x nEdges]
 
-if nEdges == 3
-  
-  ret{1} = zeros(N, N, 3, 3); % [N x N x 3 x 3]
-  ret{2} = zeros(N, N, 3, 3); % [N x N x 3 x 3]
+for n = 1 : nEdges
+  for i = 1 : N
+    for j = 1 : N
+      for m = 1 : 2
+        ret{m}(i,j,n) = W * ( basesOnQuad.gradPhi1D{qOrd}(:,i,n,m) .* basesOnQuad.phi1D{qOrd}(:,j,n) );
+      end
+    end  % for j
+  end  % for i
+end  % for n
 
-  for nn = 1 : 3
-    for np = 1 : 3
-      for i = 1 : N
-        for j = 1 : N
-          for m = 1 : 2
-            ret{m}(i, j, nn, np) = sum( W' .* basesOnQuad.gradPhi1D{qOrd}(:,i,nn,m) .* basesOnQuad.thetaPhi1D{qOrd}(:,j,nn,np) );
-          end % for m
-        end % for
-      end % for
-    end % for
-  end % for
-  
-elseif nEdges == 4
-  
-  assert(0==1, 'Not implemented');
-  
-end % if  
 end % function

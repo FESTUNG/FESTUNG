@@ -2,7 +2,7 @@
 % basis function, a derivative of a basis function, and the normal of the triangle.
 
 %===============================================================================
-%> @file ./core/assembleMatEdgePhiPhi.m
+%> @file 
 %>
 %> @brief Assembles a matrix containing integrals over interior edges of
 %>        products of basis function, a derivative of a basis function,

@@ -2,7 +2,7 @@
 % consist of all permutations of two basis functions.
 
 %===============================================================================
-%> @file ./coreintegrateRefElemPhiPhiLumped.m
+%> @file
 %>
 %> @brief Compute lumped integrals on the reference triangle, whose 
 %>        integrands consist of all permutations of two basis functions.
