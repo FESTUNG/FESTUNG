@@ -166,7 +166,7 @@ ret = { sparse(Ke*N, Ke*N), sparse(Ke*N, Ke*N) };
 for m = 1 : 2
   Rs = zeros(Ke*N, N);
   for r = 1 : 2
-    for l = 1 : N
+    for l = 1 : dataN
       for s = 1 : length(J0T)
       % Multiplying dataDisc here seems to be slightly faster than using spdiags instead of speye in the kronVec
         Rs = Rs + kron(dataDisc{r,m}(markElem,l) .* J0T{s}(markElem,3-r,3-r), refElemDphiPhiPhi{s}(:,:,l,  r)) - ...
@@ -190,7 +190,7 @@ validateattributes(dataDisc{2}, {'numeric'}, {'size', [K dataN]}, mfilename, 'da
 ret = { sparse(Ke*N, Ke*N), sparse(Ke*N, Ke*N) };
 for m = 1 : 2
   Rs = zeros(Ke*N, N);
-  for l = 1 : N
+  for l = 1 : dataN
     for s = 1 : length(J0T)
       % Multiplying dataDisc here seems to be slightly faster than using spdiags instead of speye in the kronVec
       Rs = Rs + kron(dataDisc{m}(markElem,l) .* J0T{s}(markElem,3-m,3-m), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
@@ -212,7 +212,7 @@ validateattributes(dataDisc, {'numeric'}, {'size', [K dataN]}, mfilename, 'dataD
 ret = { sparse(Ke*N, Ke*N), sparse(Ke*N, Ke*N) };
 for m = 1 : 2
   Rs = zeros(Ke*N, N);
-  for l = 1 : N
+  for l = 1 : dataN
     for s = 1 : length(J0T)
       % Multiplying dataDisc here seems to be slightly faster than using spdiags instead of speye in the kronVec
       Rs = Rs + kron(dataDisc(markElem,l) .* J0T{s}(markElem,3-m,3-m), refElemDphiPhiPhi{s}(:,:,l,  m)) - ...
