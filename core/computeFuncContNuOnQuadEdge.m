@@ -51,10 +51,16 @@ K = g.numT;  [Q, W] = quadRule1D(qOrd);
 validateattributes(funcCont1, {'function_handle'}, {}, mfilename, 'funcCont1');
 validateattributes(funcCont2, {'function_handle'}, {}, mfilename, 'funcCont2');
 
+if size(g.V0T, 2) == 4
+  edgeMap = @gammaMapQuadri;
+else
+  edgeMap = @gammaMap;
+end
+
 % Evaluate function
 ret = zeros(K, 3, length(W));
-for n = 1 : 3
-  [Q1, Q2] = gammaMap(n, Q);
+for n = 1 : size(g.V0T, 2)
+  [Q1, Q2] = edgeMap(n, Q);
   ret(:, n, :) = bsxfun(@times, g.nuE0T(:, n, 1), funcCont1(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2))) + ...
                  bsxfun(@times, g.nuE0T(:, n, 2), funcCont2(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2)));
 end % for

@@ -201,10 +201,15 @@ if nargin < 7
 end % if
 
 % Check function arguments that are directly used
-validateattributes(markE0Tbdr, {'logical'}, {'size', [K 3]}, mfilename, 'markE0Tbdr');
-validateattributes(valOnQuad, {'numeric'}, {'size', [K 3 NaN]});
-validateattributes(refEdgePhiIntPhiIntOnQuad, {'numeric'}, {'size', [N N 3 R]});
-validateattributes(refEdgePhiIntPhiExtOnQuad, {'numeric'}, {'size', [N N 3 3 R]});
+n_edges = size(g.V0T, 2);
+validateattributes(markE0Tbdr, {'logical'}, {'size', [K n_edges]}, mfilename, 'markE0Tbdr');
+validateattributes(valOnQuad, {'numeric'}, {'size', [K n_edges NaN]});
+validateattributes(refEdgePhiIntPhiIntOnQuad, {'numeric'}, {'size', [N N n_edges R]});
+if n_edges == 4
+  validateattributes(refEdgePhiIntPhiExtOnQuad, {'numeric'}, {'size', [N N 4 R]});
+else
+  validateattributes(refEdgePhiIntPhiExtOnQuad, {'numeric'}, {'size', [N N 3 3 R]});
+end
 validateattributes(markElem, {'logical'}, {'size', [K 1]}, mfilename, 'elem');
 
 if nargin > 5 && ~isequal(areaE0Tbdr, [])
@@ -217,39 +222,57 @@ end % function
 function ret = assembleMatEdgePhiPhiValUpwind_withAreaE0Tbdr(g, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, areaE0Tbdr, markElem)
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
+n_edges = size(g.V0T, 2);
 
 % Assemble matrices
 ret = sparse(K*N, K*N);
-for nn = 1 : 3
-  % true for elements with E0T(:,nn) adjacent to two active elements or
-  % where E0T(:,nn) is on the boundary
-  markElemEdges = any(g.markE0TE0T{nn,1}(markElem,markElem) | g.markE0TE0T{nn,2}(markElem,markElem) | g.markE0TE0T{nn,3}(markElem,markElem), 2) | (g.idE0T(markElem, nn) ~= 0);
+for nn = 1 : n_edges
+  if n_edges == 4
+    markElemEdges = any(g.markE0TE0T{nn}(markElem,markElem));
+  else
+    % true for elements with E0T(:,nn) adjacent to two active elements or
+    % where E0T(:,nn) is on the boundary
+    markElemEdges = any(g.markE0TE0T{nn,1}(markElem,markElem) | g.markE0TE0T{nn,2}(markElem,markElem) | g.markE0TE0T{nn,3}(markElem,markElem), 2) | (g.idE0T(markElem, nn) ~= 0);
+  end % if
   
   % Diagonal blocks
   for r = 1 : R
     ret = ret + kron(spdiags(areaE0Tbdr{nn}(markElem) .* valOnQuad(:, nn, r) .* (markElemEdges & valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
   end
   % Off-diagonal blocks
-  for np = 1 : 3
+  if n_edges == 4
     RknTimesVal = sparse(K*N, N);
     for r = 1 : R
-      RknTimesVal = RknTimesVal + kron(areaE0Tbdr{nn}(markElem) .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
+      RknTimesVal = RknTimesVal + kron(areaE0Tbdr{nn}(markElem) .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, r));
     end
-    ret = ret + kronVec(g.markE0TE0T{nn, np}(markElem,markElem), RknTimesVal);
-  end % for
+    ret = ret + kronVec(g.markE0TE0T{nn}(markElem,markElem), RknTimesVal);
+  else
+    for np = 1 : 3
+      RknTimesVal = sparse(K*N, N);
+      for r = 1 : R
+        RknTimesVal = RknTimesVal + kron(areaE0Tbdr{nn}(markElem) .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
+      end
+      ret = ret + kronVec(g.markE0TE0T{nn, np}(markElem,markElem), RknTimesVal);
+    end % for
+  end % if
 end % for
 end % function
 
 function ret = assembleMatEdgePhiPhiValUpwind_noAreaE0Tbdr(g, markE0Tbdr, refEdgePhiIntPhiIntOnQuad, refEdgePhiIntPhiExtOnQuad, valOnQuad, markElem)
 [K, ~, R] = size(valOnQuad);
 N = size(refEdgePhiIntPhiIntOnQuad, 1);
+n_edges = size(g.V0T, 2);
 
 % Assemble matrices
 ret = sparse(K*N, K*N);
-for nn = 1 : 3
-  % true for elements with E0T(:,nn) adjacent to two active elements or
-  % where E0T(:,nn) is on the boundary
-  markElemEdges = any(g.markE0TE0T{nn,1}(markElem,markElem) | g.markE0TE0T{nn,2}(markElem,markElem) | g.markE0TE0T{nn,3}(markElem,markElem), 2) | (g.idE0T(markElem, nn) ~= 0);
+for nn = 1 : n_edges
+  if n_edges == 4
+    markElemEdges = any(g.markE0TE0T{nn}(markElem,markElem));
+  else
+    % true for elements with E0T(:,nn) adjacent to two active elements or
+    % where E0T(:,nn) is on the boundary
+    markElemEdges = any(g.markE0TE0T{nn,1}(markElem,markElem) | g.markE0TE0T{nn,2}(markElem,markElem) | g.markE0TE0T{nn,3}(markElem,markElem), 2) | (g.idE0T(markElem, nn) ~= 0);
+  end % if
   
   Rkn = markE0Tbdr(markElem,nn) .* g.areaE0T(markElem, nn);
   % Diagonal blocks
@@ -257,12 +280,20 @@ for nn = 1 : 3
     ret = ret + kron(spdiags(Rkn .* valOnQuad(:, nn, r) .* (markElemEdges & valOnQuad(:, nn, r) > 0), 0, K, K), refEdgePhiIntPhiIntOnQuad(:, :, nn, r));
   end
   % Off-diagonal blocks
-  for np = 1 : 3
+  if n_edges == 4
     RknTimesVal = sparse(K*N, N);
     for r = 1 : R
-      RknTimesVal = RknTimesVal + kron(Rkn .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
+      RknTimesVal = RknTimesVal + kron(Rkn .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, r));
     end
-    ret = ret + kronVec(g.markE0TE0T{nn, np}(markElem,markElem), RknTimesVal);
-  end % for
+    ret = ret + kronVec(g.markE0TE0T{nn}(markElem,markElem), RknTimesVal);
+  else
+    for np = 1 : n_edges
+      RknTimesVal = sparse(K*N, N);
+      for r = 1 : R
+        RknTimesVal = RknTimesVal + kron(Rkn .* valOnQuad(:, nn, r) .* sparse(valOnQuad(:, nn, r) < 0), refEdgePhiIntPhiExtOnQuad(:, :, nn, np, r));
+      end
+      ret = ret + kronVec(g.markE0TE0T{nn, np}(markElem,markElem), RknTimesVal);
+    end % for
+  end
 end % for
 end % function

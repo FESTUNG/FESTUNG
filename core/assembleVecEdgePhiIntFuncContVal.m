@@ -106,19 +106,20 @@
 %
 function ret = assembleVecEdgePhiIntFuncContVal(g, markE0Tbdr, funcCont, valOnQuad, N, basesOnQuad, areaE0Tbdr, qOrd)
 % Determine quadrature rule
-if nargin < 8
+n_edges = size(g.V0T, 2);
+if nargin < 8 && n_edges == 3
   p = (sqrt(8*N+1)-3)/2;
   qOrd = 2*p+1;  
 end % if
 [~, W] = quadRule1D(qOrd);
 
 % Check function arguments that are directly used
-validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markE0Tbdr');
+validateattributes(markE0Tbdr, {'logical'}, {'size', [g.numT n_edges]}, mfilename, 'markE0Tbdr');
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
-validateattributes(valOnQuad, {'numeric'}, {'size', [g.numT 3 length(W)]}, mfilename, 'valOnQuad');
+validateattributes(valOnQuad, {'numeric'}, {'size', [g.numT n_edges length(W)]}, mfilename, 'valOnQuad');
 validateattributes(basesOnQuad, {'struct'}, {}, mfilename, 'basesOnQuad')
 
-if nargin > 6
+if nargin > 6 && numel(areaE0Tbdr) > 0
   ret = assembleVecEdgePhiIntFuncContVal_withAreaE0Tbdr(g, funcCont, valOnQuad, N, basesOnQuad, areaE0Tbdr, qOrd);
 else
   ret = assembleVecEdgePhiIntFuncContVal_noAreaE0Tbdr(g, markE0Tbdr, funcCont, valOnQuad, N, basesOnQuad, qOrd);
@@ -133,11 +134,17 @@ end % function
 function ret = assembleVecEdgePhiIntFuncContVal_withAreaE0Tbdr(g, funcCont, valOnQuad, N, basesOnQuad, areaE0Tbdr, qOrd)
 % Determine quadrature rule
 [Q, W] = quadRule1D(qOrd);
+n_edges = size(g.V0T, 2);
+if n_edges == 4
+  mapEdge = @gammaMapQuadri;
+else
+  mapEdge = @gammaMap;
+end % if
 
 % Assemble vector
 ret = zeros(g.numT, N);
-for n = 1 : 3
-  [Q1, Q2] = gammaMap(n, Q);
+for n = 1 : n_edges
+  [Q1, Q2] = mapEdge(n, Q);
   funcOnQuad = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   for i = 1 : N
     integral = (funcOnQuad .* squeeze((valOnQuad(:, n, :) < 0) .* valOnQuad(:, n, :))) * ( W' .* basesOnQuad.phi1D{qOrd}(:,i,n));
@@ -155,11 +162,17 @@ end % function
 function ret = assembleVecEdgePhiIntFuncContVal_noAreaE0Tbdr(g, markE0Tbdr, funcCont, valOnQuad, N, basesOnQuad, qOrd)
 % Determine quadrature rule
 [Q, W] = quadRule1D(qOrd);
+n_edges = size(g.V0T, 2);
+if n_edges == 4
+  mapEdge = @gammaMapQuadri;
+else
+  mapEdge = @gammaMap;
+end % if
 
 % Assemble vector
 ret = zeros(g.numT, N);
-for n = 1 : 3
-  [Q1, Q2] = gammaMap(n, Q);
+for n = 1 : n_edges
+  [Q1, Q2] = mapEdge(n, Q);
   funcOnQuad = funcCont(g.mapRef2Phy(1, Q1, Q2), g.mapRef2Phy(2, Q1, Q2));
   Kkn = markE0Tbdr(:, n) .* g.areaE0T(:,n);
   for i = 1 : N
