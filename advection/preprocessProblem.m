@@ -86,9 +86,9 @@ if problemData.isQuadri
   problemData.basesOnQuad = computeBasesOnQuadTensorProduct(problemData.p, struct, problemData.qOrd : problemData.qOrdMax+1);
 else
   problemData.basesOnQuad = computeBasesOnQuad(problemData.N, struct);
-end
-if problemData.isSlopeLim
-  problemData.basesOnQuad = computeTaylorBasesV0T(problemData.g, problemData.N, problemData.basesOnQuad);
+  if problemData.isSlopeLim 
+    problemData.basesOnQuad = computeTaylorBasesV0T(problemData.g, problemData.N, problemData.basesOnQuad);
+  end % if
 end % if
 %% Computation of matrices on the reference triangle.
 if problemData.isQuadri
@@ -104,7 +104,7 @@ else
 end
 %% Assembly of time-independent global matrices.
 problemData.globM = assembleMatElemPhiPhi(problemData.g, problemData.hatM);
-if problemData.isSlopeLim
+if problemData.isSlopeLim && ~problemData.isQuadri
   globMTaylor = assembleMatElemPhiTaylorPhiTaylor(problemData.g, problemData.N);
   problemData.globMDiscTaylor = assembleMatElemPhiDiscPhiTaylor(problemData.g, problemData.N, problemData.basesOnQuad);
   problemData.globMCorr = spdiags(1./diag(globMTaylor), 0, problemData.K * problemData.N, problemData.K * problemData.N) * globMTaylor;

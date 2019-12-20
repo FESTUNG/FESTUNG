@@ -64,13 +64,13 @@ function problemData = configureProblem(problemData)
 problemData = setdefault(problemData, 'testcase', 'solid_body'); 
 
 % Maximum edge length of triangle
-problemData = setdefault(problemData, 'hmax', 2^-4);
+problemData = setdefault(problemData, 'hmax', 2^-6);
 
 % Compute on quadrilateral elements
-problemData = setdefault(problemData, 'isQuadri', false);
+problemData = setdefault(problemData, 'isQuadri', true);
 
 % Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 2);
+problemData = setdefault(problemData, 'p', 0);
 
 % Order of quadrature rule
 problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
@@ -81,11 +81,11 @@ problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3));
 
 % Time stepping parameters
 problemData = setdefault(problemData, 'numSteps', 100);  % number of time steps
-problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/3142)*2*pi);  % end time
+problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/(3142*1.5))*2*pi); % (problemData.numSteps/3142)*2*pi);  % end time
 
 % Slope limiting settings
-problemData = setdefault(problemData, 'isSlopeLim', false); %problemData.p > 0); % enable/disable slope limiting
-problemData = setdefault(problemData, 'typeSlopeLim', 'hierarch_vert'); % Type of slope limiter (linear, hierarch_vert, strict)
+problemData = setdefault(problemData, 'isSlopeLim', ~true); %problemData.p > 0); % enable/disable slope limiting
+problemData = setdefault(problemData, 'typeSlopeLim', 'linear'); % Type of slope limiter (linear, hierarch_vert, strict)
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid

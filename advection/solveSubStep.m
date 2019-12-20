@@ -66,11 +66,17 @@ sysV = problemData.globL - problemData.globKD - problemData.globKN;
 cDiscDot = problemData.globM \ (sysV - sysA * problemData.cDiscRK{nSubStep});
 
 % Apply slope limiting to time derivative
-if problemData.isSlopeLim
-  cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot, [N K])', problemData.globM, problemData.globMDiscTaylor);
-  cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
-  cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
-  cDiscDot = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
+if problemData.p > 1 && problemData.isSlopeLim
+  if problemData.isQuadri
+    cDiscDot = reshape(cDiscDot, [N K])';
+    cDiscDot = applySlopeLimiterQuadriDiscLinear(problemData.g, cDiscDot, problemData.g.markV0TbdrD, NaN(K, 4));
+    cDiscDot = reshape(cDiscDot', [K*N 1]);
+  else
+    cDiscDotTaylor = projectDataDisc2DataTaylor(reshape(cDiscDot, [N K])', problemData.globM, problemData.globMDiscTaylor);
+    cDiscDotTaylorLim = applySlopeLimiterTaylor(problemData.g, cDiscDotTaylor, problemData.g.markV0TbdrD, NaN(K,3), problemData.basesOnQuad, problemData.typeSlopeLim);
+    cDiscDotTaylor = reshape(cDiscDotTaylorLim', [K*N 1]) + problemData.globMCorr * reshape((cDiscDotTaylor - cDiscDotTaylorLim)', [K*N 1]);
+    cDiscDot = reshape(projectDataTaylor2DataDisc(reshape(cDiscDotTaylor, [N K])', problemData.globM, problemData.globMDiscTaylor)', [K*N 1]);
+  end
 end % if
 
 % Compute next step
@@ -81,7 +87,13 @@ if problemData.isSlopeLim
   % Evaluate boundary condition at new time level
   tBC = getdefault(problemData.t, nSubStep + 1, problemData.t(1) + problemData.tau);
   cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont(tBC, x1, x2));
-  problemData.cDiscRK{nSubStep + 1} = reshape(applySlopeLimiterDisc(problemData.g, reshape(problemData.cDiscRK{nSubStep + 1}, [N K])', problemData.g.markV0TbdrD, ...
-                                      cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim)', [K*N 1]);
+  if problemData.isQuadri
+    problemData.cDiscRK{nSubStep + 1} = reshape(problemData.cDiscRK{nSubStep + 1}, [N K])';
+    problemData.cDiscRK{nSubStep + 1} = applySlopeLimiterQuadriDiscLinear(problemData.g, problemData.cDiscRK{nSubStep + 1}, problemData.g.markV0TbdrD, cDV0T);
+    problemData.cDiscRK{nSubStep + 1} = reshape(problemData.cDiscRK{nSubStep + 1}', [K*N 1]);
+  else
+    problemData.cDiscRK{nSubStep + 1} = reshape(applySlopeLimiterDisc(problemData.g, reshape(problemData.cDiscRK{nSubStep + 1}, [N K])', problemData.g.markV0TbdrD, ...
+                                        cDV0T, problemData.globM, problemData.globMDiscTaylor, problemData.basesOnQuad, problemData.typeSlopeLim)', [K*N 1]);
+  end % if
 end % if
 end % function

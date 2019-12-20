@@ -43,8 +43,9 @@ function valV0T = computeFuncContV0T(g, funcCont)
 validateattributes(funcCont, {'function_handle'}, {}, mfilename, 'funcCont');
 
 % Evaluate function
-valV0T = zeros(g.numT,3);
-for n = 1 : 3
+n_edges = size(g.V0T, 2);
+valV0T = zeros(g.numT, n_edges);
+for n = 1 : n_edges
   valV0T(:, n) = funcCont(g.coordV0T(:, n, 1), g.coordV0T(:, n, 2));
 end
 end

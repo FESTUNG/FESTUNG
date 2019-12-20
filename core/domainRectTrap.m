@@ -155,6 +155,17 @@ if isOctave
     g.markE0TE0T{n} = g.markE0TE0T{n} + 0 * speye(size(g.markE0TE0T{n}, 1), size(g.markE0TE0T{n}, 2));
   end % for n
 end % if
+%% Mapping of neighbouring vertices (markV0TV0T)
+g.markV0TV0T = cell(4, 4);
+try
+  for nn = 1 : 4
+    for np = 1 : 4
+      g.markV0TV0T{nn, np} = sparse(bsxfun(@eq, g.V0T(:,nn), g.V0T(:,np)'));
+    end % for np
+  end % for nn
+catch
+  g = rmfield(markV0TV0T);
+end
 %% Edge IDs (idE, idE0T)
 g.idE = zeros(g.numE, 1);
 g.idE(1 : g.numElem(1)) = 1; % Bottom boundary

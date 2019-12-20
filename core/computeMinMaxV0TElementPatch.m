@@ -66,8 +66,8 @@
 function minMaxV0T = computeMinMaxV0TElementPatch(g, valCentroid, markV0TbdrD, dataV0T)
 % Check function arguments that are directly used
 validateattributes(valCentroid, {'numeric'}, {'size', [g.numT 1]}, mfilename, 'valCentroid');
-validateattributes(markV0TbdrD, {'logical'}, {'size', [g.numT 3]}, mfilename, 'markV0TbdrD');
-validateattributes(dataV0T, {'numeric'}, {'size', [g.numT 3]}, mfilename, 'dataV0T');
+validateattributes(markV0TbdrD, {'logical'}, {'size', [g.numT size(g.V0T, 2)]}, mfilename, 'markV0TbdrD');
+validateattributes(dataV0T, {'numeric'}, {'size', [g.numT size(g.V0T, 2)]}, mfilename, 'dataV0T');
 
 % To include only values from centroids and not the zeros introduced by
 % multiplying with the markV0TV0T-matrix, all centroid values are
@@ -78,13 +78,17 @@ valCentroidPos = valCentroid + shiftCentroidToPos;
 valCentroidNeg = valCentroid - shiftCentroidToNeg;
 
 % Include boundary value on Dirichlet vertices into limiting procedure
-valD = NaN(g.numT, 3);
+valD = NaN(g.numT, size(g.V0T, 2));
 valD(markV0TbdrD) = dataV0T(markV0TbdrD);
 
-if isfield(g, 'markV0TT0V')
-  minMaxV0T = computeMinMaxV0T_withMarkV0TT0V(g, valCentroidNeg, valCentroidPos, shiftCentroidToNeg, shiftCentroidToPos, valD);
+if size(g.V0T, 2) == 4
+  minMaxV0T = computeMinMaxV0TQuadri(g, valCentroidNeg, valCentroidPos, shiftCentroidToNeg, shiftCentroidToPos, valD);
 else
-  minMaxV0T = computeMinMaxV0T_noMarkV0TT0V(g, valCentroidNeg, valCentroidPos, shiftCentroidToNeg, shiftCentroidToPos, valD);
+  if isfield(g, 'markV0TT0V')
+    minMaxV0T = computeMinMaxV0T_withMarkV0TT0V(g, valCentroidNeg, valCentroidPos, shiftCentroidToNeg, shiftCentroidToPos, valD);
+  else
+    minMaxV0T = computeMinMaxV0T_noMarkV0TT0V(g, valCentroidNeg, valCentroidPos, shiftCentroidToNeg, shiftCentroidToPos, valD);
+  end % if
 end % if
 end % function
 %
@@ -104,6 +108,33 @@ for i = 1 : 3
                           + shiftCentroidToNeg, valD(:, i));
   minMaxV0T{2}(:, i) = max(max(bsxfun(@times, g.markV0TT0V{i}, valCentroidPos'), [], 2) ...
                           - shiftCentroidToPos, valD(:, i));
+end %for
+end % function
+%
+%===============================================================================
+%> @brief Helper function for the case that computeMinMaxV0TElementPatch()
+%> was called with a quadrilateral grid g.
+%
+function minMaxV0T = computeMinMaxV0TQuadri(g, valCentroidNeg, valCentroidPos, shiftCentroidToNeg, shiftCentroidToPos, valD)
+% Initialize return value: a 2x1-cell with a Kx3-array of minimum and 
+% maximum values per vertex of each triangle
+minMaxV0T = cell(2,1); 
+minMaxV0T{1} = zeros(g.numT, 4); minMaxV0T{2} = zeros(g.numT, 4);
+
+for i = 1 : 4
+  % Mark all elements sharing i-th vertex
+  markV0TT0V = g.markV0TV0T{i, 1} | g.markV0TV0T{i, 2} | g.markV0TV0T{i, 3} | g.markV0TV0T{i, 4}; 
+
+  % Fix a bug in GNU Octave 4.0.0's implementation of sparse matrix concatenation
+  if isOctave()
+    markV0TT0V = markV0TT0V + 0 * speye(size(markV0TT0V, 1), size(markV0TT0V, 2));
+  end % if
+
+  % Compute min/max per vertex as min/max of centroid values per vertex
+  minMaxV0T{1}(:, i) = min(min(bsxfun(@times, markV0TT0V, valCentroidNeg'), [], 2) +...
+                           shiftCentroidToNeg, valD(:, i));
+  minMaxV0T{2}(:, i) = max(max(bsxfun(@times, markV0TT0V, valCentroidPos'), [], 2) -...
+                           shiftCentroidToPos, valD(:, i));
 end %for
 end % function
 %
