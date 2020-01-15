@@ -220,37 +220,106 @@ switch problemName
     xi0Cont = @(x) zeros(size(x));
     dxZb = -0.005;
     omega = 0.1;
+    omega_t = 0.1;
     delta = 0.1;
     epsilon = 0.01;
     rho = 0;%0.001;
     CfConst = 0;
     
-    xiCont = @(t,x) epsilon * sin(omega * (x+t));
+    xiCont = @(t,x) epsilon * sin(omega * x + omega_t * t);
     zBotCont = @(x) -2 + dxZb * x;
     
     hCont = @(t,x) xiCont(t,x) - zBotCont(x);
-    u1Cont = @(t,x,z) delta * (z - zBotCont(x)) .* sin(omega * (x+t));
-    u2Cont = @(t,x,z) delta * dxZb * z .* sin(omega * (x+t)) - 0.5 * delta * omega * (z - zBotCont(x)).^2 .* cos(omega * (x+t));
+    u1Cont = @(t,x,z) delta * (z - zBotCont(x)) .* sin(omega * x+ omega_t * t);
+    u2Cont = @(t,x,z) delta * dxZb * z .* sin(omega * x+ omega_t * t) - ...
+            0.5 * delta * omega * (z - zBotCont(x)).^2 .* cos(omega * x + omega_t * t);
     
-    dxXiCont = @(t,x) epsilon * omega * cos(omega * (x+t));
-    dtHCont = @(t,x) epsilon * omega * cos(omega * (x+t));
+    dxXiCont = @(t,x) epsilon * omega * cos(omega * x + omega_t * t);
+    dtHCont = @(t,x) epsilon * omega_t * cos(omega * x + omega_t * t);
     
-    dtU1Cont = @(t,x,z) delta * omega * (z - zBotCont(x)) .* cos(omega * (x+t));
-    dxU1Cont = @(t,x,z) -delta * dxZb * sin(omega * (x+t)) + delta * omega * (z - zBotCont(x)) .* cos(omega * (x+t));
-    dzU1Cont = @(t,x,z) delta * sin(omega * (x+t));
-    dzU2Cont = @(t,x,z) delta * dxZb * sin(omega * (x+t)) - delta * omega * (z - zBotCont(x)) .* cos(omega * (x+t));
+    dtU1Cont = @(t,x,z) delta * omega_t * (z - zBotCont(x)) .* cos(omega * x + omega_t * t);
+    dxU1Cont = @(t,x,z) -delta * dxZb * sin(omega * x + omega_t * t) + ...
+            delta * omega * (z - zBotCont(x)) .* cos(omega * x + omega_t * t);
+    dzU1Cont = @(t,x,z) delta * sin(omega * x + omega_t * t);
+    dzU2Cont = @(t,x,z) delta * dxZb * sin(omega * x + omega_t * t) - ...
+            delta * omega * (z - zBotCont(x)) .* cos(omega * x + omega_t * t);
     
-    dxdxU1Cont = @(t,x,z) -delta * omega * ( 2 * dxZb * cos(omega * (x+t)) + omega * (z - zBotCont(x)) .* sin(omega * (x+t)) );
-    dxdzU1Cont = @(t,x,z) delta * omega * cos(omega * (x+t));
+    dxdxU1Cont = @(t,x,z) -delta * omega * ( 2 * dxZb * cos(omega * x + omega_t * t) + ...
+            omega * (z - zBotCont(x)) .* sin(omega * x + omega_t * t) );
+    dxdzU1Cont = @(t,x,z) delta * omega * cos(omega * x + omega_t * t);
     dzdzU1Cont = @(t,x,z) zeros(size(x));
     
-    dxU1zIntCont = @(t,x) 0.5 * delta * omega * cos(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
-      delta * sin(omega * (x+t)) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
+    dxU1zIntCont = @(t,x) 0.5 * delta * omega * cos(omega * x + omega_t * t) .* (xiCont(t,x) - zBotCont(x)).^2 + ...
+      delta * sin(omega * x + omega_t * t) .* (xiCont(t,x) - zBotCont(x)) .* (dxXiCont(t,x) - dxZb);
     
     DCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
       @(t,x,z) zeros(size(x)), @(t,x,z) rho * ones(size(x)) };
     dxzDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
       @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
+        
+  case 'convergence_new'
+    isAnalytical = true;
+    
+    % Parameters
+    gConst = 10;
+    alphaConst = 0.1;
+    betaConst = 0.1;
+    gammaConst = 0.1;
+    deltaConst = 0;
+    bConst = 0.005;
+    etaConst = 0.003;
+    rhoConst = 0.08;
+    tauConst = 1;
+    omegaConst = 1;
+    kConst = 0.01;
+    dConst = 0.001;
+    CfConst = 0;
+    
+    % Width and height of computational domain
+    xi0Cont = @(x) 5 * ones(size(x));
+    zBotCont = @(x) bConst * x;
+    
+    domainWidth = 100;
+    idBdrU = [2, 4]; idBdrH = [2, 4]; idBdrQ = [2, 4]; idBdrRiem = [2, 4];
+    
+    % Free-surface solution
+    xiCont = @(t,x) 5 + etaConst * sin(rhoConst * x + tauConst * t);
+    dxXiCont = @(t,x) etaConst * rhoConst * cos(rhoConst * x + tauConst * t);
+    hCont = @(t,x) xiCont(t,x) - zBotCont(x);
+    dtHCont = @(t,x) etaConst * tauConst * cos(rhoConst * x + tauConst * t);
+    
+    % Velocity solution
+    yCont = @(t,x) sin(gammaConst * x + deltaConst * t);
+    dxYCont = @(t,x) gammaConst * cos(gammaConst * x + deltaConst * t);
+    dxdxYCont = @(x) zeros(size(x));
+    dtYCont = @(t,x) deltaConst * cos(gammaConst * x + deltaConst * t);
+    u1Cont = @(t,x,z) yCont(t,x) .* (cos(alphaConst * z) - cos(alphaConst * zBotCont(x)));
+    epsCont = @(t,x,z) -kConst * dxXiCont(t,x) - kConst * omegaConst * betaConst * (bConst * bConst + 1) * cos(betaConst * zBotCont(x)) + ...
+                dxYCont(t,x) .* (1/alphaConst * sin(alphaConst * zBotCont(x)) - cos(alphaConst * zBotCont(x)) .* zBotCont(x)) + ...
+                alphaConst * bConst * yCont(t,x) .* sin(alphaConst * zBotCont(x)) .* zBotCont(x);
+    u2Cont = @(t,x,z) -dxYCont(t,x) .* (1/alphaConst * sin(alphaConst * z) - cos(alphaConst * zBotCont(x)) .* z) - ...
+                alphaConst * bConst * yCont(t,x) .* sin(alphaConst * zBotCont(x)) .* z + epsCont(t,x);
+
+    dtU1Cont = @(t,x,z) dtYCont(t,x) .* (cos(alphaConst * z) - cos(alphaConst * zBotCont(x)));
+    dxU1Cont = @(t,x,z) dxYCont(t,x) .* (cos(alphaConst * z) - cos(alphaConst * zBotCont(x))) + ...
+                alphaConst * bConst * yCont(t,x) .* sin(alphaConst * zBotCont(x));
+    dxdxU1Cont = @(t,x,z) dxdxYCont(x) .* (cos(alphaConst * z) - cos(alphaConst * zBotCont(x))) + ...
+                2 * alphaConst * bConst * dxYCont(t,x) .* sin(alphaConst * zBotCont(x)) + ...
+                alphaConst * alphaConst * bConst * bConst * yCont(t,x) .* cos(alphaConst * zBotCont(x));
+    dzU1Cont = @(t,x,z) -alphaConst * yCont(t,x) .* sin(alphaConst * z);
+    dzdzU1Cont = @(t,x,z) -alphaConst * alphaConst * yCont(t,x) .* cos(alphaConst * z);
+    dzU2Cont = @(t,x,z) -dxU1Cont(t,x,z);
+    
+    dxU1zIntCont = @(t,x) dxYCont(t,x) .* (1/alphaConst * sin(alphaConst * xiCont(t,x)) - cos(alphaConst * zBotCont(x)) .* xiCont(t,x) - ...
+                1/alphaConst * sin(alphaConst * zBotCont(x)) + cos(alphaConst * zBotCont(x)) .* zBotCont(x)) + ...
+                yCont(t,x) .* (cos(alphaConst * xiCont(t,x)) .* dxXiCont(t,x) + ...
+                alphaConst * bConst * sin(alphaConst * zBotCont(x)) .* xiCont(t,x) - ...
+                cos(alphaConst * zBotCont(x)) .* dxXiCont(t,x) - bConst * cos(alphaConst * zBotCont(x)) - ...
+                alphaConst * bConst * sin(alphaConst * zBotCont(x)) .* zBotCont(x) + ...
+                bConst * cos(alphaConst * zBotCont(x)));
+    
+    DCont = @(t,x,z) dConst * ones(size(x));
+    dxzDCont = @(t,x,z) zeros(size(x));
         
   otherwise
     error('ERROR: unknown testcase')

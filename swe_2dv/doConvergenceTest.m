@@ -79,12 +79,14 @@ eoc = cell(size(pLevel));
 
 for ip = 1 : length(pLevel)
   for level = 1 : nLevel
-    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase, 'tEnd', 5);
+    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase, 'tEnd', 0.001);
     pd.p = pLevel(ip);
     if isSpatConv || isTimeSpatConv
       pd.numElem = [2^hLevel(level), 2^(hLevel(level)-1)];
     end % if
-    if ~isSpatConv
+    if isSpatConv
+      pd.numSteps = 40;
+    else
       pd.numSteps = tLevel{ip}(level);
     end % if
     try

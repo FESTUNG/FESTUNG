@@ -61,7 +61,8 @@ if nargin < 3
   hLevel = 1:6;
 end % if
 if nargin < 4
-  tLevel = mat2cell((2.^pLevel)' * (25/4 * 2.^(2*hLevel)), ones(1, length(pLevel)), length(hLevel));
+%   tLevel = mat2cell((2.^pLevel)' * (25/4 * 2.^(2*hLevel)), ones(1, length(pLevel)), length(hLevel));
+  tLevel = mat2cell(5 * 2.^(pLevel' * hLevel), ones(1, length(pLevel)), length(hLevel));
 end % if
 
 if ~iscell(tLevel)
@@ -81,7 +82,7 @@ eoc = cell(size(pLevel));
 
 for ip = 1 : length(pLevel)
   for level = 1 : nLevel
-    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase, 'tEnd', 5);
+    pd = struct('isVisSol', false, 'isVisGrid', false, 'testcase', testcase, 'tEnd', 0.0002);
     pd.p = pLevel(ip);
     if isSpatConv || isTimeSpatConv
       pd.numElem = [2^hLevel(level), 2^(hLevel(level)-1)];
