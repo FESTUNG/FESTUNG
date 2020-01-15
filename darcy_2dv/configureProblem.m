@@ -173,18 +173,21 @@ switch problemData.testcase
     % Analytical solution
     switch problemData.testcase
       case 'coupled_constXi'
+        problemData.isStationary = true;
         xiCont = @(t,x) 5 * ones(size(x));
 
         dxXiCont = @(t,x) zeros(size(x));
         dxdxXiCont = @(t,x) zeros(size(x));
         dtXiCont = @(t,x) zeros(size(x));
       case 'coupled_stationary'
+        problemData.isStationary = true;
         xiCont = @(t,x) 5 + etaConst * sin(rhoConst * x);
 
         dxXiCont = @(t,x) etaConst * rhoConst * cos(rhoConst * x);
         dxdxXiCont = @(t,x) -etaConst * rhoConst * rhoConst * sin(rhoConst * x);
         dtXiCont = @(t,x) zeros(size(x));
       case 'coupled_transient'
+        problemData.isStationary = tauConst == 0;
         xiCont = @(t,x) 5 + etaConst * sin(rhoConst * x + tauConst * t);
 
         dxXiCont = @(t,x) etaConst * rhoConst * cos(rhoConst * x + tauConst * t);
@@ -225,8 +228,9 @@ switch problemData.testcase
       + betaConst * betaConst * bConst * bConst * sin(betaConst * zBotCont(x)) .* omegaCont(t,x) ...
       - 2 * betaConst * bConst * cos(betaConst * zBotCont(x)) .* dxOmegaCont(t,x) ...
       + (sin(betaConst * z) - sin(betaConst * zBotCont(x))) .* dxdxOmegaCont(t,x);
+    dXdZhCont = @(t,x,z) betaConst * cos(betaConst * z) .* dxOmegaCont(t,x);
     dZdZhCont = @(t,x,z) -betaConst * betaConst * sin(betaConst * z) .* omegaCont(t, x);
-    dXZDCont = cellfun(@(c) @(t,x,z) c * ones(size(x)), {0, 0; 0, 0}, 'UniformOutput', false);
+    dXZDCont = @(t,x,z) zeros(size(x));
     
     % Boundary conditions
     problemData.hDCont = problemData.hCont;
@@ -234,8 +238,8 @@ switch problemData.testcase
     
     % Right hand side
     problemData.fCont = @(t,x,z) dThCont(t,x,z) - ...
-                          dXZDCont{1}(t,x,z) .* dXhCont(t,x,z)  - problemData.DCont(t,x,z) .* dXdXhCont(t,x,z) - ...
-                          dXZDCont{2}(t,x,z) .* dZhCont(t,x,z)  - problemData.DCont(t,x,z) .* dZdZhCont(t,x,z);
+                          dXZDCont(t,x,z) .* dXhCont(t,x,z)  - problemData.DCont(t,x,z) .* dXdXhCont(t,x,z) - ...
+                          dXZDCont(t,x,z) .* dZhCont(t,x,z)  - problemData.DCont(t,x,z) .* dZdZhCont(t,x,z);
                    
   case 'convergence'
     % width and height of computational domain
@@ -243,19 +247,24 @@ switch problemData.testcase
     domainHeight = [0, 10];
     idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
     % Analytical solution
-    problemData.hCont = @(t,x,z) cos(x + t) .* cos(z + t);
-    problemData.q1Cont = @(t,x,z) sin(x + t) .* cos(z + t);
-    problemData.q2Cont = @(t,x,z) cos(x + t) .* sin(z + t);
+    coef_x = 0.1;
+    coef_z = 0.1;
+    coef_t = 0;
+    problemData.isStationary = coef_t == 0;
+    problemData.hCont = @(t,x,z) cos(coef_x * x + coef_t * t) .* cos(coef_z * z + coef_t * t);
+    problemData.q1Cont = @(t,x,z) coef_x * sin(coef_x * x + coef_t * t) .* cos(coef_z * z + coef_t * t);
+    problemData.q2Cont = @(t,x,z) coef_z * cos(coef_x * x + coef_t * t) .* sin(coef_z * z + coef_t * t);
     % Diffusion matrix
     problemData.DCont = { @(t,x,z) exp(z/5) , @(t,x,z) 0.5 * ones(size(x)) ; ...
                           @(t,x,z) 1/3 * ones(size(x)), @(t,x,z) exp(x/5) };
     % Derivatives
-    dThCont = @(t,x,z) -sin(x + t) .* cos(z + t) - cos(x + t) .* sin(z + t);
-    dXhCont = @(t,x,z) -sin(x + t) .* cos(z + t);
-    dZhCont = @(t,x,z) -cos(x + t) .* sin(z + t);
-    dXdXhCont = @(t,x,z) -cos(x + t) .* cos(z + t);
-    dZdZhCont = @(t,x,z) -cos(x + t) .* cos(z + t);
-    dXdZhCont = @(t,x,z) sin(x + t) .* sin(z + t);
+    dThCont = @(t,x,z) -coef_t * sin(coef_x * x + coef_t * t) .* cos(coef_z * z + coef_t * t) - ...
+            coef_t * cos(coef_x * x + coef_t * t) .* sin(coef_z * z + coef_t * t);
+    dXhCont = @(t,x,z) -coef_x * sin(coef_x * x + coef_t * t) .* cos(coef_z * z + coef_t * t);
+    dZhCont = @(t,x,z) -coef_z * cos(coef_x * x + coef_t * t) .* sin(coef_z * z + coef_t * t);
+    dXdXhCont = @(t,x,z) -coef_x * coef_x * cos(coef_x * x + coef_t * t) .* cos(coef_z * z + coef_t * t);
+    dZdZhCont = @(t,x,z) -coef_z * coef_z * cos(coef_x * x + coef_t * t) .* cos(coef_z * z + coef_t * t);
+    dXdZhCont = @(t,x,z) coef_x * coef_z * sin(coef_x * x + coef_t * t) .* sin(coef_z * z + coef_t * t);
     dXZDCont = { @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)); ...
                  @(t,x,z) zeros(size(x)), @(t,x,z) zeros(size(x)) };
     % Boundary conditions
@@ -295,7 +304,61 @@ switch problemData.testcase
     % Right hand side
     problemData.fCont = @(t,x,z) -dXDCont(t,x,z) .* dXhCont(t,x,z) - dZDCont(t,x,z) .* dZhCont(t,x,z) ...
       - problemData.DCont(t,x,z) .* (dXdXhCont(t,x,z) + dZdZhCont(t,x,z));
+                   
+  case 'convergence_new'
+%     problemData.isStationary = true;
+    
+    % Parameters
+    bConst = 0.005;
+    betaConst = 0.1;
+    etaConst = 0.003;
+    rhoConst = 0.08;
+    tauConst = 1;
+    kConst = 0.01;
+    omegaConst = 1;
+    
+    % Width and height of computational domain
+    zPMCont = @(x) -20 * ones(size(x));
+    zBotCont = @(x) bConst * x;
+    
+    domainWidth = linspace(0, 100, problemData.numElem(1)+1);
+    domainHeight = [zPMCont(domainWidth); zBotCont(domainWidth)];
+    idDirichlet = [1, 2, 3, 4]; idNeumann = -1;
+    
+    % Free-surface solution
+    xiCont = @(t,x) 5 + etaConst * sin(rhoConst * x + tauConst * t);
+    dtXiCont = @(t,x) etaConst * tauConst * cos(rhoConst * x + tauConst * t);
+    dxXiCont = @(t,x) etaConst * rhoConst * cos(rhoConst * x + tauConst * t);
+    dxdxXiCont = @(t,x) -etaConst * rhoConst * rhoConst * sin(rhoConst * x + tauConst * t);
+    
+    % Analytical solution
+%     omegaCont = @(t,x) cos(omegaConst * x);
+%     dxOmegaCont = @(t,x) -omegaConst * sin(omegaConst * x);
+%     dxdxOmegaCont = @(t,x) -omegaConst * omegaConst * cos(omegaConst * x);
+%     problemData.hCont = @(t,x,z) xiCont(t,x) + (sin(betaConst * z) - sin(betaConst * zBotCont(x))) .* omegaCont(t,x);
+%     problemData.q1Cont = @(t,x,z) -dxXiCont(t,x) + betaConst * bConst * omegaCont(t,x) .* cos(betaConst * zBotCont(x)) - (sin(betaConst * z) - sin(betaConst * zBotCont(x))) .* dxOmegaCont(t,x);
+%     problemData.q2Cont = @(t,x,z) -betaConst * omegaCont(t,x) .* cos(betaConst * z);
+%     % Diffusion matrix
+%     problemData.DCont = @(t,x,z) kConst * ones(size(x));
+%     % Derivatives
+%     dXdXhCont = @(t,x,z) dxdxXiCont(t,x) + betaConst * betaConst * bConst * bConst * omegaCont(t,x) .* sin(betaConst * zBotCont(x)) ...
+%                   - 2 * betaConst * bConst * dxOmegaCont(t,x) .* cos(betaConst * zBotCont(x)) + (sin(betaConst * z) - sin(betaConst * zBotCont(x))) .* dxdxOmegaCont(t,x);
+%     dZdZhCont = @(t,x,z) -betaConst * betaConst * omegaCont(t,x) .* sin(betaConst * z);
 
+    problemData.hCont = @(t,x,z) xiCont(t,x) + (sin(betaConst * z) - sin(betaConst * zBotCont(x))) * omegaConst;
+    problemData.q1Cont = @(t,x,z) -dxXiCont(t,x) + betaConst * bConst * omegaConst * cos(betaConst * zBotCont(x));
+    problemData.q2Cont = @(t,x,z) -betaConst * omegaConst * cos(betaConst * z);
+    % Diffusion matrix
+    problemData.DCont = @(t,x,z) kConst * ones(size(x));
+    % Derivatives
+    dXdXhCont = @(t,x,z) dxdxXiCont(t,x) + betaConst * betaConst * bConst * bConst * omegaConst * sin(betaConst * zBotCont(x));
+    dZdZhCont = @(t,x,z) -betaConst * betaConst * omegaConst * sin(betaConst * z);
+    % Boundary conditions
+    problemData.hDCont = problemData.hCont;
+    problemData.gNCont = @(t,x,z) zeros(size(x));
+    % Right hand side
+    problemData.fCont = @(t,x,z) dtXiCont(t,x) - problemData.DCont(t,x,z) .* (dXdXhCont(t,x,z) + dZdZhCont(t,x,z));
+  
   otherwise
     error('Unknown testcase "%s".\n', problemData.testcase);
 end % switch

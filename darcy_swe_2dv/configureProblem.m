@@ -60,7 +60,7 @@ problemData = setdefault(problemData, 'testcase', 'showcase');
 
 % Enable coupling
 problemData = setdefault(problemData, 'isCouplingDarcy', true);
-problemData = setdefault(problemData, 'isCouplingSWE', true);
+problemData = setdefault(problemData, 'isCouplingSWE',  true);
 
 % Number of elements in x- and y-direction
 problemData = setdefault(problemData, 'numElem', [32 8]);
