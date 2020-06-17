@@ -1,12 +1,12 @@
-% Last step of the four-part algorithm in the main loop.
+% Third step of the four-part algorithm in the main loop.
 
 %===============================================================================
 %> @file
 %>
-%> @brief Last step of the four-part algorithm in the main loop.
+%> @brief Third step of the four-part algorithm in the main loop.
 %===============================================================================
 %>
-%> @brief Last step of the four-part algorithm in the main loop.
+%> @brief Third step of the four-part algorithm in the main loop.
 %>
 %> The main loop repeatedly executes four steps until the parameter
 %> <code>problemData.isFinished</code> becomes <code>true</code>.
@@ -17,9 +17,8 @@
 %>  3. postprocessStep()
 %>  4. outputStep()
 %> 
-%> This routine is executed last in each loop iteration and writes output
-%> files that can later be visualized using TecPlot, Paraview, or others,
-%> depending on the chosen file types in configureProblem().
+%> This routine is executed third in each loop iteration and is intended to
+%> post-process the solution computed by solveStep().
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures, as provided 
@@ -50,18 +49,7 @@
 %> along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %> @endparblock
 %
-function problemData = outputStep(problemData, nStep)
-%% visualization
-if problemData.isVisSol && mod(nStep, problemData.outputFrequency) == 0
-  if problemData.isQuadri
-    cLagrange = projectDataDisc2DataLagrTensorProduct(problemData.cDisc);
-    visualizeDataLagrQuadri(problemData.g, cLagrange, 'u_h', problemData.outputBasename, ...
-                            nStep, problemData.outputTypes)
-  else
-    cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
-    visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, ...
-                      nStep, problemData.outputTypes);
-  end
-end % if
-end % function
+function problemData = postprocessStep(problemData, nStep)
+problemData.isFinished = nStep >= problemData.numSteps;
+end
 

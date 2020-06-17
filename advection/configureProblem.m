@@ -66,19 +66,26 @@ problemData = setdefault(problemData, 'testcase', 'solid_body');
 % Maximum edge length of triangle
 problemData = setdefault(problemData, 'hmax', 2^-6);
 
+% Compute on quadrilateral elements
+problemData = setdefault(problemData, 'isQuadri', true);
+
 % Local polynomial approximation order (0 to 4)
-problemData = setdefault(problemData, 'p', 2);
+problemData = setdefault(problemData, 'p', 0);
+
+% Order of quadrature rule
+problemData = setdefault(problemData, 'qOrd', 2*problemData.p + 1);
+problemData = setdefault(problemData, 'qOrdMax', problemData.qOrd);
 
 % Order of Runge-Kutta method
 problemData = setdefault(problemData, 'ordRK', min(problemData.p+1,3));
 
 % Time stepping parameters
-problemData = setdefault(problemData, 'numSteps', 10);  % number of time steps
-problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/3142)*2*pi);  % end time
+problemData = setdefault(problemData, 'numSteps', 100);  % number of time steps
+problemData = setdefault(problemData, 'tEnd', (problemData.numSteps/(3142*1.5))*2*pi); % (problemData.numSteps/3142)*2*pi);  % end time
 
 % Slope limiting settings
-problemData = setdefault(problemData, 'isSlopeLim', problemData.p > 0); % enable/disable slope limiting
-problemData = setdefault(problemData, 'typeSlopeLim', 'hierarch_vert'); % Type of slope limiter (linear, hierarch_vert, strict)
+problemData = setdefault(problemData, 'isSlopeLim', ~true); %problemData.p > 0); % enable/disable slope limiting
+problemData = setdefault(problemData, 'typeSlopeLim', 'linear'); % Type of slope limiter (linear, hierarch_vert, strict)
 
 % Visualization settings
 problemData = setdefault(problemData, 'isVisGrid', false);  % visualization of grid
@@ -129,7 +136,9 @@ switch problemData.testcase
 end % switch
 %% Domain and triangulation configuration.
 % Triangulate unit square using pdetool (if available or Friedrichs-Keller otherwise).
-if ~problemData.isAnalytical && license('checkout','PDE_Toolbox')
+if problemData.isQuadri
+  problemData.generateGridData = @(hmax) domainRectTrap([0 1], [0 1], ceil(1/hmax));
+elseif ~problemData.isAnalytical && license('checkout','PDE_Toolbox')
   problemData.generateGridData = @(hmax) domainPolygon([0 1 1 0], [0 0 1 1], hmax);
 else
   fprintf('PDE_Toolbox not available. Using Friedrichs-Keller triangulation.\n');
@@ -137,6 +146,6 @@ else
 end % if
 % Specify edge ids of boundary conditions
 problemData.generateMarkE0Tint = @(g) g.idE0T == 0;
-problemData.generateMarkE0TbdrN = @(g) false(g.numT,3);
+problemData.generateMarkE0TbdrN = @(g) false(g.numT, 3+problemData.isQuadri);
 problemData.generateMarkE0TbdrD = @(g) ~(g.markE0Tint | g.markE0TbdrN);
 end % function

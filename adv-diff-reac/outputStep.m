@@ -17,9 +17,9 @@
 %>  3. postprocessStep()
 %>  4. outputStep()
 %> 
-%> This routine is executed last in each loop iteration and writes output
-%> files that can later be visualized using TecPlot, Paraview, or others,
-%> depending on the chosen file types in configureProblem().
+%> This routine is executed last in each loop iteration and is intended to
+%> provide output operations for the solution, e.g., write it to a file
+%> for later visualization.
 %>
 %> @param  problemData  A struct with problem parameters, precomputed
 %>                      fields, and solution data structures, as provided 
@@ -51,17 +51,10 @@
 %> @endparblock
 %
 function problemData = outputStep(problemData, nStep)
-%% visualization
 if problemData.isVisSol && mod(nStep, problemData.outputFrequency) == 0
-  if problemData.isQuadri
-    cLagrange = projectDataDisc2DataLagrTensorProduct(problemData.cDisc);
-    visualizeDataLagrQuadri(problemData.g, cLagrange, 'u_h', problemData.outputBasename, ...
-                            nStep, problemData.outputTypes)
-  else
-    cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
-    visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, ...
-                      nStep, problemData.outputTypes);
-  end
+  uLagr = projectDataDisc2DataLagr(problemData.uDisc);
+  visualizeDataLagr(problemData.g, uLagr, 'u_h', problemData.outputBasename, ...
+                    nStep / problemData.outputFrequency, problemData.outputTypes);
 end % if
 end % function
 

@@ -46,21 +46,40 @@
 function problemData = initializeProblem(problemData)
 problemData.isFinished = false;
 %% Initial data.
-problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, 2*problemData.p+1, ...
-                                             problemData.hatM, problemData.basesOnQuad);
+if problemData.isQuadri
+  problemData.cDisc = projectFuncCont2DataDiscQuadri(problemData.g, problemData.c0Cont, problemData.qOrd, ...
+                                                     problemData.globM, problemData.basesOnQuad);
+else
+  problemData.cDisc = projectFuncCont2DataDisc(problemData.g, problemData.c0Cont, problemData.qOrd, ...
+                                               problemData.hatM, problemData.basesOnQuad);
+end
 if problemData.isSlopeLim
   cDV0T = computeFuncContV0T(problemData.g, @(x1, x2) problemData.cDCont(0, x1, x2));
-  problemData.cDisc = applySlopeLimiterDisc(problemData.g, problemData.cDisc, ...
-                        problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
-                        problemData.globMDiscTaylor, problemData.basesOnQuad, ...
-                        problemData.typeSlopeLim);
+  if problemData.isQuadri
+    problemData.cDisc = applySlopeLimiterQuadriDiscLinear(problemData.g, problemData.cDisc, ...
+                          problemData.g.markV0TbdrD, cDV0T);
+  else
+    problemData.cDisc = applySlopeLimiterDisc(problemData.g, problemData.cDisc, ...
+                          problemData.g.markV0TbdrD, cDV0T, problemData.globM, ...
+                          problemData.globMDiscTaylor, problemData.basesOnQuad, ...
+                          problemData.typeSlopeLim);
+  end % if
 end % if
-fprintf('L2 error w.r.t. the initial condition: %g\n', ...
-  computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
+if problemData.isQuadri
+  fprintf('L2 error w.r.t. the initial condition: %g\n', ...
+    computeL2ErrorQuadri(problemData.g, problemData.cDisc, problemData.c0Cont, problemData.qOrd+1, problemData.basesOnQuad));
+else
+  fprintf('L2 error w.r.t. the initial condition: %g\n', ...
+    computeL2Error(problemData.g, problemData.cDisc, problemData.c0Cont, 2*problemData.p, problemData.basesOnQuad));
+end
 %% visualization of inital condition.
 if problemData.isVisSol
-  cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
-  visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
+  if problemData.isQuadri
+    cLagrange = projectDataDisc2DataLagrTensorProduct(problemData.cDisc);
+    visualizeDataLagrQuadri(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
+  else
+    cLagrange = projectDataDisc2DataLagr(problemData.cDisc);
+    visualizeDataLagr(problemData.g, cLagrange, 'u_h', problemData.outputBasename, 0, problemData.outputTypes)
 end
 fprintf('Starting time integration from 0 to %g using time step size %g (%d steps).\n', ...
   problemData.tEnd, problemData.tau, problemData.numSteps)

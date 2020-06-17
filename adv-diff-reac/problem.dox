@@ -1,0 +1,31 @@
+/*!
+ * \dir ./adv-diff-reac/
+ *
+ * \brief This is an implementation of advection-diffusion-reaction
+ *        that allows to choose between interior penalty DG and local DG for
+ *        the discretization of the diffusion operator.
+ *
+ * Let @f$J := (t_0, t_\mathrm{end})@f$ be a finite time interval, and let 
+ * @f$\Omega\subset\mathbb{R}^2@f$ be a polygonally bounded domain with 
+ * boundary @f$\partial\Omega = \partial\Omega_\mathrm{D} \uplus \partial\Omega_\mathrm{N}@f$
+ * subdivided into Dirichlet and Neumann boundary parts.
+ * We consider the \emph{advection-diffusion-reaction equation}
+ * @f{align*}{
+ * \partial_t u + \nabla \cdot (\vec{v}\,u - d\,\nabla u) + r\,u  &\;=\; 0            && \text{in}~J\times\Omega\,, \\
+ *                                                              u &\;=\; u_\mathrm{D} && \text{on}~J\times\partial\Omega_\mathrm{D}\,, \\
+ *                                    -d \,\nabla u \cdot \vec{n} &\;=\; g_\mathrm{N} && \text{on}~J\times\partial\Omega_\mathrm{N}\,, \\
+ *                                                              u &\;=\; u^0          && \text{on}~\{t_0\}\times\Omega\
+ * @f}
+ * with given initial $u^0:\Omega\to\mathbb{R}^+_0@f$ and boundary data 
+ * @f$u_\mathrm{D}: J\times\partial\Omega_\mathrm{D} \to \mathbb{R}^+_0@f$,
+ * @f$g_\mathrm{N}: J\times\partial\Omega_\mathrm{N} \to \mathbb{R}@f$.
+ *
+ * The implementation uses hierarchical polynomial bases up to fourth order and
+ * first order Runge-Kutta methods for time-integration.
+ * 
+ * See @link ./adv-diff-reac/configureProblem.m @endlink for available configuration options.
+ * 
+ * A detailed description can be found in @ref RHRAFK2019.
+ */
+
+

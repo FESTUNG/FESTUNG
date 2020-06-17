@@ -77,17 +77,18 @@
 %
 function [alphaE, minMaxV0T] = computeVertexBasedLimiter(g, valCentroid, valV0T, markV0TbdrD, dataV0T)
 % Check function arguments that are directly used
+n_edges = size(g.V0T, 2);
 validateattributes(valCentroid, {'numeric'}, {'size', [g.numT 1]}, mfilename, 'valCentroid');
-validateattributes(dataV0T, {'numeric'}, {'size', [g.numT 3]}, mfilename, 'dataV0T');
+validateattributes(dataV0T, {'numeric'}, {'size', [g.numT n_edges]}, mfilename, 'dataV0T');
 
 % Determine for each vertex the min- and max-values of the centroids in 
 % elements adjacent to the vertex
 minMaxV0T = computeMinMaxV0TElementPatch(g, valCentroid, markV0TbdrD, dataV0T);
 
 % Compute deviance from centroid values for vertex- and min/max-values
-diffV0TCentroid = valV0T - repmat(valCentroid, [1 3]);
-diffMinCentroid = minMaxV0T{1} - repmat(valCentroid, [1 3]);
-diffMaxCentroid = minMaxV0T{2} - repmat(valCentroid, [1 3]);
+diffV0TCentroid = valV0T - repmat(valCentroid, [1 n_edges]);
+diffMinCentroid = minMaxV0T{1} - repmat(valCentroid, [1 n_edges]);
+diffMaxCentroid = minMaxV0T{2} - repmat(valCentroid, [1 n_edges]);
 
 % Find out if positive or negative deviance from centroid value
 tol = 1.e-8;
@@ -96,7 +97,7 @@ markPos = diffV0TCentroid > diffMaxCentroid - tol;
 
 % Compute limiter parameter for each vertex in each triangle and ensure
 % that the value stays in [0,1]
-alphaEV0T = ones(g.numT,3);
+alphaEV0T = ones(g.numT, n_edges);
 alphaEV0T(markNeg) = max(0, min(1, diffMinCentroid(markNeg) ./ (diffV0TCentroid(markNeg) - tol) ) );
 alphaEV0T(markPos) = max(0, min(1, diffMaxCentroid(markPos) ./ (diffV0TCentroid(markPos) + tol) ) );
 
