@@ -61,7 +61,7 @@
 function problemData = solveStep(problemData, nStep)
 %% Solve SWE time steps
 problemData.isSubSteppingFinished = false;
-problemData = iterateSubSteps(problemData, nStep);
+problemData = iterateSubSteps(problemData, nStep, problemData.subStepHandles);
 
 %% Solve Darcy time step
 problemData.darcyData = problemData.darcySteps.preprocessStep(problemData.darcyData, nStep);

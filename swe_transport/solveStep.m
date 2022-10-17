@@ -76,5 +76,5 @@ problemData.transportData.cDiscRK = problemData.transportData.cDiscRK0;
 
 % Perform RK stepping
 problemData.isSubSteppingFinished = false;
-problemData = iterateSubSteps(problemData, nStep);
+problemData = iterateSubSteps(problemData, nStep, problemData.subStepHandles);
 end % function

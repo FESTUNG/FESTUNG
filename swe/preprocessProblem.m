@@ -47,6 +47,10 @@
 %
 function pd = preprocessProblem(pd)
 
+% Store substep handles to avoid calling overhead
+[~, ~, ~, subStepList] = getStepLists();
+pd.subStepHandles = getStepHandles(pd.problemName, subStepList);
+
 if ~pd.isSlopeLim
   pd.slopeLimList = {};
 elseif isempty(pd.slopeLimList)

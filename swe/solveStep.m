@@ -79,7 +79,7 @@ problemData.cDiscRK = problemData.cDiscRK0;
 
 % Carry out RK steps
 problemData.isSubSteppingFinished = false;
-problemData = iterateSubSteps(problemData, nStep);
+problemData = iterateSubSteps(problemData, nStep, problemData.subStepHandles);
 
 % Compute change
 if problemData.isSteadyState

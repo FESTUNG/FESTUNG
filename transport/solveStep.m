@@ -62,5 +62,5 @@ problemData.cDiscRK = problemData.cDiscRK0;
 
 % Initialize substepping
 problemData.isSubSteppingFinished = false;
-problemData = iterateSubSteps(problemData, nStep);
+problemData = iterateSubSteps(problemData, nStep, problemData.subStepHandles);
 end % function

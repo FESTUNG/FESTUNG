@@ -48,6 +48,11 @@
 %> @endparblock
 %
 function problemData = preprocessProblem(problemData)
+
+% Store substep handles to avoid calling overhead
+[~, ~, ~, subStepList] = getStepLists();
+problemData.subStepHandles = getStepHandles(problemData.problemName, subStepList);
+
 problemData.darcyData = problemData.darcySteps.preprocessProblem(problemData.darcyData);
 problemData.sweData = problemData.sweSteps.preprocessProblem(problemData.sweData);
 

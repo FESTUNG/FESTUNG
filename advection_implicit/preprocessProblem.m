@@ -46,6 +46,11 @@
 %> @endparblock
 %
 function problemData = preprocessProblem(problemData)
+
+% Store substep handles to avoid calling overhead
+[~, ~, ~, subStepList] = getStepLists();
+problemData.subStepHandles = getStepHandles(problemData.problemName, subStepList);
+
 %% Triangulation.
 problemData.g = problemData.generateGridData(problemData.hmax);
 if problemData.isVisGrid,  visualizeGrid(problemData.g);  end
